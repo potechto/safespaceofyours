@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Reading Piece | safespaceofsyours</title>
+  <meta name="description" content="Read a full spoken poetry piece from safespaceofsyours." />
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="reader-body">
+  <div class="bg-orbs"></div>
+  <div class="paper-texture"></div>
+
+  <header class="site-header">
+    <a href="index.html" class="logo">safespaceofsyours</a>
+
+    <nav class="nav-links">
+      <a href="index.html#pieces">Pieces</a>
+      <a href="index.html#commissions">Commissions</a>
+      <a href="index.html#about">About</a>
+    </nav>
+  </header>
+
+  <main class="reader-layout">
+    <a href="index.html#pieces" class="back-link">← Back to pieces</a>
+
+    <article id="reader" class="reader-card">
+      <div class="reader-cover-wrap">
+        <img id="readerCover" src="" alt="" />
+      </div>
+
+      <div class="reader-content">
+        <p id="readerCategory" class="eyebrow"></p>
+        <h1 id="readerTitle"></h1>
+        <p id="readerExcerpt" class="reader-excerpt"></p>
+
+        <hr />
+
+        <div id="poemText" class="poem-text">
+          Loading piece...
+        </div>
+
+        <nav id="readerActions" class="reader-actions" aria-label="Poem navigation">
+          <a id="prevPoem" class="reader-action-btn" href="#">← Previous piece</a>
+          <button id="randomPoem" class="reader-action-btn random-btn" type="button">Random piece ✦</button>
+          <a id="nextPoem" class="reader-action-btn" href="#">Next piece →</a>
+        </nav>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <p>© <span id="year"></span> safespaceofsyours. Written with quiet courage.</p>
+  </footer>
+
+  <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Back to top">↑</button>
+
+  <script src="js/poems.js"></script>
+  <script src="js/poem.js"></script>
+</body>
+</html>
+
+
+
+

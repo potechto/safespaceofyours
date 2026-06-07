@@ -1,0 +1,5 @@
+*.backup.*
+*.backup
+*.bak
+apply-*.py
+*.tmp

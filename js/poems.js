@@ -1,0 +1,245 @@
+window.POEMS = [
+  {
+    slug: "adreamtochooseortofollow",
+    title: "A Dream to Choose or to Follow?",
+    type: "spoken-poetry",
+    access: "premium",
+    price: 49,
+    category: "Dreams",
+    cover: "Resources/adreamtochooseortofollow.png",
+    file: "Resources/adreamtochooseortofollow.txt",
+    excerpt: "Minsan iniisip ko, nasa tama pa ba ako? O mapupunta ba talaga ako sa kung saan dapat akong mapunta?"
+  },
+  {
+    slug: "biglanglingon",
+    title: "Biglang Lingon",
+    type: "spoken-poetry",
+    access: "premium",
+    price: 49,
+    category: "Reflection",
+    cover: "Resources/biglanglingon.png",
+    file: "Resources/biglanglingon.txt",
+    excerpt: "There are times I am looking back, and I often feel pain from the past."
+  },
+  {
+    slug: "genesis2214",
+    title: "Genesis 22:14",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Faith",
+    cover: "Resources/genesis2214.png",
+    file: "Resources/genesis2214.txt",
+    excerpt: "A reserved faith-based piece. Full text can be added later."
+  },
+  {
+    slug: "hindikanamantalaganagiisa",
+    title: "Hindi Ka Naman Talaga Nag-iisa",
+    type: "spoken-poetry",
+    access: "premium",
+    price: 49,
+    category: "Healing",
+    cover: "Resources/hindikanamantalaganagiisa.png",
+    file: "Resources/hindikanamantalaganagiisa.txt",
+    excerpt: "Be with others too. Be with your real loved ones."
+  },
+  {
+    slug: "isaiah6022",
+    title: "Isaiah 60:22",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Faith",
+    cover: "Resources/isaiah6022.png",
+    file: "Resources/isaiah6022.txt",
+    excerpt: "Nasa proseso ka pa. Kaya huwag kang magmadali."
+  },
+  {
+    slug: "kailanbaangnanditona",
+    title: "Kailan Ba Ang Nandito Na?",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Life",
+    cover: "Resources/kailanbaangnanditona.png",
+    file: "Resources/kailanbaangnanditona.txt",
+    excerpt: "Sabi nila, ang buhay ay hindi raw karera. Pero bakit may pakiramdam na parang nahuhuli ka?"
+  },
+  {
+    slug: "kakapitkapaba",
+    title: "Kakapit Ka Pa Ba?",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Love",
+    cover: "Resources/kakapitkapaba.png",
+    file: "Resources/kakapitkapaba.txt",
+    excerpt: "Kakapit ka pa ba kung pasuko na siya?"
+  },
+  {
+    slug: "kayamobagawinlahatparasapangarap",
+    title: "Kaya Mo Ba Gawin Lahat Para Sa Pangarap?",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Dreams",
+    cover: "Resources/kayamobagawinlahatparasapangarap.png",
+    file: "Resources/kayamobagawinlahatparasapangarap.txt",
+    excerpt: "Sino ba talaga ako? Magiging ano ba ako?"
+  },
+  {
+    slug: "kungangpaglisanmoypaglaya",
+    title: "Kung Ang Paglisan Mo'y Paglaya",
+    type: "spoken-poetry",
+    access: "premium",
+    price: 49,
+    category: "Heartbreak",
+    cover: "Resources/kungangpaglisanmoypaglaya.png",
+    file: "Resources/kungangpaglisanmoypaglaya.txt",
+    excerpt: "Isa lang naman ang gusto, ang mahalin mo ako nang totoo."
+  },
+  {
+    slug: "love",
+    title: "Love",
+    type: "spoken-poetry",
+    access: "premium",
+    price: 49,
+    category: "Love",
+    cover: "Resources/love.png",
+    file: "Resources/love.txt",
+    excerpt: "Some people come to teach you how to love, and some people come to teach you how to let go."
+  },
+  {
+    slug: "makakamitmorin",
+    title: "Makakamit Mo Rin",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Dreams",
+    cover: "Resources/makakamitmorin.png",
+    file: "Resources/makakamitmorin.txt",
+    excerpt: "Sa patuloy na hirap at sakit, higpitan mo lang ang kapit."
+  },
+  {
+    slug: "maligawsasarilingako",
+    title: "Maligaw Sa Sariling Ako",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Reflection",
+    cover: "Resources/maligawsasarilingako.png",
+    file: "Resources/maligawsasarilingako.txt",
+    excerpt: "Andito ulit ako, sa gitna ng kawalan, sa gitna ng mapaglaro kong isipan."
+  },
+  {
+    slug: "minsannakakalimutannanatinmagmahal",
+    title: "Minsan Nakakalimutan Na Natin Magmahal",
+    type: "spoken-poetry",
+    access: "premium",
+    price: 49,
+    category: "Love",
+    cover: "Resources/minsannakakalimutannanatinmagmahal.png",
+    file: "Resources/minsannakakalimutannanatinmagmahal.txt",
+    excerpt: "If you would allow me to borrow your time once more..."
+  },
+  {
+    slug: "nakakatakotpalangtumanda",
+    title: "Nakakatakot Palang Tumanda",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Life",
+    cover: "Resources/nakakatakotpalangtumanda.png",
+    file: "Resources/nakakatakotpalangtumanda.txt",
+    excerpt: "Sabi ng mga bata, masarap daw tumanda. Pero nakakatakot din pala."
+  },
+  {
+    slug: "okaykanaba",
+    title: "Okay Ka Na Ba?",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Healing",
+    cover: "Resources/okaykanaba.png",
+    file: "Resources/okaykanaba.txt",
+    excerpt: "Gusto kitang tanungin at sana tapat mo akong sagutin—okay ka na ba?"
+  },
+  {
+    slug: "papakuinkorinpalaangpangakokosasariliko",
+    title: "Papakuin Ko Rin Pala Ang Pangako Ko Sa Sarili Ko",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Reflection",
+    cover: "Resources/papakuinkorinpalaangpangakokosasariliko.png",
+    file: "Resources/papakuinkorinpalaangpangakokosasariliko.txt",
+    excerpt: "Naalala ko lang dati noong bata pa ako, yung mga araw na niloloko ako nila lolo at tito."
+  },
+  {
+    slug: "psalm375",
+    title: "Psalm 37:5",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Faith",
+    cover: "Resources/psalm375.png",
+    file: "Resources/psalm375.txt",
+    excerpt: "Dear God, I don’t know where You are taking me, but I trust You."
+  },
+  {
+    slug: "righttimingrightperson",
+    title: "Right Timing, Right Person?",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Love",
+    cover: "Resources/righttimingrightperson.png",
+    file: "Resources/righttimingrightperson.txt",
+    excerpt: "Do you believe that there is a right time for love?"
+  },
+  {
+    slug: "sapagmamahalparinpalatayobabalik",
+    title: "Sa Pagmamahal Pa Rin Pala Tayo Babalik",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Love",
+    cover: "Resources/sapagmamahalparinpalatayobabalik.png",
+    file: "Resources/sapagmamahalparinpalatayobabalik.txt",
+    excerpt: "Sumusulat ulit ako, hindi para sa akin kundi para sa inyo."
+  },
+  {
+    slug: "simulanghindinagingwakas",
+    title: "Simulang Hindi Naging Wakas",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Heartbreak",
+    cover: "Resources/simulanghindinagingwakas.png",
+    file: "Resources/simulanghindinagingwakas.txt",
+    excerpt: "Simulan ulit natin ang kwentuhan. Magtanungan ulit tayo tungkol sa ating mga nakaraan."
+  },
+  {
+    slug: "tomyfamily",
+    title: "To My Family",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Family",
+    cover: "Resources/tomyfamily.png",
+    file: "Resources/tomyfamily.txt",
+    excerpt: "Minsan nakakalimutan ko na tumatanda na pala sila."
+  },
+  {
+    slug: "walanguunlad",
+    title: "Walang Uunlad",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Society",
+    cover: "Resources/walanguunlad.png",
+    file: "Resources/walanguunlad.txt",
+    excerpt: "Hindi ko ’to ginawa para husgahan ang mga kulay na pinili n’yo."
+  }
+];
+
