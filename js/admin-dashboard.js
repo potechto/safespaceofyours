@@ -6,6 +6,8 @@ const unlockList = document.querySelector("#unlockList");
 const paymentList = document.querySelector("#paymentList");
 const pieceSettingsList = document.querySelector("#pieceSettingsList");
 const promoRequestList = document.querySelector("#promoRequestList");
+const promoRequestBell = document.querySelector("#promoRequestBell");
+const promoRequestBellCount = document.querySelector("#promoRequestBellCount");
 const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
@@ -273,6 +275,33 @@ function formatAdminDate(value) {
   }
 }
 
+function updatePromoRequestBell(requests = []) {
+  if (!promoRequestBell || !promoRequestBellCount) return;
+
+  const pendingCount = requests.filter(item => (item.status || "pending") === "pending").length;
+
+  promoRequestBellCount.textContent = String(pendingCount);
+  promoRequestBell.classList.toggle("has-alert", pendingCount > 0);
+  promoRequestBell.setAttribute(
+    "aria-label",
+    pendingCount > 0
+      ? `${pendingCount} pending promo request${pendingCount === 1 ? "" : "s"}`
+      : "No pending promo requests"
+  );
+}
+
+function focusPromoRequestPanel() {
+  if (!promoRequestList) return;
+
+  const card = promoRequestList.closest(".admin-card") || promoRequestList;
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+  card.classList.add("is-attention");
+
+  window.setTimeout(() => {
+    card.classList.remove("is-attention");
+  }, 1800);
+}
+
 function renderPromoRequestItem(item) {
   return `
     <article class="code-list-item promo-request-item">
@@ -308,6 +337,8 @@ async function loadPromoRequests() {
     promoRequestList.innerHTML = `<div class="list-item"><div><small>Promo requests could not be loaded.</small></div></div>`;
     throw error;
   }
+
+  updatePromoRequestBell(data || []);
 
   promoRequestList.innerHTML = data && data.length
     ? data.map(renderPromoRequestItem).join("")
@@ -739,3 +770,18 @@ loadPromoRequests();
     setDashboardMessage(error.message || "Action failed.", "error");
   }
 });
+
+
+if (promoRequestBell) {
+  promoRequestBell.addEventListener("click", focusPromoRequestPanel);
+}
+
+if (!window.safePromoRequestPollStarted) {
+  window.safePromoRequestPollStarted = true;
+
+  window.setInterval(() => {
+    if (document.visibilityState === "hidden") return;
+    loadPromoRequests().catch(error => console.warn("Promo request poll failed:", error));
+  }, 60000);
+}
+
