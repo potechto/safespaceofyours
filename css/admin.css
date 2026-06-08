@@ -2177,3 +2177,127 @@ button:disabled,
 }
 /* V18R admin piece label dropdown END */
 
+
+/* V18N piece control layout containment + select visibility */
+#pieceControlList .piece-control-item,
+#piecesControlList .piece-control-item,
+.piece-control-item {
+  overflow: hidden;
+}
+
+#pieceControlList .piece-control-item *,
+#piecesControlList .piece-control-item *,
+.piece-control-item * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+#pieceControlList .piece-control-item,
+#piecesControlList .piece-control-item,
+.piece-control-item {
+  gap: 0.8rem;
+}
+
+#pieceControlList .piece-control-item .item-actions,
+#piecesControlList .piece-control-item .item-actions,
+.piece-control-item .item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+#pieceControlList .piece-control-item input,
+#pieceControlList .piece-control-item select,
+#piecesControlList .piece-control-item input,
+#piecesControlList .piece-control-item select,
+.piece-control-item input,
+.piece-control-item select {
+  width: 100%;
+  max-width: 100%;
+}
+
+#pieceControlList .piece-control-item select,
+#piecesControlList .piece-control-item select,
+.piece-control-item select {
+  appearance: auto;
+  -webkit-appearance: auto;
+  background: rgba(36, 28, 40, 0.96);
+  color: #fff4fb;
+  border: 1px solid rgba(255, 244, 251, 0.16);
+}
+
+#pieceControlList .piece-control-item select option,
+#piecesControlList .piece-control-item select option,
+.piece-control-item select option {
+  background: #211824;
+  color: #fff4fb;
+}
+
+#pieceControlList .piece-control-item select:focus,
+#pieceControlList .piece-control-item input:focus,
+#piecesControlList .piece-control-item select:focus,
+#piecesControlList .piece-control-item input:focus,
+.piece-control-item select:focus,
+.piece-control-item input:focus {
+  outline: none;
+  border-color: rgba(255, 203, 225, 0.35);
+  box-shadow: 0 0 0 1px rgba(255, 203, 225, 0.18);
+}
+
+/* make right-side controls stay inside the card */
+#pieceControlList .piece-control-item [class*="control"],
+#pieceControlList .piece-control-item [class*="field"],
+#pieceControlList .piece-control-item [class*="meta"],
+#piecesControlList .piece-control-item [class*="control"],
+#piecesControlList .piece-control-item [class*="field"],
+#piecesControlList .piece-control-item [class*="meta"],
+.piece-control-item [class*="control"],
+.piece-control-item [class*="field"],
+.piece-control-item [class*="meta"] {
+  min-width: 0;
+}
+
+/* desktop tighten */
+@media (min-width: 1024px) {
+  #pieceControlList .piece-control-item select,
+  #piecesControlList .piece-control-item select,
+  .piece-control-item select {
+    min-width: 0;
+    font-size: 0.92rem;
+  }
+
+  #pieceControlList .piece-control-item input,
+  #piecesControlList .piece-control-item input,
+  .piece-control-item input {
+    min-width: 0;
+    font-size: 0.92rem;
+  }
+
+  #pieceControlList .piece-control-item .tiny-btn,
+  #piecesControlList .piece-control-item .tiny-btn,
+  .piece-control-item .tiny-btn {
+    white-space: nowrap;
+  }
+}
+
+/* fallback stack for tighter laptop widths */
+@media (max-width: 1320px) {
+  #pieceControlList .piece-control-item .item-actions,
+  #piecesControlList .piece-control-item .item-actions,
+  .piece-control-item .item-actions {
+    justify-content: flex-start;
+  }
+
+  #pieceControlList .piece-control-item select,
+  #pieceControlList .piece-control-item input,
+  #piecesControlList .piece-control-item select,
+  #piecesControlList .piece-control-item input,
+  .piece-control-item select,
+  .piece-control-item input {
+    max-width: 100%;
+  }
+}
+/* V18N piece control layout containment + select visibility END */
+
+
