@@ -697,39 +697,26 @@ function setupSocialModal() {
 
     syncGeneralPaymentCards();
   }
-
-
-  window.openSafePaymentModal = function openSafePaymentModal(context = {}) {
-    openModal("payment", context || {});
-  };
-
-  if (!window.__safePaymentTriggerBound) {
-    window.__safePaymentTriggerBound = true;
-
-    document.addEventListener("click", event => {
-      const trigger = event.target.closest("[data-open-payment]");
-      if (!trigger) return;
-
-      event.preventDefault();
-
-      const pieceTitle = trigger.dataset.pieceTitle || "";
-      const piecePrice = trigger.dataset.piecePrice || "";
-      const pieceSlug = trigger.dataset.pieceSlug || "";
-      const hasPieceContext = Boolean(pieceTitle || piecePrice || pieceSlug);
-
-      window.openSafePaymentModal(hasPieceContext
-        ? {
-            title: pieceTitle,
-            price: piecePrice,
-            slug: pieceSlug,
-            isPiece: true
-          }
         : {
             isPiece: false
           }
       );
     }, true);
   }
+
+
+
+    window.openSafePaymentModal = function openSafePaymentModal(context = {}) {
+      openModal("payment", context || {});
+    };
+
+    if (!window.__safePaymentEventBound) {
+      window.__safePaymentEventBound = true;
+
+      document.addEventListener("safe:open-payment", event => {
+        openModal("payment", event.detail || {});
+      });
+    }
 
 
   function setupPaymentCalculator() {

@@ -444,7 +444,7 @@ if (document.readyState === "loading") {
 }
 
 
-/* V18S.3 paid piece manual payment bridge */
+/* V18S.4 paid piece manual payment no-refresh bridge */
 (function setupPaidPiecePaymentBridge() {
   if (window.__safePaidPiecePaymentBridgeBound) return;
   window.__safePaidPiecePaymentBridgeBound = true;
@@ -467,13 +467,9 @@ if (document.readyState === "loading") {
       return;
     }
 
-    const params = new URLSearchParams();
-    params.set("payment", "true");
-    if (context.title) params.set("title", context.title);
-    if (context.price) params.set("price", context.price);
-    if (context.slug) params.set("slug", context.slug);
-
-    window.location.href = `./?${params.toString()}`;
+    document.dispatchEvent(new CustomEvent("safe:open-payment", {
+      detail: context
+    }));
   }, true);
 })();
 
