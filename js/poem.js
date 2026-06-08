@@ -443,3 +443,37 @@ if (document.readyState === "loading") {
   setupReaderNavigationLayoutWatcher();
 }
 
+
+/* V18S.3 paid piece manual payment bridge */
+(function setupPaidPiecePaymentBridge() {
+  if (window.__safePaidPiecePaymentBridgeBound) return;
+  window.__safePaidPiecePaymentBridgeBound = true;
+
+  document.addEventListener("click", event => {
+    const trigger = event.target.closest(".paid-reader-shell [data-open-payment]");
+    if (!trigger) return;
+
+    event.preventDefault();
+
+    const context = {
+      title: trigger.dataset.pieceTitle || "",
+      price: trigger.dataset.piecePrice || "",
+      slug: trigger.dataset.pieceSlug || "",
+      isPiece: true
+    };
+
+    if (typeof window.openSafePaymentModal === "function") {
+      window.openSafePaymentModal(context);
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("payment", "true");
+    if (context.title) params.set("title", context.title);
+    if (context.price) params.set("price", context.price);
+    if (context.slug) params.set("slug", context.slug);
+
+    window.location.href = `./?${params.toString()}`;
+  }, true);
+})();
+
