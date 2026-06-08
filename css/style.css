@@ -3318,7 +3318,6 @@ header nav button:hover {
 }
 /* V18G viewer desktop density tune END */
 
-
 /* V18L payment promo status clarity */
 #promoStatus {
   display: block;
@@ -3342,7 +3341,6 @@ header nav button:hover {
   color: #ff9ab8;
 }
 /* V18L payment promo status clarity END */
-
 
 /* V18N paid reader unlock polish and hidden homepage about section */
 section#about {
@@ -3505,4 +3503,21 @@ section#about {
   }
 }
 /* V18N paid reader unlock polish and hidden homepage about section END */
+
+/* V18O copy polish helpers */
+.sample-bullet {
+  color: var(--accent-strong);
+  margin-right: 0.25rem;
+}
+
+.sample-inquiry-bullets p {
+  position: relative;
+}
+
+.future-update,
+.background-music-update,
+.music-future-update {
+  display: none !important;
+}
+/* V18O copy polish helpers END */
 

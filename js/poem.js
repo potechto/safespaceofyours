@@ -9,7 +9,7 @@ const prevPoem = document.querySelector("#prevPoem");
 const nextPoem = document.querySelector("#nextPoem");
 const randomPoem = document.querySelector("#randomPoem");
 
-const UNLOCKED_PIECES_STORAGE_KEY = "safespaceofsyours.unlockedPieces.v1";
+const UNLOCKED_PIECES_STORAGE_KEY = "@safespaceofyours.unlockedPieces.v1";
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -305,7 +305,7 @@ async function loadPoem() {
   const currentIndex = enabledPoems.findIndex(item => item.slug === slug);
 
   if (!poem) {
-    document.title = "Piece not found | safespaceofsyours";
+    document.title = "Piece not found | @safespaceofyours";
     poemText.innerHTML = `
       <p class="reserved-piece">
         Piece not found. Please return to the archive and choose another poem.
@@ -322,7 +322,7 @@ async function loadPoem() {
   }
 
   if (poem.is_enabled === false) {
-    document.title = "Piece unavailable | safespaceofsyours";
+    document.title = "Piece unavailable | @safespaceofyours";
     readerCover.src = poem.cover;
     readerCover.alt = `${poem.title} cover`;
     readerCategory.textContent = poem.category;
@@ -344,7 +344,7 @@ async function loadPoem() {
     return;
   }
 
-  document.title = `${poem.title} | safespaceofsyours`;
+  document.title = `${poem.title} | @safespaceofyours`;
 
   readerCover.src = poem.cover;
   readerCover.alt = `${poem.title} cover`;
