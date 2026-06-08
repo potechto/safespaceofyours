@@ -5,6 +5,7 @@ const promoList = document.querySelector("#promoList");
 const unlockList = document.querySelector("#unlockList");
 const paymentList = document.querySelector("#paymentList");
 const pieceSettingsList = document.querySelector("#pieceSettingsList");
+const promoRequestList = document.querySelector("#promoRequestList");
 const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
@@ -255,6 +256,64 @@ function makePromoCode(slug) {
 function renderEmpty(target, message) {
   target.innerHTML = `<div class="list-item"><div><small>${escapeAdminHTML(message)}</small></div></div>`;
 }
+
+function formatAdminDate(value) {
+  if (!value) return "No date";
+
+  try {
+    return new Date(value).toLocaleString("en-PH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    });
+  } catch (error) {
+    return "No date";
+  }
+}
+
+function renderPromoRequestItem(item) {
+  return `
+    <article class="code-list-item promo-request-item">
+      <div>
+        <strong>${escapeAdminHTML(item.piece_title || item.piece_slug)}</strong>
+        <small>
+          ${escapeAdminHTML(item.status || "pending")}
+          &bull; ${escapeAdminHTML(formatAdminDate(item.created_at))}
+        </small>
+        <small>Slug: ${escapeAdminHTML(item.piece_slug || "")}</small>
+        ${item.requester_contact ? `<small>Contact: ${escapeAdminHTML(item.requester_contact)}</small>` : ""}
+        ${item.note ? `<small>Note: ${escapeAdminHTML(item.note)}</small>` : ""}
+      </div>
+
+      <div class="item-actions code-actions">
+        <button class="tiny-btn" type="button" data-complete-promo-request="${escapeAdminHTML(item.id)}">Mark done</button>
+        <button class="tiny-btn danger" type="button" data-delete-promo-request="${escapeAdminHTML(item.id)}">Delete</button>
+      </div>
+    </article>
+  `;
+}
+
+async function loadPromoRequests() {
+  if (!promoRequestList) return;
+
+  const { data, error } = await adminClient
+    .from("promo_requests")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(40);
+
+  if (error) {
+    promoRequestList.innerHTML = `<div class="list-item"><div><small>Promo requests could not be loaded.</small></div></div>`;
+    throw error;
+  }
+
+  promoRequestList.innerHTML = data && data.length
+    ? data.map(renderPromoRequestItem).join("")
+    : `<div class="list-item"><div><small>No promo requests yet.</small></div></div>`;
+}
+
 
 async function loadPromos() {
   const { data, error } = await adminClient
@@ -516,6 +575,8 @@ document.addEventListener("click", async event => {
   const pieceSave = event.target.closest("[data-save-piece]");
   const promoGenerate = event.target.closest("[data-generate-promo]");
   const unlockGenerate = event.target.closest("[data-generate-unlock]");
+  const completePromoRequest = event.target.closest("[data-complete-promo-request]");
+  const deletePromoRequest = event.target.closest("[data-delete-promo-request]");
 
   try {
     if (promoToggle) {
@@ -548,6 +609,39 @@ document.addEventListener("click", async event => {
       setDashboardMessage("Unlock deleted.", "success");
     }
 
+
+    if (completePromoRequest) {
+      const requestId = completePromoRequest.dataset.completePromoRequest;
+
+      const { error } = await adminClient
+        .from("promo_requests")
+        .update({ status: "done" })
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      await loadPromoRequests();
+      setDashboardMessage("Promo request marked done.", "success");
+      return;
+    }
+
+    if (deletePromoRequest) {
+      const requestId = deletePromoRequest.dataset.deletePromoRequest;
+      const confirmed = window.confirm("Delete this promo request?");
+
+      if (!confirmed) return;
+
+      const { error } = await adminClient
+        .from("promo_requests")
+        .delete()
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      await loadPromoRequests();
+      setDashboardMessage("Promo request deleted.", "success");
+      return;
+    }
 
     if (pieceSave) {
       const row = pieceSave.closest("[data-piece-row]");
@@ -611,6 +705,7 @@ document.addEventListener("click", async event => {
       if (targetError) throw targetError;
 
       await loadPromos();
+loadPromoRequests();
       setDashboardMessage(`Promo code generated: ${code} - ${promoDetails.maxUses} use/s`, "success");
     }
 

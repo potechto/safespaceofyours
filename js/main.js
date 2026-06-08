@@ -412,6 +412,83 @@ function setupSocialModal() {
     target.innerHTML = result.promos.map(createPromoCodeCard).join("");
   }
 
+  function getPromoRequestPieces() {
+    const source = Array.isArray(visiblePoems) && visiblePoems.length
+      ? visiblePoems
+      : (Array.isArray(window.POEMS) ? window.POEMS : []);
+
+    const paidPieces = source.filter(piece => getPoemAccess(piece) === "paid");
+    return paidPieces.length ? paidPieces : source;
+  }
+
+  function createPromoRequestOptions() {
+    const pieces = getPromoRequestPieces();
+
+    if (!pieces.length) {
+      return `<option value="">No pieces available yet</option>`;
+    }
+
+    return pieces.map(piece => `
+      <option value="${escapeHTML(piece.slug)}">${escapeHTML(piece.title)}</option>
+    `).join("");
+  }
+
+  async function submitPublicPromoRequest(pieceSlug, contact, note) {
+    if (!window.safeAdminClient) {
+      return {
+        ok: false,
+        message: "Request service is not ready. Please refresh the page."
+      };
+    }
+
+    const { data, error } = await window.safeAdminClient.rpc("submit_promo_request", {
+      input_piece_slug: pieceSlug,
+      input_contact: contact,
+      input_note: note
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        message: error.message || "Promo request could not be sent."
+      };
+    }
+
+    return data || {
+      ok: false,
+      message: "Promo request could not be sent."
+    };
+  }
+
+  function setupPromoRequestForm() {
+    const form = panel.querySelector("#promoRequestForm");
+    const status = panel.querySelector("#promoRequestStatus");
+
+    if (!form || !status) return;
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const pieceSlug = form.querySelector("#promoRequestPiece")?.value || "";
+      const contact = form.querySelector("#promoRequestContact")?.value || "";
+      const note = form.querySelector("#promoRequestNote")?.value || "";
+      const submitButton = form.querySelector("button[type='submit']");
+
+      status.textContent = "Sending request...";
+      if (submitButton) submitButton.disabled = true;
+
+      const result = await submitPublicPromoRequest(pieceSlug, contact, note);
+
+      status.textContent = result.message || (result.ok ? "Request sent." : "Request failed.");
+
+      if (result.ok) {
+        form.reset();
+      }
+
+      if (submitButton) submitButton.disabled = false;
+    });
+  }
+
   function createPaymentCard(method) {
     return `
       <article class="payment-method-card">
@@ -605,6 +682,36 @@ function setupSocialModal() {
 
         <div id="publicPromoCodesList" class="public-promo-list"></div>
 
+        <div class="promo-request-panel">
+          <div>
+            <p class="eyebrow">Request</p>
+            <h3>Want a promo for a specific piece?</h3>
+            <p>Choose a piece below. If approved, a public promo code may appear here within 6-24 hours.</p>
+          </div>
+
+          <form id="promoRequestForm" class="promo-request-form">
+            <label>
+              <span>Piece / story</span>
+              <select id="promoRequestPiece" required>
+                ${createPromoRequestOptions()}
+              </select>
+            </label>
+
+            <label>
+              <span>Contact or name (optional)</span>
+              <input id="promoRequestContact" type="text" maxlength="160" placeholder="Optional name, email, or handle" />
+            </label>
+
+            <label>
+              <span>Note (optional)</span>
+              <textarea id="promoRequestNote" maxlength="500" placeholder="Example: Requesting a random promo for this piece."></textarea>
+            </label>
+
+            <button class="btn primary" type="submit">Request promo</button>
+            <p id="promoRequestStatus" class="promo-request-status" aria-live="polite"></p>
+          </form>
+        </div>
+
         <div class="modal-note">
           <p><strong>Note:</strong> Promo codes can be limited, disabled, or used up anytime. If a code does not work, please check its status here.</p>
         </div>
@@ -706,7 +813,10 @@ function setupSocialModal() {
     if (backPaymentBtn) backPaymentBtn.addEventListener("click", () => openModal("payment", paymentContext));
 
     if (isPayment) setupPaymentCalculator();
-    if (isPromoCodes) hydratePromoCodesModal();
+    if (isPromoCodes) {
+      hydratePromoCodesModal();
+      setupPromoRequestForm();
+    }
   }
 
   function openModal(mode = "connect", context = {}) {

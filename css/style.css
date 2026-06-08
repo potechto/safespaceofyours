@@ -3086,3 +3086,138 @@ nav a:focus-visible,
 }
 /* V18B public promo codes modal END */
 
+/* V18C promo request and final nav polish */
+header nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+header nav a,
+header nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+header nav a:hover,
+header nav button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 203, 225, 0.35);
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.12), transparent 6rem),
+    rgba(255, 255, 255, 0.075);
+  box-shadow: 0 12px 34px rgba(255, 203, 225, 0.08);
+}
+
+.promo-request-panel {
+  display: grid;
+  gap: 1rem;
+  margin: 1.2rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 225, 0.09), transparent 9rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.promo-request-panel h3 {
+  margin: 0.2rem 0 0.4rem;
+  font-size: clamp(1.35rem, 3vw, 2.2rem);
+}
+
+.promo-request-panel p {
+  margin: 0;
+}
+
+.promo-request-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.promo-request-form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.promo-request-form span {
+  color: var(--pink);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.promo-request-form select,
+.promo-request-form input,
+.promo-request-form textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 244, 251, 0.15);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 0.9rem 1rem;
+  font: inherit;
+}
+
+.promo-request-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.promo-request-form select:focus,
+.promo-request-form input:focus,
+.promo-request-form textarea:focus {
+  outline: 2px solid rgba(255, 203, 225, 0.45);
+  outline-offset: 3px;
+}
+
+.promo-request-status {
+  min-height: 1.35rem;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+}
+
+/* Center the last commission/support card even when the row has 3 columns. */
+.commission-grid > :last-child,
+.commission-cards > :last-child,
+.commission-services > :last-child,
+.service-grid > :last-child,
+.offer-grid > :last-child,
+.cards-grid > :last-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 460px);
+}
+
+@media (max-width: 900px) {
+  header nav {
+    justify-content: center;
+  }
+
+  header nav a,
+  header nav button {
+    min-height: 36px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+}
+/* V18C promo request and final nav polish END */
+
