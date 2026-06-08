@@ -9,6 +9,7 @@ const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
 let latestAdminPieces = [];
+let pieceCharacterCountCache = new Map();
 
 function setDashboardMessage(message, type = "") {
   if (!dashboardMessage) return;
@@ -134,14 +135,48 @@ async function loadTargets(tableName, codeIdKey, ids) {
 
 
 
-function getPieceTextValue(piece) {
+function getInlinePieceTextValue(piece) {
   const value = piece.fullText || piece.text || piece.content || piece.body || piece.poem || "";
   if (Array.isArray(value)) return value.join("\n");
   return String(value || "");
 }
 
-function getPieceCharacterCount(piece) {
-  return getPieceTextValue(piece).length;
+async function loadPieceCharacterCount(piece) {
+  const inlineText = getInlinePieceTextValue(piece);
+  if (inlineText) return inlineText.length;
+
+  if (!piece.file) return 0;
+
+  if (pieceCharacterCountCache.has(piece.file)) {
+    return pieceCharacterCountCache.get(piece.file);
+  }
+
+  try {
+    const response = await fetch(piece.file, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Could not load ${piece.file}`);
+    const text = await response.text();
+    const count = text.length;
+    pieceCharacterCountCache.set(piece.file, count);
+    return count;
+  } catch (error) {
+    console.warn("Character count failed:", error);
+    pieceCharacterCountCache.set(piece.file, 0);
+    return 0;
+  }
+}
+
+async function enrichPiecesWithCharacterCounts(pieces) {
+  return Promise.all(
+    pieces.map(async piece => ({
+      ...piece,
+      total_characters: await loadPieceCharacterCount(piece)
+    }))
+  );
+}
+
+function formatCharacterCount(count) {
+  const numericCount = Number(count) || 0;
+  return numericCount.toLocaleString("en-PH");
 }
 
 function formatUseStatus(item) {
@@ -306,13 +341,15 @@ async function loadPieceSettings() {
     ...item
   }));
 
+  latestAdminPieces = await enrichPiecesWithCharacterCounts(latestAdminPieces);
+
   renderPiecePickers();
 
   pieceSettingsList.innerHTML = latestAdminPieces.map(item => {
     const accessType = normalizeAdminAccess(item.access_type);
     const price = Number(item.price) || 49;
     const previewLimit = Number(item.preview_char_limit) || 700;
-    const totalCharacters = getPieceCharacterCount(item);
+    const totalCharacters = Number(item.total_characters) || 0;
 
     return `
       <article class="list-item piece-control-item" data-piece-row="${escapeAdminHTML(item.slug)}">
@@ -330,7 +367,7 @@ async function loadPieceSettings() {
               <span>${escapeAdminHTML(item.slug)}</span>
               <span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
               <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
-              <span>Total ${escapeAdminHTML(totalCharacters)} chars</span>
+              <span>Total ${escapeAdminHTML(formatCharacterCount(totalCharacters))} chars</span>
             </div>
           </div>
         </div>
