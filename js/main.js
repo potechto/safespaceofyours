@@ -99,8 +99,7 @@ function renderPoems() {
             ${poem.draft ? `<span class="draft-badge">Draft</span>` : ""}
             <span class="access-badge ${isPremium ? "premium" : "free"}">${accessLabel}</span>
           </div>
-
-          <div class="poem-info">
+<div class="poem-info">
             <div class="poem-meta-row">
               <p class="poem-category">${escapeHTML(poem.category)}</p>
               <span class="type-pill">${escapeHTML(typeLabel)}</span>
@@ -383,8 +382,7 @@ function setupSocialModal() {
           <small>Date created: ${escapeHTML(formatPromoDate(promo.created_at))}</small>
           <small>Qty left: ${escapeHTML(qtyLeft)}</small>
         </div>
-
-        <button class="btn secondary promo-copy-btn" type="button" data-copy-promo="${escapeHTML(promo.code || "")}" ${isAvailable ? "" : "disabled"}>
+<button class="btn secondary promo-copy-btn" type="button" data-copy-promo="${escapeHTML(promo.code || "")}" ${isAvailable ? "" : "disabled"}>
           Copy code
         </button>
       </article>
@@ -576,8 +574,7 @@ function setupSocialModal() {
           <img src="${method.image}" alt="${method.name} QR code" loading="lazy" />
           <span>Click QR to enlarge</span>
         </button>
-
-        <div>
+<div>
           <h3>${method.name}</h3>
           <p class="payment-detail">${method.detail}</p>
           <p>${method.note}</p>
@@ -724,18 +721,15 @@ function setupSocialModal() {
     if (isQr) {
       panel.innerHTML = `
         <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close QR modal"><span aria-hidden="true">X</span></button>
-
-        <p class="eyebrow">Full QR</p>
+<p class="eyebrow">Full QR</p>
         <h2 id="socialModalTitle">${escapeHTML(currentQrContext.name || "Payment QR")}</h2>
         <p class="modal-subtitle">
           You can screenshot this, scan it from another device, or open/save the image in a new tab.
         </p>
-
-        <div class="qr-full-view">
+<div class="qr-full-view">
           <img class="qr-full-image" src="${escapeHTML(currentQrContext.image)}" alt="${escapeHTML(currentQrContext.name)} QR code enlarged" />
         </div>
-
-        <div class="modal-action-row">
+<div class="modal-action-row">
           <button class="btn secondary" type="button" data-back-payment>Back to payment options</button>
           <a class="btn primary" href="${escapeHTML(currentQrContext.image)}" target="_blank" rel="noopener noreferrer">Open / save image</a>
         </div>
@@ -743,24 +737,20 @@ function setupSocialModal() {
     } else if (isAbout) {
       panel.innerHTML = `
         <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close about modal"><span aria-hidden="true">X</span></button>
-
-        <p class="eyebrow">About the writer</p>
-        <h2 id="socialModalTitle">The writer behind safespaceofsyours</h2>
-
-        <div class="about-modal-card">
+<p class="eyebrow">About the writer</p>
+        <h2 id="socialModalTitle">The writer behind @safespaceofyours</h2>
+<div class="about-modal-card">
           <div class="writer-photo-wrap">
-            <img class="writer-photo" src="Resources/me1.jpg" alt="Portrait of the writer behind safespaceofsyours" loading="lazy" />
+            <img class="writer-photo" src="Resources/me1.jpg" alt="Portrait of the writer behind @safespaceofyours" loading="lazy" />
           </div>
-
-          <div class="writer-details">
+<div class="writer-details">
             <span class="commission-card-label">Writer behind the pieces</span>
             <h3>Hi, I write quiet words for loud feelings.</h3>
             <p>
-              I created safespaceofsyours as a soft place for spoken poetry, reflections, and stories that are hard to say directly.
+              I created @safespaceofyours as a soft place for spoken poetry, reflections, and stories that are hard to say directly.
               This space is also open for custom pieces, message writing, and future premium reads with manual payment confirmation.
             </p>
-
-            <div class="writer-tags" aria-label="Writing themes">
+<div class="writer-tags" aria-label="Writing themes">
               <span>Spoken poetry</span>
               <span>Reflections</span>
               <span>Commissions</span>
@@ -772,87 +762,71 @@ function setupSocialModal() {
     } else if (isPromoCodes) {
       panel.innerHTML = `
         <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close promo codes modal"><span aria-hidden="true">X</span></button>
-
-        <p class="eyebrow">Public promos</p>
+<p class="eyebrow">Public promos</p>
         <h2 id="socialModalTitle">Promo Codes</h2>
         <p class="modal-subtitle">
           These are available public promo codes for selected premium reads. Copy a code, then use it in the payment panel for the matching piece.
         </p>
-
-        <div id="publicPromoCodesList" class="public-promo-list"></div>
-
-        <div class="promo-request-panel">
+<div id="publicPromoCodesList" class="public-promo-list"></div>
+<div class="promo-request-panel">
           <div>
             <p class="eyebrow">Request</p>
             <h3>Want a promo for a specific piece?</h3>
             <p>Choose a piece below. If approved, a public promo code may appear here within 6-24 hours.</p>
           </div>
-
-          <form id="promoRequestForm" class="promo-request-form">
+<form id="promoRequestForm" class="promo-request-form">
             <label>
               <span>Piece / story</span>
               <select id="promoRequestPiece" required>
                 ${createPromoRequestOptions()}
               </select>
             </label>
-
-            <label>
+<label>
               <span>Contact or name (optional)</span>
               <input id="promoRequestContact" type="text" maxlength="160" placeholder="Optional name, email, or handle" />
             </label>
-
-            <label>
+<label>
               <span>Note (optional)</span>
               <textarea id="promoRequestNote" maxlength="500" placeholder="Example: Requesting a random promo for this piece."></textarea>
             </label>
-
-            <button class="btn primary" type="submit">Request promo</button>
-            <p id="promoRequestStatus" class="promo-request-status" aria-live="polite"></p>
-          </form>
+<button class="btn primary" type="submit">Request promo</button>
+</form>
         </div>
-
-        <div class="modal-note">
+<div class="modal-note">
           <p><strong>Note:</strong> Promo codes can be limited, disabled, or used up anytime. If a code does not work, please check its status here.</p>
         </div>
       `;
     } else if (isPayment) {
       panel.innerHTML = `
         <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close payment modal"><span aria-hidden="true">X</span></button>
-
-        <p class="eyebrow">Manual payment</p>
+<p class="eyebrow">Manual payment</p>
         <h2 id="socialModalTitle">Payment Options</h2>
         <p class="modal-subtitle">
           Use these options for support, custom writing, or future premium unlock requests. Payment is manually verified for now.
         </p>
-
-        <div class="payment-summary-box">
+<div class="payment-summary-box">
           <span>Selected</span>
           <strong>${escapeHTML(paymentContext.title || "General support / premium unlock")}</strong>
         </div>
-
-        <div class="payment-calculator" aria-label="Payment amount calculator">
+<div class="payment-calculator" aria-label="Payment amount calculator">
           <label>
             Amount in PHP
             <input id="paymentAmount" type="number" min="0" step="1" inputmode="numeric" />
           </label>
-
-          <label>
+<label>
             Promo code
             <input id="promoCodeInput" type="text" placeholder="Optional" autocomplete="off" />
           </label>
-
-          <div class="final-amount-card">
+<div class="final-amount-card">
             <span>Final amount</span>
             <strong id="finalAmount">49</strong>
             <small id="promoStatus">Optional: enter a promo code if one was given to you.</small>
           </div>
         </div>
-
-        <div class="payment-method-grid">
+<div class="payment-method-grid">
           ${paymentMethods.map(createPaymentCard).join("")}
         </div>
-
-        <div class="modal-note payment-proof-note">
+<div class="modal-note payment-proof-note">
           <p><strong>After paying:</strong> send the proof/screenshot through Email, Instagram, or TikTok so the request can be manually verified.</p>
           <div class="payment-contact-row">
             ${[links.email, links.instagram, links.tiktok].map(createCard).join("")}
@@ -866,8 +840,7 @@ function setupSocialModal() {
 
       panel.innerHTML = `
         <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close contact modal"><span aria-hidden="true">X</span></button>
-
-        <p class="eyebrow">${isInquiry ? "Inquiry" : "Connect"}</p>
+<p class="eyebrow">${isInquiry ? "Inquiry" : "Connect"}</p>
         <h2 id="socialModalTitle">${isInquiry ? "Start an Inquiry" : "Connect with Me"}</h2>
         <p class="modal-subtitle">
           ${
@@ -876,8 +849,7 @@ function setupSocialModal() {
               : "Find my other spaces here for updates, messages, and poetry-related posts."
           }
         </p>
-
-        <div class="modal-social-grid ${isInquiry ? "inquiry-grid" : ""}">
+<div class="modal-social-grid ${isInquiry ? "inquiry-grid" : ""}">
           ${selectedLinks.map(createCard).join("")}
         </div>
 
@@ -885,11 +857,9 @@ function setupSocialModal() {
           isInquiry
             ? `<div class="modal-note inquiry-note">
               <p>For inquiries, please include the purpose, mood, story context, deadline, and preferred language or style.</p>
-
-              <div class="modal-sample-format">
+<div class="modal-sample-format">
                 <h3>Sample inquiry format</h3>
-
-                <div class="modal-sample-box">
+<div class="modal-sample-box">
                   <p><strong>Type of piece:</strong> Personalized spoken poetry / birthday message / apology / confession / project writing</p>
                   <p><strong>Purpose:</strong> I want to express...</p>
                   <p><strong>Story/context:</strong> Short background of what happened or what the piece is about.</p>
@@ -997,7 +967,6 @@ function setupSocialModal() {
     });
   });
 
-
   const paymentQuery = new URLSearchParams(window.location.search);
   if (paymentQuery.get("payment") === "piece") {
     window.setTimeout(() => {
@@ -1015,8 +984,6 @@ function setupSocialModal() {
     }
   });
 }
-
-
 
 function setupAdminGate() {
   const adminBtn = document.querySelector("#openAdminGate");
@@ -1089,8 +1056,7 @@ function setupAdminGate() {
       <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close">
         <span aria-hidden="true">X</span>
       </button>
-
-      <h2 id="socialModalTitle" class="visually-hidden">LogIn</h2>
+<h2 id="socialModalTitle" class="visually-hidden">LogIn</h2>
 
       ${innerContent}
     `;
@@ -1112,12 +1078,9 @@ function setupAdminGate() {
           <span>Enter PIN</span>
           <input id="adminPinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter PIN" maxlength="12" aria-label="Enter PIN" />
         </label>
-
-        <button class="btn primary" type="submit">Continue</button>
+<button class="btn primary" type="submit">Continue</button>
       </form>
-
-      <p id="adminGateMessage" class="admin-gate-message" role="status" aria-live="polite"></p>
-    `);
+`);
 
     showModal();
 
@@ -1165,15 +1128,12 @@ function setupAdminGate() {
     baseModalShell(`
       <div class="admin-gate-cooldown" role="status" aria-live="polite">
         <p class="gate-cooldown-title">Please wait</p>
-
-        <div class="gate-countdown">
+<div class="gate-countdown">
           <span id="gateCountdownNumber">15</span>
           <small>s</small>
         </div>
-
-        <div class="gate-countdown-track" aria-hidden="true">
-          <span id="gateCountdownBar"></span>
-        </div>
+<div class="gate-countdown-track" aria-hidden="true">
+</div>
       </div>
     `);
 
@@ -1208,12 +1168,9 @@ function setupAdminGate() {
           <span>${RECOVERY_QUESTION}</span>
           <input id="adminRecoveryInput" type="text" autocomplete="off" placeholder="Answer" aria-label="${RECOVERY_QUESTION}" />
         </label>
-
-        <button class="btn primary" type="submit">Continue</button>
+<button class="btn primary" type="submit">Continue</button>
       </form>
-
-      <p id="adminRecoveryMessage" class="admin-gate-message" role="status" aria-live="polite"></p>
-    `);
+`);
 
     showModal();
 
@@ -1287,8 +1244,6 @@ if (searchInput) {
   searchInput.addEventListener("input", renderPoems);
 }
 
-
-
 async function syncPublicPieceSettings() {
   if (!window.SafePieceSettings) return;
 
@@ -1327,7 +1282,4 @@ setupAdminGate();
 setupSmartScrollbars();
 repairVisibleSymbols();
 syncPublicPieceSettings();
-
-
-
 
