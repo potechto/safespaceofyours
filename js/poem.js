@@ -444,32 +444,3 @@ if (document.readyState === "loading") {
 }
 
 
-/* V18S.4 paid piece manual payment no-refresh bridge */
-(function setupPaidPiecePaymentBridge() {
-  if (window.__safePaidPiecePaymentBridgeBound) return;
-  window.__safePaidPiecePaymentBridgeBound = true;
-
-  document.addEventListener("click", event => {
-    const trigger = event.target.closest(".paid-reader-shell [data-open-payment]");
-    if (!trigger) return;
-
-    event.preventDefault();
-
-    const context = {
-      title: trigger.dataset.pieceTitle || "",
-      price: trigger.dataset.piecePrice || "",
-      slug: trigger.dataset.pieceSlug || "",
-      isPiece: true
-    };
-
-    if (typeof window.openSafePaymentModal === "function") {
-      window.openSafePaymentModal(context);
-      return;
-    }
-
-    document.dispatchEvent(new CustomEvent("safe:open-payment", {
-      detail: context
-    }));
-  }, true);
-})();
-
