@@ -42,14 +42,64 @@ function formatPoem(text) {
     .join("");
 }
 
+
+function formatPeso(amount) {
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) return "";
+  if (window.SafePieceSettings) return window.SafePieceSettings.formatPeso(numericAmount);
+  return `PHP ${numericAmount.toLocaleString("en-PH")}`;
+}
+
+function getPoemAccess(poem) {
+  if (window.SafePieceSettings) return window.SafePieceSettings.normalizeAccess(poem.access_type || poem.access);
+  return poem.access || "free";
+}
+
+function getPreviewText(text, limit) {
+  const cleanText = String(text || "").trim();
+  const safeLimit = Number(limit) || 700;
+
+  if (cleanText.length <= safeLimit) return cleanText;
+
+  return `${cleanText.slice(0, safeLimit).trim()}...`;
+}
+
+function buildPaidPreview(poem, fullText) {
+  const price = Number(poem.price) || 49;
+  const previewText = getPreviewText(fullText, poem.preview_char_limit);
+
+  return `
+    <div class="paid-preview-notice">
+      <p class="eyebrow">Premium piece</p>
+      <h2>This piece is preview-only for now.</h2>
+      <p>
+        Full access price: <strong>${escapeHTML(formatPeso(price))}</strong>.
+        After payment, send proof privately and wait for the viewing code.
+      </p>
+      <a class="reader-action-btn pay-to-view-btn" href="index.html#support">Pay to View</a>
+    </div>
+    <div class="paid-preview-text">
+      ${formatPoem(previewText)}
+    </div>
+  `;
+}
+
+async function getMergedReaderPoems() {
+  if (!window.SafePieceSettings) return Array.isArray(window.POEMS) ? window.POEMS : [];
+
+  const settings = await window.SafePieceSettings.loadSettings();
+  if (!settings.length) return Array.isArray(window.POEMS) ? window.POEMS : [];
+
+  return window.SafePieceSettings.mergePoemsWithSettings(window.POEMS, settings, { includeDisabled: true });
+}
+
 function getPoemUrl(slug) {
   return `poem.html?slug=${encodeURIComponent(slug)}`;
 }
 
-function setupReaderNavigation(currentIndex) {
-  if (!prevPoem || !nextPoem || !randomPoem) return;
+function setupReaderNavigation(currentIndex, poems = window.POEMS) {
+  if (!prevPoem || !nextPoem || !randomPoem || !Array.isArray(poems) || !poems.length) return;
 
-  const poems = window.POEMS;
   const prevIndex = currentIndex === 0 ? poems.length - 1 : currentIndex - 1;
   const nextIndex = currentIndex === poems.length - 1 ? 0 : currentIndex + 1;
 
@@ -62,8 +112,8 @@ function setupReaderNavigation(currentIndex) {
   prevPoem.setAttribute("title", previous.title);
   nextPoem.setAttribute("title", next.title);
 
-  prevPoem.innerHTML = `<span>← Previous</span><strong>${escapeHTML(previous.title)}</strong>`;
-  nextPoem.innerHTML = `<span>Next →</span><strong>${escapeHTML(next.title)}</strong>`;
+  prevPoem.innerHTML = `<span>&larr; Previous</span><strong>${escapeHTML(previous.title)}</strong>`;
+  nextPoem.innerHTML = `<span>Next &rarr;</span><strong>${escapeHTML(next.title)}</strong>`;
 
   randomPoem.addEventListener("click", () => {
     if (poems.length <= 1) return;
@@ -102,14 +152,40 @@ async function loadPoem() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("slug");
 
-  const currentIndex = window.POEMS.findIndex(item => item.slug === slug);
-  const poem = window.POEMS[currentIndex];
+  const readerPoems = await getMergedReaderPoems();
+  const enabledPoems = readerPoems.filter(item => item.is_enabled !== false);
+
+  const poem = readerPoems.find(item => item.slug === slug);
+  const currentIndex = enabledPoems.findIndex(item => item.slug === slug);
 
   if (!poem) {
     document.title = "Piece not found | safespaceofsyours";
     poemText.innerHTML = `
       <p class="reserved-piece">
         Piece not found. Please return to the archive and choose another poem.
+      </p>
+    `;
+
+    if (prevPoem && nextPoem && randomPoem) {
+      prevPoem.style.display = "none";
+      nextPoem.style.display = "none";
+      randomPoem.style.display = "none";
+    }
+
+    return;
+  }
+
+  if (poem.is_enabled === false) {
+    document.title = "Piece unavailable | safespaceofsyours";
+    readerCover.src = poem.cover;
+    readerCover.alt = `${poem.title} cover`;
+    readerCategory.textContent = poem.category;
+    readerTitle.textContent = poem.title;
+    readerExcerpt.textContent = "This piece is currently unavailable.";
+
+    poemText.innerHTML = `
+      <p class="reserved-piece">
+        This piece is currently hidden from public viewing. Please return to the archive.
       </p>
     `;
 
@@ -130,7 +206,7 @@ async function loadPoem() {
   readerTitle.textContent = poem.title;
   readerExcerpt.textContent = poem.excerpt;
 
-  setupReaderNavigation(currentIndex);
+  setupReaderNavigation(Math.max(currentIndex, 0), enabledPoems);
 
   try {
     const response = await fetch(poem.file);
@@ -140,6 +216,13 @@ async function loadPoem() {
     }
 
     const text = await response.text();
+    const access = getPoemAccess(poem);
+
+    if (access === "paid") {
+      poemText.innerHTML = buildPaidPreview(poem, text);
+      return;
+    }
+
     poemText.innerHTML = formatPoem(text);
   } catch (error) {
     poemText.innerHTML = `
