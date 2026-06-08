@@ -660,3 +660,183 @@ body {
 }
 /* V16.1 admin pieces professional polish END */
 
+/* V17B admin clarity and target pickers */
+.control-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.form-row label,
+.control-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--soft);
+  font-family: Arial, sans-serif;
+  font-size: 0.78rem;
+}
+
+.form-row label > span,
+.control-form label > span {
+  color: var(--soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+}
+
+.control-form input,
+.control-form select {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0.7rem 0.85rem;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text);
+  outline: none;
+}
+
+.control-form select option {
+  color: #160f1d;
+}
+
+.picker-shell {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 244, 251, 0.09);
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.11);
+}
+
+.picker-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text);
+}
+
+.picker-heading small {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+}
+
+.piece-target-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  max-height: 270px;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.piece-target-card {
+  display: grid;
+  grid-template-columns: auto 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(255, 244, 251, 0.11);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+}
+
+.piece-target-card input {
+  min-height: auto;
+  accent-color: var(--soft);
+}
+
+.piece-target-card input:disabled + img,
+.piece-target-card input:disabled + img + span {
+  opacity: 0.38;
+}
+
+.piece-target-card img {
+  width: 42px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 244, 251, 0.13);
+}
+
+.piece-target-card strong {
+  display: block;
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.piece-target-card small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 0.72rem;
+}
+
+.picker-empty {
+  padding: 0.8rem;
+  border: 1px dashed rgba(255, 244, 251, 0.14);
+  border-radius: 16px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+}
+
+.wide-action {
+  width: 100%;
+  min-height: 48px;
+}
+
+.code-list-item small {
+  display: block;
+  margin-top: 0.25rem;
+  line-height: 1.35;
+}
+
+.piece-control-main {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: start;
+  gap: 0.8rem;
+}
+
+.piece-control-cover {
+  width: 76px;
+  height: 98px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.piece-control-copy {
+  min-width: 0;
+}
+
+.piece-control-fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.piece-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+@media (max-width: 920px) {
+  .form-row,
+  .piece-target-picker,
+  .piece-control-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .picker-heading {
+    display: grid;
+  }
+}
+/* V17B admin clarity and target pickers END */
+
