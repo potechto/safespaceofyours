@@ -170,8 +170,9 @@ function setupSocialModal() {
 
   let paymentContext = {
     title: "General support / premium unlock",
-    price: 49,
-    slug: ""
+    price: "",
+    slug: "",
+    isPiece: false
   };
 
   let currentQrContext = {
@@ -655,6 +656,20 @@ function setupSocialModal() {
     return `${code} applied. Discount: ${formatPeso(discountAmount)}. Qty left: ${qtyLeft}.`;
   }
 
+
+  function isPiecePaymentContext() {
+    return Boolean(paymentContext.isPiece || paymentContext.slug);
+  }
+
+  function syncPaymentModeUI() {
+    const isPiecePayment = isPiecePaymentContext();
+    const summaryBox = panel.querySelector(".payment-summary-box");
+    const calculator = panel.querySelector(".payment-calculator");
+
+    if (summaryBox) summaryBox.hidden = !isPiecePayment;
+    if (calculator) calculator.hidden = !isPiecePayment;
+  }
+
   function setupPaymentCalculator() {
     const amountInput = panel.querySelector("#paymentAmount");
     const promoInput = panel.querySelector("#promoCodeInput");
@@ -881,7 +896,10 @@ function setupSocialModal() {
     const backPaymentBtn = panel.querySelector("[data-back-payment]");
     if (backPaymentBtn) backPaymentBtn.addEventListener("click", () => openModal("payment", paymentContext));
 
-    if (isPayment) setupPaymentCalculator();
+    if (isPayment) {
+      syncPaymentModeUI();
+      if (isPiecePaymentContext()) setupPaymentCalculator();
+    }
     if (isPromoCodes) {
       hydratePromoCodesModal();
       setupPromoRequestForm();
@@ -890,12 +908,19 @@ function setupSocialModal() {
 
   function openModal(mode = "connect", context = {}) {
     if (mode === "payment") {
-      const nextTitle = context.title || paymentContext.title || "General support / premium unlock";
+      const hasPieceContext = Boolean(context.isPiece || context.slug || context.pieceSlug || context.title || context.price);
+      const nextTitle = hasPieceContext
+        ? (context.title || "Premium piece unlock")
+        : "General support / premium unlock";
+      const nextSlug = hasPieceContext
+        ? (context.slug || context.pieceSlug || (typeof resolvePaymentSlug === "function" ? resolvePaymentSlug({ title: nextTitle }) : ""))
+        : "";
 
       paymentContext = {
         title: nextTitle,
-        price: Number(context.price) || Number(paymentContext.price) || 49,
-        slug: context.slug || resolvePaymentSlug({ title: nextTitle })
+        price: hasPieceContext ? (Number(context.price) || 49) : "",
+        slug: nextSlug,
+        isPiece: hasPieceContext
       };
     }
 
@@ -960,11 +985,22 @@ function setupSocialModal() {
     const paymentTrigger = event.target.closest("[data-open-payment]");
     if (!paymentTrigger) return;
 
-    openModal("payment", {
-      title: paymentTrigger.dataset.pieceTitle || "General support / premium unlock",
-      price: paymentTrigger.dataset.piecePrice || 49,
-      slug: paymentTrigger.dataset.pieceSlug || ""
-    });
+    const pieceTitle = paymentTrigger.dataset.pieceTitle || "";
+    const piecePrice = paymentTrigger.dataset.piecePrice || "";
+    const pieceSlug = paymentTrigger.dataset.pieceSlug || "";
+    const hasPieceContext = Boolean(pieceTitle || piecePrice || pieceSlug);
+
+    openModal("payment", hasPieceContext
+      ? {
+          title: pieceTitle,
+          price: piecePrice,
+          slug: pieceSlug,
+          isPiece: true
+        }
+      : {
+          isPiece: false
+        }
+    );
   });
 
   const paymentQuery = new URLSearchParams(window.location.search);

@@ -196,7 +196,10 @@ function buildPaidPreview(poem, fullText) {
       </div>
 
       <div class="paid-reader-actions">
-        <button class="reader-action-btn pay-to-view-btn" type="button" data-open-payment>
+        <button class="reader-action-btn pay-to-view-btn" type="button" data-open-payment
+          data-piece-title="${escapeHTML(poem.title || "")}"
+          data-piece-price="${escapeHTML(price)}"
+          data-piece-slug="${escapeHTML(poem.slug || "")}">
           <span>Manual payment</span>
           <strong>Open payment options</strong>
         </button>
