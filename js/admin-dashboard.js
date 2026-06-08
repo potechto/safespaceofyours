@@ -134,42 +134,56 @@ async function loadPieceSettings() {
     return `
       <article class="list-item piece-control-item" data-piece-row="${escapeAdminHTML(item.slug)}">
         <div class="piece-control-main">
-          <strong>${escapeAdminHTML(item.title)}</strong>
+          <div class="piece-title-row">
+            <strong>${escapeAdminHTML(item.title)}</strong>
+            <span class="piece-status-pill ${item.is_enabled ? "is-visible" : "is-hidden"}">${item.is_enabled ? "Visible" : "Hidden"}</span>
+          </div>
+
           <div class="piece-meta">
-            <span>${escapeAdminHTML(item.slug)}</span>
             <span>${escapeAdminHTML(item.category)}</span>
-            <span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free"}</span>
-            <span>${item.is_enabled ? "visible" : "hidden"}</span>
+            <span>${escapeAdminHTML(item.slug)}</span>
+            <span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
+            <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
           </div>
         </div>
 
         <div class="piece-control-fields">
-          <label class="inline-check">
-            <input type="checkbox" data-piece-enabled ${item.is_enabled ? "checked" : ""} />
-            Enabled
+          <label class="piece-field inline-check">
+            <span>Status</span>
+            <span class="switch-line">
+              <input type="checkbox" data-piece-enabled ${item.is_enabled ? "checked" : ""} />
+              Enabled
+            </span>
           </label>
 
-          <label>
-            Access
+          <label class="piece-field">
+            <span>Access</span>
             <select data-piece-access>
               <option value="free" ${accessType === "free" ? "selected" : ""}>Free</option>
               <option value="paid" ${accessType === "paid" ? "selected" : ""}>Paid</option>
             </select>
           </label>
 
-          <label>
-            Price
-            <input data-piece-price type="number" min="0" step="1" value="${escapeAdminHTML(price)}" />
+          <label class="piece-field">
+            <span>Price</span>
+            <input
+              data-piece-price
+              type="number"
+              min="0"
+              step="1"
+              value="${escapeAdminHTML(price)}"
+              ${accessType === "free" ? "disabled" : ""}
+            />
           </label>
 
-          <label>
-            Preview chars
+          <label class="piece-field">
+            <span>Preview chars</span>
             <input data-piece-preview type="number" min="120" step="10" value="${escapeAdminHTML(previewLimit)}" />
           </label>
 
-          <div class="item-actions">
-            <button class="tiny-btn" type="button" data-save-piece="${escapeAdminHTML(item.slug)}">Save</button>
-            <button class="tiny-btn" type="button" data-generate-unlock="${escapeAdminHTML(item.slug)}">Code</button>
+          <div class="item-actions piece-actions">
+            <button class="tiny-btn primary-tiny" type="button" data-save-piece="${escapeAdminHTML(item.slug)}">Save changes</button>
+            <button class="tiny-btn" type="button" data-generate-unlock="${escapeAdminHTML(item.slug)}">Generate code</button>
           </div>
         </div>
       </article>
@@ -278,6 +292,28 @@ unlockForm.addEventListener("submit", async event => {
   document.querySelector("#maxUsesInput").value = 1;
   await loadUnlocks();
   setDashboardMessage("Unlock code added.", "success");
+});
+
+
+/* data-piece-access-change-bound */
+document.addEventListener("change", event => {
+  const accessSelect = event.target.closest("[data-piece-access]");
+  if (!accessSelect) return;
+
+  const row = accessSelect.closest("[data-piece-row]");
+  if (!row) return;
+
+  const priceInput = row.querySelector("[data-piece-price]");
+  if (!priceInput) return;
+
+  const isFree = normalizeAdminAccess(accessSelect.value) === "free";
+  priceInput.disabled = isFree;
+
+  if (!isFree && (!Number(priceInput.value) || Number(priceInput.value) <= 0)) {
+    priceInput.value = "49";
+  }
+
+  row.dataset.pieceAccessChangeBound = "true";
 });
 
 document.addEventListener("click", async event => {

@@ -508,3 +508,155 @@ body {
 }
 /* Admin V16 pieces control END */
 
+/* V16.1 admin pieces professional polish */
+#piecesControlCard {
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 225, 0.08), transparent 18rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
+}
+
+.piece-settings-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.piece-control-item {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(420px, 1.55fr);
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+}
+
+.piece-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.piece-title-row strong {
+  line-height: 1.05;
+  max-width: 18rem;
+}
+
+.piece-status-pill {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.68rem;
+  color: var(--soft);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.piece-status-pill.is-visible {
+  color: #d7ffe8;
+  border-color: rgba(150, 255, 196, 0.24);
+}
+
+.piece-status-pill.is-hidden {
+  color: #ffd1dc;
+  border-color: rgba(255, 120, 160, 0.28);
+}
+
+.piece-meta {
+  margin-top: 0.65rem;
+  gap: 0.35rem;
+}
+
+.piece-meta span {
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 999px;
+  padding: 0.24rem 0.5rem;
+  background: rgba(0, 0, 0, 0.13);
+}
+
+.piece-control-fields {
+  grid-template-columns: minmax(92px, 0.7fr) minmax(120px, 0.9fr) minmax(120px, 0.8fr) minmax(135px, 0.8fr) minmax(210px, auto);
+  gap: 0.7rem;
+}
+
+.piece-field {
+  min-width: 0;
+}
+
+.piece-field > span:first-child {
+  color: var(--soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+}
+
+.piece-control-fields input,
+.piece-control-fields select {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 16px;
+  transition: border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.piece-control-fields input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.switch-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 42px;
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  font-size: 0.78rem;
+}
+
+.switch-line input {
+  accent-color: var(--soft);
+}
+
+.piece-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: end;
+  gap: 0.45rem;
+}
+
+.primary-tiny {
+  border-color: rgba(255, 203, 225, 0.36);
+  background: rgba(255, 203, 225, 0.12);
+}
+
+@media (max-width: 1120px) {
+  .piece-control-item {
+    grid-template-columns: 1fr;
+  }
+
+  .piece-control-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .piece-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .piece-control-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .piece-title-row {
+    display: grid;
+  }
+
+  .piece-actions {
+    display: grid;
+  }
+}
+/* V16.1 admin pieces professional polish END */
+
