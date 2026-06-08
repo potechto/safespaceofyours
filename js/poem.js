@@ -9,6 +9,8 @@ const prevPoem = document.querySelector("#prevPoem");
 const nextPoem = document.querySelector("#nextPoem");
 const randomPoem = document.querySelector("#randomPoem");
 
+const UNLOCKED_PIECES_STORAGE_KEY = "safespaceofsyours.unlockedPieces.v1";
+
 if (year) {
   year.textContent = new Date().getFullYear();
 }
@@ -55,6 +57,110 @@ function getPoemAccess(poem) {
   return poem.access || "free";
 }
 
+
+function readUnlockedPieces() {
+  try {
+    const stored = window.localStorage.getItem(UNLOCKED_PIECES_STORAGE_KEY);
+    const parsed = stored ? JSON.parse(stored) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function isPieceUnlocked(slug) {
+  const unlockedPieces = readUnlockedPieces();
+  return Boolean(unlockedPieces[slug]);
+}
+
+function savePieceUnlock(slug, code) {
+  const unlockedPieces = readUnlockedPieces();
+
+  unlockedPieces[slug] = {
+    code: String(code || "").trim().toUpperCase(),
+    unlockedAt: new Date().toISOString()
+  };
+
+  window.localStorage.setItem(UNLOCKED_PIECES_STORAGE_KEY, JSON.stringify(unlockedPieces));
+}
+
+function buildUnlockedNotice() {
+  return `
+    <div class="unlock-success-notice">
+      <p class="eyebrow">Unlocked piece</p>
+      <p>This full piece is unlocked on this browser/device.</p>
+    </div>
+  `;
+}
+
+function setUnlockMessage(form, message, type = "") {
+  const target = form.querySelector("[data-unlock-message]");
+  if (!target) return;
+
+  target.textContent = message || "";
+  target.classList.remove("success", "error");
+  if (type) target.classList.add(type);
+}
+
+async function claimUnlockCode(poem, code) {
+  if (!window.safeAdminClient) {
+    return {
+      ok: false,
+      message: "Unlock service is not ready. Please refresh the page and try again."
+    };
+  }
+
+  const { data, error } = await window.safeAdminClient.rpc("claim_unlock_code", {
+    input_code: code,
+    input_piece_slug: poem.slug
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message || "Unlock code could not be checked."
+    };
+  }
+
+  return data || {
+    ok: false,
+    message: "Unlock code could not be checked."
+  };
+}
+
+function setupUnlockForm(poem, fullText) {
+  const form = poemText.querySelector("[data-unlock-form]");
+  if (!form) return;
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const input = form.querySelector("[data-unlock-code-input]");
+    const code = input ? input.value.trim().toUpperCase() : "";
+
+    if (!code) {
+      setUnlockMessage(form, "Enter the unlock code first.", "error");
+      return;
+    }
+
+    const button = form.querySelector("button[type='submit']");
+    if (button) button.disabled = true;
+    setUnlockMessage(form, "Checking unlock code...", "");
+
+    const result = await claimUnlockCode(poem, code);
+
+    if (!result.ok) {
+      if (button) button.disabled = false;
+      setUnlockMessage(form, result.message || "Invalid unlock code.", "error");
+      return;
+    }
+
+    savePieceUnlock(poem.slug, code);
+    poemText.innerHTML = buildUnlockedNotice() + formatPoem(fullText);
+    window.scrollTo({ top: poemText.offsetTop - 120, behavior: "smooth" });
+  });
+}
+
 function getPreviewText(text, limit) {
   const cleanText = String(text || "").trim();
   const safeLimit = Number(limit) || 700;
@@ -84,7 +190,21 @@ function buildPaidPreview(poem, fullText) {
 
       <div class="premium-next-steps">
         <p><strong>After payment:</strong> send your proof of payment through the contact option shown in the payment panel.</p>
-        <p><strong>Then:</strong> wait for manual confirmation and your unlock/viewing code for the full piece.</p>
+        <p><strong>Then:</strong> wait for manual confirmation and your unlock/viewing code for this piece.</p>
+      </div>
+
+      <div class="reader-unlock-panel">
+        <div>
+          <p class="eyebrow">Already paid?</p>
+          <h3>Enter unlock code</h3>
+          <p>Use the code sent after manual payment confirmation. It unlocks this full piece on this browser/device.</p>
+        </div>
+
+        <form class="unlock-code-form" data-unlock-form>
+          <input data-unlock-code-input type="text" placeholder="Enter unlock code" autocomplete="off" />
+          <button class="reader-action-btn" type="submit">Unlock full piece</button>
+          <p class="unlock-message" data-unlock-message></p>
+        </form>
       </div>
 
       <a class="reader-action-btn pay-to-view-btn" href="${escapeHTML(paymentLink)}">Pay to View</a>
@@ -226,12 +346,15 @@ async function loadPoem() {
     const text = await response.text();
     const access = getPoemAccess(poem);
 
-    if (access === "paid") {
+    if (access === "paid" && !isPieceUnlocked(poem.slug)) {
       poemText.innerHTML = buildPaidPreview(poem, text);
+      setupUnlockForm(poem, text);
       return;
     }
 
-    poemText.innerHTML = formatPoem(text);
+    poemText.innerHTML = access === "paid"
+      ? buildUnlockedNotice() + formatPoem(text)
+      : formatPoem(text);
   } catch (error) {
     poemText.innerHTML = `
       <p class="reserved-piece">
