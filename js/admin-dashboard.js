@@ -8,7 +8,6 @@ const pieceSettingsList = document.querySelector("#pieceSettingsList");
 const promoRequestList = document.querySelector("#promoRequestList");
 const promoRequestBell = document.querySelector("#promoRequestBell");
 const promoRequestBellCount = document.querySelector("#promoRequestBellCount");
-const logoutBtn = document.querySelector("#logoutBtn");
 const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
@@ -784,18 +783,5 @@ if (!window.safePromoRequestPollStarted) {
     if (document.visibilityState === "hidden") return;
     loadPromoRequests().catch(error => console.warn("Promo request poll failed:", error));
   }, 60000);
-}
-
-
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      const { error } = await adminClient.auth.signOut();
-      if (error) throw error;
-      window.location.href = "index.html";
-    } catch (error) {
-      setDashboardMessage(error.message || "Logout failed.", "error");
-    }
-  });
 }
 

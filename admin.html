@@ -8,23 +8,12 @@
   <link rel="stylesheet" href="css/admin.css" />
 </head>
 <body>
-  <nav class="admin-top-nav" aria-label="Private space controls">
-    <a class="admin-nav-pill" href="index.html">Back to site</a>
-
-    <button id="promoRequestBell" class="admin-nav-pill promo-request-bell" type="button" aria-label="View pending promo requests">
-      <span class="bell-icon" aria-hidden="true">&#128276;</span>
-      <span>Requests</span>
-      <strong id="promoRequestBellCount">0</strong>
-    </button>
-
-    <button id="logoutBtn" class="admin-nav-pill admin-logout-pill" type="button">Logout</button>
-  </nav>
-
   <main class="admin-shell">
     <section class="admin-hero">
       <p class="eyebrow">safespaceofsyours</p>
       <h1>Private Space</h1>
-</section>
+      <a href="index.html" class="soft-link">Back to site</a>
+    </section>
 
     <section id="authView" class="admin-card auth-card">
       <div class="card-heading">
@@ -67,7 +56,15 @@
           <h2>Welcome</h2>
           <p id="adminIdentity" class="muted"></p>
         </div>
-</div>
+
+        <button id="logoutBtn" class="ghost-btn" type="button">Log out</button>
+      </div>
+
+      <section class="admin-card promo-requests-card">
+        <h2>Promo requests</h2>
+        <p>Viewer requests for random promo codes on specific pieces.</p>
+        <div id="promoRequestList" class="admin-list"></div>
+      </section>
 
       <div class="dashboard-grid">
         <section class="admin-card manager-card">
@@ -85,7 +82,6 @@
           </div>
           <div id="unlockList" class="admin-list"></div>
         </section>
-
 
         <section class="admin-card manager-card wide-card" id="piecesControlCard">
           <div class="card-heading">
@@ -107,14 +103,13 @@
       </div>
 
       <p id="dashboardMessage" class="status-message" role="status"></p>
-    </section>
-  
-        <section class="admin-card promo-requests-card">
-          <h2>Promo requests</h2>
-          <p>Viewer requests for random promo codes on specific pieces.</p>
-          <div id="promoRequestList" class="admin-list"></div>
-        </section>
+      <button id="promoRequestBell" class="promo-request-bell" type="button" aria-label="View pending promo requests">
+        <span class="bell-icon" aria-hidden="true">&#128276;</span>
+        <span>Promo requests</span>
+        <strong id="promoRequestBellCount">0</strong>
+      </button>
 
+    </section>
 </main>
 
   <script src="js/poems.js"></script>
@@ -125,9 +120,4 @@
   <script src="js/admin-dashboard.js"></script>
 </body>
 </html>
-
-
-
-
-
 
