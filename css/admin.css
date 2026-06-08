@@ -424,3 +424,87 @@ body {
 
 /* Admin V15.1 END
 */
+
+/* Admin V16 pieces control */
+.piece-settings-list {
+  gap: 0.9rem;
+}
+
+.piece-control-item {
+  align-items: stretch;
+}
+
+.piece-control-main {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.piece-control-main strong {
+  font-size: 1rem;
+}
+
+.piece-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 0.78rem;
+}
+
+.piece-control-fields {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(110px, 0.7fr) minmax(110px, 0.7fr) minmax(120px, 0.8fr) auto;
+  gap: 0.55rem;
+  align-items: end;
+}
+
+.piece-control-fields label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--soft);
+  font-family: Arial, sans-serif;
+  font-size: 0.75rem;
+}
+
+.piece-control-fields input,
+.piece-control-fields select {
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.65rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  outline: none;
+}
+
+.piece-control-fields select option {
+  color: #130d18;
+}
+
+.inline-check {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  min-height: 40px;
+  color: var(--text);
+}
+
+.inline-check input {
+  width: auto;
+  min-height: auto;
+}
+
+@media (max-width: 920px) {
+  .piece-control-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .piece-control-fields {
+    grid-template-columns: 1fr;
+  }
+}
+/* Admin V16 pieces control END */
+
