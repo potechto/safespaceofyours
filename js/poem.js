@@ -173,7 +173,7 @@ function getPreviewText(text, limit) {
 function buildPaidPreview(poem, fullText) {
   const price = Number(poem.price) || 49;
   const previewText = getPreviewText(fullText, poem.preview_char_limit);
-  const paymentLink = `index.html?payment=piece&title=${encodeURIComponent(poem.title)}&price=${encodeURIComponent(price)}#commissions`;
+  const paymentLink = `index.html?payment=piece&title=${encodeURIComponent(poem.title)}&price=${encodeURIComponent(price)}&slug=${encodeURIComponent(poem.slug)}#commissions`;
 
   return `
     <div class="paid-preview-text">

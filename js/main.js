@@ -118,6 +118,7 @@ function renderPoems() {
             data-open-payment
             data-piece-title="${escapeHTML(poem.title)}"
             data-piece-price="${price}"
+            data-piece-slug="${escapeHTML(poem.slug)}"
           >
             ${priceLabel ? `Support / unlock ${priceLabel}` : "Support / unlock"}
           </button>
@@ -169,7 +170,8 @@ function setupSocialModal() {
 
   let paymentContext = {
     title: "General support / premium unlock",
-    price: 49
+    price: 49,
+    slug: ""
   };
 
   let currentQrContext = {
@@ -324,6 +326,42 @@ function setupSocialModal() {
     document.body.classList.remove("modal-open");
   }
 
+  async function validatePromoCode(code, amount) {
+    if (!window.safeAdminClient) {
+      return {
+        ok: false,
+        message: "Promo service is not ready. Please refresh the page and try again."
+      };
+    }
+
+    const { data, error } = await window.safeAdminClient.rpc("validate_promo_code", {
+      input_code: code,
+      input_piece_slug: paymentContext.slug || "",
+      input_amount: amount
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        message: error.message || "Promo code could not be checked."
+      };
+    }
+
+    return data || {
+      ok: false,
+      message: "Promo code could not be checked."
+    };
+  }
+
+  function formatPromoAppliedMessage(code, result) {
+    const discountAmount = Number(result.discount_amount) || 0;
+    const qtyLeft = result.qty_left === null || result.qty_left === undefined
+      ? "unlimited"
+      : Number(result.qty_left);
+
+    return `${code} applied. Discount: ${formatPeso(discountAmount)}. Qty left: ${qtyLeft}.`;
+  }
+
   function setupPaymentCalculator() {
     const amountInput = panel.querySelector("#paymentAmount");
     const promoInput = panel.querySelector("#promoCodeInput");
@@ -335,30 +373,44 @@ function setupSocialModal() {
     const startingPrice = Number(paymentContext.price) || 49;
     amountInput.value = startingPrice;
 
-    function updateTotal() {
+    let promoCheckId = 0;
+    let promoCheckTimer = null;
+
+    async function updateTotal() {
+      const currentCheckId = ++promoCheckId;
       const amount = Math.max(Number(amountInput.value) || 0, 0);
       const code = promoInput.value.trim().toUpperCase();
-      const promo = promoCodes[code];
-      let discount = 0;
 
-      if (promo && promo.type === "percent") {
-        discount = amount * (promo.value / 100);
-      }
-
-      const total = Math.max(amount - discount, 0);
-      finalAmount.textContent = formatPeso(total || amount);
+      finalAmount.textContent = formatPeso(amount);
 
       if (!code) {
         promoStatus.textContent = "Optional: enter a promo code if one was given to you.";
-      } else if (promo) {
-        promoStatus.textContent = `${code} applied - ${promo.label}.`;
-      } else {
-        promoStatus.textContent = "Promo code not recognized. You can still continue with the base amount.";
+        return;
       }
+
+      promoStatus.textContent = "Checking promo code...";
+
+      const result = await validatePromoCode(code, amount);
+
+      if (currentCheckId !== promoCheckId) return;
+
+      if (!result.ok) {
+        finalAmount.textContent = formatPeso(amount);
+        promoStatus.textContent = `${result.message || "Promo code not recognized."} You can still continue with the base amount.`;
+        return;
+      }
+
+      finalAmount.textContent = formatPeso(Number(result.final_amount) || 0);
+      promoStatus.textContent = formatPromoAppliedMessage(code, result);
     }
 
-    amountInput.addEventListener("input", updateTotal);
-    promoInput.addEventListener("input", updateTotal);
+    function scheduleUpdate() {
+      window.clearTimeout(promoCheckTimer);
+      promoCheckTimer = window.setTimeout(updateTotal, 250);
+    }
+
+    amountInput.addEventListener("input", scheduleUpdate);
+    promoInput.addEventListener("input", scheduleUpdate);
     updateTotal();
   }
 
@@ -519,7 +571,8 @@ function setupSocialModal() {
     if (mode === "payment") {
       paymentContext = {
         title: context.title || paymentContext.title || "General support / premium unlock",
-        price: Number(context.price) || Number(paymentContext.price) || 49
+        price: Number(context.price) || Number(paymentContext.price) || 49,
+        slug: context.slug || paymentContext.slug || ""
       };
     }
 
@@ -569,7 +622,8 @@ function setupSocialModal() {
 
     openModal("payment", {
       title: paymentTrigger.dataset.pieceTitle || "General support / premium unlock",
-      price: paymentTrigger.dataset.piecePrice || 49
+      price: paymentTrigger.dataset.piecePrice || 49,
+      slug: paymentTrigger.dataset.pieceSlug || ""
     });
   });
 
@@ -579,7 +633,8 @@ function setupSocialModal() {
     window.setTimeout(() => {
       openModal("payment", {
         title: paymentQuery.get("title") || "Premium piece unlock",
-        price: paymentQuery.get("price") || 49
+        price: paymentQuery.get("price") || 49,
+        slug: paymentQuery.get("slug") || ""
       });
     }, 250);
   }
