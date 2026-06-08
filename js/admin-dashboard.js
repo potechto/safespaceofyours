@@ -200,7 +200,7 @@ async function loadUnlocks() {
           <strong>${escapeAdminHTML(item.code)}</strong>
           <small>
             ${escapeAdminHTML(formatTargetSummary(targetSlugs))}
-            &bull; Used ${Number(item.used_count) || 0}/${item.max_uses || "unlimited"}
+            &bull; Unlock uses ${Number(item.used_count) || 0}/${item.max_uses || "auto"}
             &bull; ${item.is_active ? "Active" : "Inactive"}
           </small>
         </div>
@@ -412,7 +412,7 @@ unlockForm.addEventListener("submit", async event => {
   event.preventDefault();
 
   const selectedSlugs = getSelectedPickerSlugs(unlockPiecePicker);
-  const maxUses = Number(document.querySelector("#maxUsesInput").value) || 1;
+  const maxUses = Math.max(1, selectedSlugs.length);
   const codeInput = document.querySelector("#unlockCodeInput");
   const code = (codeInput.value.trim().toUpperCase() || makeUnlockCode(selectedSlugs[0] || "piece"));
 
@@ -454,7 +454,6 @@ unlockForm.addEventListener("submit", async event => {
   }
 
   unlockForm.reset();
-  document.querySelector("#maxUsesInput").value = 1;
   await loadUnlocks();
   renderPiecePickers();
   setDashboardMessage(`Unlock code generated: ${code}`, "success");

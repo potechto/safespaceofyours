@@ -109,16 +109,16 @@
           </div>
 
           <form id="unlockForm" class="admin-form control-form">
-            <div class="form-row">
+            <div class="form-row unlock-code-row">
               <label>
                 <span>Unlock code</span>
                 <input id="unlockCodeInput" type="text" placeholder="Leave blank to auto-generate" />
               </label>
 
-              <label>
-                <span>Use limit</span>
-                <input id="maxUsesInput" type="number" min="1" step="1" value="1" required />
-              </label>
+              <div class="auto-limit-note">
+                <strong>Automatic use limit</strong>
+                <small>The limit follows how many pieces you select below. One selected piece = one valid unlock use.</small>
+              </div>
             </div>
 
             <input id="pieceSlugInput" type="hidden" />
@@ -126,7 +126,7 @@
             <div class="picker-shell">
               <div class="picker-heading">
                 <strong>Which piece/s will this code unlock?</strong>
-                <small>Select up to 5 paid pieces. For one buyer, keep use limit at 1.</small>
+                <small>Select up to 5 paid pieces. Use limit is automatic.</small>
               </div>
               <div id="unlockPiecePicker" class="piece-target-picker" data-picker="unlock"></div>
             </div>
