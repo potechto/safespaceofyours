@@ -24,7 +24,7 @@ function getCategories() {
 }
 
 function renderFilters() {
-  if (!filterButtons) return;
+  if (!filterButtons || !window.POEMS) return;
 
   filterButtons.innerHTML = getCategories()
     .map(category => `
@@ -48,7 +48,6 @@ function poemMatchesSearch(poem, keyword) {
   return searchable.includes(keyword.toLowerCase());
 }
 
-/* V12 poem card helpers */
 function getPoemTypeLabel(poem) {
   const type = poem.type || "spoken-poetry";
   return type
@@ -64,11 +63,11 @@ function getPoemAccess(poem) {
 function formatPeso(amount) {
   const numericAmount = Number(amount);
   if (!Number.isFinite(numericAmount) || numericAmount <= 0) return "";
-  return `₱${numericAmount.toLocaleString("en-PH")}`;
+  return `?${numericAmount.toLocaleString("en-PH")}`;
 }
 
 function renderPoems() {
-  if (!poemGrid || !searchInput || !emptyState) return;
+  if (!poemGrid || !searchInput || !emptyState || !window.POEMS) return;
 
   const keyword = searchInput.value.trim();
 
@@ -82,11 +81,12 @@ function renderPoems() {
 
   poemGrid.innerHTML = filtered.map(poem => {
     const access = getPoemAccess(poem);
-    const isPremium = access === "premium";
+    const isPremium = access === "premium" || access === "paid";
     const price = Number(poem.price) || 49;
     const accessLabel = isPremium ? "Premium" : "Free";
     const typeLabel = getPoemTypeLabel(poem);
     const priceLabel = isPremium ? formatPeso(price) : "";
+    const readText = isPremium ? "Read preview" : "Read full piece";
 
     return `
       <article class="poem-card ${isPremium ? "premium-piece" : "free-piece"}">
@@ -104,7 +104,7 @@ function renderPoems() {
             </div>
             <h3>${escapeHTML(poem.title)}</h3>
             <p>${escapeHTML(poem.excerpt)}</p>
-            <span class="read-more">${isPremium ? "Read preview →" : "Read full piece →"}</span>
+            <span class="read-more">${readText}</span>
           </div>
         </a>
 
@@ -206,7 +206,7 @@ function setupSocialModal() {
     {
       name: "GCash",
       image: "Resources/gcash.jpg",
-      detail: "RA**H JO*N S. ? 0976 *** 6958",
+      detail: "RA**H JO*N S. - 0976 *** 6958",
       note: "Scan the QR first. Details are partially masked for privacy."
     },
     {
@@ -218,7 +218,7 @@ function setupSocialModal() {
     {
       name: "Maribank",
       image: "Resources/maribank.jpg",
-      detail: "RALPH JOHN SANTOS ? **** 4853",
+      detail: "RALPH JOHN SANTOS - **** 4853",
       note: "Scan the QR first. Bank details are partially masked for privacy."
     }
   ];
@@ -229,13 +229,65 @@ function setupSocialModal() {
     FIRSTREAD20: { type: "percent", value: 20, label: "20% off" }
   };
 
+  function getSocialIcon(label) {
+    const key = String(label || "").toLowerCase();
+
+    const icons = {
+      email: `
+        <span class="social-platform-icon brand-email" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm-.4 4.25-7.07 4.42a1 1 0 0 1-1.06 0L4.4 8.25V6.7l7.6 4.75 7.6-4.75v1.55Z"></path>
+          </svg>
+        </span>
+      `,
+      facebook: `
+        <span class="social-platform-icon brand-facebook" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M14.2 8.2V6.9c0-.63.42-.78.72-.78h1.84V3.1L14.2 3.08c-2.84 0-3.48 2.13-3.48 3.49V8.2H8.5v3.1h2.22V21h3.48v-9.7h2.58l.34-3.1H14.2Z"></path>
+          </svg>
+        </span>
+      `,
+      github: `
+        <span class="social-platform-icon brand-github" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.76-.24.76-.54v-1.9c-3.1.68-3.76-1.33-3.76-1.33-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.68.08-.68 1.1.08 1.69 1.14 1.69 1.14.99 1.68 2.58 1.2 3.22.91.1-.72.39-1.2.7-1.48-2.48-.28-5.09-1.24-5.09-5.53 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.08 1.15a10.63 10.63 0 0 1 5.6 0c2.13-1.45 3.07-1.15 3.07-1.15.61 1.54.23 2.68.11 2.96.72.78 1.15 1.78 1.15 3 0 4.3-2.61 5.25-5.1 5.52.4.35.76 1.03.76 2.08v3.09c0 .3.2.65.77.54A11.2 11.2 0 0 0 12 .8Z"></path>
+          </svg>
+        </span>
+      `,
+      instagram: `
+        <span class="social-platform-icon brand-instagram" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M7.8 2h8.4A5.81 5.81 0 0 1 22 7.8v8.4a5.81 5.81 0 0 1-5.8 5.8H7.8A5.81 5.81 0 0 1 2 16.2V7.8A5.81 5.81 0 0 1 7.8 2Zm0 2A3.8 3.8 0 0 0 4 7.8v8.4A3.8 3.8 0 0 0 7.8 20h8.4a3.8 3.8 0 0 0 3.8-3.8V7.8A3.8 3.8 0 0 0 16.2 4H7.8Zm4.2 3.35A4.65 4.65 0 1 1 7.35 12 4.65 4.65 0 0 1 12 7.35Zm0 2A2.65 2.65 0 1 0 14.65 12 2.65 2.65 0 0 0 12 9.35Zm4.9-2.25a1.1 1.1 0 1 1-1.1 1.1 1.1 1.1 0 0 1 1.1-1.1Z"></path>
+          </svg>
+        </span>
+      `,
+      tiktok: `
+        <span class="social-platform-icon brand-tiktok" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M16.6 3c.35 2.18 1.6 3.48 3.7 3.62v3.13a7.1 7.1 0 0 1-3.63-1.02v6.03c0 3.06-2.1 5.24-5.13 5.24-3.1 0-5.34-2.1-5.34-5.05 0-2.86 2.2-5.03 5.07-5.03.38 0 .75.04 1.12.13v3.23a2.9 2.9 0 0 0-1.04-.18 1.82 1.82 0 0 0-1.92 1.85 1.86 1.86 0 0 0 1.97 1.88c1.16 0 1.92-.77 1.92-2.02V3h3.28Z"></path>
+          </svg>
+        </span>
+      `
+    };
+
+    return icons[key] || `
+      <span class="social-platform-icon brand-default" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z"></path>
+        </svg>
+      </span>
+    `;
+  }
+
   function createCard(item) {
     const target = item.href.startsWith("mailto:") ? "_self" : "_blank";
+    const rel = target === "_blank" ? ' rel="noopener noreferrer"' : "";
+    const label = escapeHTML(item.label);
 
     return `
-      <a class="modal-social-card" href="${item.href}" target="${target}" rel="noopener noreferrer">
-        <span>${item.label}</span>
-        <strong>${item.value}</strong>
+      <a class="modal-social-card social-platform-card" href="${item.href}" target="${target}"${rel} aria-label="Open ${label}">
+        ${getSocialIcon(item.label)}
+        <strong>${label}</strong>
       </a>
     `;
   }
@@ -296,7 +348,7 @@ function setupSocialModal() {
       if (!code) {
         promoStatus.textContent = "Optional: enter a promo code if one was given to you.";
       } else if (promo) {
-        promoStatus.textContent = `${code} applied ? ${promo.label}.`;
+        promoStatus.textContent = `${code} applied - ${promo.label}.`;
       } else {
         promoStatus.textContent = "Promo code not recognized. You can still continue with the base amount.";
       }
@@ -389,7 +441,7 @@ function setupSocialModal() {
 
           <div class="final-amount-card">
             <span>Final amount</span>
-            <strong id="finalAmount">?49</strong>
+            <strong id="finalAmount">49</strong>
             <small id="promoStatus">Optional: enter a promo code if one was given to you.</small>
           </div>
         </div>
@@ -531,6 +583,255 @@ function setupSocialModal() {
   });
 }
 
+
+
+function setupAdminGate() {
+  const adminBtn = document.querySelector("#openAdminGate");
+  const modal = document.querySelector("#socialModal");
+  const panel = modal ? modal.querySelector(".social-modal") : null;
+
+  if (!adminBtn || !modal || !panel) return;
+
+  const ADMIN_PIN = "4312";
+  const MAX_ATTEMPTS = 3;
+  const COOLDOWN_MS = 15000;
+  const RECOVERY_QUESTION = "what country you want to go";
+  const RECOVERY_ANSWER = "Japan, pake mo ba?";
+
+  function normalizeRecoveryAnswer(value) {
+    return String(value || "")
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  const LOCK_KEY = "safespace_admin_gate_locked";
+  const ATTEMPTS_KEY = "safespace_admin_gate_attempts";
+  const COOLDOWN_KEY = "safespace_admin_gate_cooldown_until";
+
+  let countdownTimer = null;
+
+  function getAttempts() {
+    return Number(localStorage.getItem(ATTEMPTS_KEY) || "0");
+  }
+
+  function setAttempts(value) {
+    localStorage.setItem(ATTEMPTS_KEY, String(value));
+  }
+
+  function isLocked() {
+    return localStorage.getItem(LOCK_KEY) === "true";
+  }
+
+  function getCooldownUntil() {
+    return Number(localStorage.getItem(COOLDOWN_KEY) || "0");
+  }
+
+  function startCooldown() {
+    localStorage.setItem(LOCK_KEY, "true");
+    localStorage.setItem(COOLDOWN_KEY, String(Date.now() + COOLDOWN_MS));
+  }
+
+  function clearGateLock() {
+    localStorage.removeItem(LOCK_KEY);
+    localStorage.removeItem(ATTEMPTS_KEY);
+    localStorage.removeItem(COOLDOWN_KEY);
+  }
+
+  function clearCountdownTimer() {
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+  }
+
+  function closeModal() {
+    clearCountdownTimer();
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  }
+
+  function baseModalShell(innerContent) {
+    panel.innerHTML = `
+      <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close">
+        <span aria-hidden="true">X</span>
+      </button>
+
+      <h2 id="socialModalTitle" class="visually-hidden">LogIn</h2>
+
+      ${innerContent}
+    `;
+
+    const closeBtn = panel.querySelector("#closeSocialModal");
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  }
+
+  function showModal() {
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+  }
+
+  function renderPinForm() {
+    baseModalShell(`
+      <form id="adminGateForm" class="admin-gate-form stealth-gate-form">
+        <label class="admin-gate-label">
+          <span>Enter PIN</span>
+          <input id="adminPinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter PIN" maxlength="12" aria-label="Enter PIN" />
+        </label>
+
+        <button class="btn primary" type="submit">Continue</button>
+      </form>
+
+      <p id="adminGateMessage" class="admin-gate-message" role="status" aria-live="polite"></p>
+    `);
+
+    showModal();
+
+    const pinInput = panel.querySelector("#adminPinInput");
+    const form = panel.querySelector("#adminGateForm");
+    const message = panel.querySelector("#adminGateMessage");
+
+    if (pinInput) pinInput.focus();
+
+    if (!form || !pinInput) return;
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const enteredPin = pinInput.value.trim();
+
+      if (enteredPin === ADMIN_PIN) {
+        clearGateLock();
+        window.location.href = "admin.html";
+        return;
+      }
+
+      const nextAttempts = getAttempts() + 1;
+      setAttempts(nextAttempts);
+
+      if (nextAttempts >= MAX_ATTEMPTS) {
+        startCooldown();
+        openAdminModal();
+        return;
+      }
+
+      if (message) {
+        message.textContent = "Try again.";
+        message.classList.add("error");
+      }
+
+      pinInput.value = "";
+      pinInput.focus();
+    });
+  }
+
+  function renderCooldown() {
+    const cooldownUntil = getCooldownUntil();
+
+    baseModalShell(`
+      <div class="admin-gate-cooldown" role="status" aria-live="polite">
+        <p class="gate-cooldown-title">Please wait</p>
+
+        <div class="gate-countdown">
+          <span id="gateCountdownNumber">15</span>
+          <small>s</small>
+        </div>
+
+        <div class="gate-countdown-track" aria-hidden="true">
+          <span id="gateCountdownBar"></span>
+        </div>
+      </div>
+    `);
+
+    showModal();
+
+    const numberEl = panel.querySelector("#gateCountdownNumber");
+    const barEl = panel.querySelector("#gateCountdownBar");
+
+    function updateCountdown() {
+      const remainingMs = Math.max(0, cooldownUntil - Date.now());
+      const remainingSeconds = Math.ceil(remainingMs / 1000);
+      const progress = Math.max(0, Math.min(1, remainingMs / COOLDOWN_MS));
+
+      if (numberEl) numberEl.textContent = String(remainingSeconds);
+      if (barEl) barEl.style.width = `${progress * 100}%`;
+
+      if (remainingMs <= 0) {
+        clearCountdownTimer();
+        localStorage.removeItem(COOLDOWN_KEY);
+        openAdminModal();
+      }
+    }
+
+    updateCountdown();
+    countdownTimer = setInterval(updateCountdown, 250);
+  }
+
+  function renderRecoveryForm() {
+    baseModalShell(`
+      <form id="adminRecoveryForm" class="admin-gate-form stealth-gate-form">
+        <label class="admin-gate-label">
+          <span>${RECOVERY_QUESTION}</span>
+          <input id="adminRecoveryInput" type="text" autocomplete="off" placeholder="Answer" aria-label="${RECOVERY_QUESTION}" />
+        </label>
+
+        <button class="btn primary" type="submit">Continue</button>
+      </form>
+
+      <p id="adminRecoveryMessage" class="admin-gate-message" role="status" aria-live="polite"></p>
+    `);
+
+    showModal();
+
+    const recoveryInput = panel.querySelector("#adminRecoveryInput");
+    const form = panel.querySelector("#adminRecoveryForm");
+    const message = panel.querySelector("#adminRecoveryMessage");
+
+    if (recoveryInput) recoveryInput.focus();
+
+    if (!form || !recoveryInput) return;
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      if (normalizeRecoveryAnswer(recoveryInput.value) === RECOVERY_ANSWER) {
+        clearGateLock();
+        openAdminModal();
+        return;
+      }
+
+      if (message) {
+        message.textContent = "Try again.";
+        message.classList.add("error");
+      }
+
+      recoveryInput.value = "";
+      recoveryInput.focus();
+    });
+  }
+
+  function openAdminModal() {
+    clearCountdownTimer();
+
+    const cooldownUntil = getCooldownUntil();
+
+    if (isLocked() && cooldownUntil > Date.now()) {
+      renderCooldown();
+      return;
+    }
+
+    if (isLocked()) {
+      renderRecoveryForm();
+      return;
+    }
+
+    renderPinForm();
+  }
+
+  adminBtn.addEventListener("click", openAdminModal);
+}
+
 function setupSmartScrollbars() {
   let scrollTimer;
 
@@ -553,10 +854,34 @@ if (searchInput) {
   searchInput.addEventListener("input", renderPoems);
 }
 
+
+function repairVisibleSymbols() {
+  const scrollTopBtn = document.querySelector("#scrollTopBtn");
+
+  if (scrollTopBtn) {
+    scrollTopBtn.classList.add("scroll-top-btn");
+    scrollTopBtn.setAttribute("aria-label", "Back to top");
+    scrollTopBtn.innerHTML = `
+      <span class="scroll-top-icon" aria-hidden="true">&#8593;</span>
+      <span class="visually-hidden">Back to top</span>
+    `;
+  }
+
+  document.querySelectorAll(".pencil").forEach(icon => {
+    icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = "&#10022;";
+  });
+}
+
 redirectOldArchiveHash();
 renderFilters();
 renderPoems();
 setupScrollTopButton();
 setupSocialModal();
+setupAdminGate();
 setupSmartScrollbars();
+repairVisibleSymbols();
+
+
+
 

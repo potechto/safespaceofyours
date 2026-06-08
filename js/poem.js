@@ -1,4 +1,4 @@
-﻿const year = document.querySelector("#year");
+const year = document.querySelector("#year");
 const readerCover = document.querySelector("#readerCover");
 const readerCategory = document.querySelector("#readerCategory");
 const readerTitle = document.querySelector("#readerTitle");

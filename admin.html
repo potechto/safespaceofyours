@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>safespaceofsyours | LogIn</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <section class="admin-hero">
+      <p class="eyebrow">safespaceofsyours</p>
+      <h1>Private Space</h1>
+      <a href="index.html" class="soft-link">Back to site</a>
+    </section>
+
+    <section id="authView" class="admin-card auth-card">
+      <div class="card-heading">
+        <p class="eyebrow">LogIn</p>
+        <h2 id="authTitle">Sign-in</h2>
+      </div>
+
+      <div class="auth-tabs" role="tablist" aria-label="Access options">
+        <button class="auth-tab active" type="button" data-auth-mode="login">Sign-in</button>
+        <button class="auth-tab" type="button" data-auth-mode="signup">Sign-up</button>
+      </div>
+
+      <form id="emailForm" class="admin-form">
+        <label>
+          Email
+          <input id="emailInput" type="email" autocomplete="off" placeholder="Enter email" required />
+        </label>
+
+        <button id="emailSubmitBtn" class="primary-btn" type="submit">
+          Sign-in
+        </button>
+      </form>
+
+      <form id="verifyForm" class="admin-form hidden">
+        <label>
+          Code
+          <input id="codeInput" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Code" required />
+        </label>
+      </form>
+
+      <form id="profileForm" class="admin-form hidden" aria-hidden="true"></form>
+
+      <p id="authMessage" class="status-message" role="status"></p>
+    </section>
+
+    <section id="dashboardView" class="dashboard hidden">
+      <div class="dashboard-top">
+        <div>
+          <p class="eyebrow">Workspace</p>
+          <h2>Welcome</h2>
+          <p id="adminIdentity" class="muted"></p>
+        </div>
+
+        <button id="logoutBtn" class="ghost-btn" type="button">Log out</button>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="admin-card manager-card">
+          <div class="card-heading">
+            <h3>Promo codes</h3>
+            <p>Create discounts for premium reads or commissions.</p>
+          </div>
+
+          <form id="promoForm" class="admin-form mini-form">
+            <input id="promoCodeInputAdmin" type="text" placeholder="Code e.g. SAFE10" required />
+            <select id="promoTypeInput" required>
+              <option value="percent">Percent</option>
+              <option value="fixed">Fixed PHP</option>
+            </select>
+            <input id="promoValueInput" type="number" min="0" step="1" placeholder="Value" required />
+            <button class="primary-btn" type="submit">Add promo</button>
+          </form>
+
+          <div id="promoList" class="admin-list"></div>
+        </section>
+
+        <section class="admin-card manager-card">
+          <div class="card-heading">
+            <h3>Unlock codes</h3>
+            <p>Generate codes for paid premium pieces.</p>
+          </div>
+
+          <form id="unlockForm" class="admin-form mini-form">
+            <input id="unlockCodeInput" type="text" placeholder="Unlock code" required />
+            <input id="pieceSlugInput" type="text" placeholder="piece-slug" required />
+            <input id="maxUsesInput" type="number" min="1" step="1" value="1" required />
+            <button class="primary-btn" type="submit">Add unlock</button>
+          </form>
+
+          <div id="unlockList" class="admin-list"></div>
+        </section>
+
+        <section class="admin-card manager-card wide-card">
+          <div class="card-heading">
+            <h3>Payment methods</h3>
+            <p>View and update visible manual payment methods.</p>
+          </div>
+
+          <div id="paymentList" class="admin-list"></div>
+        </section>
+      </div>
+
+      <p id="dashboardMessage" class="status-message" role="status"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/admin-auth.js"></script>
+  <script src="js/admin-dashboard.js"></script>
+</body>
+</html>
+
+
+
+
+
+
