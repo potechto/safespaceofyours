@@ -133,6 +133,69 @@ async function loadTargets(tableName, codeIdKey, ids) {
 }
 
 
+
+function getPieceTextValue(piece) {
+  const value = piece.fullText || piece.text || piece.content || piece.body || piece.poem || "";
+  if (Array.isArray(value)) return value.join("\n");
+  return String(value || "");
+}
+
+function getPieceCharacterCount(piece) {
+  return getPieceTextValue(piece).length;
+}
+
+function formatUseStatus(item) {
+  return Number(item.used_count) > 0 ? "Used" : "Not used";
+}
+
+function promptPromoDetails(pieceTitle) {
+  const typeAnswer = window.prompt(
+    `Generate promo for "${pieceTitle}"\n\nType P for percent discount or F for fixed peso discount.`,
+    "P"
+  );
+
+  if (typeAnswer === null) return null;
+
+  const normalizedType = typeAnswer.trim().toLowerCase();
+  const discountType = normalizedType.startsWith("f") ? "fixed" : "percent";
+
+  const valueAnswer = window.prompt(
+    discountType === "percent"
+      ? "Enter percent discount value. Example: 10 means 10% off."
+      : "Enter fixed peso discount value. Example: 10 means PHP 10 off.",
+    "10"
+  );
+
+  if (valueAnswer === null) return null;
+
+  const discountValue = Number(valueAnswer);
+
+  if (!Number.isFinite(discountValue) || discountValue <= 0) {
+    setDashboardMessage("Promo discount value must be greater than 0.", "error");
+    return null;
+  }
+
+  const codeAnswer = window.prompt("Optional: type promo code, or leave blank to auto-generate.", "");
+
+  if (codeAnswer === null) return null;
+
+  return {
+    code: codeAnswer.trim().toUpperCase(),
+    discountType,
+    discountValue
+  };
+}
+
+function makePromoCode(slug) {
+  const prefix = String(slug || "PROMO")
+    .replace(/[^a-z0-9]/gi, "")
+    .slice(0, 6)
+    .toUpperCase() || "PROMO";
+  const randomPart = Math.random().toString(36).slice(2, 7).toUpperCase();
+  return `${prefix}-P${randomPart}`;
+}
+
+
 function renderEmpty(target, message) {
   target.innerHTML = `<div class="list-item"><div><small>${escapeAdminHTML(message)}</small></div></div>`;
 }
@@ -162,6 +225,7 @@ async function loadPromos() {
           <small>
             ${escapeAdminHTML(formatDiscount(item.discount_type, item.discount_value))}
             &bull; ${escapeAdminHTML(formatTargetSummary(targets))}
+            &bull; ${escapeAdminHTML(formatUseStatus(item))}
             &bull; ${item.is_active ? "Active" : "Inactive"}
           </small>
         </div>
@@ -200,7 +264,7 @@ async function loadUnlocks() {
           <strong>${escapeAdminHTML(item.code)}</strong>
           <small>
             ${escapeAdminHTML(formatTargetSummary(targetSlugs))}
-            &bull; Unlock uses ${Number(item.used_count) || 0}/${item.max_uses || "auto"}
+            &bull; ${escapeAdminHTML(formatUseStatus(item))}
             &bull; ${item.is_active ? "Active" : "Inactive"}
           </small>
         </div>
@@ -248,6 +312,7 @@ async function loadPieceSettings() {
     const accessType = normalizeAdminAccess(item.access_type);
     const price = Number(item.price) || 49;
     const previewLimit = Number(item.preview_char_limit) || 700;
+    const totalCharacters = getPieceCharacterCount(item);
 
     return `
       <article class="list-item piece-control-item" data-piece-row="${escapeAdminHTML(item.slug)}">
@@ -265,6 +330,7 @@ async function loadPieceSettings() {
               <span>${escapeAdminHTML(item.slug)}</span>
               <span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
               <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
+              <span>Total ${escapeAdminHTML(totalCharacters)} chars</span>
             </div>
           </div>
         </div>
@@ -305,7 +371,8 @@ async function loadPieceSettings() {
 
           <div class="item-actions piece-actions">
             <button class="tiny-btn primary-tiny" type="button" data-save-piece="${escapeAdminHTML(item.slug)}">Save changes</button>
-            <button class="tiny-btn" type="button" data-generate-unlock="${escapeAdminHTML(item.slug)}">Generate code</button>
+            <button class="tiny-btn" type="button" data-generate-promo="${escapeAdminHTML(item.slug)}">Promo code</button>
+            <button class="tiny-btn" type="button" data-generate-unlock="${escapeAdminHTML(item.slug)}">Unlock code</button>
           </div>
         </div>
       </article>
@@ -331,7 +398,7 @@ async function loadPayments() {
     <article class="list-item">
       <div>
         <strong>${escapeAdminHTML(item.name)}</strong>
-        <small>${escapeAdminHTML(item.display_detail)} &bull; ${escapeAdminHTML(item.qr_path)} &bull; ${item.is_active ? "Visible" : "Hidden"}</small>
+        <small>${escapeAdminHTML(item.display_detail)} &bull; ${item.is_active ? "Visible" : "Hidden"}</small>
       </div>
       <div class="item-actions">
         <button class="tiny-btn" type="button" data-toggle-payment="${item.id}" data-current="${item.is_active}">
@@ -352,112 +419,6 @@ window.loadAdminDashboard = async function loadAdminDashboard() {
   }
 };
 
-promoForm.addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const code = document.querySelector("#promoCodeInputAdmin").value.trim().toUpperCase();
-  const discountType = document.querySelector("#promoTypeInput").value;
-  const discountValue = Number(document.querySelector("#promoValueInput").value);
-  const selectedSlugs = getSelectedPickerSlugs(promoPiecePicker);
-
-  if (!code || !Number.isFinite(discountValue) || discountValue <= 0) {
-    setDashboardMessage("Enter a valid promo code and discount value.", "error");
-    return;
-  }
-
-  if (!selectedSlugs.length) {
-    setDashboardMessage("Select at least one paid piece for this promo code.", "error");
-    return;
-  }
-
-  const { data, error } = await adminClient
-    .from("promo_codes")
-    .insert({
-      code,
-      discount_type: discountType,
-      discount_value: discountValue,
-      is_active: true,
-      applies_to_all: false
-    })
-    .select("id")
-    .single();
-
-  if (error) {
-    setDashboardMessage(error.message, "error");
-    return;
-  }
-
-  const targetRows = selectedSlugs.map(slug => ({
-    promo_code_id: String(data.id),
-    piece_slug: slug
-  }));
-
-  const { error: targetError } = await adminClient
-    .from("promo_code_targets")
-    .insert(targetRows);
-
-  if (targetError) {
-    setDashboardMessage(targetError.message, "error");
-    return;
-  }
-
-  promoForm.reset();
-  document.querySelector("#promoTypeInput").value = "percent";
-  await loadPromos();
-  renderPiecePickers();
-  setDashboardMessage(`Promo code ${code} added for ${selectedSlugs.length} piece/s.`, "success");
-});
-
-unlockForm.addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const selectedSlugs = getSelectedPickerSlugs(unlockPiecePicker);
-  const maxUses = Math.max(1, selectedSlugs.length);
-  const codeInput = document.querySelector("#unlockCodeInput");
-  const code = (codeInput.value.trim().toUpperCase() || makeUnlockCode(selectedSlugs[0] || "piece"));
-
-  if (!selectedSlugs.length) {
-    setDashboardMessage("Select at least one paid piece for this unlock code.", "error");
-    return;
-  }
-
-  const { data, error } = await adminClient
-    .from("unlock_codes")
-    .insert({
-      code,
-      piece_slug: selectedSlugs.length === 1 ? selectedSlugs[0] : null,
-      max_uses: maxUses,
-      is_active: true
-    })
-    .select("id,code")
-    .single();
-
-  if (error) {
-    setDashboardMessage(error.message, "error");
-    return;
-  }
-
-  if (selectedSlugs.length > 1) {
-    const targetRows = selectedSlugs.map(slug => ({
-      unlock_code_id: String(data.id),
-      piece_slug: slug
-    }));
-
-    const { error: targetError } = await adminClient
-      .from("unlock_code_targets")
-      .insert(targetRows);
-
-    if (targetError) {
-      setDashboardMessage(targetError.message, "error");
-      return;
-    }
-  }
-
-  unlockForm.reset();
-  await loadUnlocks();
-  renderPiecePickers();
-  setDashboardMessage(`Unlock code generated: ${code}`, "success");
-});
 
 
 document.addEventListener("change", event => {
@@ -495,6 +456,7 @@ document.addEventListener("click", async event => {
   const unlockDelete = event.target.closest("[data-delete-unlock]");
   const paymentToggle = event.target.closest("[data-toggle-payment]");
   const pieceSave = event.target.closest("[data-save-piece]");
+  const promoGenerate = event.target.closest("[data-generate-promo]");
   const unlockGenerate = event.target.closest("[data-generate-unlock]");
 
   try {
@@ -553,6 +515,45 @@ document.addEventListener("click", async event => {
 
       await loadPieceSettings();
       setDashboardMessage("Piece settings saved.", "success");
+    }
+
+
+    if (promoGenerate) {
+      const slug = promoGenerate.dataset.generatePromo;
+      const piece = latestAdminPieces.find(item => item.slug === slug) || { slug, title: slug };
+      const promoDetails = promptPromoDetails(piece.title || slug);
+
+      if (!promoDetails) return;
+
+      const code = promoDetails.code || makePromoCode(slug);
+
+      const { data, error } = await adminClient
+        .from("promo_codes")
+        .insert({
+          code,
+          discount_type: promoDetails.discountType,
+          discount_value: promoDetails.discountValue,
+          max_uses: 1,
+          used_count: 0,
+          is_active: true,
+          applies_to_all: false
+        })
+        .select("id,code")
+        .single();
+
+      if (error) throw error;
+
+      const { error: targetError } = await adminClient
+        .from("promo_code_targets")
+        .insert({
+          promo_code_id: String(data.id),
+          piece_slug: slug
+        });
+
+      if (targetError) throw targetError;
+
+      await loadPromos();
+      setDashboardMessage(`1-time promo code generated: ${code}`, "success");
     }
 
     if (unlockGenerate) {

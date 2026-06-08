@@ -846,7 +846,7 @@ body {
 }
 
 .auto-limit-note {
-  display: grid;
+  display: none;
   gap: 0.35rem;
   align-content: center;
   min-height: 44px;
@@ -971,4 +971,26 @@ button:disabled,
   }
 }
 /* V17C admin interaction polish END */
+
+/* V17D simplified admin cards */
+
+.piece-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.piece-actions .tiny-btn {
+  min-width: 128px;
+}
+
+.piece-meta span {
+  white-space: normal;
+}
+
+.payment-methods .list-item small,
+#paymentList .list-item small {
+  color: var(--muted);
+}
+/* V17D simplified admin cards END */
 

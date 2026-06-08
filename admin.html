@@ -66,39 +66,6 @@
             <h3>Promo codes</h3>
             <p>Create discounts for premium reads or commissions.</p>
           </div>
-
-          <form id="promoForm" class="admin-form control-form">
-            <div class="form-row">
-              <label>
-                <span>Promo code</span>
-                <input id="promoCodeInputAdmin" type="text" placeholder="e.g. SAFE10" required />
-              </label>
-
-              <label>
-                <span>Discount type</span>
-                <select id="promoTypeInput" required>
-                  <option value="percent">Percent discount (%)</option>
-                  <option value="fixed">Fixed peso discount (PHP)</option>
-                </select>
-              </label>
-
-              <label>
-                <span>Discount value</span>
-                <input id="promoValueInput" type="number" min="0" step="1" placeholder="e.g. 10" required />
-              </label>
-            </div>
-
-            <div class="picker-shell">
-              <div class="picker-heading">
-                <strong>Where can this promo be used?</strong>
-                <small>Select up to 5 paid pieces.</small>
-              </div>
-              <div id="promoPiecePicker" class="piece-target-picker" data-picker="promo"></div>
-            </div>
-
-            <button class="primary-btn wide-action" type="submit">Create promo code</button>
-          </form>
-
           <div id="promoList" class="admin-list"></div>
         </section>
 
@@ -107,33 +74,6 @@
             <h3>Unlock codes</h3>
             <p>Generate codes for paid premium pieces.</p>
           </div>
-
-          <form id="unlockForm" class="admin-form control-form">
-            <div class="form-row unlock-code-row">
-              <label>
-                <span>Unlock code</span>
-                <input id="unlockCodeInput" type="text" placeholder="Leave blank to auto-generate" />
-              </label>
-
-              <div class="auto-limit-note">
-                <strong>Automatic use limit</strong>
-                <small>The limit follows how many pieces you select below. One selected piece = one valid unlock use.</small>
-              </div>
-            </div>
-
-            <input id="pieceSlugInput" type="hidden" />
-
-            <div class="picker-shell">
-              <div class="picker-heading">
-                <strong>Which piece/s will this code unlock?</strong>
-                <small>Select up to 5 paid pieces. Use limit is automatic.</small>
-              </div>
-              <div id="unlockPiecePicker" class="piece-target-picker" data-picker="unlock"></div>
-            </div>
-
-            <button class="primary-btn wide-action" type="submit">Create unlock code</button>
-          </form>
-
           <div id="unlockList" class="admin-list"></div>
         </section>
 
