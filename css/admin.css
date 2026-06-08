@@ -2301,3 +2301,103 @@ button:disabled,
 /* V18N piece control layout containment + select visibility END */
 
 
+/* V18R.2 piece control no-cut layout fix */
+#piecesControlCard,
+.piece-settings-list,
+.piece-control-item {
+  overflow: visible !important;
+}
+
+.piece-control-item {
+  max-width: 100%;
+}
+
+.piece-control-fields {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.piece-control-fields .piece-field,
+.piece-control-fields label {
+  min-width: 0;
+}
+
+.piece-control-fields input,
+.piece-control-fields select {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  padding-inline: 0.72rem;
+}
+
+.piece-field > span:first-child {
+  white-space: nowrap;
+}
+
+/* Give controls full card width on normal laptop/desktop sizes */
+@media (max-width: 1380px) {
+  .piece-control-item {
+    grid-template-columns: 1fr !important;
+  }
+
+  .piece-control-main {
+    max-width: 100%;
+  }
+
+  .piece-control-fields {
+    grid-template-columns:
+      minmax(78px, 0.65fr)
+      minmax(126px, 1fr)
+      minmax(118px, 0.95fr)
+      minmax(108px, 0.82fr)
+      minmax(128px, 0.9fr) !important;
+    gap: 0.58rem !important;
+    align-items: end;
+  }
+
+  .piece-actions {
+    grid-column: 1 / -1 !important;
+    justify-content: flex-start !important;
+  }
+
+  .piece-actions .tiny-btn {
+    min-width: 118px;
+  }
+}
+
+/* Tighter screens: 2 rows instead of clipping */
+@media (max-width: 980px) {
+  .piece-control-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .piece-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+/* Mobile: full stack */
+@media (max-width: 640px) {
+  .piece-control-main {
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+  }
+
+  .piece-control-cover {
+    width: 64px !important;
+    height: 84px !important;
+  }
+
+  .piece-control-fields {
+    grid-template-columns: 1fr !important;
+  }
+
+  .piece-actions .tiny-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+/* V18R.2 piece control no-cut layout fix END */
+
+
