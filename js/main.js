@@ -460,19 +460,83 @@ function setupSocialModal() {
     };
   }
 
+  let promoRequestCountdownTimer = null;
+  const promoRequestCooldownKey = "safePromoRequestCooldownUntil";
+  const promoRequestCooldownMs = 60 * 60 * 1000;
+
+  function getPromoRequestCooldownUntil() {
+    return Number(localStorage.getItem(promoRequestCooldownKey)) || 0;
+  }
+
+  function setPromoRequestCooldown() {
+    const cooldownUntil = Date.now() + promoRequestCooldownMs;
+    localStorage.setItem(promoRequestCooldownKey, String(cooldownUntil));
+    return cooldownUntil;
+  }
+
+  function formatCountdown(ms) {
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function setupPromoRequestCooldownButton(button, status) {
+    if (!button) return null;
+
+    const defaultText = button.dataset.defaultText || button.textContent.trim() || "Request promo";
+    button.dataset.defaultText = defaultText;
+
+    function updateButton() {
+      const cooldownUntil = getPromoRequestCooldownUntil();
+      const remaining = cooldownUntil - Date.now();
+
+      if (remaining > 0) {
+        button.disabled = true;
+        button.textContent = `Request again in ${formatCountdown(remaining)}`;
+
+        if (status && !status.textContent) {
+          status.textContent = "You already sent a request. Please wait before requesting again.";
+        }
+
+        return true;
+      }
+
+      button.disabled = false;
+      button.textContent = defaultText;
+      return false;
+    }
+
+    updateButton();
+    return window.setInterval(updateButton, 1000);
+  }
+
   function setupPromoRequestForm() {
     const form = panel.querySelector("#promoRequestForm");
     const status = panel.querySelector("#promoRequestStatus");
 
     if (!form || !status) return;
 
+    const submitButton = form.querySelector("button[type='submit']");
+
+    if (promoRequestCountdownTimer) {
+      window.clearInterval(promoRequestCountdownTimer);
+    }
+
+    promoRequestCountdownTimer = setupPromoRequestCooldownButton(submitButton, status);
+
     form.addEventListener("submit", async event => {
       event.preventDefault();
+
+      if (getPromoRequestCooldownUntil() > Date.now()) {
+        status.textContent = "Please wait for the countdown before sending another request.";
+        return;
+      }
 
       const pieceSlug = form.querySelector("#promoRequestPiece")?.value || "";
       const contact = form.querySelector("#promoRequestContact")?.value || "";
       const note = form.querySelector("#promoRequestNote")?.value || "";
-      const submitButton = form.querySelector("button[type='submit']");
 
       status.textContent = "Sending request...";
       if (submitButton) submitButton.disabled = true;
@@ -483,10 +547,20 @@ function setupSocialModal() {
 
       if (result.ok) {
         form.reset();
+        setPromoRequestCooldown();
+        setupPromoRequestCooldownButton(submitButton, status);
+      } else if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = submitButton.dataset.defaultText || "Request promo";
       }
-
-      if (submitButton) submitButton.disabled = false;
     });
+
+    return () => {
+      if (promoRequestCountdownTimer) {
+        window.clearInterval(promoRequestCountdownTimer);
+        promoRequestCountdownTimer = null;
+      }
+    };
   }
 
   function createPaymentCard(method) {

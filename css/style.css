@@ -3260,3 +3260,16 @@ header nav button:hover {
 }
 /* V18C.1 modal close and promo request dropdown fix END */
 
+/* V18C.3 promo request cooldown */
+.promo-request-form button[disabled] {
+  opacity: 0.68;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.promo-request-form button[disabled]:hover {
+  transform: none;
+  box-shadow: none;
+}
+/* V18C.3 promo request cooldown END */
+
