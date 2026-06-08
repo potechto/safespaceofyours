@@ -1494,3 +1494,47 @@ button:disabled,
 /* V18H admin bell alignment + hidden zero badge END */
 
 
+/* V18I admin nav non-sticky and bell alignment */
+.admin-control-bar {
+  position: static !important;
+  top: auto !important;
+  margin-top: -0.35rem !important;
+  margin-bottom: 0.5rem !important;
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.25rem !important;
+  backdrop-filter: none !important;
+}
+
+.admin-control-actions {
+  align-items: center !important;
+}
+
+.admin-control-link,
+.admin-control-btn {
+  min-height: 42px !important;
+  height: 42px !important;
+  padding-block: 0 !important;
+  align-items: center !important;
+}
+
+.promo-request-bell.icon-only {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  transform: translateY(-1px);
+}
+
+.promo-request-bell.icon-only .bell-icon {
+  font-size: 0.92rem !important;
+  transform: translateY(0);
+}
+
+#promoRequestBellCount {
+  top: -3px !important;
+  right: -3px !important;
+}
+/* V18I admin nav non-sticky and bell alignment END */
+
+
