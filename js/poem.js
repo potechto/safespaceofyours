@@ -1077,3 +1077,83 @@ if (document.readyState === "loading") {
   });
 })();
 
+
+/* V18U.2 paid reader proof SVG icons */
+(function setupPaidReaderProofSvgIcons() {
+  if (window.__safePaidReaderProofSvgIconsBound) return;
+  window.__safePaidReaderProofSvgIconsBound = true;
+
+  function proofIconMarkup(label = "") {
+    const key = String(label || "").trim().toLowerCase();
+
+    if (key.includes("email")) {
+      return `
+        <span class="social-platform-icon brand-email" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm-.4 4.25-7.07 4.42a1 1 0 0 1-1.06 0L4.4 8.25V6.7l7.6 4.75 7.6-4.75v1.55Z"></path>
+          </svg>
+        </span>
+      `;
+    }
+
+    if (key.includes("instagram")) {
+      return `
+        <span class="social-platform-icon brand-instagram" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Zm0 2A3.5 3.5 0 0 0 4 7.5v9A3.5 3.5 0 0 0 7.5 20h9a3.5 3.5 0 0 0 3.5-3.5v-9A3.5 3.5 0 0 0 16.5 4h-9Zm4.5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5Zm5.15-2.9a1.15 1.15 0 1 1-1.15 1.15 1.15 1.15 0 0 1 1.15-1.15Z"></path>
+          </svg>
+        </span>
+      `;
+    }
+
+    if (key.includes("tiktok")) {
+      return `
+        <span class="social-platform-icon brand-tiktok" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M16.7 3c.32 2.16 1.55 3.63 3.73 3.77v3.1a7.56 7.56 0 0 1-3.71-1.08v5.86c0 3.02-2.1 5.35-5.3 5.35-3.04 0-5.18-2.04-5.18-4.92 0-3.26 2.86-5.36 6.24-4.74v3.25c-1.3-.42-2.85.17-2.85 1.46 0 .92.72 1.55 1.74 1.55 1.12 0 1.86-.68 1.86-2.15V3h3.47Z"></path>
+          </svg>
+        </span>
+      `;
+    }
+
+    return `
+      <span class="social-platform-icon brand-link" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M10.6 13.4a1 1 0 0 1 0-1.4l2.8-2.8a1 1 0 1 1 1.4 1.4L12 13.4a1 1 0 0 1-1.4 0Zm-4.95 4.95a3.5 3.5 0 0 1 0-4.95l3.18-3.18a3.5 3.5 0 0 1 4.95 0 1 1 0 0 1-1.42 1.42 1.5 1.5 0 0 0-2.12 0l-3.18 3.18a1.5 1.5 0 0 0 2.12 2.12l1.08-1.08a1 1 0 0 1 1.42 1.42l-1.08 1.08a3.5 3.5 0 0 1-4.95 0Zm4.57-4.57a1 1 0 0 1 1.42-1.42 1.5 1.5 0 0 0 2.12 0l3.18-3.18a1.5 1.5 0 0 0-2.12-2.12l-1.08 1.08a1 1 0 0 1-1.42-1.42l1.08-1.08a3.5 3.5 0 0 1 4.95 4.95l-3.18 3.18a3.5 3.5 0 0 1-4.95 0Z"></path>
+        </svg>
+      </span>
+    `;
+  }
+
+  function applyPaidReaderProofIcons() {
+    document.querySelectorAll(".paid-reader-proof-link-card").forEach(card => {
+      const label = card.querySelector("strong")?.textContent || "";
+      const currentIcon = card.querySelector("span[aria-hidden='true']");
+
+      if (!currentIcon) return;
+      if (currentIcon.classList.contains("social-platform-icon")) return;
+
+      currentIcon.outerHTML = proofIconMarkup(label);
+    });
+  }
+
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".paid-reader-shell [data-open-payment]")) return;
+
+    window.setTimeout(applyPaidReaderProofIcons, 80);
+    window.setTimeout(applyPaidReaderProofIcons, 350);
+    window.setTimeout(applyPaidReaderProofIcons, 900);
+  }, true);
+
+  const observer = new MutationObserver(() => {
+    applyPaidReaderProofIcons();
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+  applyPaidReaderProofIcons();
+})();
+

@@ -3803,3 +3803,23 @@ section#about {
 /* V18U proof/contact icon parity END */
 
 
+/* V18U.2 paid reader proof SVG icons */
+.paid-reader-proof-link-card .social-platform-icon {
+  width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid rgba(255, 203, 225, 0.28);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--pink);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.paid-reader-proof-link-card .social-platform-icon svg {
+  width: 1.45rem;
+  height: 1.45rem;
+  display: block;
+  fill: currentColor;
+}
+/* V18U.2 paid reader proof SVG icons END */
+
