@@ -8,6 +8,7 @@ const pieceSettingsList = document.querySelector("#pieceSettingsList");
 const promoRequestList = document.querySelector("#promoRequestList");
 const promoRequestBell = document.querySelector("#promoRequestBell");
 const promoRequestBellCount = document.querySelector("#promoRequestBellCount");
+const logoutBtn = document.querySelector("#logoutBtn");
 const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
@@ -317,7 +318,7 @@ function renderPromoRequestItem(item) {
       </div>
 
       <div class="item-actions code-actions">
-        <button class="tiny-btn" type="button" data-complete-promo-request="${escapeAdminHTML(item.id)}">Mark done</button>
+        ${(item.status || "pending") === "pending" ? `<button class="tiny-btn" type="button" data-complete-promo-request="${escapeAdminHTML(item.id)}">Mark done</button>` : ""}
         <button class="tiny-btn danger" type="button" data-delete-promo-request="${escapeAdminHTML(item.id)}">Delete</button>
       </div>
     </article>
@@ -783,5 +784,18 @@ if (!window.safePromoRequestPollStarted) {
     if (document.visibilityState === "hidden") return;
     loadPromoRequests().catch(error => console.warn("Promo request poll failed:", error));
   }, 60000);
+}
+
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      const { error } = await adminClient.auth.signOut();
+      if (error) throw error;
+      window.location.href = "index.html";
+    } catch (error) {
+      setDashboardMessage(error.message || "Logout failed.", "error");
+    }
+  });
 }
 

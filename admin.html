@@ -8,12 +8,23 @@
   <link rel="stylesheet" href="css/admin.css" />
 </head>
 <body>
+  <nav class="admin-top-nav" aria-label="Private space controls">
+    <a class="admin-nav-pill" href="index.html">Back to site</a>
+
+    <button id="promoRequestBell" class="admin-nav-pill promo-request-bell" type="button" aria-label="View pending promo requests">
+      <span class="bell-icon" aria-hidden="true">&#128276;</span>
+      <span>Requests</span>
+      <strong id="promoRequestBellCount">0</strong>
+    </button>
+
+    <button id="logoutBtn" class="admin-nav-pill admin-logout-pill" type="button">Logout</button>
+  </nav>
+
   <main class="admin-shell">
     <section class="admin-hero">
       <p class="eyebrow">safespaceofsyours</p>
       <h1>Private Space</h1>
-      <a href="index.html" class="soft-link">Back to site</a>
-    </section>
+</section>
 
     <section id="authView" class="admin-card auth-card">
       <div class="card-heading">
@@ -56,9 +67,7 @@
           <h2>Welcome</h2>
           <p id="adminIdentity" class="muted"></p>
         </div>
-
-        <button id="logoutBtn" class="ghost-btn" type="button">Log out</button>
-      </div>
+</div>
 
       <div class="dashboard-grid">
         <section class="admin-card manager-card">
@@ -98,12 +107,6 @@
       </div>
 
       <p id="dashboardMessage" class="status-message" role="status"></p>
-      <button id="promoRequestBell" class="promo-request-bell" type="button" aria-label="View pending promo requests">
-        <span class="bell-icon" aria-hidden="true">&#128276;</span>
-        <span>Promo requests</span>
-        <strong id="promoRequestBellCount">0</strong>
-      </button>
-
     </section>
   
         <section class="admin-card promo-requests-card">
