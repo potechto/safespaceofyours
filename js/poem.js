@@ -87,8 +87,8 @@ function savePieceUnlock(slug, code) {
 function buildUnlockedNotice() {
   return `
     <div class="unlock-success-notice">
-      <p class="eyebrow">Unlocked piece</p>
-      <p>This full piece is unlocked on this browser/device.</p>
+      <p class="eyebrow">Full piece unlocked</p>
+      <p>You can read the full piece on this browser/device.</p>
     </div>
   `;
 }
@@ -173,41 +173,59 @@ function getPreviewText(text, limit) {
 function buildPaidPreview(poem, fullText) {
   const price = Number(poem.price) || 49;
   const previewText = getPreviewText(fullText, poem.preview_char_limit);
-  const paymentLink = `index.html?payment=piece&title=${encodeURIComponent(poem.title)}&price=${encodeURIComponent(price)}&slug=${encodeURIComponent(poem.slug)}#commissions`;
+  const previewLimit = Number(poem.preview_char_limit) || 700;
+  const totalChars = String(fullText || "").length;
 
   return `
-    <div class="paid-preview-text">
-      ${formatPoem(previewText)}
-    </div>
+    <div class="paid-reader-shell">
+      <div class="paid-reader-hero">
+        <div>
+          <p class="eyebrow">Preview only</p>
+          <h2>Continue reading the full piece</h2>
+          <p>
+            You're reading the opening preview. The rest can be unlocked after manual payment confirmation.
+          </p>
+        </div>
 
-    <div class="paid-preview-notice paid-preview-after">
-      <p class="eyebrow">Premium piece</p>
-      <h2>Pay for full piece</h2>
-      <p>
-        Full access price: <strong>${escapeHTML(formatPeso(price))}</strong>.
-        The text above is only a preview.
-      </p>
+        <div class="paid-reader-price-card">
+          <span>Full access</span>
+          <strong>${escapeHTML(formatPeso(price))}</strong>
+          <small>${escapeHTML(previewLimit)} preview chars ? ${escapeHTML(totalChars)} total chars</small>
+        </div>
+      </div>
 
-      <div class="premium-next-steps">
-        <p><strong>After payment:</strong> send your proof of payment through the contact option shown in the payment panel.</p>
-        <p><strong>Then:</strong> wait for manual confirmation and your unlock/viewing code for this piece.</p>
+      <div class="paid-preview-text">
+        ${formatPoem(previewText)}
+      </div>
+
+      <div class="paid-reader-actions">
+        <button class="reader-action-btn pay-to-view-btn" type="button" data-open-payment>
+          <span>Manual payment</span>
+          <strong>Open payment options</strong>
+        </button>
+
+        <div class="paid-reader-note">
+          <p><strong>After paying:</strong> send the screenshot/proof through the contact option in the payment panel.</p>
+          <p><strong>After confirmation:</strong> you?ll receive an unlock code for this piece.</p>
+        </div>
       </div>
 
       <div class="reader-unlock-panel">
-        <div>
-          <p class="eyebrow">Already paid?</p>
+        <div class="reader-unlock-copy">
+          <p class="eyebrow">Already have a code?</p>
           <h3>Enter unlock code</h3>
-          <p>Use the code sent after manual payment confirmation. It unlocks this full piece on this browser/device.</p>
+          <p>Use the code sent after confirmation. It unlocks the full piece on this browser/device.</p>
         </div>
 
         <form class="unlock-code-form" data-unlock-form>
-          <input data-unlock-code-input type="text" placeholder="Enter unlock code" autocomplete="off" />
-          <button class="reader-action-btn" type="submit">Unlock full piece</button>
-          <p class="unlock-message" data-unlock-message></p>
+          <input data-unlock-code-input type="text" autocomplete="off" placeholder="Unlock code" />
+          <button class="reader-action-btn" type="submit">
+            <span>Code</span>
+            <strong>Unlock piece</strong>
+          </button>
+          <p class="unlock-message" data-unlock-message aria-live="polite"></p>
         </form>
       </div>
-
-      <a class="reader-action-btn pay-to-view-btn" href="${escapeHTML(paymentLink)}">Pay to View</a>
     </div>
   `;
 }
