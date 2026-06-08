@@ -733,8 +733,7 @@ function renderPieceSettingsList() {
 
             <div class="piece-meta">
               <span>${escapeAdminHTML(item.category)}</span>
-              
-              <span>${escapeAdminHTML(formatAdminContentLabel(contentLabel))}</span><span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
+<span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
               <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
               <span>Total ${escapeAdminHTML(formatCharacterCount(totalCharacters))} chars</span>
             </div>
@@ -751,7 +750,7 @@ function renderPieceSettingsList() {
           </label>            <label class="piece-field">
               <span>Label</span>
               <select data-piece-label>
-                ${renderAdminContentLabelOptions(contentLabel)}
+                ${renderAdminContentLabelOptions(item.content_label || item.type)}
               </select>
             </label>
 
