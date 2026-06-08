@@ -3221,3 +3221,42 @@ header nav button:hover {
 }
 /* V18C promo request and final nav polish END */
 
+/* V18C.1 modal close and promo request dropdown fix */
+.modal-overlay {
+  cursor: default;
+}
+
+.social-modal,
+.social-modal * {
+  cursor: auto;
+}
+
+.modal-close {
+  cursor: pointer;
+}
+
+.promo-request-form select {
+  appearance: auto;
+  -webkit-appearance: auto;
+  background-color: rgba(44, 34, 48, 0.96);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.promo-request-form select option {
+  background-color: #211824;
+  color: #fff4fb;
+}
+
+.promo-request-form select option:checked,
+.promo-request-form select option:hover {
+  background-color: #564657;
+  color: #fff4fb;
+}
+
+.promo-request-form input::placeholder,
+.promo-request-form textarea::placeholder {
+  color: rgba(255, 244, 251, 0.52);
+}
+/* V18C.1 modal close and promo request dropdown fix END */
+

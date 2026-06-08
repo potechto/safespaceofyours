@@ -910,12 +910,6 @@ function setupSocialModal() {
     }, 250);
   }
 
-  modal.addEventListener("click", event => {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && modal.classList.contains("open")) {
       closeModal();
