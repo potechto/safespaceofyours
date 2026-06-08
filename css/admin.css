@@ -1085,3 +1085,74 @@ button:disabled,
 }
 /* Safe promo requests placement polish END */
 
+/* V18E pieces control filter tabs */
+.piece-control-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 1rem 0 1.1rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(255, 244, 251, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.piece-filter-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 38px;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.piece-filter-tab:hover {
+  transform: translateY(-1px);
+  color: var(--text);
+  border-color: rgba(255, 244, 251, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.piece-filter-tab.active {
+  color: var(--text);
+  border-color: rgba(255, 203, 225, 0.34);
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.14), transparent 6rem),
+    rgba(255, 255, 255, 0.075);
+}
+
+.piece-filter-tab span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.45rem;
+  height: 1.45rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .piece-control-tabs {
+    border-radius: 22px;
+  }
+
+  .piece-filter-tab {
+    flex: 1 1 100%;
+  }
+}
+/* V18E pieces control filter tabs END */
+

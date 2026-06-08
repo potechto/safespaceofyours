@@ -5,6 +5,7 @@ const promoList = document.querySelector("#promoList");
 const unlockList = document.querySelector("#unlockList");
 const paymentList = document.querySelector("#paymentList");
 const pieceSettingsList = document.querySelector("#pieceSettingsList");
+const pieceControlFilters = document.querySelector("#pieceControlFilters");
 const promoRequestList = document.querySelector("#promoRequestList");
 const promoRequestBell = document.querySelector("#promoRequestBell");
 const promoRequestBellCount = document.querySelector("#promoRequestBellCount");
@@ -12,6 +13,7 @@ const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
 let latestAdminPieces = [];
+let activePieceControlFilter = "all";
 let pieceCharacterCountCache = new Map();
 
 function setDashboardMessage(message, type = "") {
@@ -426,37 +428,68 @@ async function loadUnlocks() {
 }
 
 
-async function loadPieceSettings() {
+function getPieceControlCounts() {
+  return latestAdminPieces.reduce(
+    (counts, item) => {
+      const accessType = normalizeAdminAccess(item.access_type);
+      counts.all += 1;
+      counts[accessType] += 1;
+      return counts;
+    },
+    { all: 0, paid: 0, free: 0 }
+  );
+}
+
+function getFilteredAdminPieces() {
+  if (activePieceControlFilter === "paid") {
+    return latestAdminPieces.filter(item => normalizeAdminAccess(item.access_type) === "paid");
+  }
+
+  if (activePieceControlFilter === "free") {
+    return latestAdminPieces.filter(item => normalizeAdminAccess(item.access_type) === "free");
+  }
+
+  return latestAdminPieces;
+}
+
+function updatePieceControlFilters() {
+  if (!pieceControlFilters) return;
+
+  const counts = getPieceControlCounts();
+
+  pieceControlFilters.querySelectorAll("[data-piece-filter]").forEach(button => {
+    const filter = button.dataset.pieceFilter || "all";
+    const isActive = filter === activePieceControlFilter;
+
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+
+  pieceControlFilters.querySelectorAll("[data-piece-count]").forEach(counter => {
+    const key = counter.dataset.pieceCount || "all";
+    counter.textContent = String(counts[key] || 0);
+  });
+}
+
+function renderPieceSettingsList() {
   if (!pieceSettingsList) return;
 
-  const { data, error } = await adminClient
-    .from("piece_settings")
-    .select("slug,title,category,type,is_enabled,access_type,price,preview_mode,preview_char_limit,updated_at")
-    .order("category", { ascending: true })
-    .order("title", { ascending: true });
+  updatePieceControlFilters();
 
-  if (error) {
-    renderEmpty(pieceSettingsList, "Piece settings are not ready yet. Run supabase/v16_piece_control.sql in Supabase SQL Editor, then refresh this dashboard.");
+  const piecesToRender = getFilteredAdminPieces();
+
+  if (!piecesToRender.length) {
+    const label = activePieceControlFilter === "paid"
+      ? "No paid pieces yet."
+      : activePieceControlFilter === "free"
+        ? "No free pieces yet."
+        : "No pieces found.";
+
+    renderEmpty(pieceSettingsList, label);
     return;
   }
 
-  if (!data.length) {
-    renderEmpty(pieceSettingsList, "No piece settings found. Run the V16 SQL seed first.");
-    return;
-  }
-
-  const sourceMap = getPoemSourceMap();
-  latestAdminPieces = data.map(item => ({
-    ...item,
-    ...(sourceMap.get(item.slug) || {}),
-    ...item
-  }));
-
-  latestAdminPieces = await enrichPiecesWithCharacterCounts(latestAdminPieces);
-
-  renderPiecePickers();
-
-  pieceSettingsList.innerHTML = latestAdminPieces.map(item => {
+  pieceSettingsList.innerHTML = piecesToRender.map(item => {
     const accessType = normalizeAdminAccess(item.access_type);
     const price = Number(item.price) || 49;
     const previewLimit = Number(item.preview_char_limit) || 700;
@@ -526,6 +559,39 @@ async function loadPieceSettings() {
       </article>
     `;
   }).join("");
+}
+
+async function loadPieceSettings() {
+  if (!pieceSettingsList) return;
+
+  const { data, error } = await adminClient
+    .from("piece_settings")
+    .select("slug,title,category,type,is_enabled,access_type,price,preview_mode,preview_char_limit,updated_at")
+    .order("category", { ascending: true })
+    .order("title", { ascending: true });
+
+  if (error) {
+    renderEmpty(pieceSettingsList, "Piece settings are not ready yet. Run supabase/v16_piece_control.sql in Supabase SQL Editor, then refresh this dashboard.");
+    return;
+  }
+
+  if (!data.length) {
+    renderEmpty(pieceSettingsList, "No piece settings found. Run the V16 SQL seed first.");
+    return;
+  }
+
+  const sourceMap = getPoemSourceMap();
+  latestAdminPieces = data.map(item => ({
+    ...item,
+    ...(sourceMap.get(item.slug) || {}),
+    ...item
+  }));
+
+  latestAdminPieces = await enrichPiecesWithCharacterCounts(latestAdminPieces);
+
+  renderPiecePickers();
+
+  renderPieceSettingsList();
 }
 
 
@@ -598,6 +664,7 @@ document.addEventListener("change", event => {
 
 
 document.addEventListener("click", async event => {
+  const pieceFilter = event.target.closest("[data-piece-filter]");
   const promoToggle = event.target.closest("[data-toggle-promo]");
   const promoDelete = event.target.closest("[data-delete-promo]");
   const unlockToggle = event.target.closest("[data-toggle-unlock]");
@@ -610,6 +677,12 @@ document.addEventListener("click", async event => {
   const deletePromoRequest = event.target.closest("[data-delete-promo-request]");
 
   try {
+    if (pieceFilter) {
+      activePieceControlFilter = pieceFilter.dataset.pieceFilter || "all";
+      renderPieceSettingsList();
+      return;
+    }
+
     if (promoToggle) {
       const nextValue = promoToggle.dataset.current !== "true";
       const { error } = await adminClient.from("promo_codes").update({ is_active: nextValue }).eq("id", promoToggle.dataset.togglePromo);

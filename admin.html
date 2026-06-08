@@ -89,6 +89,12 @@
             <p>Mirror public piece visibility, free/paid status, price, and preview limits.</p>
           </div>
 
+          <div id="pieceControlFilters" class="piece-control-tabs" role="tablist" aria-label="Filter pieces by access type">
+            <button class="piece-filter-tab active" type="button" data-piece-filter="all">All <span data-piece-count="all">0</span></button>
+            <button class="piece-filter-tab" type="button" data-piece-filter="paid">Paid <span data-piece-count="paid">0</span></button>
+            <button class="piece-filter-tab" type="button" data-piece-filter="free">Free <span data-piece-count="free">0</span></button>
+          </div>
+
           <div id="pieceSettingsList" class="admin-list piece-settings-list"></div>
         </section>
 
