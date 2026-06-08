@@ -5,6 +5,7 @@ const emptyState = document.querySelector("#emptyState");
 const year = document.querySelector("#year");
 
 let activeCategory = "All";
+let visiblePoems = Array.isArray(window.POEMS) ? window.POEMS : [];
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -20,11 +21,11 @@ function escapeHTML(value) {
 }
 
 function getCategories() {
-  return ["All", ...new Set(window.POEMS.map(poem => poem.category))];
+  return ["All", ...new Set(visiblePoems.map(poem => poem.category))];
 }
 
 function renderFilters() {
-  if (!filterButtons || !window.POEMS) return;
+  if (!filterButtons || !Array.isArray(visiblePoems)) return;
 
   filterButtons.innerHTML = getCategories()
     .map(category => `
@@ -57,21 +58,23 @@ function getPoemTypeLabel(poem) {
 }
 
 function getPoemAccess(poem) {
+  if (window.SafePieceSettings) return window.SafePieceSettings.normalizeAccess(poem.access_type || poem.access);
   return poem.access || "free";
 }
 
 function formatPeso(amount) {
   const numericAmount = Number(amount);
   if (!Number.isFinite(numericAmount) || numericAmount <= 0) return "";
-  return `?${numericAmount.toLocaleString("en-PH")}`;
+  if (window.SafePieceSettings) return window.SafePieceSettings.formatPeso(numericAmount);
+  return `PHP ${numericAmount.toLocaleString("en-PH")}`;
 }
 
 function renderPoems() {
-  if (!poemGrid || !searchInput || !emptyState || !window.POEMS) return;
+  if (!poemGrid || !searchInput || !emptyState) return;
 
   const keyword = searchInput.value.trim();
 
-  const filtered = window.POEMS.filter(poem => {
+  const filtered = visiblePoems.filter(poem => {
     const categoryMatch = activeCategory === "All" || poem.category === activeCategory;
     const searchMatch = !keyword || poemMatchesSearch(poem, keyword);
     return categoryMatch && searchMatch;
@@ -81,7 +84,7 @@ function renderPoems() {
 
   poemGrid.innerHTML = filtered.map(poem => {
     const access = getPoemAccess(poem);
-    const isPremium = access === "premium" || access === "paid";
+    const isPremium = access === "paid";
     const price = Number(poem.price) || 49;
     const accessLabel = isPremium ? "Premium" : "Free";
     const typeLabel = getPoemTypeLabel(poem);
@@ -855,6 +858,18 @@ if (searchInput) {
 }
 
 
+
+async function syncPublicPieceSettings() {
+  if (!window.SafePieceSettings) return;
+
+  const settings = await window.SafePieceSettings.loadSettings();
+  if (!settings.length) return;
+
+  visiblePoems = window.SafePieceSettings.mergePoemsWithSettings(window.POEMS, settings, { includeDisabled: false });
+  renderFilters();
+  renderPoems();
+}
+
 function repairVisibleSymbols() {
   const scrollTopBtn = document.querySelector("#scrollTopBtn");
 
@@ -881,6 +896,7 @@ setupSocialModal();
 setupAdminGate();
 setupSmartScrollbars();
 repairVisibleSymbols();
+syncPublicPieceSettings();
 
 
 
