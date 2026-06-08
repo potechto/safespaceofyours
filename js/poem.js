@@ -203,7 +203,7 @@ function buildPaidPreview(poem, fullText) {
 
         <div class="paid-reader-note">
           <p><strong>After paying:</strong> send the screenshot/proof through the contact option in the payment panel.</p>
-          <p><strong>After confirmation:</strong> you?ll receive an unlock code for this piece.</p>
+          <p><strong>After confirmation:</strong> you'll receive an unlock code for this piece.</p>
         </div>
       </div>
 
@@ -402,3 +402,41 @@ function setupSmartScrollbars() {
 }
 
 setupSmartScrollbars();
+
+
+function syncReaderNavigationLayoutClasses() {
+  const controls = Array.from(document.querySelectorAll("a, button"));
+  const randomControl = controls.find(control => {
+    return String(control.textContent || "").trim().toLowerCase().includes("random piece");
+  });
+
+  if (!randomControl || !randomControl.parentElement) return;
+
+  const navWrap = randomControl.parentElement;
+  navWrap.classList.add("reader-nav-mobile-row");
+  randomControl.classList.add("reader-nav-random-control");
+
+  Array.from(navWrap.children).forEach(child => {
+    child.classList.add("reader-nav-mobile-item");
+  });
+}
+
+function setupReaderNavigationLayoutWatcher() {
+  syncReaderNavigationLayoutClasses();
+
+  const observer = new MutationObserver(syncReaderNavigationLayoutClasses);
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  window.addEventListener("pageshow", syncReaderNavigationLayoutClasses);
+  window.addEventListener("resize", syncReaderNavigationLayoutClasses);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", setupReaderNavigationLayoutWatcher);
+} else {
+  setupReaderNavigationLayoutWatcher();
+}
+
