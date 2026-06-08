@@ -3586,45 +3586,46 @@ section#about {
 /* V18S.2 general payment hides piece-only calculator cards END */
 
 
-/* V18S.9 paid reader payment modal */
-.paid-reader-payment-modal .payment-selected-box,
-.paid-reader-payment-modal .payment-mini-card {
+/* V18S.10 clean paid reader payment modal */
+.paid-reader-payment-modal .payment-selected-box {
   border: 1px solid rgba(255, 244, 251, 0.14);
   border-radius: 22px;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.035);
-}
-
-.paid-reader-payment-modal .payment-selected-box {
   display: grid;
   gap: 0.25rem;
   margin: 1rem 0;
 }
 
 .paid-reader-payment-modal .payment-selected-box span,
-.paid-reader-payment-modal .payment-mini-card span {
+.paid-reader-payment-strip span {
   color: var(--pink);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 .paid-reader-payment-modal .payment-selected-box strong,
-.paid-reader-payment-modal .payment-mini-card strong {
+.paid-reader-payment-strip strong {
   color: var(--text);
-  font-size: 1.08rem;
 }
 
-.paid-reader-piece-fields {
+.paid-reader-payment-strip {
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 0.85fr);
   gap: 0.8rem;
   margin-bottom: 1rem;
 }
 
-.paid-reader-promo-card {
+.paid-reader-payment-strip .payment-calculator-card {
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 22px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.035);
   display: grid;
+  align-content: start;
   gap: 0.55rem;
+  min-height: 132px;
 }
 
 .paid-reader-promo-card input {
@@ -3637,30 +3638,29 @@ section#about {
   font: inherit;
 }
 
-.paid-reader-promo-card .tiny-btn {
-  width: fit-content;
-  min-width: 86px;
+.paid-reader-promo-card small {
+  color: rgba(255, 244, 251, 0.74);
+}
+
+.paid-reader-promo-card small.is-error {
+  color: #ff9ab7;
 }
 
 .paid-reader-proof-note {
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 22px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.035);
   margin-bottom: 1rem;
-}
-
-.paid-reader-proof-note p,
-.paid-reader-after-note {
-  margin: 0.5rem 0 0;
+  color: rgba(255, 244, 251, 0.86);
 }
 
 .paid-reader-payment-modal .payment-method-grid {
   margin-top: 1rem;
 }
 
-.paid-reader-payment-modal .payment-method-card {
-  position: relative;
-}
-
-.paid-reader-payment-modal .payment-method-card:not(:has(.payment-qr-button)) {
-  padding-top: 1.2rem;
+.paid-reader-after-note {
+  margin-top: 1rem;
 }
 
 .reader-qr-preview {
@@ -3688,9 +3688,9 @@ section#about {
 }
 
 @media (max-width: 860px) {
-  .paid-reader-piece-fields {
+  .paid-reader-payment-strip {
     grid-template-columns: 1fr;
   }
 }
-/* V18S.9 paid reader payment modal END */
+/* V18S.10 clean paid reader payment modal END */
 

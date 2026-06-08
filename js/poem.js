@@ -444,10 +444,33 @@ if (document.readyState === "loading") {
 }
 
 
-/* V18S.9 paid reader payment modal */
-(function setupPaidReaderPaymentModal() {
-  if (window.__safePaidReaderPaymentModalBound) return;
-  window.__safePaidReaderPaymentModalBound = true;
+/* V18S.10 clean paid reader payment modal */
+(function setupCleanPaidReaderPaymentModal() {
+  if (window.__safeCleanPaidReaderPaymentModalBound) return;
+  window.__safeCleanPaidReaderPaymentModalBound = true;
+
+  const FALLBACK_PAYMENT_METHODS = [
+      {
+            "name": "GCash",
+            "details": "RA**H JO*N S. - 0976 *** 6958",
+            "note": "Scan the QR first. Details are partially masked for privacy.",
+            "image": "https://www.facebook.com/ralphjohn.santos.79"
+      },
+      {
+            "name": "PayPal",
+            "details": "ralphjohnsantos01@gmail.com",
+            "note": "Use PHP when possible, then send proof after payment.",
+            "image": "https://www.facebook.com/ralphjohn.santos.79"
+      },
+      {
+            "name": "Maribank",
+            "details": "RALPH JOHN SANTOS - **** 4853",
+            "note": "Scan the QR first. Bank details are partially masked for privacy.",
+            "image": "https://www.facebook.com/ralphjohn.santos.79"
+      }
+];
+
+  let promoTimer = null;
 
   function esc(value) {
     return String(value ?? "")
@@ -463,12 +486,6 @@ if (document.readyState === "loading") {
     return `PHP ${amount.toLocaleString("en-PH", { maximumFractionDigits: 0 })}`;
   }
 
-  function closeModal() {
-    document.querySelector("#paidReaderPaymentModal")?.remove();
-    document.querySelector("[data-paid-reader-qr-preview]")?.remove();
-    document.body.classList.remove("modal-open");
-  }
-
   function getContext(trigger) {
     return {
       title: trigger.dataset.pieceTitle || "Premium piece unlock",
@@ -478,60 +495,71 @@ if (document.readyState === "loading") {
   }
 
   function getClient() {
-    return (
-      window.safeSupabase ||
-      window.safeSupabaseClient ||
-      window.supabaseClient ||
-      window.SAFE_SUPABASE_CLIENT ||
-      window.safeSpaceSupabase ||
-      null
-    );
+    const direct = [
+      "safeSupabase",
+      "safeSupabaseClient",
+      "supabaseClient",
+      "SAFE_SUPABASE_CLIENT",
+      "safeSpaceSupabase"
+    ];
+
+    for (const key of direct) {
+      if (window[key] && typeof window[key].from === "function") {
+        return window[key];
+      }
+    }
+
+    for (const key of Object.keys(window)) {
+      try {
+        if (window[key] && typeof window[key].from === "function") {
+          return window[key];
+        }
+      } catch (error) {}
+    }
+
+    return null;
   }
 
-  function normalizeImage(value) {
+  function cleanImage(value) {
     const raw = String(value || "").trim();
     if (!raw) return "";
     if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
-    return raw.replace(/^\.?\//, "");
+    return raw.replace(/^\.\//, "").replace(/^\//, "");
   }
 
-  function defaultMethods() {
-    return [
-      {
-        name: "GCash",
-        details: "RA**H JO*N S. - 0976 *** 6958",
-        note: "Scan the QR first. Details are partially masked for privacy.",
-        image: ""
-      },
-      {
-        name: "PayPal",
-        details: "ralphjohnsantos01@gmail.com",
-        note: "Use PHP when possible, then send proof after payment.",
-        image: ""
-      },
-      {
-        name: "Maribank",
-        details: "RALPH JOHN SANTOS - **** 4853",
-        note: "Scan the QR first. Bank details are partially masked for privacy.",
-        image: ""
-      }
-    ];
+  function closeModal() {
+    document.querySelector("#paidReaderPaymentModal")?.remove();
+    document.querySelector("[data-paid-reader-qr-preview]")?.remove();
+    document.body.classList.remove("modal-open");
   }
 
-  async function loadMethods() {
+  async function loadPaymentMethods() {
     try {
       const client = getClient();
-      if (!client || typeof client.from !== "function") return defaultMethods();
+      if (!client || typeof client.from !== "function") return FALLBACK_PAYMENT_METHODS;
 
-      const { data, error } = await client
+      let response = await client
         .from("payment_methods")
         .select("*")
-        .eq("is_visible", true)
         .order("created_at", { ascending: true });
 
-      if (error || !Array.isArray(data) || !data.length) return defaultMethods();
+      if (response.error) {
+        response = await client
+          .from("payment_methods")
+          .select("*");
+      }
 
-      return data.map(item => ({
+      const rows = Array.isArray(response.data) ? response.data : [];
+
+      const visible = rows.filter(item =>
+        item.is_visible !== false &&
+        item.visible !== false &&
+        item.is_active !== false
+      );
+
+      if (!visible.length) return FALLBACK_PAYMENT_METHODS;
+
+      return visible.map(item => ({
         name: item.name || item.method_name || item.title || "Payment method",
         details:
           item.details ||
@@ -551,10 +579,12 @@ if (document.readyState === "loading") {
           item.qr_url ||
           item.image_url ||
           item.image ||
+          item.qr ||
+          item.qr_path ||
           ""
       }));
     } catch (error) {
-      return defaultMethods();
+      return FALLBACK_PAYMENT_METHODS;
     }
   }
 
@@ -563,17 +593,20 @@ if (document.readyState === "loading") {
 
     if (!raw) {
       return {
+        ok: true,
         finalAmount: context.price,
-        message: "Optional: enter a promo code if one was given to you."
+        message: "Optional."
       };
     }
 
     try {
       const client = getClient();
+
       if (!client || typeof client.from !== "function") {
         return {
+          ok: false,
           finalAmount: context.price,
-          message: "Promo checking is unavailable here. Include the promo code in your proof if one was given."
+          message: "Code checking unavailable."
         };
       }
 
@@ -585,15 +618,17 @@ if (document.readyState === "loading") {
 
       if (error || !promo) {
         return {
+          ok: false,
           finalAmount: context.price,
-          message: "Promo code not recognized. You can still pay the base amount."
+          message: "Invalid code."
         };
       }
 
       if (promo.is_active === false) {
         return {
+          ok: false,
           finalAmount: context.price,
-          message: "This promo code is currently disabled."
+          message: "Code inactive."
         };
       }
 
@@ -602,8 +637,9 @@ if (document.readyState === "loading") {
 
       if (limit > 0 && used >= limit) {
         return {
+          ok: false,
           finalAmount: context.price,
-          message: "This promo code has already reached its limit."
+          message: "Code already used up."
         };
       }
 
@@ -614,7 +650,7 @@ if (document.readyState === "loading") {
           .eq("promo_code_id", promo.id);
 
         if (Array.isArray(targets) && targets.length) {
-          const match = targets.some(target => {
+          const matched = targets.some(target => {
             const slug =
               target.piece_slug ||
               target.slug ||
@@ -624,10 +660,11 @@ if (document.readyState === "loading") {
             return String(slug) === String(context.slug);
           });
 
-          if (!match) {
+          if (!matched) {
             return {
+              ok: false,
               finalAmount: context.price,
-              message: "This promo code does not match this piece."
+              message: "Code not for this piece."
             };
           }
         }
@@ -642,15 +679,43 @@ if (document.readyState === "loading") {
       const finalAmount = Math.max(0, Math.round(context.price - discount));
 
       return {
+        ok: true,
         finalAmount,
-        message: `Promo applied. Final amount: ${money(finalAmount)}.`
+        message: "Code applied."
       };
     } catch (error) {
       return {
+        ok: false,
         finalAmount: context.price,
-        message: "Promo code could not be checked. You can still pay the base amount."
+        message: "Code check failed."
       };
     }
+  }
+
+  function updateFinal(amount, message, isError = false) {
+    const output = document.querySelector("[data-paid-reader-final-amount]");
+    const status = document.querySelector("[data-paid-reader-promo-status]");
+
+    if (output) output.textContent = money(amount);
+
+    if (status) {
+      status.textContent = message || "";
+      status.classList.toggle("is-error", Boolean(isError));
+    }
+  }
+
+  async function autoCheckPromo() {
+    const modal = document.querySelector("#paidReaderPaymentModal");
+    if (!modal || !modal.__paidReaderContext) return;
+
+    const context = modal.__paidReaderContext;
+    const input = modal.querySelector("[data-paid-reader-promo-code]");
+    const code = input?.value || "";
+
+    updateFinal(context.price, code.trim() ? "Checking..." : "Optional.");
+
+    const result = await checkPromo(code, context);
+    updateFinal(result.finalAmount, result.message, !result.ok);
   }
 
   function renderShell(context) {
@@ -674,34 +739,28 @@ if (document.readyState === "loading") {
             <strong>${esc(context.title)}</strong>
           </div>
 
-          <div class="paid-reader-piece-fields">
-            <div class="payment-mini-card">
+          <div class="paid-reader-payment-strip">
+            <div class="payment-calculator-card">
               <span>Amount to pay</span>
               <strong>${money(context.price)}</strong>
-              <small>Viewing only. This amount is based on the selected piece.</small>
             </div>
 
-            <label class="payment-mini-card paid-reader-promo-card">
-              <span>Promo code</span>
+            <label class="payment-calculator-card paid-reader-promo-card">
+              <span>Enter code</span>
               <input data-paid-reader-promo-code type="text" autocomplete="off" placeholder="Optional" />
-              <button class="tiny-btn" type="button" data-paid-reader-apply-promo>Apply</button>
-              <small data-paid-reader-promo-status>Optional: enter a promo code if one was given to you.</small>
+              <small data-paid-reader-promo-status>Optional.</small>
             </label>
 
-            <div class="payment-mini-card">
+            <div class="payment-calculator-card">
               <span>Final amount</span>
               <strong data-paid-reader-final-amount>${money(context.price)}</strong>
-              <small>This is the amount to send after promo checking.</small>
             </div>
           </div>
 
-          <div class="payment-mini-card paid-reader-proof-note">
-            <span>Important proof note</span>
-            <p>
-              Include the exact title <strong>${esc(context.title)}</strong> in your screenshot/proof.
-              If the title is not included, the request will not be processed.
-            </p>
-            <p><strong>No refund policy:</strong> payments sent without complete proof/details are not refundable.</p>
+          <div class="paid-reader-proof-note">
+            Include the exact title <strong>${esc(context.title)}</strong> in your proof/receipt. If missing, the request will not be processed.
+            <br />
+            <strong>No refund policy:</strong> payments with incomplete proof/details are not refundable.
           </div>
 
           <div id="paidReaderPaymentMethods" class="payment-method-grid">
@@ -721,28 +780,6 @@ if (document.readyState === "loading") {
     if (modal) modal.__paidReaderContext = { ...context };
   }
 
-  function updateFinal(amount, message) {
-    const output = document.querySelector("[data-paid-reader-final-amount]");
-    const status = document.querySelector("[data-paid-reader-promo-status]");
-
-    if (output) output.textContent = money(amount);
-    if (status && message) status.textContent = message;
-  }
-
-  async function applyPromo() {
-    const modal = document.querySelector("#paidReaderPaymentModal");
-    if (!modal || !modal.__paidReaderContext) return;
-
-    const context = modal.__paidReaderContext;
-    const input = modal.querySelector("[data-paid-reader-promo-code]");
-    const status = modal.querySelector("[data-paid-reader-promo-status]");
-
-    if (status) status.textContent = "Checking promo code...";
-
-    const result = await checkPromo(input?.value || "", context);
-    updateFinal(result.finalAmount, result.message);
-  }
-
   function renderMethods(methods) {
     const target = document.querySelector("#paidReaderPaymentMethods");
     if (!target) return;
@@ -753,19 +790,16 @@ if (document.readyState === "loading") {
     }
 
     target.innerHTML = methods.map(method => {
-      const image = normalizeImage(method.image);
-      const imageMarkup = image
-        ? `
-          <button class="payment-qr-button" type="button" data-paid-reader-qr="${esc(image)}" data-paid-reader-qr-name="${esc(method.name)}">
-            <img src="${esc(image)}" alt="${esc(method.name)} QR code" loading="lazy" onerror="this.closest('.payment-qr-button')?.remove();" />
-          </button>
-          <p class="qr-hint">Click QR to enlarge</p>
-        `
-        : "";
+      const image = cleanImage(method.image);
 
       return `
         <article class="payment-method-card">
-          ${imageMarkup}
+          ${image ? `
+            <button class="payment-qr-button" type="button" data-paid-reader-qr="${esc(image)}" data-paid-reader-qr-name="${esc(method.name)}">
+              <img src="${esc(image)}" alt="${esc(method.name)} QR code" loading="lazy" onerror="this.closest('.payment-qr-button')?.remove();" />
+            </button>
+            <p class="qr-hint">Click QR to enlarge</p>
+          ` : ""}
           <h3>${esc(method.name)}</h3>
           ${method.details ? `<p>${esc(method.details)}</p>` : ""}
           ${method.note ? `<p>${esc(method.note)}</p>` : ""}
@@ -774,23 +808,23 @@ if (document.readyState === "loading") {
     }).join("");
   }
 
-  async function openModal(context) {
+  async function openPayment(context) {
     renderShell(context);
-    const methods = await loadMethods();
+    const methods = await loadPaymentMethods();
     renderMethods(methods);
   }
+
+  document.addEventListener("input", event => {
+    if (!event.target.matches("[data-paid-reader-promo-code]")) return;
+
+    clearTimeout(promoTimer);
+    promoTimer = setTimeout(autoCheckPromo, 450);
+  });
 
   document.addEventListener("click", event => {
     const close = event.target.closest("[data-paid-reader-payment-close]");
     if (close) {
       closeModal();
-      return;
-    }
-
-    const apply = event.target.closest("[data-paid-reader-apply-promo]");
-    if (apply) {
-      event.preventDefault();
-      applyPromo();
       return;
     }
 
@@ -822,7 +856,7 @@ if (document.readyState === "loading") {
     if (!trigger) return;
 
     event.preventDefault();
-    openModal(getContext(trigger));
+    openPayment(getContext(trigger));
   }, true);
 
   document.addEventListener("keydown", event => {
