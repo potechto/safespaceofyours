@@ -67,19 +67,27 @@ function getPreviewText(text, limit) {
 function buildPaidPreview(poem, fullText) {
   const price = Number(poem.price) || 49;
   const previewText = getPreviewText(fullText, poem.preview_char_limit);
+  const paymentLink = `index.html?payment=piece&title=${encodeURIComponent(poem.title)}&price=${encodeURIComponent(price)}#commissions`;
 
   return `
-    <div class="paid-preview-notice">
-      <p class="eyebrow">Premium piece</p>
-      <h2>This piece is preview-only for now.</h2>
-      <p>
-        Full access price: <strong>${escapeHTML(formatPeso(price))}</strong>.
-        After payment, send proof privately and wait for the viewing code.
-      </p>
-      <a class="reader-action-btn pay-to-view-btn" href="index.html#support">Pay to View</a>
-    </div>
     <div class="paid-preview-text">
       ${formatPoem(previewText)}
+    </div>
+
+    <div class="paid-preview-notice paid-preview-after">
+      <p class="eyebrow">Premium piece</p>
+      <h2>Pay for full piece</h2>
+      <p>
+        Full access price: <strong>${escapeHTML(formatPeso(price))}</strong>.
+        The text above is only a preview.
+      </p>
+
+      <div class="premium-next-steps">
+        <p><strong>After payment:</strong> send your proof of payment through the contact option shown in the payment panel.</p>
+        <p><strong>Then:</strong> wait for manual confirmation and your unlock/viewing code for the full piece.</p>
+      </div>
+
+      <a class="reader-action-btn pay-to-view-btn" href="${escapeHTML(paymentLink)}">Pay to View</a>
     </div>
   `;
 }

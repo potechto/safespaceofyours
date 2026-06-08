@@ -2879,3 +2879,45 @@ nav a:focus-visible,
 
 /* V15.14 END
 */
+
+/* V16.1 premium reader CTA polish */
+.paid-preview-text {
+  position: relative;
+}
+
+.paid-preview-after {
+  margin-top: 2rem;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  border: 1px solid rgba(255, 215, 233, 0.22);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 215, 233, 0.12), transparent 12rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.paid-preview-after h2 {
+  margin: 0 0 0.7rem;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.premium-next-steps {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1rem 0 1.2rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.premium-next-steps p {
+  margin: 0;
+}
+
+.pay-to-view-btn {
+  width: fit-content;
+  min-width: 180px;
+  justify-content: center;
+}
+/* V16.1 premium reader CTA polish END */
+

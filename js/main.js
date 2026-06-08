@@ -573,6 +573,17 @@ function setupSocialModal() {
     });
   });
 
+
+  const paymentQuery = new URLSearchParams(window.location.search);
+  if (paymentQuery.get("payment") === "piece") {
+    window.setTimeout(() => {
+      openModal("payment", {
+        title: paymentQuery.get("title") || "Premium piece unlock",
+        price: paymentQuery.get("price") || 49
+      });
+    }, 250);
+  }
+
   modal.addEventListener("click", event => {
     if (event.target === modal) {
       closeModal();
