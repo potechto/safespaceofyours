@@ -180,7 +180,18 @@ function formatCharacterCount(count) {
 }
 
 function formatUseStatus(item) {
-  return Number(item.used_count) > 0 ? "Used" : "Not used";
+  const usedCount = Number(item.used_count) || 0;
+  const maxUses = Number(item.max_uses) || 0;
+
+  if (!maxUses) {
+    return usedCount > 0 ? `Used ${usedCount} time/s` : "Not used";
+  }
+
+  const left = Math.max(maxUses - usedCount, 0);
+
+  if (usedCount <= 0) return `Not used - ${left} left`;
+  if (left <= 0) return `Used - 0 left`;
+  return `Partly used - ${left} left`;
 }
 
 function promptPromoDetails(pieceTitle) {
@@ -210,6 +221,15 @@ function promptPromoDetails(pieceTitle) {
     return null;
   }
 
+  const maxUsesAnswer = window.prompt(
+    "How many times can this promo code be used? Example: 1 for one buyer, 5 for five uses.",
+    "1"
+  );
+
+  if (maxUsesAnswer === null) return null;
+
+  const maxUses = Math.max(1, Math.floor(Number(maxUsesAnswer) || 1));
+
   const codeAnswer = window.prompt("Optional: type promo code, or leave blank to auto-generate.", "");
 
   if (codeAnswer === null) return null;
@@ -217,7 +237,8 @@ function promptPromoDetails(pieceTitle) {
   return {
     code: codeAnswer.trim().toUpperCase(),
     discountType,
-    discountValue
+    discountValue,
+    maxUses
   };
 }
 
@@ -570,7 +591,7 @@ document.addEventListener("click", async event => {
           code,
           discount_type: promoDetails.discountType,
           discount_value: promoDetails.discountValue,
-          max_uses: 1,
+          max_uses: promoDetails.maxUses,
           used_count: 0,
           is_active: true,
           applies_to_all: false
@@ -590,7 +611,7 @@ document.addEventListener("click", async event => {
       if (targetError) throw targetError;
 
       await loadPromos();
-      setDashboardMessage(`1-time promo code generated: ${code}`, "success");
+      setDashboardMessage(`Promo code generated: ${code} - ${promoDetails.maxUses} use/s`, "success");
     }
 
     if (unlockGenerate) {

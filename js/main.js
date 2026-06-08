@@ -228,6 +228,22 @@ function setupSocialModal() {
     }
   ];
 
+  function findPieceByTitle(title) {
+    const normalizedTitle = String(title || "").trim().toLowerCase();
+    if (!normalizedTitle) return null;
+
+    return (Array.isArray(window.POEMS) ? window.POEMS : []).find(piece =>
+      String(piece.title || "").trim().toLowerCase() === normalizedTitle
+    ) || null;
+  }
+
+  function resolvePaymentSlug(context = {}) {
+    if (context.slug) return context.slug;
+
+    const piece = findPieceByTitle(context.title || "");
+    return piece ? piece.slug : "";
+  }
+
   const promoCodes = {
     SAFE10: { type: "percent", value: 10, label: "10% off" },
     POTATO15: { type: "percent", value: 15, label: "15% off" },
@@ -334,9 +350,18 @@ function setupSocialModal() {
       };
     }
 
+    const selectedSlug = paymentContext.slug || resolvePaymentSlug(paymentContext);
+
+    if (!selectedSlug) {
+      return {
+        ok: false,
+        message: "Please open payment from a specific piece before using a piece promo code."
+      };
+    }
+
     const { data, error } = await window.safeAdminClient.rpc("validate_promo_code", {
       input_code: code,
-      input_piece_slug: paymentContext.slug || "",
+      input_piece_slug: selectedSlug,
       input_amount: amount
     });
 
@@ -569,10 +594,12 @@ function setupSocialModal() {
 
   function openModal(mode = "connect", context = {}) {
     if (mode === "payment") {
+      const nextTitle = context.title || paymentContext.title || "General support / premium unlock";
+
       paymentContext = {
-        title: context.title || paymentContext.title || "General support / premium unlock",
+        title: nextTitle,
         price: Number(context.price) || Number(paymentContext.price) || 49,
-        slug: context.slug || paymentContext.slug || ""
+        slug: context.slug || resolvePaymentSlug({ title: nextTitle })
       };
     }
 
