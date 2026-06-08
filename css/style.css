@@ -3694,3 +3694,11 @@ section#about {
 }
 /* V18S.10 clean paid reader payment modal END */
 
+
+/* V18T copied button feedback */
+.is-copied {
+  border-color: rgba(126, 240, 199, 0.55) !important;
+  color: #7ef0c7 !important;
+}
+/* V18T copied button feedback END */
+

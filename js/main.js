@@ -1360,3 +1360,111 @@ setupSmartScrollbars();
 repairVisibleSymbols();
 syncPublicPieceSettings();
 
+
+/* V18T copy button feedback */
+(function setupSafeCopyButtonFeedback() {
+  if (window.__safeCopyButtonFeedbackBound) return;
+  window.__safeCopyButtonFeedbackBound = true;
+
+  const timers = new WeakMap();
+
+  function getCopyValue(button) {
+    const dataKeys = [
+      "copyAdminCode",
+      "copyCode",
+      "copyPromoCode",
+      "copyUnlockCode",
+      "copyValue",
+      "copy"
+    ];
+
+    for (const key of dataKeys) {
+      if (button.dataset && button.dataset[key]) {
+        return button.dataset[key];
+      }
+    }
+
+    const card = button.closest(".admin-code-card, .code-list-item, .promo-code-card, .promo-card, .public-promo-card");
+    const codeText = card?.querySelector(".admin-code-title, [data-code-value], code, strong");
+
+    return codeText?.textContent?.trim() || "";
+  }
+
+  async function copyValue(value) {
+    if (!value) return;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+        return;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    } catch (error) {
+      // Feedback still appears even if the browser blocks clipboard access.
+    }
+  }
+
+  function showCopied(button) {
+    if (!button) return;
+
+    const originalText = button.dataset.copyFeedbackOriginalText || button.textContent.trim() || "Copy";
+    const originalAria = button.dataset.copyFeedbackOriginalAria || button.getAttribute("aria-label") || "";
+
+    button.dataset.copyFeedbackOriginalText = originalText;
+    button.dataset.copyFeedbackOriginalAria = originalAria;
+
+    button.textContent = "Copied";
+    button.classList.add("is-copied");
+    button.setAttribute("aria-label", "Copied");
+
+    const oldTimer = timers.get(button);
+    if (oldTimer) clearTimeout(oldTimer);
+
+    const timer = window.setTimeout(() => {
+      button.textContent = button.dataset.copyFeedbackOriginalText || originalText;
+      button.classList.remove("is-copied");
+
+      const savedAria = button.dataset.copyFeedbackOriginalAria || "";
+      if (savedAria) {
+        button.setAttribute("aria-label", savedAria);
+      } else {
+        button.removeAttribute("aria-label");
+      }
+
+      timers.delete(button);
+    }, 1200);
+
+    timers.set(button, timer);
+  }
+
+  document.addEventListener("click", event => {
+    const button = event.target.closest(`
+      [data-copy-admin-code],
+      [data-copy-code],
+      [data-copy-promo-code],
+      [data-copy-unlock-code],
+      [data-copy-value],
+      [data-copy],
+      .copy-code-btn
+    `);
+
+    if (!button) return;
+
+    const value = getCopyValue(button);
+    copyValue(value);
+
+    window.setTimeout(() => {
+      showCopied(button);
+    }, 0);
+  }, true);
+})();
+

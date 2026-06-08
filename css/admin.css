@@ -2346,3 +2346,10 @@ button:disabled,
 /* V18R.5 admin piece action buttons one-row END */
 
 
+/* V18T copied button feedback */
+.is-copied {
+  border-color: rgba(126, 240, 199, 0.55) !important;
+  color: #7ef0c7 !important;
+}
+/* V18T copied button feedback END */
+
