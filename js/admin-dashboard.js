@@ -298,6 +298,70 @@ function makePromoCode(slug) {
 }
 
 
+
+function formatCodeUsesLeft(item) {
+  const maxUses = Number(item.max_uses);
+  const usedCount = Number(item.used_count) || 0;
+
+  if (!Number.isFinite(maxUses) || maxUses <= 0) {
+    return "Unlimited";
+  }
+
+  return `${Math.max(maxUses - usedCount, 0)} left`;
+}
+
+function getCodeUseBadge(item) {
+  const usedCount = Number(item.used_count) || 0;
+  const maxUses = Number(item.max_uses);
+
+  if (Number.isFinite(maxUses) && maxUses > 0 && usedCount >= maxUses) {
+    return { label: "Used up", className: "used-up" };
+  }
+
+  if (usedCount > 0) {
+    return { label: "Used", className: "used" };
+  }
+
+  return { label: "Not used", className: "not-used" };
+}
+
+function renderCodeBadges(item) {
+  const activeLabel = item.is_active ? "Active" : "Disabled";
+  const activeClass = item.is_active ? "active" : "disabled";
+  const useBadge = getCodeUseBadge(item);
+
+  return `
+    <div class="code-status-row" aria-label="Code status">
+      <span class="code-badge ${activeClass}">${escapeAdminHTML(activeLabel)}</span>
+      <span class="code-badge ${useBadge.className}">${escapeAdminHTML(useBadge.label)}</span>
+    </div>
+  `;
+}
+
+async function copyAdminText(value) {
+  const text = String(value || "").trim();
+
+  if (!text) {
+    throw new Error("Nothing to copy.");
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+
 function renderEmpty(target, message) {
   target.innerHTML = `<div class="list-item"><div><small>${escapeAdminHTML(message)}</small></div></div>`;
 }
@@ -433,19 +497,30 @@ async function loadPromos() {
 
   promoList.innerHTML = data.map(item => {
     const targets = targetMap.get(String(item.id)) || [];
+    const discountLabel = formatDiscount(item.discount_type, item.discount_value);
+    const targetLabel = formatTargetSummary(targets);
 
     return `
-      <article class="list-item code-list-item">
-        <div>
-          <strong>${escapeAdminHTML(item.code)}</strong>
-          <small>
-            ${escapeAdminHTML(formatDiscount(item.discount_type, item.discount_value))}
-            &bull; ${escapeAdminHTML(formatTargetSummary(targets))}
-            &bull; ${escapeAdminHTML(formatUseStatus(item))}
-            &bull; ${item.is_active ? "Active" : "Inactive"}
-          </small>
+      <article class="list-item code-list-item admin-code-card">
+        <div class="admin-code-top">
+          <div class="admin-code-identity">
+            <strong class="admin-code-title">${escapeAdminHTML(item.code)}</strong>
+            <button class="tiny-btn copy-code-btn" type="button" data-copy-admin-code="${escapeAdminHTML(item.code)}">Copy</button>
+          </div>
+
+          <div class="admin-code-info-wrap">
+            <button class="admin-code-info-btn" type="button" data-code-info-touch aria-expanded="false" aria-label="View promo details">i</button>
+            <div class="admin-code-popover" role="note">
+              <p><span>Discount</span><strong>${escapeAdminHTML(discountLabel)}</strong></p>
+              <p><span>Applies to</span><strong>${escapeAdminHTML(targetLabel)}</strong></p>
+              <p><span>Usage</span><strong>${escapeAdminHTML(formatUseStatus(item))}</strong></p>
+            </div>
+          </div>
         </div>
-        <div class="item-actions">
+
+        ${renderCodeBadges(item)}
+
+        <div class="item-actions code-actions admin-code-actions">
           <button class="tiny-btn" type="button" data-toggle-promo="${item.id}" data-current="${item.is_active}">
             ${item.is_active ? "Disable" : "Enable"}
           </button>
@@ -473,18 +548,28 @@ async function loadUnlocks() {
 
   unlockList.innerHTML = data.map(item => {
     const targetSlugs = item.piece_slug ? [item.piece_slug] : (targetMap.get(String(item.id)) || []);
+    const targetLabel = formatTargetSummary(targetSlugs);
 
     return `
-      <article class="list-item code-list-item">
-        <div>
-          <strong>${escapeAdminHTML(item.code)}</strong>
-          <small>
-            ${escapeAdminHTML(formatTargetSummary(targetSlugs))}
-            &bull; ${escapeAdminHTML(formatUseStatus(item))}
-            &bull; ${item.is_active ? "Active" : "Inactive"}
-          </small>
+      <article class="list-item code-list-item admin-code-card">
+        <div class="admin-code-top">
+          <div class="admin-code-identity">
+            <strong class="admin-code-title">${escapeAdminHTML(item.code)}</strong>
+            <button class="tiny-btn copy-code-btn" type="button" data-copy-admin-code="${escapeAdminHTML(item.code)}">Copy</button>
+          </div>
+
+          <div class="admin-code-info-wrap">
+            <button class="admin-code-info-btn" type="button" data-code-info-touch aria-expanded="false" aria-label="View unlock details">i</button>
+            <div class="admin-code-popover" role="note">
+              <p><span>Unlocks</span><strong>${escapeAdminHTML(targetLabel)}</strong></p>
+              <p><span>Usage</span><strong>${escapeAdminHTML(formatUseStatus(item))}</strong></p>
+            </div>
+          </div>
         </div>
-        <div class="item-actions">
+
+        ${renderCodeBadges(item)}
+
+        <div class="item-actions code-actions admin-code-actions">
           <button class="tiny-btn" type="button" data-toggle-unlock="${item.id}" data-current="${item.is_active}">
             ${item.is_active ? "Disable" : "Enable"}
           </button>
@@ -576,7 +661,6 @@ function renderPieceSettingsList() {
 
             <div class="piece-meta">
               <span>${escapeAdminHTML(item.category)}</span>
-              <span>${escapeAdminHTML(item.slug)}</span>
               <span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
               <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
               <span>Total ${escapeAdminHTML(formatCharacterCount(totalCharacters))} chars</span>
@@ -732,6 +816,7 @@ document.addEventListener("change", event => {
 
 
 document.addEventListener("click", async event => {
+  const copyAdminCode = event.target.closest("[data-copy-admin-code]");
   const pieceFilter = event.target.closest("[data-piece-filter]");
   const promoToggle = event.target.closest("[data-toggle-promo]");
   const promoDelete = event.target.closest("[data-delete-promo]");
@@ -746,6 +831,12 @@ document.addEventListener("click", async event => {
   const deletePromoRequest = event.target.closest("[data-delete-promo-request]");
 
   try {
+    if (copyAdminCode) {
+      await copyAdminText(copyAdminCode.dataset.copyAdminCode || "");
+      setDashboardMessage("Code copied.", "success");
+      return;
+    }
+
     if (pieceFilter) {
       activePieceControlFilter = pieceFilter.dataset.pieceFilter || "all";
       renderPieceSettingsList();
@@ -955,3 +1046,34 @@ document.addEventListener("keydown", event => {
 });
 
 setupPromoRequestBellBadgeWatcher();
+
+
+function closeAdminCodeInfoPopovers() {
+  document.querySelectorAll(".admin-code-card.is-touch-peeking").forEach(card => {
+    card.classList.remove("is-touch-peeking");
+  });
+}
+
+document.addEventListener("pointerdown", event => {
+  const infoButton = event.target.closest("[data-code-info-touch]");
+  if (!infoButton) return;
+
+  if (event.pointerType === "mouse") return;
+
+  const card = infoButton.closest(".admin-code-card");
+  if (!card) return;
+
+  closeAdminCodeInfoPopovers();
+  card.classList.add("is-touch-peeking");
+});
+
+document.addEventListener("pointerup", closeAdminCodeInfoPopovers);
+document.addEventListener("pointercancel", closeAdminCodeInfoPopovers);
+document.addEventListener("scroll", closeAdminCodeInfoPopovers, true);
+
+document.addEventListener("contextmenu", event => {
+  if (event.target.closest("[data-code-info-touch]")) {
+    event.preventDefault();
+  }
+});
+
