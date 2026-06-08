@@ -7,6 +7,45 @@ const paymentList = document.querySelector("#paymentList");
 const pieceSettingsList = document.querySelector("#pieceSettingsList");
 const pieceControlFilters = document.querySelector("#pieceControlFilters");
 const promoRequestList = document.querySelector("#promoRequestList");
+
+
+function syncPromoRequestBellBadge() {
+  const badge = document.querySelector("#promoRequestBellCount");
+  if (!badge) return;
+
+  const raw = String(badge.textContent || "").trim();
+  const count = Number.parseInt(raw, 10);
+
+  if (!Number.isFinite(count) || count <= 0) {
+    badge.textContent = "";
+    badge.classList.remove("has-count");
+    badge.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  badge.textContent = String(count);
+  badge.classList.add("has-count");
+  badge.setAttribute("aria-hidden", "false");
+}
+
+function setupPromoRequestBellBadgeWatcher() {
+  const badge = document.querySelector("#promoRequestBellCount");
+  if (!badge) return;
+
+  syncPromoRequestBellBadge();
+
+  const observer = new MutationObserver(() => {
+    syncPromoRequestBellBadge();
+  });
+
+  observer.observe(badge, {
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
+}
+
+
 const promoRequestBell = document.querySelector("#promoRequestBell");
 const promoRequestBellCount = document.querySelector("#promoRequestBellCount");
 const promoRequestModal = document.querySelector("#promoRequestModal");
@@ -906,3 +945,4 @@ document.addEventListener("keydown", event => {
   }
 });
 
+setupPromoRequestBellBadgeWatcher();

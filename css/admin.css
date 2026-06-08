@@ -1291,3 +1291,206 @@ button:disabled,
 }
 /* V18F admin top control bar and request modal END */
 
+/* V18G admin control bar polish + desktop density tune */
+.admin-control-bar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  width: min(1180px, 100%);
+  margin: 0 auto 1rem;
+  padding: 0.85rem 0 0.45rem;
+  background: transparent;
+  backdrop-filter: blur(18px);
+}
+
+.admin-control-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.admin-top-status {
+  min-height: 40px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: #7ef0c7;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-top-status:empty {
+  opacity: 0;
+}
+
+.admin-control-link,
+.admin-control-btn {
+  min-height: 40px;
+  padding: 0.58rem 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.promo-request-bell.icon-only {
+  position: relative;
+  width: 42px;
+  min-width: 42px;
+  padding: 0;
+}
+
+.promo-request-bell.icon-only .bell-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.promo-request-bell.icon-only strong {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (min-width: 1024px) {
+  .admin-hero h1 {
+    font-size: clamp(3.6rem, 6vw, 5rem) !important;
+  }
+
+  .dashboard-top h2,
+  .card-heading h3,
+  .manager-card h3,
+  .wide-card h3 {
+    font-size: clamp(1.7rem, 2.2vw, 2.3rem) !important;
+  }
+
+  .dashboard-top p,
+  .card-heading p,
+  .manager-card p,
+  .admin-card p,
+  .admin-card small,
+  .admin-list,
+  .admin-form label,
+  .admin-form input,
+  .admin-form select,
+  .admin-form textarea,
+  .primary-btn,
+  .ghost-btn,
+  .admin-control-link,
+  .admin-control-btn,
+  .piece-meta,
+  .piece-badges,
+  .payment-item {
+    font-size: 0.95rem !important;
+  }
+
+  .piece-card h4,
+  .payment-item h4,
+  .admin-list h4 {
+    font-size: 1.2rem !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-control-bar {
+    position: static;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .admin-control-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .admin-top-status {
+    white-space: normal;
+  }
+}
+/* V18G admin control bar polish + desktop density tune END */
+
+
+/* V18H admin bell alignment + hidden zero badge */
+.admin-control-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.promo-request-bell,
+.promo-request-bell.icon-only {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 52px;
+  min-width: 52px;
+  height: 52px;
+  min-height: 52px;
+  padding: 0;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.promo-request-bell .bell-icon,
+.promo-request-bell.icon-only .bell-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.08rem;
+  line-height: 1;
+}
+
+#promoRequestBellCount {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  background: #fff4fb;
+  color: #231523;
+  box-shadow: 0 0 0 2px rgba(30, 16, 34, 0.95);
+}
+
+#promoRequestBellCount.has-count {
+  display: inline-flex;
+}
+/* V18H admin bell alignment + hidden zero badge END */
+
+
