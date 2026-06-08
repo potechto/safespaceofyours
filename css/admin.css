@@ -2159,3 +2159,21 @@ button:disabled,
 }
 /* V18P hide private controls before login END */
 
+
+/* V18R admin piece label dropdown */
+@media (min-width: 921px) {
+  .piece-control-fields {
+    grid-template-columns:
+      minmax(88px, 0.7fr)
+      minmax(130px, 0.95fr)
+      minmax(120px, 0.85fr)
+      minmax(120px, 0.8fr)
+      minmax(135px, 0.85fr) !important;
+  }
+
+  .piece-actions {
+    grid-column: 1 / -1;
+  }
+}
+/* V18R admin piece label dropdown END */
+

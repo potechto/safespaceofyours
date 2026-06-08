@@ -114,6 +114,37 @@ function escapeAdminHTML(value) {
 }
 
 
+
+const ADMIN_CONTENT_LABEL_OPTIONS = [
+  { value: "spoken-poetry", label: "Spoken Poetry" },
+  { value: "motivational", label: "Motivational" },
+  { value: "story", label: "Story" }
+];
+
+function normalizeAdminContentLabel(value) {
+  const raw = String(value || "").trim().toLowerCase().replace(/\s+/g, "-");
+  if (raw === "story") return "story";
+  if (raw === "motivational") return "motivational";
+  return "spoken-poetry";
+}
+
+function formatAdminContentLabel(value) {
+  const normalized = normalizeAdminContentLabel(value);
+  const option = ADMIN_CONTENT_LABEL_OPTIONS.find(item => item.value === normalized);
+  return option ? option.label : "Spoken Poetry";
+}
+
+function renderAdminContentLabelOptions(currentValue) {
+  const current = normalizeAdminContentLabel(currentValue);
+
+  return ADMIN_CONTENT_LABEL_OPTIONS.map(option => `
+    <option value="${escapeAdminHTML(option.value)}" ${option.value === current ? "selected" : ""}>
+      ${escapeAdminHTML(option.label)}
+    </option>
+  `).join("");
+}
+
+
 function normalizeAdminAccess(value) {
   if (window.SafePieceSettings) return window.SafePieceSettings.normalizeAccess(value);
   return String(value || "free").toLowerCase() === "paid" ? "paid" : "free";
@@ -625,6 +656,7 @@ function getPieceControlCounts() {
   return latestAdminPieces.reduce(
     (counts, item) => {
       const accessType = normalizeAdminAccess(item.access_type);
+    const contentLabel = normalizeAdminContentLabel(item.content_label || item.type);
       counts.all += 1;
       counts[accessType] += 1;
       return counts;
@@ -701,7 +733,8 @@ function renderPieceSettingsList() {
 
             <div class="piece-meta">
               <span>${escapeAdminHTML(item.category)}</span>
-              <span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
+              
+              <span>${escapeAdminHTML(formatAdminContentLabel(contentLabel))}</span><span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
               <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
               <span>Total ${escapeAdminHTML(formatCharacterCount(totalCharacters))} chars</span>
             </div>
@@ -715,7 +748,14 @@ function renderPieceSettingsList() {
               <input type="checkbox" data-piece-enabled ${item.is_enabled ? "checked" : ""} />
               Enabled
             </span>
-          </label>
+          </label>            <label class="piece-field">
+              <span>Label</span>
+              <select data-piece-label>
+                ${renderAdminContentLabelOptions(contentLabel)}
+              </select>
+            </label>
+
+
 
           <label class="piece-field">
             <span>Access</span>
@@ -758,7 +798,7 @@ async function loadPieceSettings() {
 
   const { data, error } = await adminClient
     .from("piece_settings")
-    .select("slug,title,category,type,is_enabled,access_type,price,preview_mode,preview_char_limit,updated_at")
+    .select("slug,title,category,type,is_enabled,access_type,price,preview_mode,preview_char_limit,updated_at,content_label")
     .order("category", { ascending: true })
     .order("title", { ascending: true });
 
@@ -968,12 +1008,14 @@ document.addEventListener("click", async event => {
       const row = pieceSave.closest("[data-piece-row]");
       const slug = pieceSave.dataset.savePiece;
       const accessType = normalizeAdminAccess(row.querySelector("[data-piece-access]").value);
+      const contentLabel = normalizeAdminContentLabel(row.querySelector("[data-piece-label]")?.value);
       const rawPrice = Number(row.querySelector("[data-piece-price]").value);
       const previewLimit = Number(row.querySelector("[data-piece-preview]").value) || 700;
       const isEnabled = row.querySelector("[data-piece-enabled]").checked;
 
       const payload = {
         is_enabled: isEnabled,
+        content_label: contentLabel,
         access_type: accessType,
         price: accessType === "paid" ? (Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : 49) : null,
         preview_char_limit: Math.max(120, previewLimit)

@@ -24,7 +24,7 @@ window.POEMS = [
   {
     slug: "genesis2214",
     title: "Genesis 22:14",
-    type: "spoken-poetry",
+    type: "motivational",
     access: "free",
     price: null,
     category: "Faith",
@@ -46,7 +46,7 @@ window.POEMS = [
   {
     slug: "isaiah6022",
     title: "Isaiah 60:22",
-    type: "spoken-poetry",
+    type: "motivational",
     access: "free",
     price: null,
     category: "Faith",
@@ -178,7 +178,7 @@ window.POEMS = [
   {
     slug: "psalm375",
     title: "Psalm 37:5",
-    type: "spoken-poetry",
+    type: "motivational",
     access: "free",
     price: null,
     category: "Faith",

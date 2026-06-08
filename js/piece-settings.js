@@ -58,7 +58,7 @@
     try {
       const { data, error } = await client
         .from("piece_settings")
-        .select("slug,title,category,type,is_enabled,access_type,price,preview_mode,preview_char_limit,updated_at");
+        .select("slug,title,category,type,is_enabled,access_type,price,preview_mode,preview_char_limit,updated_at,content_label");
 
       if (error) {
         console.warn("Piece settings unavailable:", error.message || error);
@@ -80,3 +80,61 @@
     loadSettings
   };
 }());
+
+
+/* V18R content label support */
+(function setupSafeContentLabelSupport() {
+  function normalizeContentLabel(value) {
+    const raw = String(value || "").trim().toLowerCase().replace(/\s+/g, "-");
+    if (raw === "story") return "story";
+    if (raw === "motivational") return "motivational";
+    return "spoken-poetry";
+  }
+
+  function mapSettings(settings) {
+    if (Array.isArray(settings)) {
+      return new Map(settings.map(item => [item.slug, item]));
+    }
+
+    if (settings && typeof settings === "object") {
+      return new Map(Object.values(settings).map(item => [item.slug, item]));
+    }
+
+    return new Map();
+  }
+
+  function enhance() {
+    if (!window.SafePieceSettings || window.SafePieceSettings.__contentLabelSupport) return false;
+
+    const originalMerge = window.SafePieceSettings.mergePoemsWithSettings;
+
+    window.SafePieceSettings.normalizeContentLabel = normalizeContentLabel;
+
+    window.SafePieceSettings.mergePoemsWithSettings = function mergePoemsWithContentLabels(poems, settings, options) {
+      const merged = typeof originalMerge === "function"
+        ? originalMerge.call(window.SafePieceSettings, poems, settings, options)
+        : (Array.isArray(poems) ? poems : []);
+
+      const settingsMap = mapSettings(settings);
+
+      return merged.map(poem => {
+        const setting = settingsMap.get(poem.slug) || {};
+        const contentLabel = normalizeContentLabel(setting.content_label || setting.type || poem.type);
+
+        return {
+          ...poem,
+          content_label: contentLabel,
+          type: contentLabel
+        };
+      });
+    };
+
+    window.SafePieceSettings.__contentLabelSupport = true;
+    return true;
+  }
+
+  if (!enhance()) {
+    document.addEventListener("DOMContentLoaded", enhance, { once: true });
+  }
+})();
+
