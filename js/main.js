@@ -722,6 +722,47 @@ function setupSocialModal() {
   }
 
 
+
+  function forceGeneralPaymentContactVisibility() {
+    const isPiecePayment = Boolean(paymentContext.isPiece === true || paymentContext.slug);
+
+    const proofLinks = Array.from(panel.querySelectorAll(`
+      a[href^="mailto:"],
+      a[href*="instagram.com"],
+      a[href*="tiktok.com"],
+      .paid-reader-proof-links,
+      [data-paid-reader-proof-links],
+      .payment-social-links,
+      .proof-social-links,
+      .modal-social-links
+    `));
+
+    proofLinks.forEach(item => {
+      const target =
+        item.closest(".paid-reader-proof-links, [data-paid-reader-proof-links], .payment-social-links, .proof-social-links, .modal-social-links, .contact-card, .social-card, article") ||
+        item;
+
+      target.hidden = !isPiecePayment;
+      target.classList.toggle("is-general-payment-hidden", !isPiecePayment);
+    });
+
+    Array.from(panel.querySelectorAll("section, div")).forEach(section => {
+      if (section === panel || section.classList.contains("social-modal")) return;
+
+      const text = String(section.textContent || "").replace(/\s+/g, " ").trim();
+      const hasProofLinks =
+        text.includes("Email") &&
+        text.includes("Instagram") &&
+        text.includes("TikTok");
+
+      if (!hasProofLinks) return;
+
+      section.hidden = !isPiecePayment;
+      section.classList.toggle("is-general-payment-hidden", !isPiecePayment);
+    });
+  }
+
+
   function syncPaymentModeUI() {
     const isPiecePayment = isPiecePaymentContext();
     const summaryBox = panel.querySelector(".payment-summary-box");
@@ -733,6 +774,7 @@ function setupSocialModal() {
     syncGeneralPaymentCards();
 
     forceGeneralPaymentFieldVisibility();
+    forceGeneralPaymentContactVisibility();
   }
     window.openSafePaymentModal = function openSafePaymentModal(context = {}) {
       openModal("payment", context || {});
@@ -979,6 +1021,7 @@ function setupSocialModal() {
       syncGeneralPaymentCards();
       forceGeneralPaymentFieldVisibility();
       window.setTimeout(forceGeneralPaymentFieldVisibility, 0);
+      window.setTimeout(forceGeneralPaymentContactVisibility, 0);
     }
     if (isPromoCodes) {
       hydratePromoCodesModal();

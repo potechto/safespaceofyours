@@ -980,3 +980,100 @@ if (document.readyState === "loading") {
   }, true);
 })();
 
+
+/* V18T.3 paid reader proof social links */
+(function setupPaidReaderProofSocialLinks() {
+  if (window.__safePaidReaderProofSocialLinksBound) return;
+  window.__safePaidReaderProofSocialLinksBound = true;
+
+  const PAID_READER_PROOF_LINKS = [
+      {
+            "label": "Email",
+            "href": "mailto:ralphjohnsantos01@gmail.com",
+            "icon": "?"
+      },
+      {
+            "label": "Instagram",
+            "href": "https://www.instagram.com/live_xps/",
+            "icon": "?"
+      },
+      {
+            "label": "TikTok",
+            "href": "https://www.tiktok.com/@patatas0111",
+            "icon": "?"
+      }
+];
+
+  function esc(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function normalizeHref(value) {
+    return String(value || "").trim();
+  }
+
+  function ensurePaidReaderProofLinks() {
+    const modal = document.querySelector("#paidReaderPaymentModal");
+    if (!modal || modal.querySelector("[data-paid-reader-proof-links]")) return;
+
+    const usableLinks = PAID_READER_PROOF_LINKS
+      .map(item => ({ ...item, href: normalizeHref(item.href) }))
+      .filter(item => item.href);
+
+    if (!usableLinks.length) return;
+
+    const html = `
+      <section class="paid-reader-proof-links" data-paid-reader-proof-links>
+        <p><strong>Send proof through:</strong></p>
+
+        <div class="paid-reader-proof-link-grid">
+          ${usableLinks.map(item => `
+            <a class="paid-reader-proof-link-card" href="${esc(item.href)}" target="_blank" rel="noopener noreferrer">
+              <span aria-hidden="true">${esc(item.icon || "")}</span>
+              <strong>${esc(item.label)}</strong>
+            </a>
+          `).join("")}
+        </div>
+      </section>
+    `;
+
+    const modalBody = modal.querySelector(".paid-reader-payment-modal");
+    const afterNote = modal.querySelector(".paid-reader-after-note");
+    const methods = modal.querySelector("#paidReaderPaymentMethods");
+
+    if (afterNote) {
+      afterNote.insertAdjacentHTML("afterend", html);
+      return;
+    }
+
+    if (methods) {
+      methods.insertAdjacentHTML("afterend", html);
+      return;
+    }
+
+    modalBody?.insertAdjacentHTML("beforeend", html);
+  }
+
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".paid-reader-shell [data-open-payment]")) return;
+
+    window.setTimeout(ensurePaidReaderProofLinks, 80);
+    window.setTimeout(ensurePaidReaderProofLinks, 350);
+    window.setTimeout(ensurePaidReaderProofLinks, 900);
+  }, true);
+
+  const observer = new MutationObserver(() => {
+    ensurePaidReaderProofLinks();
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+})();
+

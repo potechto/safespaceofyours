@@ -3710,3 +3710,64 @@ section#about {
 }
 /* V18T.2 hide piece-only payment fields on general modal END */
 
+
+/* V18T.3 paid reader proof social links */
+.paid-reader-proof-links {
+  margin-top: 1rem;
+}
+
+.paid-reader-proof-links p {
+  margin: 0 0 0.8rem;
+  color: rgba(255, 244, 251, 0.82);
+}
+
+.paid-reader-proof-link-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.paid-reader-proof-link-card {
+  min-height: 120px;
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 22px;
+  padding: 1rem;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.12), transparent 5rem),
+    rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  text-decoration: none;
+  display: grid;
+  place-items: center;
+  gap: 0.55rem;
+  text-align: center;
+}
+
+.paid-reader-proof-link-card span {
+  width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid rgba(255, 203, 225, 0.28);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--pink);
+  font-size: 1.2rem;
+}
+
+.paid-reader-proof-link-card strong {
+  color: var(--text);
+}
+
+.paid-reader-proof-link-card:hover,
+.paid-reader-proof-link-card:focus-visible {
+  border-color: rgba(255, 203, 225, 0.38);
+  outline: none;
+}
+
+@media (max-width: 700px) {
+  .paid-reader-proof-link-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* V18T.3 paid reader proof social links END */
+
