@@ -3771,3 +3771,35 @@ section#about {
 }
 /* V18T.3 paid reader proof social links END */
 
+
+/* V18U proof/contact icon parity */
+.proof-link-card .contact-card-icon,
+.payment-proof-card .contact-card-icon,
+.social-proof-card .contact-card-icon,
+.proof-link-card-icon .contact-card-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 203, 225, 0.24);
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.10), transparent 4rem),
+    rgba(255, 255, 255, 0.04);
+  color: var(--pink);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.proof-link-card .contact-card-icon i,
+.payment-proof-card .contact-card-icon i,
+.social-proof-card .contact-card-icon i,
+.proof-link-card-icon .contact-card-icon i {
+  font-size: 2rem;
+  line-height: 1;
+}
+/* V18U proof/contact icon parity END */
+
+

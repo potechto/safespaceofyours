@@ -11,6 +11,34 @@ if (year) {
   year.textContent = new Date().getFullYear();
 }
 
+
+function getSharedContactIconMarkup(type = "") {
+  const key = String(type || "").trim().toLowerCase();
+
+  if (key === "email") {
+    return '<span class="contact-card-icon" aria-hidden="true"><i class="fa-solid fa-envelope"></i></span>';
+  }
+
+  if (key === "facebook") {
+    return '<span class="contact-card-icon" aria-hidden="true"><i class="fa-brands fa-facebook-f"></i></span>';
+  }
+
+  if (key === "github") {
+    return '<span class="contact-card-icon" aria-hidden="true"><i class="fa-brands fa-github"></i></span>';
+  }
+
+  if (key === "instagram") {
+    return '<span class="contact-card-icon" aria-hidden="true"><i class="fa-brands fa-instagram"></i></span>';
+  }
+
+  if (key === "tiktok") {
+    return '<span class="contact-card-icon" aria-hidden="true"><i class="fa-brands fa-tiktok"></i></span>';
+  }
+
+  return '<span class="contact-card-icon" aria-hidden="true"><i class="fa-solid fa-link"></i></span>';
+}
+
+
 function escapeHTML(value) {
   return String(value)
     .replaceAll("&", "&amp;")
