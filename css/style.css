@@ -3318,3 +3318,28 @@ header nav button:hover {
 }
 /* V18G viewer desktop density tune END */
 
+
+/* V18L payment promo status clarity */
+#promoStatus {
+  display: block;
+  margin-top: 0.35rem;
+  line-height: 1.35;
+}
+
+#promoStatus[data-state="idle"] {
+  color: var(--muted);
+}
+
+#promoStatus[data-state="checking"] {
+  color: var(--text);
+}
+
+#promoStatus[data-state="success"] {
+  color: #9ff8d8;
+}
+
+#promoStatus[data-state="error"] {
+  color: #ff9ab8;
+}
+/* V18L payment promo status clarity END */
+

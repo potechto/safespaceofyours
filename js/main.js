@@ -628,6 +628,27 @@ function setupSocialModal() {
     };
   }
 
+  function getFriendlyPromoMessage(message) {
+    const raw = String(message || "").trim();
+    const lower = raw.toLowerCase();
+
+    if (!raw) return "Promo code not recognized. You can still pay the base amount.";
+    if (lower.includes("not for") || lower.includes("selected piece")) {
+      return "This promo is not for the selected piece. Please use it only on its matching piece.";
+    }
+    if (lower.includes("used") || lower.includes("left") || lower.includes("limit")) {
+      return "This promo has no uses left. You can still pay the base amount.";
+    }
+    if (lower.includes("disabled") || lower.includes("inactive")) {
+      return "This promo is currently disabled. You can still pay the base amount.";
+    }
+    if (lower.includes("expired")) {
+      return "This promo is already expired. You can still pay the base amount.";
+    }
+
+    return `${raw} You can still pay the base amount.`;
+  }
+
   function formatPromoAppliedMessage(code, result) {
     const discountAmount = Number(result.discount_amount) || 0;
     const qtyLeft = result.qty_left === null || result.qty_left === undefined
@@ -659,10 +680,12 @@ function setupSocialModal() {
       finalAmount.textContent = formatPeso(amount);
 
       if (!code) {
-        promoStatus.textContent = "Optional: enter a promo code if one was given to you.";
+        promoStatus.dataset.state = "idle";
+        promoStatus.textContent = "Optional. Enter a promo code only if one matches this piece.";
         return;
       }
 
+      promoStatus.dataset.state = "checking";
       promoStatus.textContent = "Checking promo code...";
 
       const result = await validatePromoCode(code, amount);
@@ -671,11 +694,13 @@ function setupSocialModal() {
 
       if (!result.ok) {
         finalAmount.textContent = formatPeso(amount);
-        promoStatus.textContent = `${result.message || "Promo code not recognized."} You can still continue with the base amount.`;
+        promoStatus.dataset.state = "error";
+        promoStatus.textContent = getFriendlyPromoMessage(result.message);
         return;
       }
 
       finalAmount.textContent = formatPeso(Number(result.final_amount) || 0);
+      promoStatus.dataset.state = "success";
       promoStatus.textContent = formatPromoAppliedMessage(code, result);
     }
 

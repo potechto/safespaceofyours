@@ -1795,3 +1795,359 @@ button:disabled,
 }
 /* V18J.1 promo request modal visible close button END */
 
+
+/* V18L admin promo/unlock code polish */
+.polished-code-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.7rem 1rem;
+  align-items: center;
+}
+
+.code-copy {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.code-copy strong {
+  overflow-wrap: anywhere;
+}
+
+.copy-code-btn {
+  min-height: 30px;
+  padding: 0.35rem 0.65rem;
+}
+
+.code-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  color: var(--muted);
+}
+
+.code-status-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.code-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.55rem;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
+.code-badge.active,
+.code-badge.not-used {
+  border-color: rgba(126, 240, 199, 0.3);
+  color: #9ff8d8;
+}
+
+.code-badge.disabled,
+.code-badge.used-up {
+  border-color: rgba(255, 127, 164, 0.28);
+  color: #ff9ab8;
+}
+
+.code-badge.used {
+  border-color: rgba(255, 203, 225, 0.24);
+  color: var(--text);
+}
+
+.code-badge.neutral {
+  color: var(--text);
+}
+
+.polished-code-item .code-actions {
+  grid-row: span 2;
+}
+
+@media (max-width: 720px) {
+  .polished-code-item {
+    grid-template-columns: 1fr;
+  }
+
+  .polished-code-item .code-actions {
+    grid-row: auto;
+    justify-content: flex-start;
+  }
+}
+/* V18L admin promo/unlock code polish END */
+
+
+/* V18M.1 admin code card readability repair */
+#promoList .polished-code-grid,
+#unlockList .polished-code-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+#promoList .code-main,
+#unlockList .code-main {
+  gap: 0.58rem;
+}
+
+#promoList .code-header-row,
+#unlockList .code-header-row {
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+}
+
+#promoList .code-title,
+#unlockList .code-title {
+  max-width: 100%;
+  font-size: clamp(1.05rem, 1.6vw, 1.28rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+#promoList .copy-code-btn,
+#unlockList .copy-code-btn {
+  min-width: 70px;
+  min-height: 34px;
+  padding: 0.38rem 0.7rem;
+}
+
+#promoList .code-summary-row,
+#unlockList .code-summary-row {
+  font-size: 0.95rem;
+  line-height: 1.35;
+  gap: 0.35rem;
+}
+
+#promoList .code-status-row,
+#unlockList .code-status-row {
+  margin-top: 0.15rem;
+}
+
+#promoList .code-badge,
+#unlockList .code-badge {
+  min-height: 1.45rem;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.72rem;
+}
+
+#promoList .code-actions,
+#unlockList .code-actions {
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-top: 0.1rem;
+}
+
+#promoList .polished-code-item,
+#unlockList .polished-code-item {
+  padding: 0.95rem;
+}
+
+@media (min-width: 900px) {
+  #promoList .polished-code-grid,
+  #unlockList .polished-code-grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  #promoList .code-actions,
+  #unlockList .code-actions {
+    justify-content: flex-end;
+    align-self: end;
+  }
+}
+/* V18M.1 admin code card readability repair END */
+
+
+/* V18M.2 admin code info popover layout */
+.admin-code-card {
+  position: relative;
+  display: grid;
+  gap: 0.72rem;
+  padding: 1rem;
+}
+
+.admin-code-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.admin-code-identity {
+  min-width: 0;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.admin-code-title {
+  display: block;
+  max-width: 100%;
+  font-size: clamp(1.05rem, 1.55vw, 1.32rem);
+  line-height: 1.02;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-code-info-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.admin-code-info-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(255, 244, 251, 0.16);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.14), transparent 4rem),
+    rgba(255, 255, 255, 0.055);
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.admin-code-info-btn:hover,
+.admin-code-info-btn:focus-visible {
+  border-color: rgba(255, 203, 225, 0.4);
+  outline: none;
+}
+
+.admin-code-popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  display: none;
+  width: min(280px, 72vw);
+  padding: 0.78rem;
+  border: 1px solid rgba(255, 244, 251, 0.16);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.13), transparent 7rem),
+    rgba(31, 23, 35, 0.98);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+}
+
+.admin-code-info-wrap:hover .admin-code-popover,
+.admin-code-info-wrap:focus-within .admin-code-popover,
+.admin-code-card.is-info-open .admin-code-popover {
+  display: grid;
+  gap: 0.48rem;
+}
+
+.admin-code-popover p {
+  margin: 0;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.admin-code-popover span {
+  color: var(--pink);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.admin-code-popover strong {
+  color: var(--text);
+  font-size: 0.86rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.admin-code-card .code-status-row {
+  order: 2;
+  margin: 0;
+}
+
+.admin-code-actions {
+  order: 3;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.admin-code-card .copy-code-btn {
+  width: fit-content;
+  min-width: 74px;
+  min-height: 34px;
+  padding: 0.36rem 0.72rem;
+}
+
+@media (min-width: 880px) {
+  .admin-code-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .admin-code-top,
+  .admin-code-card .code-status-row {
+    grid-column: 1;
+  }
+
+  .admin-code-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-code-popover {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+/* V18M.2 admin code info popover layout END */
+
+
+/* V18M.3 admin code info hover/press behavior */
+.admin-code-info-btn {
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+}
+
+.admin-code-popover {
+  display: none !important;
+}
+
+/* Cursor devices: hover only */
+@media (hover: hover) and (pointer: fine) {
+  .admin-code-info-wrap:hover .admin-code-popover {
+    display: grid !important;
+    gap: 0.48rem;
+  }
+}
+
+/* Touch devices: show only while pressing */
+.admin-code-card.is-touch-peeking .admin-code-popover {
+  display: grid !important;
+  gap: 0.48rem;
+}
+
+/* Prevent old click/focus toggle behavior from keeping it open */
+.admin-code-info-wrap:focus-within .admin-code-popover,
+.admin-code-card.is-info-open .admin-code-popover {
+  display: none !important;
+}
+
+.admin-code-card.is-touch-peeking .admin-code-info-wrap:focus-within .admin-code-popover,
+.admin-code-card.is-touch-peeking.is-info-open .admin-code-popover {
+  display: grid !important;
+}
+/* V18M.3 admin code info hover/press behavior END */
+
