@@ -3702,3 +3702,11 @@ section#about {
 }
 /* V18T copied button feedback END */
 
+
+/* V18T.2 hide piece-only payment fields on general modal */
+.is-general-payment-hidden,
+[hidden].is-general-payment-hidden {
+  display: none !important;
+}
+/* V18T.2 hide piece-only payment fields on general modal END */
+

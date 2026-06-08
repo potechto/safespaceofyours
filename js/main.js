@@ -687,6 +687,41 @@ function setupSocialModal() {
   }
 
 
+
+  function forceGeneralPaymentFieldVisibility() {
+    const isPiecePayment = Boolean(paymentContext.isPiece === true || paymentContext.slug);
+
+    const selectors = [
+      "#paymentAmountInput",
+      "#promoCodeInput",
+      "#paymentFinalAmount",
+      "#promoStatus"
+    ];
+
+    selectors.forEach(selector => {
+      const node = panel.querySelector(selector);
+      if (!node) return;
+
+      const card = node.closest("label, article, .payment-card, .payment-field, .payment-summary-card, .payment-input-card, div");
+      if (!card) return;
+
+      card.hidden = !isPiecePayment;
+      card.classList.toggle("is-general-payment-hidden", !isPiecePayment);
+    });
+
+    const textTargets = ["Amount in PHP", "Promo code", "Final amount", "FINAL AMOUNT"];
+
+    Array.from(panel.querySelectorAll("label, article, div")).forEach(node => {
+      const text = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      const shouldHide = textTargets.some(label => text.startsWith(label));
+      if (!shouldHide) return;
+
+      node.hidden = !isPiecePayment;
+      node.classList.toggle("is-general-payment-hidden", !isPiecePayment);
+    });
+  }
+
+
   function syncPaymentModeUI() {
     const isPiecePayment = isPiecePaymentContext();
     const summaryBox = panel.querySelector(".payment-summary-box");
@@ -696,6 +731,8 @@ function setupSocialModal() {
     if (calculator) calculator.hidden = !isPiecePayment;
 
     syncGeneralPaymentCards();
+
+    forceGeneralPaymentFieldVisibility();
   }
     window.openSafePaymentModal = function openSafePaymentModal(context = {}) {
       openModal("payment", context || {});
@@ -940,6 +977,8 @@ function setupSocialModal() {
       syncPaymentModeUI();
       if (isPiecePaymentContext()) setupPaymentCalculator();
       syncGeneralPaymentCards();
+      forceGeneralPaymentFieldVisibility();
+      window.setTimeout(forceGeneralPaymentFieldVisibility, 0);
     }
     if (isPromoCodes) {
       hydratePromoCodesModal();
@@ -949,7 +988,7 @@ function setupSocialModal() {
 
   function openModal(mode = "connect", context = {}) {
     if (mode === "payment") {
-      const hasPieceContext = Boolean(context.isPiece || context.slug || context.pieceSlug || context.title || context.price);
+      const hasPieceContext = Boolean(context.isPiece === true || context.slug || context.pieceSlug);
       const nextTitle = hasPieceContext
         ? (context.title || "Premium piece unlock")
         : "General support / premium unlock";
