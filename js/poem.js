@@ -173,29 +173,26 @@ function getPreviewText(text, limit) {
 function buildPaidPreview(poem, fullText) {
   const price = Number(poem.price) || 49;
   const previewText = getPreviewText(fullText, poem.preview_char_limit);
-  const previewLimit = Number(poem.preview_char_limit) || 700;
-  const totalChars = String(fullText || "").length;
 
   return `
     <div class="paid-reader-shell">
+      <div class="paid-preview-text">
+        ${formatPoem(previewText)}
+      </div>
+
       <div class="paid-reader-hero">
         <div>
           <p class="eyebrow">Preview only</p>
           <h2>Continue reading the full piece</h2>
           <p>
-            You're reading the opening preview. The rest can be unlocked after manual payment confirmation.
+            You've reached the end of the preview. The full piece can be unlocked after manual payment confirmation.
           </p>
         </div>
 
         <div class="paid-reader-price-card">
           <span>Full access</span>
           <strong>${escapeHTML(formatPeso(price))}</strong>
-          <small>${escapeHTML(previewLimit)} preview chars ? ${escapeHTML(totalChars)} total chars</small>
         </div>
-      </div>
-
-      <div class="paid-preview-text">
-        ${formatPoem(previewText)}
       </div>
 
       <div class="paid-reader-actions">

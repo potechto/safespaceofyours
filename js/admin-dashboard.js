@@ -9,6 +9,46 @@ const pieceControlFilters = document.querySelector("#pieceControlFilters");
 const promoRequestList = document.querySelector("#promoRequestList");
 
 
+function syncAdminControlBarVisibility() {
+  const controlBar = document.querySelector(".admin-control-bar");
+  const dashboard = document.querySelector("#dashboardView");
+
+  if (!controlBar || !dashboard) return;
+
+  const isDashboardVisible = !dashboard.classList.contains("hidden");
+
+  controlBar.classList.toggle("hidden", !isDashboardVisible);
+  controlBar.setAttribute("aria-hidden", isDashboardVisible ? "false" : "true");
+}
+
+function setupAdminControlBarGate() {
+  const dashboard = document.querySelector("#dashboardView");
+  const auth = document.querySelector("#authView");
+
+  syncAdminControlBarVisibility();
+
+  const observer = new MutationObserver(syncAdminControlBarVisibility);
+
+  if (dashboard) {
+    observer.observe(dashboard, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+  }
+
+  if (auth) {
+    observer.observe(auth, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+  }
+
+  window.addEventListener("pageshow", syncAdminControlBarVisibility);
+}
+
+
+
+
 function syncPromoRequestBellBadge() {
   const badge = document.querySelector("#promoRequestBellCount");
   if (!badge) return;
@@ -1077,3 +1117,4 @@ document.addEventListener("contextmenu", event => {
   }
 });
 
+setupAdminControlBarGate();

@@ -2151,3 +2151,11 @@ button:disabled,
 }
 /* V18M.3 admin code info hover/press behavior END */
 
+
+/* V18P hide private controls before login */
+.admin-control-bar.hidden,
+.admin-control-bar[aria-hidden="true"] {
+  display: none !important;
+}
+/* V18P hide private controls before login END */
+
