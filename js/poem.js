@@ -444,10 +444,28 @@ if (document.readyState === "loading") {
 }
 
 
-/* V18S.7 standalone reader payment modal */
+/* V18S.8 standalone reader payment modal */
 (function setupReaderPaymentModal() {
   if (window.__safeReaderPaymentModalBound) return;
   window.__safeReaderPaymentModalBound = true;
+
+  const READER_PAYMENT_FALLBACK_METHODS = [
+      {
+            "name": "GCash",
+            "details": "RA**H JO*N S. - 0976 *** 6958",
+            "image": "Resources/gcash.jpg"
+      },
+      {
+            "name": "PayPal",
+            "details": "ralphjohnsantos5@gmail.com",
+            "image": "Resources/paypal.jpg"
+      },
+      {
+            "name": "Maribank",
+            "details": "RALPH JOHN SANTOS - **** 4853",
+            "image": "Resources/maribank.jpg"
+      }
+];
 
   function readerPaymentEscape(value) {
     return String(value ?? "")
@@ -458,12 +476,34 @@ if (document.readyState === "loading") {
       .replaceAll("'", "&#039;");
   }
 
+  function formatReaderPeso(value) {
+    const amount = Number(value) || 0;
+    return `PHP ${amount.toLocaleString("en-PH", { maximumFractionDigits: 0 })}`;
+  }
+
+  function normalizeReaderImagePath(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+    return raw.replace(/^\.\//, "");
+  }
+
   function getReaderPaymentContext(trigger) {
     return {
       title: trigger.dataset.pieceTitle || "Premium piece unlock",
       price: Number(trigger.dataset.piecePrice || 49) || 49,
       slug: trigger.dataset.pieceSlug || ""
     };
+  }
+
+  function getReaderSupabaseClient() {
+    return (
+      window.safeSupabase ||
+      window.safeSupabaseClient ||
+      window.supabaseClient ||
+      window.SAFE_SUPABASE_CLIENT ||
+      null
+    );
   }
 
   function closeReaderPaymentModal() {
@@ -473,36 +513,11 @@ if (document.readyState === "loading") {
     document.body.classList.remove("modal-open");
   }
 
-  function getReaderPaymentMethodsFallback() {
-    return [
-      {
-        name: "GCash",
-        details: "RA**H JO*N S. - 0976 *** 6958",
-        image: "images/payments/gcash.jpg"
-      },
-      {
-        name: "PayPal",
-        details: "ralphjohnsantos5@gmail.com",
-        image: "images/payments/paypal.jpg"
-      },
-      {
-        name: "Maribank",
-        details: "RALPH JOHN SANTOS - **** 4853",
-        image: "images/payments/maribank.jpg"
-      }
-    ];
-  }
-
   async function loadReaderPaymentMethods() {
-    const fallback = getReaderPaymentMethodsFallback();
+    const fallback = READER_PAYMENT_FALLBACK_METHODS;
 
     try {
-      const client =
-        window.safeSupabase ||
-        window.safeSupabaseClient ||
-        window.supabaseClient ||
-        window.SAFE_SUPABASE_CLIENT ||
-        null;
+      const client = getReaderSupabaseClient();
 
       if (!client || typeof client.from !== "function") {
         return fallback;
@@ -520,11 +535,134 @@ if (document.readyState === "loading") {
 
       return data.map(method => ({
         name: method.name || method.method_name || "Payment method",
-        details: method.details || method.account_details || method.account || method.number || "",
-        image: method.image || method.image_url || method.qr_image || method.qr_url || ""
+        details:
+          method.details ||
+          method.account_details ||
+          method.account ||
+          method.number ||
+          method.description ||
+          "",
+        image:
+          method.image ||
+          method.image_url ||
+          method.qr_image ||
+          method.qr_image_url ||
+          method.qr_url ||
+          ""
       }));
     } catch (error) {
       return fallback;
+    }
+  }
+
+  async function checkReaderPromoCode(code, context) {
+    const rawCode = String(code || "").trim();
+
+    if (!rawCode) {
+      return {
+        ok: false,
+        finalAmount: context.price,
+        message: "Optional: enter a promo code if one was given to you."
+      };
+    }
+
+    try {
+      const client = getReaderSupabaseClient();
+
+      if (!client || typeof client.from !== "function") {
+        return {
+          ok: false,
+          finalAmount: context.price,
+          message: "Promo checking is unavailable here. Include the promo code in your proof if one was given."
+        };
+      }
+
+      const normalizedCode = rawCode.toUpperCase();
+
+      const { data: promo, error } = await client
+        .from("promo_codes")
+        .select("*")
+        .eq("code", normalizedCode)
+        .maybeSingle();
+
+      if (error || !promo) {
+        return {
+          ok: false,
+          finalAmount: context.price,
+          message: "Promo code not recognized. You can still pay the base amount."
+        };
+      }
+
+      if (promo.is_active === false) {
+        return {
+          ok: false,
+          finalAmount: context.price,
+          message: "This promo code is currently disabled."
+        };
+      }
+
+      const limit = Number(promo.usage_limit ?? promo.max_uses ?? promo.total_uses ?? 0);
+      const used = Number(promo.used_count ?? promo.uses_count ?? promo.times_used ?? promo.used ?? 0);
+
+      if (limit > 0 && used >= limit) {
+        return {
+          ok: false,
+          finalAmount: context.price,
+          message: "This promo code has already reached its limit."
+        };
+      }
+
+      if (promo.id && context.slug) {
+        const { data: targets } = await client
+          .from("promo_code_targets")
+          .select("*")
+          .eq("promo_code_id", promo.id);
+
+        if (Array.isArray(targets) && targets.length) {
+          const matchesTarget = targets.some(target => {
+            const targetSlug =
+              target.piece_slug ||
+              target.slug ||
+              target.target_slug ||
+              target.piece ||
+              "";
+
+            return String(targetSlug) === String(context.slug);
+          });
+
+          if (!matchesTarget) {
+            return {
+              ok: false,
+              finalAmount: context.price,
+              message: "This promo code does not match this piece."
+            };
+          }
+        }
+      }
+
+      const discountType = String(promo.discount_type || promo.type || "").toLowerCase();
+      const discountValue = Number(promo.discount_value ?? promo.value ?? 0);
+      let discount = 0;
+
+      if (discountType.includes("percent")) {
+        discount = context.price * (discountValue / 100);
+      } else {
+        discount = discountValue;
+      }
+
+      const finalAmount = Math.max(0, Math.round(context.price - discount));
+
+      return {
+        ok: true,
+        finalAmount,
+        message: `Promo applied. Final amount: ${formatReaderPeso(finalAmount)}.`
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        finalAmount: context.price,
+        message: "Promo code could not be checked. You can still pay the base amount."
+      };
     }
   }
 
@@ -546,20 +684,36 @@ if (document.readyState === "loading") {
           </p>
 
           <div class="payment-selected-box">
-            <span>Selected</span>
+            <span>Selected piece</span>
             <strong>${readerPaymentEscape(context.title)}</strong>
           </div>
 
           <div class="reader-payment-amount-grid">
-            <div class="payment-mini-card">
-              <span>Amount</span>
-              <strong>PHP ${readerPaymentEscape(context.price)}</strong>
-            </div>
+            <label class="payment-mini-card reader-payment-input-card">
+              <span>Amount in PHP</span>
+              <input data-reader-payment-amount type="number" min="0" step="1" value="${readerPaymentEscape(context.price)}" />
+            </label>
 
-            <div class="payment-mini-card">
-              <span>After payment</span>
-              <p>You will receive an unlock code after manual confirmation.</p>
+            <label class="payment-mini-card reader-payment-input-card">
+              <span>Promo code</span>
+              <input data-reader-promo-code type="text" autocomplete="off" placeholder="Optional" />
+              <button class="tiny-btn" type="button" data-reader-apply-promo>Apply</button>
+              <small data-reader-promo-status>Optional: enter a promo code if one was given to you.</small>
+            </label>
+
+            <div class="payment-mini-card reader-final-card">
+              <span>Final amount</span>
+              <strong data-reader-final-amount>${formatReaderPeso(context.price)}</strong>
+              <small>Use this amount for your payment.</small>
             </div>
+          </div>
+
+          <div class="payment-mini-card reader-receipt-note">
+            <span>Receipt note</span>
+            <p>
+              Please include this title in your screenshot/proof:
+              <strong>${readerPaymentEscape(context.title)}</strong>
+            </p>
           </div>
 
           <div id="readerPaymentMethods" class="payment-method-grid">
@@ -572,6 +726,31 @@ if (document.readyState === "loading") {
     document.body.classList.add("modal-open");
   }
 
+  function updateReaderFinalAmount(amount, message) {
+    const finalAmount = document.querySelector("[data-reader-final-amount]");
+    const status = document.querySelector("[data-reader-promo-status]");
+
+    if (finalAmount) finalAmount.textContent = formatReaderPeso(amount);
+    if (status && message) status.textContent = message;
+  }
+
+  async function applyReaderPromo() {
+    const modal = document.querySelector("#readerPaymentModal");
+    if (!modal || !modal.__readerPaymentContext) return;
+
+    const context = modal.__readerPaymentContext;
+    const amountInput = modal.querySelector("[data-reader-payment-amount]");
+    const promoInput = modal.querySelector("[data-reader-promo-code]");
+    const status = modal.querySelector("[data-reader-promo-status]");
+
+    context.price = Number(amountInput?.value || context.price) || context.price;
+
+    if (status) status.textContent = "Checking promo code...";
+
+    const result = await checkReaderPromoCode(promoInput?.value || "", context);
+    updateReaderFinalAmount(result.finalAmount, result.message);
+  }
+
   function renderReaderPaymentMethods(methods) {
     const target = document.querySelector("#readerPaymentMethods");
     if (!target) return;
@@ -581,22 +760,33 @@ if (document.readyState === "loading") {
       return;
     }
 
-    target.innerHTML = methods.map(method => `
-      <article class="payment-method-card">
-        ${method.image ? `
-          <button class="payment-qr-button" type="button" data-reader-qr="${readerPaymentEscape(method.image)}" data-reader-qr-name="${readerPaymentEscape(method.name)}">
-            <img src="${readerPaymentEscape(method.image)}" alt="${readerPaymentEscape(method.name)} QR code" loading="lazy" />
-          </button>
-          <p class="qr-hint">Click QR to enlarge</p>
-        ` : ""}
-        <h3>${readerPaymentEscape(method.name)}</h3>
-        ${method.details ? `<p>${readerPaymentEscape(method.details)}</p>` : ""}
-      </article>
-    `).join("");
+    target.innerHTML = methods.map(method => {
+      const image = normalizeReaderImagePath(method.image);
+
+      return `
+        <article class="payment-method-card">
+          ${image ? `
+            <button class="payment-qr-button" type="button" data-reader-qr="${readerPaymentEscape(image)}" data-reader-qr-name="${readerPaymentEscape(method.name)}">
+              <img src="${readerPaymentEscape(image)}" alt="${readerPaymentEscape(method.name)} QR code" loading="lazy" onerror="this.closest('.payment-qr-button')?.classList.add('is-broken-qr'); this.remove();" />
+              <span class="broken-qr-note">QR image unavailable</span>
+            </button>
+            <p class="qr-hint">Click QR to enlarge</p>
+          ` : `<p class="qr-hint">QR image unavailable</p>`}
+          <h3>${readerPaymentEscape(method.name)}</h3>
+          ${method.details ? `<p>${readerPaymentEscape(method.details)}</p>` : ""}
+        </article>
+      `;
+    }).join("");
   }
 
   async function openReaderPaymentModal(context) {
     renderReaderPaymentModalShell(context);
+    const modal = document.querySelector("#readerPaymentModal");
+
+    if (modal) {
+      modal.__readerPaymentContext = { ...context };
+    }
+
     const methods = await loadReaderPaymentMethods();
     renderReaderPaymentMethods(methods);
   }
@@ -608,16 +798,20 @@ if (document.readyState === "loading") {
       return;
     }
 
+    const applyPromo = event.target.closest("[data-reader-apply-promo]");
+    if (applyPromo) {
+      event.preventDefault();
+      applyReaderPromo();
+      return;
+    }
+
     const qrButton = event.target.closest("[data-reader-qr]");
-    if (qrButton) {
+    if (qrButton && !qrButton.classList.contains("is-broken-qr")) {
       const image = qrButton.dataset.readerQr || "";
       const name = qrButton.dataset.readerQrName || "Payment QR";
       if (!image) return;
 
-      const target = document.querySelector("#readerPaymentMethods");
-      if (!target) return;
-
-      target.insertAdjacentHTML("beforeend", `
+      document.body.insertAdjacentHTML("beforeend", `
         <div class="reader-qr-preview" data-reader-qr-preview>
           <button class="modal-close reader-qr-close" type="button" data-reader-qr-close aria-label="Close enlarged QR">
             <span aria-hidden="true">X</span>
@@ -641,8 +835,21 @@ if (document.readyState === "loading") {
     openReaderPaymentModal(getReaderPaymentContext(trigger));
   }, true);
 
+  document.addEventListener("input", event => {
+    if (event.target.matches("[data-reader-payment-amount]")) {
+      const amount = Number(event.target.value || 0) || 0;
+      updateReaderFinalAmount(amount, "Optional: enter a promo code if one was given to you.");
+    }
+  });
+
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
+      const qrPreview = document.querySelector("[data-reader-qr-preview]");
+      if (qrPreview) {
+        qrPreview.remove();
+        return;
+      }
+
       closeReaderPaymentModal();
     }
   });

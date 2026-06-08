@@ -3586,7 +3586,7 @@ section#about {
 /* V18S.2 general payment hides piece-only calculator cards END */
 
 
-/* V18S.7 standalone reader payment modal */
+/* V18S.8 standalone reader payment modal */
 .reader-payment-modal .payment-selected-box,
 .reader-payment-modal .payment-mini-card {
   border: 1px solid rgba(255, 244, 251, 0.14);
@@ -3612,14 +3612,48 @@ section#about {
 .reader-payment-modal .payment-selected-box strong,
 .reader-payment-modal .payment-mini-card strong {
   color: var(--text);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
 }
 
 .reader-payment-amount-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.65fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 0.9fr);
   gap: 0.8rem;
   margin-bottom: 1rem;
+}
+
+.reader-payment-input-card {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.reader-payment-input-card input {
+  width: 100%;
+  border: 1px solid rgba(255, 244, 251, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text);
+  padding: 0.85rem 1rem;
+  font: inherit;
+}
+
+.reader-payment-input-card .tiny-btn {
+  width: fit-content;
+  min-width: 86px;
+}
+
+.reader-final-card {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+}
+
+.reader-receipt-note {
+  margin-bottom: 1rem;
+}
+
+.reader-receipt-note p {
+  margin: 0.35rem 0 0;
 }
 
 .reader-payment-modal .payment-method-grid {
@@ -3628,6 +3662,24 @@ section#about {
 
 .reader-payment-modal .payment-method-card {
   position: relative;
+}
+
+.reader-payment-modal .payment-qr-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.reader-payment-modal .payment-qr-button .broken-qr-note {
+  display: none;
+  padding: 2rem 1rem;
+  color: rgba(255, 244, 251, 0.68);
+  text-align: center;
+}
+
+.reader-payment-modal .payment-qr-button.is-broken-qr .broken-qr-note {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
 }
 
 .reader-qr-preview {
@@ -3654,10 +3706,10 @@ section#about {
   right: 1.25rem;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 860px) {
   .reader-payment-amount-grid {
     grid-template-columns: 1fr;
   }
 }
-/* V18S.7 standalone reader payment modal END */
+/* V18S.8 standalone reader payment modal END */
 
