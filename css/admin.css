@@ -303,7 +303,6 @@ p {
   }
 }
 
-
 /* ===============================
    Admin V15.1 compact centered polish
    =============================== */
@@ -1436,7 +1435,6 @@ button:disabled,
 }
 /* V18G admin control bar polish + desktop density tune END */
 
-
 /* V18H admin bell alignment + hidden zero badge */
 .admin-control-actions {
   display: inline-flex;
@@ -1493,7 +1491,6 @@ button:disabled,
 }
 /* V18H admin bell alignment + hidden zero badge END */
 
-
 /* V18I admin nav non-sticky and bell alignment */
 .admin-control-bar {
   position: static !important;
@@ -1536,7 +1533,6 @@ button:disabled,
   right: -3px !important;
 }
 /* V18I admin nav non-sticky and bell alignment END */
-
 
 /* V18I.1 exact admin bell alignment */
 .admin-control-actions {
@@ -1592,4 +1588,210 @@ button:disabled,
 }
 /* V18I.1 exact admin bell alignment END */
 
+/* V18J promo request modal polish */
+.promo-request-modal-card {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.admin-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border-bottom: 1px solid rgba(255, 244, 251, 0.1);
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.12), transparent 12rem),
+    rgba(28, 20, 32, 0.98);
+  backdrop-filter: blur(14px);
+}
+
+.admin-modal-header h2 {
+  margin: 0.15rem 0 0.25rem;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+}
+
+.admin-modal-header .modal-help {
+  margin: 0;
+}
+
+.promo-request-modal-list {
+  max-height: min(64vh, 620px);
+  overflow: auto;
+  padding: clamp(1rem, 3vw, 1.35rem);
+  scrollbar-width: none;
+}
+
+.promo-request-modal-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.promo-request-card {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 225, 0.07), transparent 10rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.promo-request-card.is-unread {
+  border-color: rgba(255, 203, 225, 0.34);
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 225, 0.12), transparent 10rem),
+    rgba(255, 255, 255, 0.055);
+}
+
+.promo-request-card.is-done {
+  opacity: 0.78;
+}
+
+.promo-request-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.promo-request-card-top strong {
+  display: block;
+  font-size: 1.15rem;
+  line-height: 1.05;
+}
+
+.promo-request-card-top small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted);
+}
+
+.promo-request-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.request-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.55rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.request-badge.unread,
+.request-badge.pending {
+  border-color: rgba(255, 203, 225, 0.28);
+  color: var(--text);
+}
+
+.request-badge.done,
+.request-badge.read {
+  opacity: 0.75;
+}
+
+.promo-request-details {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 244, 251, 0.08);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.promo-request-details p {
+  margin: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.promo-request-details span {
+  display: inline-block;
+  min-width: 4.6rem;
+  margin-right: 0.5rem;
+  color: var(--pink);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.promo-request-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.promo-request-empty {
+  padding: 1rem;
+  border: 1px dashed rgba(255, 244, 251, 0.14);
+  border-radius: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .promo-request-card-top {
+    display: grid;
+  }
+
+  .promo-request-badges,
+  .promo-request-actions {
+    justify-content: flex-start;
+  }
+
+  .promo-request-details span {
+    display: block;
+    margin: 0 0 0.15rem;
+  }
+}
+/* V18J promo request modal polish END */
+
+/* V18J.1 promo request modal visible close button */
+.promo-request-modal-card {
+  position: relative;
+}
+
+.promo-request-modal-card .admin-modal-close {
+  position: absolute !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 12 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.55rem !important;
+  height: 2.55rem !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.24) !important;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.18), transparent 4rem),
+    rgba(255, 255, 255, 0.08) !important;
+  color: var(--text) !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.promo-request-modal-card .admin-modal-close:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 203, 225, 0.42) !important;
+}
+
+.promo-request-modal-card .admin-modal-header {
+  padding-right: clamp(4rem, 8vw, 5rem) !important;
+}
+/* V18J.1 promo request modal visible close button END */
 

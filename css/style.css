@@ -2045,7 +2045,6 @@ button.btn {
   }
 }
 
-
 /* ===============================
    V12 public monetization UI
    =============================== */
@@ -2312,7 +2311,6 @@ button.btn {
 /* V12 END
 */
 
-
 /* ===============================
    V12.1 clean modal improvements
    =============================== */
@@ -2399,9 +2397,6 @@ button.btn {
 /* V12.1 END
 */
 
-
-
-
 /* ===============================
    V12.2 modal close/about nav fix
    =============================== */
@@ -2428,9 +2423,6 @@ nav a[href="#about"] {
 
 /* V12.2 END
 */
-
-
-
 
 /* ===============================
    V12.3 admin gate nav
@@ -2501,7 +2493,6 @@ nav a[href="#about"] {
 
 /* V12.3 END
 */
-
 
 /* ===============================
    V12.4 uniform nav buttons
@@ -2647,7 +2638,6 @@ nav a:focus-visible,
 /* V12.6 END
 */
 
-
 /* ===============================
    V15.10 social icon cards
    =============================== */
@@ -2705,7 +2695,6 @@ nav a:focus-visible,
 
 /* V15.10 END
 */
-
 
 /* ===============================
    V15.11 branded social platform cards
@@ -2771,7 +2760,6 @@ nav a:focus-visible,
 /* V15.11 END
 */
 
-
 /* ===============================
    V15.12 scroll top arrow fix
    =============================== */
@@ -2797,7 +2785,6 @@ nav a:focus-visible,
 
 /* V15.12 END
 */
-
 
 /* ===============================
    V15.13 forced visible symbol fix
@@ -2831,7 +2818,6 @@ nav a:focus-visible,
 
 /* V15.13 END
 */
-
 
 /* ===============================
    V15.14 final symbol force fix
@@ -3273,7 +3259,6 @@ header nav button:hover {
 }
 /* V18C.3 promo request cooldown END */
 
-
 /* V18G viewer desktop density tune */
 @media (min-width: 1024px) {
   body {
@@ -3332,5 +3317,4 @@ header nav button:hover {
   }
 }
 /* V18G viewer desktop density tune END */
-
 
