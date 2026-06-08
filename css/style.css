@@ -3586,48 +3586,48 @@ section#about {
 /* V18S.2 general payment hides piece-only calculator cards END */
 
 
-/* V18S.8 standalone reader payment modal */
-.reader-payment-modal .payment-selected-box,
-.reader-payment-modal .payment-mini-card {
+/* V18S.9 paid reader payment modal */
+.paid-reader-payment-modal .payment-selected-box,
+.paid-reader-payment-modal .payment-mini-card {
   border: 1px solid rgba(255, 244, 251, 0.14);
   border-radius: 22px;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.035);
 }
 
-.reader-payment-modal .payment-selected-box {
+.paid-reader-payment-modal .payment-selected-box {
   display: grid;
   gap: 0.25rem;
   margin: 1rem 0;
 }
 
-.reader-payment-modal .payment-selected-box span,
-.reader-payment-modal .payment-mini-card span {
+.paid-reader-payment-modal .payment-selected-box span,
+.paid-reader-payment-modal .payment-mini-card span {
   color: var(--pink);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.8rem;
 }
 
-.reader-payment-modal .payment-selected-box strong,
-.reader-payment-modal .payment-mini-card strong {
+.paid-reader-payment-modal .payment-selected-box strong,
+.paid-reader-payment-modal .payment-mini-card strong {
   color: var(--text);
-  font-size: 1.1rem;
+  font-size: 1.08rem;
 }
 
-.reader-payment-amount-grid {
+.paid-reader-piece-fields {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 0.85fr);
   gap: 0.8rem;
   margin-bottom: 1rem;
 }
 
-.reader-payment-input-card {
+.paid-reader-promo-card {
   display: grid;
   gap: 0.55rem;
 }
 
-.reader-payment-input-card input {
+.paid-reader-promo-card input {
   width: 100%;
   border: 1px solid rgba(255, 244, 251, 0.16);
   border-radius: 999px;
@@ -3637,49 +3637,30 @@ section#about {
   font: inherit;
 }
 
-.reader-payment-input-card .tiny-btn {
+.paid-reader-promo-card .tiny-btn {
   width: fit-content;
   min-width: 86px;
 }
 
-.reader-final-card {
-  display: grid;
-  align-content: start;
-  gap: 0.5rem;
-}
-
-.reader-receipt-note {
+.paid-reader-proof-note {
   margin-bottom: 1rem;
 }
 
-.reader-receipt-note p {
-  margin: 0.35rem 0 0;
+.paid-reader-proof-note p,
+.paid-reader-after-note {
+  margin: 0.5rem 0 0;
 }
 
-.reader-payment-modal .payment-method-grid {
+.paid-reader-payment-modal .payment-method-grid {
   margin-top: 1rem;
 }
 
-.reader-payment-modal .payment-method-card {
+.paid-reader-payment-modal .payment-method-card {
   position: relative;
 }
 
-.reader-payment-modal .payment-qr-button {
-  position: relative;
-  overflow: hidden;
-}
-
-.reader-payment-modal .payment-qr-button .broken-qr-note {
-  display: none;
-  padding: 2rem 1rem;
-  color: rgba(255, 244, 251, 0.68);
-  text-align: center;
-}
-
-.reader-payment-modal .payment-qr-button.is-broken-qr .broken-qr-note {
-  display: grid;
-  min-height: 180px;
-  place-items: center;
+.paid-reader-payment-modal .payment-method-card:not(:has(.payment-qr-button)) {
+  padding-top: 1.2rem;
 }
 
 .reader-qr-preview {
@@ -3707,9 +3688,9 @@ section#about {
 }
 
 @media (max-width: 860px) {
-  .reader-payment-amount-grid {
+  .paid-reader-piece-fields {
     grid-template-columns: 1fr;
   }
 }
-/* V18S.8 standalone reader payment modal END */
+/* V18S.9 paid reader payment modal END */
 
