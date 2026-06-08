@@ -2308,3 +2308,41 @@ button:disabled,
 /* V18R.4 balanced compact admin piece control layout END */
 
 
+/* V18R.5 admin piece action buttons one-row */
+#piecesControlCard .piece-actions {
+  grid-column: 2 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(112px, 1fr)) !important;
+  gap: 0.55rem !important;
+  width: min(100%, 500px) !important;
+  max-width: 100% !important;
+  justify-self: start !important;
+  align-items: center !important;
+}
+
+#piecesControlCard .piece-actions .tiny-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  min-height: 40px !important;
+}
+
+/* when controls stack below the info, still keep buttons one row */
+@media (max-width: 1100px) {
+  #piecesControlCard .piece-actions {
+    grid-column: 1 !important;
+    width: min(100%, 520px) !important;
+    grid-template-columns: repeat(3, minmax(100px, 1fr)) !important;
+  }
+}
+
+/* tiny mobile only: allow stacking to avoid ugly squeeze */
+@media (max-width: 460px) {
+  #piecesControlCard .piece-actions {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+}
+/* V18R.5 admin piece action buttons one-row END */
+
+
