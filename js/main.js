@@ -661,6 +661,32 @@ function setupSocialModal() {
     return Boolean(paymentContext.isPiece || paymentContext.slug);
   }
 
+
+  function syncGeneralPaymentCards() {
+    const isPiecePayment = Boolean(paymentContext.isPiece || paymentContext.slug);
+    const paymentCards = Array.from(panel.querySelectorAll("label, article, div"));
+
+    const hiddenLabels = [
+      "Amount in PHP",
+      "Promo code",
+      "FINAL AMOUNT"
+    ];
+
+    paymentCards.forEach(node => {
+      const text = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      const shouldTarget = hiddenLabels.some(label => text.startsWith(label));
+
+      if (!shouldTarget) return;
+
+      const card = node.closest(".payment-card, .payment-field, .payment-summary-card, .payment-input-card, article, label, div");
+      if (!card) return;
+
+      card.hidden = !isPiecePayment;
+      card.classList.toggle("is-general-payment-hidden", !isPiecePayment);
+    });
+  }
+
+
   function syncPaymentModeUI() {
     const isPiecePayment = isPiecePaymentContext();
     const summaryBox = panel.querySelector(".payment-summary-box");
@@ -668,6 +694,8 @@ function setupSocialModal() {
 
     if (summaryBox) summaryBox.hidden = !isPiecePayment;
     if (calculator) calculator.hidden = !isPiecePayment;
+
+    syncGeneralPaymentCards();
   }
 
   function setupPaymentCalculator() {
@@ -899,6 +927,7 @@ function setupSocialModal() {
     if (isPayment) {
       syncPaymentModeUI();
       if (isPiecePaymentContext()) setupPaymentCalculator();
+      syncGeneralPaymentCards();
     }
     if (isPromoCodes) {
       hydratePromoCodesModal();

@@ -3577,3 +3577,11 @@ section#about {
 }
 /* V18Q mobile reader navigation polish END */
 
+
+/* V18S.2 general payment hides piece-only calculator cards */
+.is-general-payment-hidden,
+[hidden].is-general-payment-hidden {
+  display: none !important;
+}
+/* V18S.2 general payment hides piece-only calculator cards END */
+
