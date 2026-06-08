@@ -120,9 +120,13 @@
     <div class="admin-modal-card promo-request-modal-card" role="dialog" aria-modal="true" aria-labelledby="promoRequestModalTitle">
       <button id="closePromoRequestModal" class="admin-modal-close" type="button" aria-label="Close promo requests">X</button>
 
-      <p class="eyebrow">Viewer requests</p>
-      <h2 id="promoRequestModalTitle">Promo requests</h2>
-      <p class="modal-help">Unread requests appear in the bell badge. Mark a request as read, unread, done, or delete it.</p>
+      <div class="admin-modal-header">
+        <div>
+          <p class="eyebrow">Viewer requests</p>
+          <h2 id="promoRequestModalTitle">Promo requests</h2>
+          <p class="modal-help">Unread pending requests appear on the bell badge.</p>
+        </div>
+      </div>
 
       <div id="promoRequestList" class="admin-list promo-request-modal-list"></div>
     </div>

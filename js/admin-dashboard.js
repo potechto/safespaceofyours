@@ -359,26 +359,35 @@ function renderPromoRequestItem(item) {
   const status = item.status || "pending";
   const isRead = item.is_read === true;
   const readLabel = isRead ? "Read" : "Unread";
+  const statusLabel = status === "done" ? "Done" : "Pending";
+  const contact = item.requester_contact || "No contact provided";
+  const note = item.note || "No note provided";
 
   return `
-    <article class="code-list-item promo-request-item ${isRead ? "is-read" : "is-unread"}">
-      <div>
-        <strong>${escapeAdminHTML(item.piece_title || item.piece_slug)}</strong>
-        <small>
-          ${escapeAdminHTML(status)}
-          &bull; ${escapeAdminHTML(readLabel)}
-          &bull; ${escapeAdminHTML(formatAdminDate(item.created_at))}
-        </small>
-        <small>Slug: ${escapeAdminHTML(item.piece_slug || "")}</small>
-        ${item.requester_contact ? `<small>Contact: ${escapeAdminHTML(item.requester_contact)}</small>` : ""}
-        ${item.note ? `<small>Note: ${escapeAdminHTML(item.note)}</small>` : ""}
+    <article class="promo-request-card ${isRead ? "is-read" : "is-unread"} ${status === "done" ? "is-done" : "is-pending"}">
+      <div class="promo-request-card-top">
+        <div>
+          <strong>${escapeAdminHTML(item.piece_title || item.piece_slug)}</strong>
+          <small>${escapeAdminHTML(formatAdminDate(item.created_at))}</small>
+        </div>
+
+        <div class="promo-request-badges">
+          <span class="request-badge ${status === "done" ? "done" : "pending"}">${escapeAdminHTML(statusLabel)}</span>
+          <span class="request-badge ${isRead ? "read" : "unread"}">${escapeAdminHTML(readLabel)}</span>
+        </div>
       </div>
 
-      <div class="item-actions code-actions">
+      <div class="promo-request-details">
+        <p><span>Slug</span>${escapeAdminHTML(item.piece_slug || "")}</p>
+        <p><span>Contact</span>${escapeAdminHTML(contact)}</p>
+        <p><span>Note</span>${escapeAdminHTML(note)}</p>
+      </div>
+
+      <div class="promo-request-actions">
         <button class="tiny-btn" type="button" data-toggle-promo-request-read="${escapeAdminHTML(item.id)}" data-current-read="${isRead ? "true" : "false"}">
           ${isRead ? "Mark unread" : "Mark read"}
         </button>
-        ${status === "pending" ? `<button class="tiny-btn" type="button" data-complete-promo-request="${escapeAdminHTML(item.id)}">Mark done</button>` : ""}
+        ${status === "pending" ? `<button class="tiny-btn primary-tiny" type="button" data-complete-promo-request="${escapeAdminHTML(item.id)}">Mark done</button>` : ""}
         <button class="tiny-btn danger" type="button" data-delete-promo-request="${escapeAdminHTML(item.id)}">Delete</button>
       </div>
     </article>
@@ -395,7 +404,7 @@ async function loadPromoRequests() {
     .limit(40);
 
   if (error) {
-    promoRequestList.innerHTML = `<div class="list-item"><div><small>Promo requests could not be loaded.</small></div></div>`;
+    promoRequestList.innerHTML = `<div class="promo-request-empty">Promo requests could not be loaded.</div>`;
     throw error;
   }
 
@@ -403,7 +412,7 @@ async function loadPromoRequests() {
 
   promoRequestList.innerHTML = data && data.length
     ? data.map(renderPromoRequestItem).join("")
-    : `<div class="list-item"><div><small>No promo requests yet.</small></div></div>`;
+    : `<div class="promo-request-empty">No promo requests yet.</div>`;
 }
 
 
@@ -796,7 +805,7 @@ document.addEventListener("click", async event => {
 
       const { error } = await adminClient
         .from("promo_requests")
-        .update({ status: "done" })
+        .update({ status: "done", is_read: true })
         .eq("id", requestId);
 
       if (error) throw error;
