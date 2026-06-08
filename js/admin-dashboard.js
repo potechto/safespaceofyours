@@ -13,7 +13,7 @@ function setDashboardMessage(message, type = "") {
 }
 
 function escapeAdminHTML(value) {
-  return String(value ? "")
+  return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
