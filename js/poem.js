@@ -444,3 +444,207 @@ if (document.readyState === "loading") {
 }
 
 
+/* V18S.7 standalone reader payment modal */
+(function setupReaderPaymentModal() {
+  if (window.__safeReaderPaymentModalBound) return;
+  window.__safeReaderPaymentModalBound = true;
+
+  function readerPaymentEscape(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function getReaderPaymentContext(trigger) {
+    return {
+      title: trigger.dataset.pieceTitle || "Premium piece unlock",
+      price: Number(trigger.dataset.piecePrice || 49) || 49,
+      slug: trigger.dataset.pieceSlug || ""
+    };
+  }
+
+  function closeReaderPaymentModal() {
+    const modal = document.querySelector("#readerPaymentModal");
+    if (!modal) return;
+    modal.remove();
+    document.body.classList.remove("modal-open");
+  }
+
+  function getReaderPaymentMethodsFallback() {
+    return [
+      {
+        name: "GCash",
+        details: "RA**H JO*N S. - 0976 *** 6958",
+        image: "images/payments/gcash.jpg"
+      },
+      {
+        name: "PayPal",
+        details: "ralphjohnsantos5@gmail.com",
+        image: "images/payments/paypal.jpg"
+      },
+      {
+        name: "Maribank",
+        details: "RALPH JOHN SANTOS - **** 4853",
+        image: "images/payments/maribank.jpg"
+      }
+    ];
+  }
+
+  async function loadReaderPaymentMethods() {
+    const fallback = getReaderPaymentMethodsFallback();
+
+    try {
+      const client =
+        window.safeSupabase ||
+        window.safeSupabaseClient ||
+        window.supabaseClient ||
+        window.SAFE_SUPABASE_CLIENT ||
+        null;
+
+      if (!client || typeof client.from !== "function") {
+        return fallback;
+      }
+
+      const { data, error } = await client
+        .from("payment_methods")
+        .select("*")
+        .eq("is_visible", true)
+        .order("created_at", { ascending: true });
+
+      if (error || !Array.isArray(data) || !data.length) {
+        return fallback;
+      }
+
+      return data.map(method => ({
+        name: method.name || method.method_name || "Payment method",
+        details: method.details || method.account_details || method.account || method.number || "",
+        image: method.image || method.image_url || method.qr_image || method.qr_url || ""
+      }));
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function renderReaderPaymentModalShell(context) {
+    const existing = document.querySelector("#readerPaymentModal");
+    if (existing) existing.remove();
+
+    document.body.insertAdjacentHTML("beforeend", `
+      <div id="readerPaymentModal" class="modal-overlay is-open open reader-payment-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="readerPaymentTitle">
+        <div class="social-modal reader-payment-modal">
+          <button class="modal-close" type="button" data-reader-payment-close aria-label="Close payment options">
+            <span aria-hidden="true">X</span>
+          </button>
+
+          <p class="eyebrow">Manual payment</p>
+          <h2 id="readerPaymentTitle">Payment Options</h2>
+          <p class="modal-lede">
+            Use one of the payment options below. After paying, send the screenshot/proof through the contact option.
+          </p>
+
+          <div class="payment-selected-box">
+            <span>Selected</span>
+            <strong>${readerPaymentEscape(context.title)}</strong>
+          </div>
+
+          <div class="reader-payment-amount-grid">
+            <div class="payment-mini-card">
+              <span>Amount</span>
+              <strong>PHP ${readerPaymentEscape(context.price)}</strong>
+            </div>
+
+            <div class="payment-mini-card">
+              <span>After payment</span>
+              <p>You will receive an unlock code after manual confirmation.</p>
+            </div>
+          </div>
+
+          <div id="readerPaymentMethods" class="payment-method-grid">
+            <div class="promo-loading-card">Loading payment options...</div>
+          </div>
+        </div>
+      </div>
+    `);
+
+    document.body.classList.add("modal-open");
+  }
+
+  function renderReaderPaymentMethods(methods) {
+    const target = document.querySelector("#readerPaymentMethods");
+    if (!target) return;
+
+    if (!methods.length) {
+      target.innerHTML = `<div class="promo-loading-card">No payment methods available right now.</div>`;
+      return;
+    }
+
+    target.innerHTML = methods.map(method => `
+      <article class="payment-method-card">
+        ${method.image ? `
+          <button class="payment-qr-button" type="button" data-reader-qr="${readerPaymentEscape(method.image)}" data-reader-qr-name="${readerPaymentEscape(method.name)}">
+            <img src="${readerPaymentEscape(method.image)}" alt="${readerPaymentEscape(method.name)} QR code" loading="lazy" />
+          </button>
+          <p class="qr-hint">Click QR to enlarge</p>
+        ` : ""}
+        <h3>${readerPaymentEscape(method.name)}</h3>
+        ${method.details ? `<p>${readerPaymentEscape(method.details)}</p>` : ""}
+      </article>
+    `).join("");
+  }
+
+  async function openReaderPaymentModal(context) {
+    renderReaderPaymentModalShell(context);
+    const methods = await loadReaderPaymentMethods();
+    renderReaderPaymentMethods(methods);
+  }
+
+  document.addEventListener("click", event => {
+    const close = event.target.closest("[data-reader-payment-close]");
+    if (close) {
+      closeReaderPaymentModal();
+      return;
+    }
+
+    const qrButton = event.target.closest("[data-reader-qr]");
+    if (qrButton) {
+      const image = qrButton.dataset.readerQr || "";
+      const name = qrButton.dataset.readerQrName || "Payment QR";
+      if (!image) return;
+
+      const target = document.querySelector("#readerPaymentMethods");
+      if (!target) return;
+
+      target.insertAdjacentHTML("beforeend", `
+        <div class="reader-qr-preview" data-reader-qr-preview>
+          <button class="modal-close reader-qr-close" type="button" data-reader-qr-close aria-label="Close enlarged QR">
+            <span aria-hidden="true">X</span>
+          </button>
+          <img src="${readerPaymentEscape(image)}" alt="${readerPaymentEscape(name)} enlarged QR code" />
+        </div>
+      `);
+      return;
+    }
+
+    const qrClose = event.target.closest("[data-reader-qr-close]");
+    if (qrClose) {
+      qrClose.closest("[data-reader-qr-preview]")?.remove();
+      return;
+    }
+
+    const trigger = event.target.closest(".paid-reader-shell [data-open-payment]");
+    if (!trigger) return;
+
+    event.preventDefault();
+    openReaderPaymentModal(getReaderPaymentContext(trigger));
+  }, true);
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeReaderPaymentModal();
+    }
+  });
+})();
+

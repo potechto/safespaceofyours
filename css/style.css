@@ -3585,3 +3585,79 @@ section#about {
 }
 /* V18S.2 general payment hides piece-only calculator cards END */
 
+
+/* V18S.7 standalone reader payment modal */
+.reader-payment-modal .payment-selected-box,
+.reader-payment-modal .payment-mini-card {
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 22px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.reader-payment-modal .payment-selected-box {
+  display: grid;
+  gap: 0.25rem;
+  margin: 1rem 0;
+}
+
+.reader-payment-modal .payment-selected-box span,
+.reader-payment-modal .payment-mini-card span {
+  color: var(--pink);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.reader-payment-modal .payment-selected-box strong,
+.reader-payment-modal .payment-mini-card strong {
+  color: var(--text);
+  font-size: 1.15rem;
+}
+
+.reader-payment-amount-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.65fr) minmax(0, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.reader-payment-modal .payment-method-grid {
+  margin-top: 1rem;
+}
+
+.reader-payment-modal .payment-method-card {
+  position: relative;
+}
+
+.reader-qr-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(8, 5, 10, 0.84);
+  backdrop-filter: blur(10px);
+}
+
+.reader-qr-preview img {
+  max-width: min(86vw, 520px);
+  max-height: 82vh;
+  border-radius: 22px;
+  background: #fff;
+}
+
+.reader-qr-close {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+@media (max-width: 680px) {
+  .reader-payment-amount-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* V18S.7 standalone reader payment modal END */
+
