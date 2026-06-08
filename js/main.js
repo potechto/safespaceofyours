@@ -697,15 +697,6 @@ function setupSocialModal() {
 
     syncGeneralPaymentCards();
   }
-        : {
-            isPiece: false
-          }
-      );
-    }, true);
-  }
-
-
-
     window.openSafePaymentModal = function openSafePaymentModal(context = {}) {
       openModal("payment", context || {});
     };
