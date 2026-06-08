@@ -3008,3 +3008,81 @@ nav a:focus-visible,
 }
 /* V17 reader unlock-code panel END */
 
+/* V18B public promo codes modal */
+.public-promo-list {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.2rem 0;
+  max-height: min(52vh, 520px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.public-promo-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.public-promo-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid rgba(255, 244, 251, 0.13);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.08), transparent 8rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.public-promo-card h3 {
+  margin: 0.2rem 0;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  letter-spacing: 0.08em;
+}
+
+.public-promo-card p,
+.public-promo-card small {
+  display: block;
+  margin: 0.18rem 0;
+}
+
+.public-promo-card small {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+}
+
+.public-promo-card.is-disabled {
+  opacity: 0.62;
+}
+
+.promo-copy-btn {
+  min-width: 112px;
+  justify-content: center;
+}
+
+.promo-copy-btn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.promo-loading-card {
+  padding: 1rem;
+  border: 1px dashed rgba(255, 244, 251, 0.15);
+  border-radius: 18px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+}
+
+@media (max-width: 680px) {
+  .public-promo-card {
+    grid-template-columns: 1fr;
+  }
+
+  .promo-copy-btn {
+    width: 100%;
+  }
+}
+/* V18B public promo codes modal END */
+

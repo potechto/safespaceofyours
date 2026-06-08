@@ -161,6 +161,7 @@ function setupScrollTopButton() {
 
 function setupSocialModal() {
   const openConnectBtn = document.querySelector("#openSocialModal");
+  const openPromoCodesBtn = document.querySelector("#openPromoCodesModal");
   const openInquiryBtn = document.querySelector("#openInquiryModal");
   const openAboutBtns = document.querySelectorAll("#openAboutModal, a[href='#about']");
   const modal = document.querySelector("#socialModal");
@@ -313,6 +314,104 @@ function setupSocialModal() {
     `;
   }
 
+  function formatPromoDiscount(type, value) {
+    const numericValue = Number(value) || 0;
+    if (type === "percent") return `${numericValue}% off`;
+    return `${formatPeso(numericValue)} off`;
+  }
+
+  function formatPromoDate(value) {
+    if (!value) return "No date";
+    try {
+      return new Date(value).toLocaleDateString("en-PH", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
+    } catch (error) {
+      return "No date";
+    }
+  }
+
+  function formatPromoTargets(targets) {
+    const list = Array.isArray(targets) ? targets : [];
+    if (!list.length) return "Selected premium pieces";
+
+    return list
+      .map(target => target.title || target.slug)
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  async function loadPublicPromoCodes() {
+    if (!window.safeAdminClient) {
+      return {
+        ok: false,
+        message: "Promo list is not ready. Please refresh the page."
+      };
+    }
+
+    const { data, error } = await window.safeAdminClient.rpc("list_public_promo_codes");
+
+    if (error) {
+      return {
+        ok: false,
+        message: error.message || "Promo codes could not be loaded."
+      };
+    }
+
+    return {
+      ok: true,
+      promos: Array.isArray(data) ? data : []
+    };
+  }
+
+  function createPromoCodeCard(promo) {
+    const qtyLeft = promo.qty_left === null || promo.qty_left === undefined
+      ? "Unlimited"
+      : String(promo.qty_left);
+
+    const isAvailable = promo.status === "Active" && (promo.qty_left === null || Number(promo.qty_left) > 0);
+
+    return `
+      <article class="public-promo-card ${isAvailable ? "is-active" : "is-disabled"}">
+        <div>
+          <p class="eyebrow">${escapeHTML(promo.status || "Promo")}</p>
+          <h3>${escapeHTML(promo.code || "")}</h3>
+          <p>${escapeHTML(formatPromoDiscount(promo.discount_type, promo.discount_value))}</p>
+          <small>For: ${escapeHTML(formatPromoTargets(promo.targets))}</small>
+          <small>Date created: ${escapeHTML(formatPromoDate(promo.created_at))}</small>
+          <small>Qty left: ${escapeHTML(qtyLeft)}</small>
+        </div>
+
+        <button class="btn secondary promo-copy-btn" type="button" data-copy-promo="${escapeHTML(promo.code || "")}" ${isAvailable ? "" : "disabled"}>
+          Copy code
+        </button>
+      </article>
+    `;
+  }
+
+  async function hydratePromoCodesModal() {
+    const target = panel.querySelector("#publicPromoCodesList");
+    if (!target) return;
+
+    target.innerHTML = `<div class="promo-loading-card">Loading promo codes...</div>`;
+
+    const result = await loadPublicPromoCodes();
+
+    if (!result.ok) {
+      target.innerHTML = `<div class="promo-loading-card">${escapeHTML(result.message)}</div>`;
+      return;
+    }
+
+    if (!result.promos.length) {
+      target.innerHTML = `<div class="promo-loading-card">No public promo codes yet. Please check again later.</div>`;
+      return;
+    }
+
+    target.innerHTML = result.promos.map(createPromoCodeCard).join("");
+  }
+
   function createPaymentCard(method) {
     return `
       <article class="payment-method-card">
@@ -443,6 +542,7 @@ function setupSocialModal() {
     const isInquiry = mode === "inquiry";
     const isPayment = mode === "payment";
     const isAbout = mode === "about";
+    const isPromoCodes = mode === "promos";
     const isQr = mode === "qr";
 
     if (isQr) {
@@ -491,6 +591,22 @@ function setupSocialModal() {
               <span>Premium previews soon</span>
             </div>
           </div>
+        </div>
+      `;
+    } else if (isPromoCodes) {
+      panel.innerHTML = `
+        <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close promo codes modal"><span aria-hidden="true">X</span></button>
+
+        <p class="eyebrow">Public promos</p>
+        <h2 id="socialModalTitle">Promo Codes</h2>
+        <p class="modal-subtitle">
+          These are available public promo codes for selected premium reads. Copy a code, then use it in the payment panel for the matching piece.
+        </p>
+
+        <div id="publicPromoCodesList" class="public-promo-list"></div>
+
+        <div class="modal-note">
+          <p><strong>Note:</strong> Promo codes can be limited, disabled, or used up anytime. If a code does not work, please check its status here.</p>
         </div>
       `;
     } else if (isPayment) {
@@ -590,6 +706,7 @@ function setupSocialModal() {
     if (backPaymentBtn) backPaymentBtn.addEventListener("click", () => openModal("payment", paymentContext));
 
     if (isPayment) setupPaymentCalculator();
+    if (isPromoCodes) hydratePromoCodesModal();
   }
 
   function openModal(mode = "connect", context = {}) {
@@ -623,6 +740,10 @@ function setupSocialModal() {
     openConnectBtn.addEventListener("click", () => openModal("connect"));
   }
 
+  if (openPromoCodesBtn) {
+    openPromoCodesBtn.addEventListener("click", () => openModal("promos"));
+  }
+
   if (openInquiryBtn) {
     openInquiryBtn.addEventListener("click", () => openModal("inquiry"));
   }
@@ -635,6 +756,19 @@ function setupSocialModal() {
   });
 
   document.addEventListener("click", event => {
+    const copyPromoTrigger = event.target.closest("[data-copy-promo]");
+    if (copyPromoTrigger && modal.contains(copyPromoTrigger)) {
+      const code = copyPromoTrigger.dataset.copyPromo || "";
+      if (navigator.clipboard && code) {
+        navigator.clipboard.writeText(code);
+        copyPromoTrigger.textContent = "Copied";
+        window.setTimeout(() => {
+          copyPromoTrigger.textContent = "Copy code";
+        }, 1400);
+      }
+      return;
+    }
+
     const qrTrigger = event.target.closest("[data-qr-image]");
     if (qrTrigger && modal.contains(qrTrigger)) {
       openModal("qr", {
