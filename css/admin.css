@@ -1156,3 +1156,138 @@ button:disabled,
 }
 /* V18E pieces control filter tabs END */
 
+/* V18F admin top control bar and request modal */
+.admin-control-bar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0;
+  backdrop-filter: blur(18px);
+}
+
+.admin-control-link,
+.admin-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.12), transparent 7rem),
+    rgba(255, 255, 255, 0.055);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.admin-control-link:hover,
+.admin-control-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 203, 225, 0.35);
+  box-shadow: 0 14px 34px rgba(255, 203, 225, 0.08);
+}
+
+.admin-top-status {
+  min-height: 40px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.admin-top-status:empty {
+  opacity: 0;
+}
+
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(4, 0, 8, 0.72);
+  backdrop-filter: blur(14px);
+}
+
+.admin-modal-overlay.is-open {
+  display: grid;
+}
+
+.admin-modal-card {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  border: 1px solid rgba(255, 244, 251, 0.16);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.11), transparent 14rem),
+    rgba(28, 20, 32, 0.98);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+  scrollbar-width: none;
+}
+
+.admin-modal-card::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.admin-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(255, 244, 251, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.modal-help {
+  margin-top: -0.2rem;
+  color: var(--muted);
+}
+
+.promo-request-modal-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.promo-request-item.is-read {
+  opacity: 0.72;
+}
+
+.promo-request-item.is-unread {
+  border-color: rgba(255, 203, 225, 0.26);
+}
+
+@media (max-width: 760px) {
+  .admin-control-bar {
+    position: static;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-top-status {
+    grid-column: 1 / -1;
+    order: 5;
+  }
+}
+/* V18F admin top control bar and request modal END */
+

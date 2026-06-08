@@ -9,6 +9,8 @@ const pieceControlFilters = document.querySelector("#pieceControlFilters");
 const promoRequestList = document.querySelector("#promoRequestList");
 const promoRequestBell = document.querySelector("#promoRequestBell");
 const promoRequestBellCount = document.querySelector("#promoRequestBellCount");
+const promoRequestModal = document.querySelector("#promoRequestModal");
+const closePromoRequestModalBtn = document.querySelector("#closePromoRequestModal");
 const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
@@ -277,40 +279,55 @@ function formatAdminDate(value) {
   }
 }
 
+function getUnreadPromoRequestCount(requests = []) {
+  return requests.filter(item => {
+    const status = item.status || "pending";
+    return status === "pending" && item.is_read !== true;
+  }).length;
+}
+
 function updatePromoRequestBell(requests = []) {
   if (!promoRequestBell || !promoRequestBellCount) return;
 
-  const pendingCount = requests.filter(item => (item.status || "pending") === "pending").length;
+  const unreadCount = getUnreadPromoRequestCount(requests);
 
-  promoRequestBellCount.textContent = String(pendingCount);
-  promoRequestBell.classList.toggle("has-alert", pendingCount > 0);
+  promoRequestBellCount.textContent = String(unreadCount);
+  promoRequestBell.classList.toggle("has-alert", unreadCount > 0);
   promoRequestBell.setAttribute(
     "aria-label",
-    pendingCount > 0
-      ? `${pendingCount} pending promo request${pendingCount === 1 ? "" : "s"}`
-      : "No pending promo requests"
+    unreadCount > 0
+      ? `${unreadCount} unread promo request${unreadCount === 1 ? "" : "s"}`
+      : "No unread promo requests"
   );
 }
 
-function focusPromoRequestPanel() {
-  if (!promoRequestList) return;
+function openPromoRequestModal() {
+  if (!promoRequestModal) return;
 
-  const card = promoRequestList.closest(".admin-card") || promoRequestList;
-  card.scrollIntoView({ behavior: "smooth", block: "start" });
-  card.classList.add("is-attention");
+  promoRequestModal.classList.add("is-open");
+  promoRequestModal.setAttribute("aria-hidden", "false");
+  loadPromoRequests().catch(error => console.warn("Promo request modal refresh failed:", error));
+}
 
-  window.setTimeout(() => {
-    card.classList.remove("is-attention");
-  }, 1800);
+function closePromoRequestModal() {
+  if (!promoRequestModal) return;
+
+  promoRequestModal.classList.remove("is-open");
+  promoRequestModal.setAttribute("aria-hidden", "true");
 }
 
 function renderPromoRequestItem(item) {
+  const status = item.status || "pending";
+  const isRead = item.is_read === true;
+  const readLabel = isRead ? "Read" : "Unread";
+
   return `
-    <article class="code-list-item promo-request-item">
+    <article class="code-list-item promo-request-item ${isRead ? "is-read" : "is-unread"}">
       <div>
         <strong>${escapeAdminHTML(item.piece_title || item.piece_slug)}</strong>
         <small>
-          ${escapeAdminHTML(item.status || "pending")}
+          ${escapeAdminHTML(status)}
+          &bull; ${escapeAdminHTML(readLabel)}
           &bull; ${escapeAdminHTML(formatAdminDate(item.created_at))}
         </small>
         <small>Slug: ${escapeAdminHTML(item.piece_slug || "")}</small>
@@ -319,7 +336,10 @@ function renderPromoRequestItem(item) {
       </div>
 
       <div class="item-actions code-actions">
-        ${(item.status || "pending") === "pending" ? `<button class="tiny-btn" type="button" data-complete-promo-request="${escapeAdminHTML(item.id)}">Mark done</button>` : ""}
+        <button class="tiny-btn" type="button" data-toggle-promo-request-read="${escapeAdminHTML(item.id)}" data-current-read="${isRead ? "true" : "false"}">
+          ${isRead ? "Mark unread" : "Mark read"}
+        </button>
+        ${status === "pending" ? `<button class="tiny-btn" type="button" data-complete-promo-request="${escapeAdminHTML(item.id)}">Mark done</button>` : ""}
         <button class="tiny-btn danger" type="button" data-delete-promo-request="${escapeAdminHTML(item.id)}">Delete</button>
       </div>
     </article>
@@ -673,6 +693,7 @@ document.addEventListener("click", async event => {
   const pieceSave = event.target.closest("[data-save-piece]");
   const promoGenerate = event.target.closest("[data-generate-promo]");
   const unlockGenerate = event.target.closest("[data-generate-unlock]");
+  const togglePromoRequestRead = event.target.closest("[data-toggle-promo-request-read]");
   const completePromoRequest = event.target.closest("[data-complete-promo-request]");
   const deletePromoRequest = event.target.closest("[data-delete-promo-request]");
 
@@ -713,6 +734,23 @@ document.addEventListener("click", async event => {
       setDashboardMessage("Unlock deleted.", "success");
     }
 
+
+    if (togglePromoRequestRead) {
+      const requestId = togglePromoRequestRead.dataset.togglePromoRequestRead;
+      const currentRead = togglePromoRequestRead.dataset.currentRead === "true";
+      const nextRead = !currentRead;
+
+      const { error } = await adminClient
+        .from("promo_requests")
+        .update({ is_read: nextRead })
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      await loadPromoRequests();
+      setDashboardMessage(nextRead ? "Promo request marked read." : "Promo request marked unread.", "success");
+      return;
+    }
 
     if (completePromoRequest) {
       const requestId = completePromoRequest.dataset.completePromoRequest;
@@ -846,7 +884,7 @@ loadPromoRequests();
 
 
 if (promoRequestBell) {
-  promoRequestBell.addEventListener("click", focusPromoRequestPanel);
+  promoRequestBell.addEventListener("click", openPromoRequestModal);
 }
 
 if (!window.safePromoRequestPollStarted) {
@@ -857,4 +895,14 @@ if (!window.safePromoRequestPollStarted) {
     loadPromoRequests().catch(error => console.warn("Promo request poll failed:", error));
   }, 60000);
 }
+
+if (closePromoRequestModalBtn) {
+  closePromoRequestModalBtn.addEventListener("click", closePromoRequestModal);
+}
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && promoRequestModal?.classList.contains("is-open")) {
+    closePromoRequestModal();
+  }
+});
 
