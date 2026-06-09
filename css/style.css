@@ -4181,3 +4181,31 @@ section#about {
 }
 /* V2.0L page split home polish END */
 
+
+/* V2.0L.1 home cleanup and commissions one-row cards */
+@media (min-width: 1120px) {
+  .commissions-section .commission-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .commissions-section .commission-cards > article {
+    grid-column: auto !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 1119px) and (min-width: 681px) {
+  .commissions-section .commission-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .commissions-section .commission-cards > article {
+    grid-column: auto !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+/* V2.0L.1 home cleanup and commissions one-row cards END */
+
