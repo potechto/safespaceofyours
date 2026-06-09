@@ -3160,3 +3160,115 @@ button:disabled,
 }
 /* V2.0I.3 keep full promo/unlock code visible END */
 
+
+/* V2.0Q admin hamburger menu */
+.admin-menu-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-menu-toggle {
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  flex-direction: column;
+  row-gap: 4px !important;
+}
+
+.admin-menu-toggle span[aria-hidden="true"] {
+  width: 17px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.admin-menu-toggle.is-open span[aria-hidden="true"]:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.admin-menu-toggle.is-open span[aria-hidden="true"]:nth-child(2) {
+  opacity: 0;
+}
+
+.admin-menu-toggle.is-open span[aria-hidden="true"]:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.admin-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  right: 0;
+  z-index: 120;
+  width: min(245px, calc(100vw - 2rem));
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 244, 251, 0.16);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 203, 225, 0.14), transparent 8rem),
+    rgba(24, 17, 29, 0.96);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+}
+
+.admin-menu-panel[hidden] {
+  display: none !important;
+}
+
+.admin-menu-item {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 0.72rem 0.85rem;
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+  font-family: Arial, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-menu-item:hover,
+.admin-menu-item:focus-visible {
+  border-color: rgba(255, 203, 225, 0.24);
+  background: rgba(255, 255, 255, 0.07);
+  outline: none;
+}
+
+.admin-menu-item.danger {
+  color: var(--danger);
+}
+
+.admin-section-highlight {
+  animation: adminSectionHighlight 1.2s ease;
+}
+
+@keyframes adminSectionHighlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 203, 225, 0.38), var(--shadow);
+    border-color: rgba(255, 203, 225, 0.44);
+  }
+
+  100% {
+    box-shadow: var(--shadow);
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-menu-panel {
+    right: -0.25rem;
+  }
+}
+/* V2.0Q admin hamburger menu END */
+

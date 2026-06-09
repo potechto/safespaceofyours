@@ -1654,3 +1654,75 @@ setupPrivateAnalyticsCard();
 })();
 /* V2.0F.1 private floating controls END */
 
+
+/* V2.0Q admin hamburger menu */
+(function setupAdminHamburgerMenu() {
+  if (window.__safeAdminHamburgerMenuBound) return;
+  window.__safeAdminHamburgerMenuBound = true;
+
+  const toggle = document.querySelector("#adminMenuToggle");
+  const panel = document.querySelector("#adminMenuPanel");
+
+  if (!toggle || !panel) return;
+
+  function setMenuOpen(isOpen) {
+    panel.hidden = !isOpen;
+    toggle.classList.toggle("is-open", isOpen);
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    toggle.setAttribute("aria-label", isOpen ? "Close admin menu" : "Open admin menu");
+  }
+
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
+  toggle.addEventListener("click", event => {
+    event.stopPropagation();
+    setMenuOpen(panel.hidden);
+  });
+
+  panel.addEventListener("click", event => {
+    const jumpButton = event.target.closest("[data-admin-menu-jump]");
+    const siteLink = event.target.closest("a");
+    const logoutButton = event.target.closest("#logoutBtn");
+
+    if (jumpButton) {
+      const selector = jumpButton.dataset.adminMenuJump || "";
+      const target = document.querySelector(selector);
+
+      closeMenu();
+
+      if (target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+        target.classList.add("admin-section-highlight");
+        window.setTimeout(() => {
+          target.classList.remove("admin-section-highlight");
+        }, 1300);
+      }
+    }
+
+    if (siteLink || logoutButton) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".admin-menu-wrap")) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeMenu();
+    }
+  });
+
+  window.addEventListener("resize", closeMenu);
+})();
+/* V2.0Q admin hamburger menu END */
+
