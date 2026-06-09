@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@safespaceofyours | LogIn</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/admin.css?v=v20g-private-analytics-card" />
+  <link rel="stylesheet" href="css/admin.css?v=v20g1-collapsible-analytics" />
 </head>
 <body>
   <main class="admin-shell">
@@ -89,10 +89,24 @@
               <h3>Private analytics</h3>
               <p>Track one counted view/unlock per browser or device per piece.</p>
             </div>
-            <button id="pieceAnalyticsRefreshBtn" class="analytics-refresh-btn" type="button">Refresh</button>
+            <div class="analytics-heading-actions">
+              <button id="pieceAnalyticsRefreshBtn" class="analytics-refresh-btn" type="button">Refresh</button>
+              <button
+                id="pieceAnalyticsToggleBtn"
+                class="analytics-toggle-btn"
+                type="button"
+                aria-expanded="true"
+                aria-controls="pieceAnalyticsPanel"
+                title="Minimize analytics"
+              >
+                <span aria-hidden="true">⌃</span>
+                <span class="sr-only">Minimize analytics</span>
+              </button>
+            </div>
           </div>
 
-          <div class="analytics-stat-grid" aria-label="Private analytics summary">
+          <div id="pieceAnalyticsPanel" class="piece-analytics-panel">
+            <div class="analytics-stat-grid" aria-label="Private analytics summary">
             <div class="analytics-stat-pill">
               <span>Total views</span>
               <strong id="analyticsTotalViews">0</strong>
@@ -108,7 +122,8 @@
           </div>
 
           <div id="pieceAnalyticsList" class="piece-analytics-list" aria-live="polite">
-            <div class="analytics-empty">Analytics will appear here after readers open or unlock pieces.</div>
+              <div class="analytics-empty">Analytics will appear here after readers open or unlock pieces.</div>
+            </div>
           </div>
         </section>
 
@@ -188,7 +203,7 @@
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
   <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
   <script src="js/admin-auth.js?v=v18r-label-controls-2"></script>
-  <script src="js/admin-dashboard.js?v=v20g-private-analytics-card"></script>
+  <script src="js/admin-dashboard.js?v=v20g1-collapsible-analytics"></script>
 </body>
 </html>
 

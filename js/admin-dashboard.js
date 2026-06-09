@@ -14,6 +14,7 @@ const analyticsTotalViews = document.querySelector("#analyticsTotalViews");
 const analyticsTotalUnlocks = document.querySelector("#analyticsTotalUnlocks");
 const analyticsTopUnlockRate = document.querySelector("#analyticsTopUnlockRate");
 const pieceAnalyticsRefreshBtn = document.querySelector("#pieceAnalyticsRefreshBtn");
+const pieceAnalyticsToggleBtn = document.querySelector("#pieceAnalyticsToggleBtn");
 
 
 function syncAdminControlBarVisibility() {
@@ -105,6 +106,7 @@ let activePieceControlFilter = "all";
 let activePieceControlSearch = "";
 let pieceCharacterCountCache = new Map();
 let latestPieceAnalytics = [];
+const PIECE_ANALYTICS_COLLAPSED_KEY = "@safespaceofyours.privateAnalyticsCollapsed.v1";
 
 function getAdminClientForAnalytics() {
   if (typeof adminClient !== "undefined" && adminClient) return adminClient;
@@ -210,12 +212,53 @@ async function loadPieceAnalytics() {
   renderPieceAnalytics(data || []);
 }
 
+function setPrivateAnalyticsCollapsed(isCollapsed) {
+  const card = document.querySelector("#privateAnalyticsCard");
+  const panel = document.querySelector("#pieceAnalyticsPanel");
+
+  if (!card || !panel || !pieceAnalyticsToggleBtn) return;
+
+  card.classList.toggle("is-collapsed", isCollapsed);
+  panel.hidden = isCollapsed;
+  pieceAnalyticsToggleBtn.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+  pieceAnalyticsToggleBtn.setAttribute("title", isCollapsed ? "Expand analytics" : "Minimize analytics");
+
+  const icon = pieceAnalyticsToggleBtn.querySelector("[aria-hidden='true']");
+  const label = pieceAnalyticsToggleBtn.querySelector(".sr-only");
+
+  if (icon) icon.textContent = isCollapsed ? "⌄" : "⌃";
+  if (label) label.textContent = isCollapsed ? "Expand analytics" : "Minimize analytics";
+
+  try {
+    window.localStorage.setItem(PIECE_ANALYTICS_COLLAPSED_KEY, isCollapsed ? "1" : "0");
+  } catch (error) {
+    // Local storage can be unavailable in some privacy modes.
+  }
+}
+
+function getSavedPrivateAnalyticsCollapsed() {
+  try {
+    return window.localStorage.getItem(PIECE_ANALYTICS_COLLAPSED_KEY) === "1";
+  } catch (error) {
+    return false;
+  }
+}
+
 function setupPrivateAnalyticsCard() {
   if (!pieceAnalyticsList) return;
+
+  setPrivateAnalyticsCollapsed(getSavedPrivateAnalyticsCollapsed());
 
   if (pieceAnalyticsRefreshBtn) {
     pieceAnalyticsRefreshBtn.addEventListener("click", () => {
       loadPieceAnalytics().catch(error => console.warn("Private analytics refresh failed:", error));
+    });
+  }
+
+  if (pieceAnalyticsToggleBtn) {
+    pieceAnalyticsToggleBtn.addEventListener("click", () => {
+      const card = document.querySelector("#privateAnalyticsCard");
+      setPrivateAnalyticsCollapsed(!card || !card.classList.contains("is-collapsed"));
     });
   }
 
