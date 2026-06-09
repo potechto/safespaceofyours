@@ -2902,3 +2902,80 @@ button:disabled,
 }
 /* V2.0G.2 analytics card UI polish END */
 
+
+/* V2.0G.3 clean analytics collapsed bar + refresh icon */
+.private-analytics-card.is-collapsed {
+  grid-column: 1 / -1 !important;
+  width: 100%;
+  min-height: 0;
+  padding: clamp(1rem, 2vw, 1.35rem) !important;
+  align-self: stretch;
+}
+
+.private-analytics-card.is-collapsed .private-analytics-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  margin: 0 !important;
+  gap: 1rem;
+}
+
+.private-analytics-card.is-collapsed h3 {
+  margin: 0;
+}
+
+.private-analytics-card.is-collapsed .card-heading p,
+.private-analytics-card.is-collapsed .piece-analytics-panel,
+.private-analytics-card.is-collapsed .analytics-refresh-btn {
+  display: none !important;
+}
+
+.private-analytics-card.is-collapsed .analytics-heading-actions {
+  justify-content: flex-end;
+  align-self: center;
+}
+
+.icon-refresh {
+  position: relative !important;
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  transform: none !important;
+}
+
+.icon-refresh::before {
+  content: "\27F3";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: currentColor;
+  font-size: 1.55rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.icon-refresh::after {
+  content: none !important;
+}
+
+.icon-only-btn {
+  flex: 0 0 auto;
+}
+
+.private-analytics-card:not(.is-collapsed) .analytics-heading-actions {
+  margin-top: 0.1rem;
+}
+
+@media (max-width: 760px) {
+  .private-analytics-card.is-collapsed .private-analytics-heading {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .private-analytics-card.is-collapsed .analytics-heading-actions {
+    justify-content: flex-end;
+  }
+}
+/* V2.0G.3 clean analytics collapsed bar + refresh icon END */
+
