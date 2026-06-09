@@ -2979,3 +2979,49 @@ button:disabled,
 }
 /* V2.0G.3 clean analytics collapsed bar + refresh icon END */
 
+
+/* V2.0H depleted promo/unlock code cards */
+.admin-code-card.is-depleted {
+  opacity: 0.58;
+  filter: grayscale(0.55);
+  border-color: rgba(255, 244, 251, 0.08) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01)) !important;
+  box-shadow: none !important;
+}
+
+.admin-code-card.is-depleted:hover,
+.admin-code-card.is-depleted:focus-within {
+  opacity: 0.72;
+  filter: grayscale(0.35);
+}
+
+.admin-code-card.is-depleted .admin-code-title,
+.admin-code-card.is-depleted .admin-code-popover,
+.admin-code-card.is-depleted small {
+  color: rgba(255, 244, 251, 0.62) !important;
+}
+
+.admin-code-card.is-depleted .copy-code-btn,
+.admin-code-card.is-depleted .admin-code-info-btn,
+.admin-code-card.is-depleted .tiny-btn:not(.danger) {
+  opacity: 0.72;
+}
+
+.admin-code-card.is-depleted .code-badge {
+  border-color: rgba(255, 244, 251, 0.16) !important;
+  color: rgba(255, 244, 251, 0.7) !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.admin-code-card.is-depleted .code-badge.used-up {
+  border-color: rgba(190, 190, 200, 0.22) !important;
+  color: rgba(220, 220, 226, 0.82) !important;
+  background: rgba(180, 180, 190, 0.09) !important;
+}
+
+.admin-code-card.is-depleted .tiny-btn.danger {
+  opacity: 0.82;
+}
+/* V2.0H depleted promo/unlock code cards END */
+

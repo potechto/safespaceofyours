@@ -579,6 +579,13 @@ function getCodeUseBadge(item) {
   return { label: "Not used", className: "not-used" };
 }
 
+function isCodeDepleted(item) {
+  const usedCount = Number(item.used_count) || 0;
+  const maxUses = Number(item.max_uses);
+
+  return Number.isFinite(maxUses) && maxUses > 0 && usedCount >= maxUses;
+}
+
 function renderCodeBadges(item) {
   const activeLabel = item.is_active ? "Active" : "Disabled";
   const activeClass = item.is_active ? "active" : "disabled";
@@ -753,9 +760,10 @@ async function loadPromos() {
     const targets = targetMap.get(String(item.id)) || [];
     const discountLabel = formatDiscount(item.discount_type, item.discount_value);
     const targetLabel = formatTargetSummary(targets);
+    const depletedClass = isCodeDepleted(item) ? " is-depleted" : "";
 
     return `
-      <article class="list-item code-list-item admin-code-card">
+      <article class="list-item code-list-item admin-code-card${depletedClass}">
         <div class="admin-code-top">
           <div class="admin-code-identity">
             <strong class="admin-code-title">${escapeAdminHTML(item.code)}</strong>
@@ -803,9 +811,10 @@ async function loadUnlocks() {
   unlockList.innerHTML = data.map(item => {
     const targetSlugs = item.piece_slug ? [item.piece_slug] : (targetMap.get(String(item.id)) || []);
     const targetLabel = formatTargetSummary(targetSlugs);
+    const depletedClass = isCodeDepleted(item) ? " is-depleted" : "";
 
     return `
-      <article class="list-item code-list-item admin-code-card">
+      <article class="list-item code-list-item admin-code-card${depletedClass}">
         <div class="admin-code-top">
           <div class="admin-code-identity">
             <strong class="admin-code-title">${escapeAdminHTML(item.code)}</strong>
