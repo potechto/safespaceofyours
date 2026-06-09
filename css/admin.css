@@ -2457,3 +2457,72 @@ button:disabled,
 }
 /* V2.0C floating Public Space shortcut END */
 
+
+/* V2.0F.1 private floating controls */
+.admin-scroll-top {
+  position: fixed;
+  right: clamp(1rem, 3vw, 1.6rem);
+  bottom: clamp(1rem, 3vw, 1.6rem);
+  z-index: 1195;
+  width: clamp(50px, 9vw, 58px);
+  height: clamp(50px, 9vw, 58px);
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(255, 244, 251, 0.2);
+  border-radius: 999px;
+  background: #efc7d7;
+  color: #231523;
+  font-family: Arial, sans-serif;
+  font-size: 1.55rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.admin-scroll-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.admin-scroll-top:hover,
+.admin-scroll-top:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(255, 244, 251, 0.42);
+  background: #ffd8e6;
+  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.34);
+}
+
+.admin-scroll-top:focus-visible {
+  outline: 3px solid rgba(255, 203, 225, 0.28);
+  outline-offset: 4px;
+}
+
+.public-space-float.is-stacked-over-scroll {
+  bottom: calc(clamp(1rem, 3vw, 1.6rem) + clamp(58px, 11vw, 76px) + 0.85rem);
+}
+
+@media (max-width: 680px) {
+  .admin-scroll-top {
+    width: 52px;
+    height: 52px;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    font-size: 1.35rem;
+  }
+
+  .public-space-float.is-stacked-over-scroll {
+    bottom: calc(0.85rem + 56px + 0.75rem);
+  }
+}
+/* V2.0F.1 private floating controls END */
+

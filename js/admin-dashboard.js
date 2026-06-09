@@ -1328,3 +1328,60 @@ setupAdminControlBarGate();
   }, true);
 })();
 
+
+/* V2.0F.1 private floating controls */
+(function setupPrivateFloatingControls() {
+  if (window.__safePrivateFloatingControlsBound) return;
+  window.__safePrivateFloatingControlsBound = true;
+
+  function bindPrivateFloatingControls() {
+    const scrollTopBtn = document.querySelector("#adminScrollTopBtn");
+    const publicSpaceFloat = document.querySelector(".public-space-float");
+    const dashboardView = document.querySelector("#dashboardView");
+
+    if (!scrollTopBtn) return;
+
+    function isDashboardVisible() {
+      return !dashboardView || !dashboardView.classList.contains("hidden");
+    }
+
+    function togglePrivateFloatingControls() {
+      const shouldShowScrollTop = isDashboardVisible() && window.scrollY > 420;
+
+      scrollTopBtn.classList.toggle("visible", shouldShowScrollTop);
+      scrollTopBtn.setAttribute("aria-hidden", shouldShowScrollTop ? "false" : "true");
+
+      if (publicSpaceFloat) {
+        publicSpaceFloat.classList.toggle("is-stacked-over-scroll", shouldShowScrollTop);
+      }
+    }
+
+    scrollTopBtn.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+
+    window.addEventListener("scroll", togglePrivateFloatingControls, { passive: true });
+    window.addEventListener("resize", togglePrivateFloatingControls);
+
+    if (dashboardView && "MutationObserver" in window) {
+      const observer = new MutationObserver(togglePrivateFloatingControls);
+      observer.observe(dashboardView, {
+        attributes: true,
+        attributeFilter: ["class"]
+      });
+    }
+
+    togglePrivateFloatingControls();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindPrivateFloatingControls);
+  } else {
+    bindPrivateFloatingControls();
+  }
+})();
+/* V2.0F.1 private floating controls END */
+
