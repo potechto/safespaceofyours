@@ -10,6 +10,7 @@ const nextPoem = document.querySelector("#nextPoem");
 const randomPoem = document.querySelector("#randomPoem");
 
 const UNLOCKED_PIECES_STORAGE_KEY = "@safespaceofyours.unlockedPieces.v1";
+const PIECE_ANALYTICS_VISITOR_KEY = "@safespaceofyours.analyticsVisitor.v1";
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -84,6 +85,57 @@ function savePieceUnlock(slug, code) {
   window.localStorage.setItem(UNLOCKED_PIECES_STORAGE_KEY, JSON.stringify(unlockedPieces));
 }
 
+function makePieceAnalyticsVisitorKey() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+
+  return `visitor-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+function getPieceAnalyticsVisitorKey() {
+  try {
+    const existingKey = window.localStorage.getItem(PIECE_ANALYTICS_VISITOR_KEY);
+    if (existingKey) return existingKey;
+
+    const nextKey = makePieceAnalyticsVisitorKey();
+    window.localStorage.setItem(PIECE_ANALYTICS_VISITOR_KEY, nextKey);
+    return nextKey;
+  } catch (error) {
+    return makePieceAnalyticsVisitorKey();
+  }
+}
+
+async function recordPieceAnalyticsEvent(poem, eventType, details = {}) {
+  if (!poem || !poem.slug || !window.safeAdminClient) return;
+
+  const visitorKey = getPieceAnalyticsVisitorKey();
+  if (!visitorKey) return;
+
+  try {
+    await window.safeAdminClient.rpc("record_piece_analytics_event", {
+      p_event_type: eventType,
+      p_piece_slug: poem.slug,
+      p_visitor_key: visitorKey,
+      p_unlock_code_id: details.unlockCodeId || null,
+      p_unlock_code_snapshot: details.unlockCodeSnapshot || null
+    });
+  } catch (error) {
+    console.warn("Piece analytics event could not be recorded:", error);
+  }
+}
+
+function queuePieceAnalyticsEvent(poem, eventType, details = {}) {
+  const sendEvent = () => recordPieceAnalyticsEvent(poem, eventType, details);
+
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(sendEvent, { timeout: 2000 });
+    return;
+  }
+
+  window.setTimeout(sendEvent, 0);
+}
+
 function buildUnlockedNotice() {
   return `
     <div class="unlock-success-notice">
@@ -156,6 +208,9 @@ function setupUnlockForm(poem, fullText) {
     }
 
     savePieceUnlock(poem.slug, code);
+    queuePieceAnalyticsEvent(poem, "unlock", {
+      unlockCodeSnapshot: code
+    });
     poemText.innerHTML = buildUnlockedNotice() + formatPoem(fullText);
     window.scrollTo({ top: poemText.offsetTop - 120, behavior: "smooth" });
   });
@@ -363,6 +418,7 @@ async function loadPoem() {
 
     const text = await response.text();
     const access = getPoemAccess(poem);
+    queuePieceAnalyticsEvent(poem, "view");
 
     if (access === "paid" && !isPieceUnlocked(poem.slug)) {
       poemText.innerHTML = buildPaidPreview(poem, text);
