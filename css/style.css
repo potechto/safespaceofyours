@@ -4318,3 +4318,92 @@ section#about {
 }
 /* V2.0Q.10 public viewer polish END */
 
+
+/* V2.0Q.11 remaining public polish bundle */
+body {
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  min-width: 0;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+.nav-modal-btn,
+.nav-link-button,
+.reader-action-btn,
+.btn {
+  touch-action: manipulation;
+}
+
+.piece-card,
+.commission-card,
+.support-card,
+.reader-card,
+.modal-content,
+.modal-card,
+.modal-panel {
+  min-width: 0;
+}
+
+.modal-content,
+.modal-card,
+.modal-panel {
+  max-height: min(84vh, 44rem);
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.piece-card img,
+.reader-card img,
+.commission-card img,
+.support-card img {
+  max-width: 100%;
+}
+
+.piece-card h3,
+.commission-card h3,
+.support-card h3,
+.reader-card h1,
+.reader-card h2 {
+  overflow-wrap: anywhere;
+}
+
+.piece-meta,
+.piece-tags,
+.reader-actions,
+.card-actions,
+.commission-actions {
+  min-width: 0;
+}
+
+.scroll-top {
+  backface-visibility: hidden;
+}
+
+@media (max-width: 520px) {
+  .section-heading p,
+  .hero-subtitle,
+  .reader-card,
+  .piece-card,
+  .commission-card,
+  .support-card {
+    overflow-wrap: anywhere;
+  }
+
+  .modal-content,
+  .modal-card,
+  .modal-panel {
+    max-height: 78vh;
+  }
+}
+/* V2.0Q.11 remaining public polish bundle END */
+

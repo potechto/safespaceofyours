@@ -3755,3 +3755,117 @@ body[data-admin-page="payment-methods"] #paymentList button {
 }
 /* V2.0Q.9 payment methods polish END */
 
+
+/* V2.0Q.11 remaining admin polish bundle */
+.admin-shell,
+.admin-card,
+.admin-menu-panel,
+.admin-list,
+.admin-list-item {
+  min-width: 0;
+}
+
+.admin-menu-panel {
+  max-height: min(78vh, 32rem);
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.admin-menu-item {
+  min-height: 2.65rem;
+}
+
+.admin-card h2,
+.admin-card h3,
+.admin-card p,
+.admin-message,
+.admin-standalone-note {
+  overflow-wrap: anywhere;
+}
+
+#promoList,
+#unlockList {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 6rem;
+  max-height: min(48vh, 26rem);
+  overflow: auto;
+  padding-right: 0.15rem;
+  scrollbar-width: thin;
+}
+
+#promoList:empty::before,
+#unlockList:empty::before {
+  min-height: 4.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255, 244, 251, 0.12);
+  border-radius: 16px;
+  color: var(--soft);
+  text-align: center;
+  padding: 1rem;
+}
+
+#promoList:empty::before {
+  content: "No promo codes created yet.";
+}
+
+#unlockList:empty::before {
+  content: "No unlock codes created yet.";
+}
+
+#promoList > *,
+#unlockList > *,
+#paymentList > *,
+#pieceSettingsList > * {
+  min-width: 0;
+}
+
+#promoList code,
+#unlockList code,
+.code-pill,
+.promo-code-value,
+.unlock-code-value {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.public-space-float,
+.admin-scroll-top,
+.promo-request-bell,
+.analytics-refresh-btn {
+  touch-action: manipulation;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select,
+.admin-card input,
+.admin-card textarea,
+.admin-card select {
+  max-width: 100%;
+}
+
+.admin-card textarea {
+  resize: vertical;
+}
+
+@media (max-width: 560px) {
+  #promoList,
+  #unlockList {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .admin-menu-panel {
+    max-height: 70vh;
+  }
+
+  .admin-menu-item {
+    min-height: 2.85rem;
+  }
+}
+/* V2.0Q.11 remaining admin polish bundle END */
+
