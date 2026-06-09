@@ -3490,3 +3490,93 @@ body[data-admin-page="piece-control"] .admin-standalone-grid {
 }
 /* V2.0Q.5 persistent admin controls and quiet analytics END */
 
+
+/* V2.0Q.7 piece control polish */
+body[data-admin-page="piece-control"] .admin-standalone-note {
+  max-width: 56rem;
+  margin-bottom: 1.15rem;
+}
+
+body[data-admin-page="piece-control"] .admin-piece-control-layout {
+  gap: 1.15rem;
+}
+
+body[data-admin-page="piece-control"] .admin-piece-code-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+body[data-admin-page="piece-control"] .admin-piece-code-row > .admin-card {
+  display: flex;
+  min-height: 15rem;
+  flex-direction: column;
+}
+
+body[data-admin-page="piece-control"] .admin-piece-code-row .admin-list {
+  flex: 1;
+  min-height: 7.5rem;
+  max-height: 24rem;
+  overflow: auto;
+  padding-right: 0.15rem;
+  scrollbar-width: thin;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard {
+  overflow: hidden;
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+body[data-admin-page="piece-control"] .piece-control-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+body[data-admin-page="piece-control"] .piece-control-search {
+  margin: 0.9rem 0 1rem;
+}
+
+body[data-admin-page="piece-control"] .piece-control-search input {
+  width: 100%;
+  min-height: 2.9rem;
+}
+
+body[data-admin-page="piece-control"] .piece-settings-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+body[data-admin-page="piece-control"] .piece-control-cover {
+  width: clamp(3rem, 12vw, 4.5rem);
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+}
+
+body[data-admin-page="piece-control"] .piece-control-cover[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 540px) {
+  body[data-admin-page="piece-control"] .admin-piece-code-row {
+    gap: 0.6rem;
+  }
+
+  body[data-admin-page="piece-control"] .admin-piece-code-row > .admin-card {
+    min-height: auto;
+    padding: 0.75rem;
+  }
+
+  body[data-admin-page="piece-control"] .admin-piece-code-row .admin-list {
+    max-height: 18rem;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard {
+    padding: 0.85rem;
+  }
+
+  body[data-admin-page="piece-control"] .piece-filter-tab {
+    flex: 1 1 auto;
+  }
+}
+/* V2.0Q.7 piece control polish END */
+

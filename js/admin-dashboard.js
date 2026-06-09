@@ -17,6 +17,25 @@ const pieceAnalyticsRefreshBtn = document.querySelector("#pieceAnalyticsRefreshB
 const pieceAnalyticsToggleBtn = document.querySelector("#pieceAnalyticsToggleBtn");
 
 
+
+// V2.0Q.7 piece control image fallback
+if (!window.__safePieceControlCoverFallbackBound) {
+  window.__safePieceControlCoverFallbackBound = true;
+
+  document.addEventListener("error", event => {
+    const target = event.target;
+
+    if (
+      target instanceof HTMLImageElement &&
+      target.classList.contains("piece-control-cover")
+    ) {
+      target.hidden = true;
+      target.setAttribute("aria-hidden", "true");
+    }
+  }, true);
+}
+
+
 function syncAdminControlBarVisibility() {
   const controlBar = document.querySelector(".admin-control-bar");
   const dashboard = document.querySelector("#dashboardView");
