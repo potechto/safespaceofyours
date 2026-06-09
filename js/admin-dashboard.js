@@ -6,6 +6,8 @@ const unlockList = document.querySelector("#unlockList");
 const paymentList = document.querySelector("#paymentList");
 const pieceSettingsList = document.querySelector("#pieceSettingsList");
 const pieceControlFilters = document.querySelector("#pieceControlFilters");
+const pieceControlSearchInput = document.querySelector("#pieceControlSearchInput");
+const pieceControlSearchSummary = document.querySelector("#pieceControlSearchSummary");
 const promoRequestList = document.querySelector("#promoRequestList");
 
 
@@ -95,6 +97,7 @@ const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
 let latestAdminPieces = [];
 let activePieceControlFilter = "all";
+let activePieceControlSearch = "";
 let pieceCharacterCountCache = new Map();
 
 function setDashboardMessage(message, type = "") {
@@ -665,7 +668,23 @@ function getPieceControlCounts() {
   );
 }
 
-function getFilteredAdminPieces() {
+function getPieceControlSearchText(item) {
+  return [
+    item.title,
+    item.slug,
+    item.category,
+    item.type,
+    item.content_label,
+    formatAdminContentLabel(item.content_label || item.type),
+    normalizeAdminAccess(item.access_type),
+    item.is_enabled ? "visible enabled shown" : "hidden disabled"
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function getPieceControlBaseFilteredPieces() {
   if (activePieceControlFilter === "paid") {
     return latestAdminPieces.filter(item => normalizeAdminAccess(item.access_type) === "paid");
   }
@@ -675,6 +694,34 @@ function getFilteredAdminPieces() {
   }
 
   return latestAdminPieces;
+}
+
+function getFilteredAdminPieces() {
+  const basePieces = getPieceControlBaseFilteredPieces();
+  const searchTerm = String(activePieceControlSearch || "").trim().toLowerCase();
+
+  if (!searchTerm) return basePieces;
+
+  return basePieces.filter(item => getPieceControlSearchText(item).includes(searchTerm));
+}
+
+function updatePieceControlSearchSummary(visibleCount) {
+  if (!pieceControlSearchSummary) return;
+
+  const baseCount = getPieceControlBaseFilteredPieces().length;
+  const searchTerm = String(activePieceControlSearch || "").trim();
+
+  if (!baseCount) {
+    pieceControlSearchSummary.textContent = "";
+    return;
+  }
+
+  if (!searchTerm) {
+    pieceControlSearchSummary.textContent = `Showing ${baseCount} piece${baseCount === 1 ? "" : "s"}.`;
+    return;
+  }
+
+  pieceControlSearchSummary.textContent = `Showing ${visibleCount} of ${baseCount} piece${baseCount === 1 ? "" : "s"} for "${searchTerm}".`;
 }
 
 function updatePieceControlFilters() {
@@ -702,13 +749,17 @@ function renderPieceSettingsList() {
   updatePieceControlFilters();
 
   const piecesToRender = getFilteredAdminPieces();
+  updatePieceControlSearchSummary(piecesToRender.length);
 
   if (!piecesToRender.length) {
-    const label = activePieceControlFilter === "paid"
-      ? "No paid pieces yet."
-      : activePieceControlFilter === "free"
-        ? "No free pieces yet."
-        : "No pieces found.";
+    const searchTerm = String(activePieceControlSearch || "").trim();
+    const label = searchTerm
+      ? `No pieces matched "${searchTerm}".`
+      : activePieceControlFilter === "paid"
+        ? "No paid pieces yet."
+        : activePieceControlFilter === "free"
+          ? "No free pieces yet."
+          : "No pieces found.";
 
     renderEmpty(pieceSettingsList, label);
     return;
@@ -865,6 +916,15 @@ window.loadAdminDashboard = async function loadAdminDashboard() {
 };
 
 
+
+
+/* V2.0B Pieces Control search */
+if (pieceControlSearchInput) {
+  pieceControlSearchInput.addEventListener("input", () => {
+    activePieceControlSearch = pieceControlSearchInput.value || "";
+    renderPieceSettingsList();
+  });
+}
 
 document.addEventListener("change", event => {
   const pieceTarget = event.target.closest("[data-piece-target]");

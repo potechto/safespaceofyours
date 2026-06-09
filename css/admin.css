@@ -1155,6 +1155,51 @@ button:disabled,
 }
 /* V18E pieces control filter tabs END */
 
+/* V2.0B Pieces Control search */
+.piece-control-search {
+  display: grid;
+  gap: 0.45rem;
+  margin: -0.2rem 0 1.1rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 244, 251, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.piece-control-search label {
+  color: var(--soft);
+  font-family: Arial, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.piece-control-search input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 16px;
+  padding: 0.72rem 0.9rem;
+  background: rgba(12, 8, 16, 0.35);
+  color: var(--text);
+  outline: none;
+}
+
+.piece-control-search input:focus {
+  border-color: rgba(255, 203, 225, 0.42);
+  box-shadow: 0 0 0 3px rgba(255, 203, 225, 0.08);
+}
+
+.piece-control-search-summary {
+  min-height: 1.1rem;
+  margin: 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 0.78rem;
+}
+/* V2.0B Pieces Control search END */
+
+
 /* V18F admin top control bar and request modal */
 .admin-control-bar {
   position: sticky;
