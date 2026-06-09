@@ -189,22 +189,31 @@ function renderPieceAnalytics(data = []) {
   }).join("");
 }
 
-async function loadPieceAnalytics() {
+async function loadPieceAnalytics(options = {}) {
   if (!pieceAnalyticsList) return;
+
+  const isSilentRefresh = options.silent === true;
+  const shouldShowLoading = !isSilentRefresh && latestPieceAnalytics.length === 0;
 
   const client = getAdminClientForAnalytics();
   if (!client) {
-    pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Analytics client is not ready yet. Refresh after logging in.</div>`;
+    if (!isSilentRefresh) {
+      pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Analytics client is not ready yet. Refresh after logging in.</div>`;
+    }
     return;
   }
 
-  pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Loading analytics...</div>`;
+  if (shouldShowLoading) {
+    pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Loading analytics...</div>`;
+  }
 
   const { data, error } = await client.rpc("get_private_piece_analytics");
 
   if (error) {
     console.warn("Private analytics failed to load:", error);
-    pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Analytics could not be loaded yet. Make sure V20 SQL is applied and you are logged in as admin.</div>`;
+    if (!isSilentRefresh) {
+      pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Analytics could not be loaded yet. Make sure V20 SQL is applied and you are logged in as admin.</div>`;
+    }
     return;
   }
 
@@ -249,7 +258,7 @@ function setupPrivateAnalyticsCard() {
 
   if (pieceAnalyticsRefreshBtn) {
     pieceAnalyticsRefreshBtn.addEventListener("click", () => {
-      loadPieceAnalytics().catch(error => console.warn("Private analytics refresh failed:", error));
+      loadPieceAnalytics({ silent: true }).catch(error => console.warn("Private analytics refresh failed:", error));
     });
   }
 
@@ -274,6 +283,20 @@ function setupPrivateAnalyticsCard() {
       attributes: true,
       attributeFilter: ["class"]
     });
+  }
+
+  function refreshWhenVisibleQuietly() {
+    if (document.hidden) return;
+
+    if (!dashboardView || !dashboardView.classList.contains("hidden")) {
+      loadPieceAnalytics({ silent: true }).catch(error => console.warn("Private analytics auto refresh failed:", error));
+    }
+  }
+
+  if (!window.__safePrivateAnalyticsAutoRefreshBound) {
+    window.__safePrivateAnalyticsAutoRefreshBound = true;
+    window.setInterval(refreshWhenVisibleQuietly, 45000);
+    document.addEventListener("visibilitychange", refreshWhenVisibleQuietly);
   }
 
   loadWhenVisible();

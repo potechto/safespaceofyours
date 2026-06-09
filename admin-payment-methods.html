@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Methods | @safespaceofyours</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/admin.css?v=v20q4-admin-piece-row-layout" />
+  <link rel="stylesheet" href="css/admin.css?v=v20q5-admin-persistent-controls-quiet-analytics" />
 </head>
 <body class="admin-standalone-page" data-admin-page="payment-methods">
   <main class="admin-shell admin-standalone-shell">
@@ -36,6 +36,7 @@
 
           <div id="adminMenuPanel" class="admin-menu-panel" hidden>
             <a class="admin-menu-item" href="./">Back to site</a>
+            <a class="admin-menu-item" href="admin.html">Private Space Home</a>
             <a class="admin-menu-item" href="admin-piece-control.html">Piece control</a>
             <a class="admin-menu-item" href="admin-payment-methods.html">Payment methods</a>
             <button id="logoutBtn" class="admin-menu-item danger" type="button">Log out</button>
@@ -79,6 +80,12 @@
     </section>
 
     <section id="dashboardView" class="admin-view hidden admin-standalone-dashboard">
+      <a class="public-space-float" href="./" aria-label="Go to public space" title="Go to public space">
+        <img src="Resources/ps.png" alt="" aria-hidden="true" />
+        <span class="sr-only">Go to public space</span>
+      </a>
+      <button id="adminScrollTopBtn" class="admin-scroll-top" type="button" aria-label="Back to top" aria-hidden="true">↑</button>
+
       <p class="admin-standalone-note">View and update visible manual payment methods in a focused workspace.</p>
 <div class="admin-grid admin-standalone-grid">
         <section class="admin-card manager-card wide-card" id="paymentMethodsCard">
@@ -114,6 +121,6 @@
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
   <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
   <script src="js/admin-auth.js?v=v18r-label-controls-2"></script>
-  <script src="js/admin-dashboard.js?v=v20q4-admin-piece-row-layout"></script>
+  <script src="js/admin-dashboard.js?v=v20q5-admin-persistent-controls-quiet-analytics"></script>
 </body>
 </html>

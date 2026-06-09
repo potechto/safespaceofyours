@@ -3472,3 +3472,21 @@ body[data-admin-page="piece-control"] .admin-standalone-grid {
 }
 /* V2.0Q.4 exact admin piece row layout END */
 
+
+/* V2.0Q.5 persistent admin controls and quiet analytics */
+.analytics-refresh-btn {
+  opacity: 0.28;
+  transform: scale(0.94);
+}
+
+.analytics-refresh-btn:hover,
+.analytics-refresh-btn:focus-visible {
+  opacity: 0.85;
+}
+
+.admin-menu-panel .admin-menu-item[aria-current="page"] {
+  border-color: rgba(255, 203, 225, 0.26);
+  background: rgba(255, 203, 225, 0.08);
+}
+/* V2.0Q.5 persistent admin controls and quiet analytics END */
+
