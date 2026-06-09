@@ -3272,3 +3272,63 @@ button:disabled,
 }
 /* V2.0Q admin hamburger menu END */
 
+
+/* V2.0Q.1 admin standalone pages */
+.admin-standalone-shell {
+  min-height: 100vh;
+}
+
+.admin-standalone-control-inner {
+  justify-content: flex-end;
+}
+
+.admin-standalone-dashboard {
+  width: min(100% - 2rem, 1180px);
+  margin: 5.5rem auto 3rem;
+}
+
+.admin-standalone-heading {
+  margin-bottom: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 225, 0.12), transparent 14rem),
+    rgba(255, 255, 255, 0.035);
+}
+
+.admin-standalone-heading h1 {
+  margin: 0.35rem 0 0.65rem;
+}
+
+.admin-standalone-heading p:last-child {
+  color: var(--soft);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.admin-standalone-grid {
+  grid-template-columns: 1fr;
+}
+
+.admin-standalone-grid .admin-card {
+  width: 100%;
+}
+
+@media (max-width: 620px) {
+  .admin-standalone-dashboard {
+    width: min(100% - 1.1rem, 1180px);
+    margin-top: 5rem;
+  }
+
+  .admin-standalone-heading {
+    padding: 1.1rem;
+    border-radius: 22px;
+  }
+
+  .admin-standalone-control-inner {
+    justify-content: center;
+  }
+}
+/* V2.0Q.1 admin standalone pages END */
+

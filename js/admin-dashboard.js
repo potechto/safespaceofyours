@@ -1135,10 +1135,53 @@ async function loadPayments() {
   `).join("");
 }
 
+/* V2.0Q.1 admin standalone dashboard loading */
+function getAdminDashboardLoadTasks() {
+  const tasks = [];
+
+  if (promoList) {
+    tasks.push(loadPromos());
+  }
+
+  if (unlockList) {
+    tasks.push(loadUnlocks());
+  }
+
+  if (paymentList) {
+    tasks.push(loadPayments());
+  }
+
+  if (pieceSettingsList) {
+    tasks.push(loadPieceSettings());
+  }
+
+  return tasks;
+}
+
 window.loadAdminDashboard = async function loadAdminDashboard() {
   try {
+    const pageType = document.body?.dataset?.adminPage || "dashboard";
+    const tasks = getAdminDashboardLoadTasks();
+
     setDashboardMessage("Loading dashboard...", "");
-    await Promise.all([loadPromos(), loadUnlocks(), loadPayments(), loadPieceSettings()]);
+
+    if (!tasks.length) {
+      setDashboardMessage("Nothing to load on this page.", "");
+      return;
+    }
+
+    await Promise.all(tasks);
+
+    if (pageType === "piece-control") {
+      setDashboardMessage("Piece control loaded.", "success");
+      return;
+    }
+
+    if (pageType === "payment-methods") {
+      setDashboardMessage("Payment methods loaded.", "success");
+      return;
+    }
+
     setDashboardMessage("Dashboard loaded.", "success");
   } catch (error) {
     setDashboardMessage(error.message || "Could not load dashboard.", "error");
