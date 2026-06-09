@@ -2755,3 +2755,150 @@ button:disabled,
 }
 /* V2.0G.1 collapsible private analytics END */
 
+
+/* V2.0G.2 analytics card UI polish */
+.private-analytics-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1rem;
+}
+
+.private-analytics-heading > div:first-child {
+  min-width: 0;
+}
+
+.analytics-heading-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  justify-content: flex-end;
+  align-self: start;
+}
+
+.icon-only-btn {
+  width: 2.7rem;
+  height: 2.7rem;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.analytics-refresh-btn,
+.analytics-toggle-btn {
+  border: 1px solid rgba(255, 244, 251, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.analytics-refresh-btn:hover,
+.analytics-refresh-btn:focus-visible,
+.analytics-toggle-btn:hover,
+.analytics-toggle-btn:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(255, 203, 225, 0.36);
+  background: rgba(255, 203, 225, 0.11);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.analytics-refresh-btn:focus-visible,
+.analytics-toggle-btn:focus-visible {
+  outline: 3px solid rgba(255, 203, 225, 0.22);
+  outline-offset: 3px;
+}
+
+.icon-refresh {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  transform: rotate(-35deg);
+}
+
+.icon-refresh::after {
+  content: "";
+  position: absolute;
+  top: -0.2rem;
+  right: -0.12rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(18deg);
+}
+
+.icon-chevron {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(225deg);
+  transition: transform 0.18s ease;
+  margin-top: 0.12rem;
+}
+
+.private-analytics-card.is-collapsed .icon-chevron {
+  transform: rotate(45deg);
+  margin-top: -0.08rem;
+}
+
+.piece-analytics-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.private-analytics-card.is-collapsed {
+  grid-column: auto;
+  align-self: start;
+}
+
+.private-analytics-card.is-collapsed .private-analytics-heading {
+  margin-bottom: 0;
+  align-items: center;
+}
+
+.private-analytics-card.is-collapsed .card-heading p {
+  display: none;
+}
+
+.private-analytics-card.is-collapsed .piece-analytics-panel {
+  display: none;
+}
+
+.private-analytics-card.is-collapsed .analytics-refresh-btn {
+  display: none;
+}
+
+.private-analytics-card.is-collapsed .analytics-heading-actions {
+  gap: 0;
+}
+
+.private-analytics-card.is-collapsed .analytics-toggle-btn {
+  background: rgba(255, 203, 225, 0.12);
+}
+
+@media (max-width: 760px) {
+  .private-analytics-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-heading-actions {
+    justify-content: flex-start;
+  }
+
+  .private-analytics-card.is-collapsed {
+    grid-column: 1 / -1;
+  }
+}
+/* V2.0G.2 analytics card UI polish END */
+

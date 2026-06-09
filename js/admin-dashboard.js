@@ -221,13 +221,12 @@ function setPrivateAnalyticsCollapsed(isCollapsed) {
   card.classList.toggle("is-collapsed", isCollapsed);
   panel.hidden = isCollapsed;
   pieceAnalyticsToggleBtn.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
-  pieceAnalyticsToggleBtn.setAttribute("title", isCollapsed ? "Expand analytics" : "Minimize analytics");
+  pieceAnalyticsToggleBtn.setAttribute("title", isCollapsed ? "Expand analytics" : "Collapse analytics");
+  pieceAnalyticsToggleBtn.setAttribute("aria-label", isCollapsed ? "Expand analytics" : "Collapse analytics");
 
-  const icon = pieceAnalyticsToggleBtn.querySelector("[aria-hidden='true']");
   const label = pieceAnalyticsToggleBtn.querySelector(".sr-only");
 
-  if (icon) icon.textContent = isCollapsed ? "⌄" : "⌃";
-  if (label) label.textContent = isCollapsed ? "Expand analytics" : "Minimize analytics";
+  if (label) label.textContent = isCollapsed ? "Expand analytics" : "Collapse analytics";
 
   try {
     window.localStorage.setItem(PIECE_ANALYTICS_COLLAPSED_KEY, isCollapsed ? "1" : "0");

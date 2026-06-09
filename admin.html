@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@safespaceofyours | LogIn</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/admin.css?v=v20g1-collapsible-analytics" />
+  <link rel="stylesheet" href="css/admin.css?v=v20g2-analytics-ui-polish" />
 </head>
 <body>
   <main class="admin-shell">
@@ -90,17 +90,27 @@
               <p>Track one counted view/unlock per browser or device per piece.</p>
             </div>
             <div class="analytics-heading-actions">
-              <button id="pieceAnalyticsRefreshBtn" class="analytics-refresh-btn" type="button">Refresh</button>
+              <button
+                id="pieceAnalyticsRefreshBtn"
+                class="analytics-refresh-btn icon-only-btn"
+                type="button"
+                title="Refresh analytics"
+                aria-label="Refresh analytics"
+              >
+                <span class="icon-refresh" aria-hidden="true"></span>
+                <span class="sr-only">Refresh analytics</span>
+              </button>
               <button
                 id="pieceAnalyticsToggleBtn"
-                class="analytics-toggle-btn"
+                class="analytics-toggle-btn icon-only-btn"
                 type="button"
                 aria-expanded="true"
                 aria-controls="pieceAnalyticsPanel"
-                title="Minimize analytics"
+                title="Collapse analytics"
+                aria-label="Collapse analytics"
               >
-                <span aria-hidden="true">⌃</span>
-                <span class="sr-only">Minimize analytics</span>
+                <span class="icon-chevron" aria-hidden="true"></span>
+                <span class="sr-only">Collapse analytics</span>
               </button>
             </div>
           </div>
@@ -203,7 +213,7 @@
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
   <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
   <script src="js/admin-auth.js?v=v18r-label-controls-2"></script>
-  <script src="js/admin-dashboard.js?v=v20g1-collapsible-analytics"></script>
+  <script src="js/admin-dashboard.js?v=v20g2-analytics-ui-polish"></script>
 </body>
 </html>
 
