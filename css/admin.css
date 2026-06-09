@@ -2526,3 +2526,156 @@ button:disabled,
 }
 /* V2.0F.1 private floating controls END */
 
+
+/* V2.0G private analytics dashboard card */
+.private-analytics-card {
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 225, 0.1), transparent 18rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+}
+
+.private-analytics-heading {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.analytics-refresh-btn {
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 999px;
+  padding: 0.65rem 0.9rem;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.analytics-refresh-btn:hover,
+.analytics-refresh-btn:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(255, 203, 225, 0.34);
+  background: rgba(255, 203, 225, 0.1);
+}
+
+.analytics-refresh-btn:focus-visible {
+  outline: 3px solid rgba(255, 203, 225, 0.22);
+  outline-offset: 3px;
+}
+
+.analytics-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.analytics-stat-pill {
+  min-height: 5.6rem;
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+  padding: 0.95rem;
+  border: 1px solid rgba(255, 244, 251, 0.11);
+  border-radius: 20px;
+  background: rgba(10, 8, 14, 0.18);
+}
+
+.analytics-stat-pill span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.analytics-stat-pill strong {
+  color: var(--text);
+  font-size: clamp(1.45rem, 3vw, 2.1rem);
+  line-height: 1;
+}
+
+.piece-analytics-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.analytics-empty {
+  padding: 1rem;
+  border: 1px dashed rgba(255, 244, 251, 0.14);
+  border-radius: 18px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.analytics-piece-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.95rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.analytics-piece-main {
+  display: grid;
+  gap: 0.22rem;
+  min-width: 0;
+}
+
+.analytics-piece-main strong,
+.analytics-piece-main span {
+  overflow-wrap: anywhere;
+}
+
+.analytics-piece-main span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.analytics-piece-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.analytics-piece-metrics span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 203, 225, 0.08);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.analytics-piece-metrics b {
+  color: var(--text);
+}
+
+@media (max-width: 760px) {
+  .private-analytics-heading,
+  .analytics-piece-row {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-piece-metrics {
+    justify-content: flex-start;
+  }
+
+  .analytics-refresh-btn {
+    width: fit-content;
+  }
+}
+/* V2.0G private analytics dashboard card END */
+

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@safespaceofyours | LogIn</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/admin.css?v=v20f1-private-floating-controls" />
+  <link rel="stylesheet" href="css/admin.css?v=v20g-private-analytics-card" />
 </head>
 <body>
   <main class="admin-shell">
@@ -82,6 +82,36 @@
         </div>
 </div>
 <div class="dashboard-grid">
+        <!-- V2.0G private piece analytics -->
+        <section class="admin-card manager-card wide-card private-analytics-card" id="privateAnalyticsCard">
+          <div class="card-heading private-analytics-heading">
+            <div>
+              <h3>Private analytics</h3>
+              <p>Track one counted view/unlock per browser or device per piece.</p>
+            </div>
+            <button id="pieceAnalyticsRefreshBtn" class="analytics-refresh-btn" type="button">Refresh</button>
+          </div>
+
+          <div class="analytics-stat-grid" aria-label="Private analytics summary">
+            <div class="analytics-stat-pill">
+              <span>Total views</span>
+              <strong id="analyticsTotalViews">0</strong>
+            </div>
+            <div class="analytics-stat-pill">
+              <span>Total unlocks</span>
+              <strong id="analyticsTotalUnlocks">0</strong>
+            </div>
+            <div class="analytics-stat-pill">
+              <span>Top unlock rate</span>
+              <strong id="analyticsTopUnlockRate">0%</strong>
+            </div>
+          </div>
+
+          <div id="pieceAnalyticsList" class="piece-analytics-list" aria-live="polite">
+            <div class="analytics-empty">Analytics will appear here after readers open or unlock pieces.</div>
+          </div>
+        </section>
+
         <section class="admin-card manager-card">
           <div class="card-heading">
             <h3>Promo codes</h3>
@@ -158,7 +188,7 @@
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
   <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
   <script src="js/admin-auth.js?v=v18r-label-controls-2"></script>
-  <script src="js/admin-dashboard.js?v=v20f1-private-floating-controls"></script>
+  <script src="js/admin-dashboard.js?v=v20g-private-analytics-card"></script>
 </body>
 </html>
 

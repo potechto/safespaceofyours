@@ -9,6 +9,11 @@ const pieceControlFilters = document.querySelector("#pieceControlFilters");
 const pieceControlSearchInput = document.querySelector("#pieceControlSearchInput");
 const pieceControlSearchSummary = document.querySelector("#pieceControlSearchSummary");
 const promoRequestList = document.querySelector("#promoRequestList");
+const pieceAnalyticsList = document.querySelector("#pieceAnalyticsList");
+const analyticsTotalViews = document.querySelector("#analyticsTotalViews");
+const analyticsTotalUnlocks = document.querySelector("#analyticsTotalUnlocks");
+const analyticsTopUnlockRate = document.querySelector("#analyticsTopUnlockRate");
+const pieceAnalyticsRefreshBtn = document.querySelector("#pieceAnalyticsRefreshBtn");
 
 
 function syncAdminControlBarVisibility() {
@@ -99,6 +104,139 @@ let latestAdminPieces = [];
 let activePieceControlFilter = "all";
 let activePieceControlSearch = "";
 let pieceCharacterCountCache = new Map();
+let latestPieceAnalytics = [];
+
+function getAdminClientForAnalytics() {
+  if (typeof adminClient !== "undefined" && adminClient) return adminClient;
+  return window.safeAdminClient || null;
+}
+
+function getAnalyticsPieceTitle(slug) {
+  const normalizedSlug = String(slug || "").trim();
+
+  const adminPiece = latestAdminPieces.find(piece => piece.slug === normalizedSlug);
+  if (adminPiece && adminPiece.title) return adminPiece.title;
+
+  const sourcePiece = Array.isArray(window.POEMS)
+    ? window.POEMS.find(piece => piece.slug === normalizedSlug)
+    : null;
+
+  return sourcePiece && sourcePiece.title ? sourcePiece.title : normalizedSlug;
+}
+
+function formatAnalyticsNumber(value) {
+  const number = Number(value) || 0;
+  return number.toLocaleString("en-PH");
+}
+
+function formatAnalyticsRate(value) {
+  const number = Number(value) || 0;
+  return `${number.toFixed(number % 1 === 0 ? 0 : 1)}%`;
+}
+
+function renderPieceAnalytics(data = []) {
+  if (!pieceAnalyticsList) return;
+
+  const rows = Array.isArray(data) ? data : [];
+  latestPieceAnalytics = rows;
+
+  const totalViews = rows.reduce((sum, item) => sum + (Number(item.view_count) || 0), 0);
+  const totalUnlocks = rows.reduce((sum, item) => sum + (Number(item.unlock_count) || 0), 0);
+  const topUnlockRate = rows.reduce((max, item) => Math.max(max, Number(item.unlock_rate) || 0), 0);
+
+  if (analyticsTotalViews) analyticsTotalViews.textContent = formatAnalyticsNumber(totalViews);
+  if (analyticsTotalUnlocks) analyticsTotalUnlocks.textContent = formatAnalyticsNumber(totalUnlocks);
+  if (analyticsTopUnlockRate) analyticsTopUnlockRate.textContent = formatAnalyticsRate(topUnlockRate);
+
+  if (!rows.length) {
+    pieceAnalyticsList.innerHTML = `<div class="analytics-empty">No analytics yet. Open a public piece or unlock a paid piece, then refresh this card.</div>`;
+    return;
+  }
+
+  const sortedRows = [...rows]
+    .sort((a, b) => {
+      const unlockDiff = (Number(b.unlock_count) || 0) - (Number(a.unlock_count) || 0);
+      if (unlockDiff) return unlockDiff;
+
+      const viewDiff = (Number(b.view_count) || 0) - (Number(a.view_count) || 0);
+      if (viewDiff) return viewDiff;
+
+      return String(a.piece_slug || "").localeCompare(String(b.piece_slug || ""));
+    })
+    .slice(0, 8);
+
+  pieceAnalyticsList.innerHTML = sortedRows.map(item => {
+    const slug = String(item.piece_slug || "");
+    const title = getAnalyticsPieceTitle(slug);
+    const views = Number(item.view_count) || 0;
+    const unlocks = Number(item.unlock_count) || 0;
+    const rate = Number(item.unlock_rate) || 0;
+
+    return `
+      <article class="analytics-piece-row">
+        <div class="analytics-piece-main">
+          <strong>${escapeAdminHTML(title)}</strong>
+          <span>${escapeAdminHTML(slug)}</span>
+        </div>
+        <div class="analytics-piece-metrics">
+          <span><b>${formatAnalyticsNumber(views)}</b> views</span>
+          <span><b>${formatAnalyticsNumber(unlocks)}</b> unlocks</span>
+          <span><b>${formatAnalyticsRate(rate)}</b> rate</span>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+async function loadPieceAnalytics() {
+  if (!pieceAnalyticsList) return;
+
+  const client = getAdminClientForAnalytics();
+  if (!client) {
+    pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Analytics client is not ready yet. Refresh after logging in.</div>`;
+    return;
+  }
+
+  pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Loading analytics...</div>`;
+
+  const { data, error } = await client.rpc("get_private_piece_analytics");
+
+  if (error) {
+    console.warn("Private analytics failed to load:", error);
+    pieceAnalyticsList.innerHTML = `<div class="analytics-empty">Analytics could not be loaded yet. Make sure V20 SQL is applied and you are logged in as admin.</div>`;
+    return;
+  }
+
+  renderPieceAnalytics(data || []);
+}
+
+function setupPrivateAnalyticsCard() {
+  if (!pieceAnalyticsList) return;
+
+  if (pieceAnalyticsRefreshBtn) {
+    pieceAnalyticsRefreshBtn.addEventListener("click", () => {
+      loadPieceAnalytics().catch(error => console.warn("Private analytics refresh failed:", error));
+    });
+  }
+
+  const dashboardView = document.querySelector("#dashboardView");
+
+  function loadWhenVisible() {
+    if (!dashboardView || !dashboardView.classList.contains("hidden")) {
+      loadPieceAnalytics().catch(error => console.warn("Private analytics load failed:", error));
+    }
+  }
+
+  if (dashboardView && "MutationObserver" in window) {
+    const observer = new MutationObserver(loadWhenVisible);
+    observer.observe(dashboardView, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+  }
+
+  loadWhenVisible();
+}
 
 function setDashboardMessage(message, type = "") {
   if (!dashboardMessage) return;
@@ -1328,6 +1466,8 @@ setupAdminControlBarGate();
   }, true);
 })();
 
+
+setupPrivateAnalyticsCard();
 
 /* V2.0F.1 private floating controls */
 (function setupPrivateFloatingControls() {
