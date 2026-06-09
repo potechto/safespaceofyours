@@ -178,7 +178,6 @@ function renderPieceAnalytics(data = []) {
       <article class="analytics-piece-row">
         <div class="analytics-piece-main">
           <strong>${escapeAdminHTML(title)}</strong>
-          <span>${escapeAdminHTML(slug)}</span>
         </div>
         <div class="analytics-piece-metrics">
           <span><b>${formatAnalyticsNumber(views)}</b> views</span>
