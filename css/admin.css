@@ -3667,3 +3667,91 @@ body[data-admin-page="piece-control"] .piece-control-cover[hidden] {
 }
 /* V2.0Q.8 private analytics polish END */
 
+
+/* V2.0Q.9 payment methods polish */
+body[data-admin-page="payment-methods"] .admin-standalone-note {
+  max-width: 54rem;
+  margin-bottom: 1.15rem;
+}
+
+body[data-admin-page="payment-methods"] .admin-standalone-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+body[data-admin-page="payment-methods"] #paymentMethodsCard {
+  width: 100%;
+  overflow: hidden;
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+body[data-admin-page="payment-methods"] #paymentMethodsCard .card-heading {
+  margin-bottom: 1rem;
+}
+
+body[data-admin-page="payment-methods"] #paymentList {
+  display: grid;
+  gap: 0.85rem;
+  max-height: min(62vh, 38rem);
+  overflow: auto;
+  padding-right: 0.2rem;
+  scrollbar-width: thin;
+}
+
+body[data-admin-page="payment-methods"] #paymentList:empty::before {
+  content: "No payment methods added yet.";
+  min-height: 5rem;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255, 244, 251, 0.14);
+  border-radius: 18px;
+  color: var(--soft);
+  text-align: center;
+  padding: 1rem;
+}
+
+body[data-admin-page="payment-methods"] #paymentList .admin-list-item,
+body[data-admin-page="payment-methods"] #paymentList .payment-method-item,
+body[data-admin-page="payment-methods"] #paymentList > * {
+  min-width: 0;
+}
+
+body[data-admin-page="payment-methods"] #paymentList input,
+body[data-admin-page="payment-methods"] #paymentList textarea,
+body[data-admin-page="payment-methods"] #paymentList select {
+  width: 100%;
+}
+
+body[data-admin-page="payment-methods"] #paymentList textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+body[data-admin-page="payment-methods"] #paymentList img {
+  max-width: min(100%, 18rem);
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+body[data-admin-page="payment-methods"] #paymentList button {
+  max-width: 100%;
+}
+
+@media (max-width: 620px) {
+  body[data-admin-page="payment-methods"] #paymentMethodsCard {
+    padding: 0.85rem;
+  }
+
+  body[data-admin-page="payment-methods"] #paymentList {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  body[data-admin-page="payment-methods"] #paymentList img {
+    max-width: 100%;
+  }
+}
+/* V2.0Q.9 payment methods polish END */
+
