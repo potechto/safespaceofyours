@@ -277,7 +277,7 @@ function setupPrivateAnalyticsCard() {
 
   if (pieceAnalyticsRefreshBtn) {
     pieceAnalyticsRefreshBtn.addEventListener("click", () => {
-      loadPieceAnalytics({ silent: true }).catch(error => console.warn("Private analytics refresh failed:", error));
+      loadPieceAnalytics({ silent: false }).catch(error => console.warn("Private analytics refresh failed:", error));
     });
   }
 
