@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pieces Archive | @safespaceofyours</title>
+  <meta name="description" content="Browse poems, spoken poetry, reflections, free reads, and premium previews from @safespaceofyours." />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="css/style.css?v=v20l-page-split" />
+</head>
+<body>
+  <div class="bg-orbs"></div>
+  <div class="paper-texture"></div>
+  <header class="site-header">
+    <a href="./" class="logo">@safespaceofyours</a>
+    <button class="mobile-nav-toggle" type="button" data-mobile-nav-toggle aria-label="Open navigation menu" aria-expanded="false" aria-controls="siteNavLinks">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+    <nav class="nav-links" id="siteNavLinks">
+      <a href="./">Home</a>
+      <a href="pieces.html" aria-current="page">Pieces</a>
+      <a href="commissions.html">Commissions</a>
+      <button id="openAboutModal" class="nav-modal-btn" type="button">About</button>
+      <button id="openPromoCodesModal" class="nav-modal-btn" type="button">Promo Codes</button>
+      <button id="openSocialModal" class="nav-modal-btn" type="button">Connect with Me</button>
+      <button id="openAdminGate" class="nav-link-button admin-nav-link" type="button">LogIn</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="pieces" class="pieces-section">
+          <div class="section-heading">
+            <p class="eyebrow">Pieces</p>
+            <h2>Pieces archive</h2>
+            <p>Browse by title, category, or emotion. Free pieces open fully, while premium pieces show a preview and unlock options.</p>
+          </div>
+    <div class="tools">
+            <input id="searchInput" type="search" placeholder="Search a poem..." />
+            <div id="filterButtons" class="filter-buttons"></div>
+          </div>
+    <div id="poemGrid" class="poem-grid"></div>
+    <p id="emptyState" class="empty-state" hidden>
+            No pieces found. Try another keyword or category.
+          </p>
+        </section>
+  </main>
+
+  <footer>
+    <p>&copy; @safespaceofyours. Written with quiet courage.</p>
+  </footer>
+
+<div id="socialModal" class="modal-overlay" aria-hidden="true">
+    <div class="social-modal" role="dialog" aria-modal="true" aria-labelledby="socialModalTitle">
+      <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close social links"><span aria-hidden="true">X</span></button>
+<p class="eyebrow">Connect</p>
+      <h2 id="socialModalTitle">Connect with Me</h2>
+      <p class="modal-subtitle">
+        Find my other spaces here. TikTok will be added once the poetry account/link is ready.
+      </p>
+<div class="modal-social-grid">
+        <a class="modal-social-card" href="mailto:ralphjohnsantos01@gmail.com">
+          <span>Email</span>
+          <strong>ralphjohnsantos01@gmail.com</strong>
+        </a>
+<a class="modal-social-card" href="https://www.facebook.com/ralphjohn.santos.79" target="_blank" rel="noopener noreferrer">
+          <span>Facebook</span>
+          <strong>John Santos</strong>
+        </a>
+<a class="modal-social-card" href="https://github.com/potechto" target="_blank" rel="noopener noreferrer">
+          <span>GitHub</span>
+          <strong>@potechto</strong>
+        </a>
+<a class="modal-social-card" href="https://www.instagram.com/live_xps/" target="_blank" rel="noopener noreferrer">
+          <span>Instagram</span>
+          <strong>@live_xps</strong>
+        </a>
+<div class="modal-social-card disabled-social" aria-disabled="true">
+          <span>TikTok</span>
+          <strong>Coming soon</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Back to top">&#8593;</button>
+  <script src="js/poems.js?v=v18r-label-controls-2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
+  <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
+  <script src="js/main.js?v=v20k1-mobile-hamburger-nav"></script>
+</body>
+</html>

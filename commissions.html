@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commissions | @safespaceofyours</title>
+  <meta name="description" content="Commission information, inquiry flow, payment support, and custom spoken poetry options from @safespaceofyours." />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="css/style.css?v=v20l-page-split" />
+</head>
+<body>
+  <div class="bg-orbs"></div>
+  <div class="paper-texture"></div>
+  <header class="site-header">
+    <a href="./" class="logo">@safespaceofyours</a>
+    <button class="mobile-nav-toggle" type="button" data-mobile-nav-toggle aria-label="Open navigation menu" aria-expanded="false" aria-controls="siteNavLinks">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+    <nav class="nav-links" id="siteNavLinks">
+      <a href="./">Home</a>
+      <a href="pieces.html">Pieces</a>
+      <a href="commissions.html" aria-current="page">Commissions</a>
+      <button id="openAboutModal" class="nav-modal-btn" type="button">About</button>
+      <button id="openPromoCodesModal" class="nav-modal-btn" type="button">Promo Codes</button>
+      <button id="openSocialModal" class="nav-modal-btn" type="button">Connect with Me</button>
+      <button id="openAdminGate" class="nav-link-button admin-nav-link" type="button">LogIn</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="commissions" class="commissions-section">
+          <div class="section-heading">
+            <p class="eyebrow">Commissions & Support</p>
+            <h2>Words written for your story</h2>
+            <p>
+              This space is open for custom spoken poetry inquiries, personal message pieces,
+              and small writing projects.
+            </p>
+          </div>
+    <div class="commission-status">
+            <span>Commission inquiries: Open</span>
+            <span>Payments/support: QR-ready</span>
+    </div>
+    <div class="commission-cards">
+            <article>
+              <span class="commission-card-label">Custom</span>
+              <h3>Personal Spoken Poetry</h3>
+              <p>
+                For confessions, apologies, healing pieces, closure letters, or words you want to say deeply.
+              </p>
+            </article>
+    <article>
+              <span class="commission-card-label">Occasions</span>
+              <h3>Message Pieces</h3>
+              <p>
+                For birthdays, anniversaries, monthsaries, family messages, appreciation, and special moments.
+              </p>
+            </article>
+    <article>
+              <span class="commission-card-label">Projects</span>
+              <h3>Contract Writing</h3>
+              <p>
+                For short creative writing tasks, captions, spoken-word drafts, and emotional copy per project.
+              </p>
+            </article>
+    <article>
+              <span class="commission-card-label">Support</span>
+              <h3>Support & Unlocks</h3>
+              <p>
+                Readers can use manual payment options for support, custom work, or future premium unlock requests.
+              </p>
+            </article>
+          </div>
+    <div class="process-panel">
+            <h3>How inquiries work</h3>
+            <ol>
+              <li>Send the story, purpose, mood, and deadline.</li>
+              <li>Scope and writing direction will be confirmed first.</li>
+              <li>The piece will be drafted based on the agreed direction.</li>
+              <li>Final text will be sent after review and confirmation.</li>
+            </ol>
+    <div class="commission-actions">
+              <button id="openInquiryModal" class="btn primary" type="button">Start an inquiry</button>
+              <button class="btn secondary" type="button" data-open-payment>Payment options</button>
+              <a class="btn secondary" href="#pieces">Read samples</a>
+            </div>
+    <p class="service-note">
+    </p>
+    </div>
+        </section>
+  </main>
+
+  <footer>
+    <p>&copy; @safespaceofyours. Written with quiet courage.</p>
+  </footer>
+
+<div id="socialModal" class="modal-overlay" aria-hidden="true">
+    <div class="social-modal" role="dialog" aria-modal="true" aria-labelledby="socialModalTitle">
+      <button id="closeSocialModal" class="modal-close" type="button" aria-label="Close social links"><span aria-hidden="true">X</span></button>
+<p class="eyebrow">Connect</p>
+      <h2 id="socialModalTitle">Connect with Me</h2>
+      <p class="modal-subtitle">
+        Find my other spaces here. TikTok will be added once the poetry account/link is ready.
+      </p>
+<div class="modal-social-grid">
+        <a class="modal-social-card" href="mailto:ralphjohnsantos01@gmail.com">
+          <span>Email</span>
+          <strong>ralphjohnsantos01@gmail.com</strong>
+        </a>
+<a class="modal-social-card" href="https://www.facebook.com/ralphjohn.santos.79" target="_blank" rel="noopener noreferrer">
+          <span>Facebook</span>
+          <strong>John Santos</strong>
+        </a>
+<a class="modal-social-card" href="https://github.com/potechto" target="_blank" rel="noopener noreferrer">
+          <span>GitHub</span>
+          <strong>@potechto</strong>
+        </a>
+<a class="modal-social-card" href="https://www.instagram.com/live_xps/" target="_blank" rel="noopener noreferrer">
+          <span>Instagram</span>
+          <strong>@live_xps</strong>
+        </a>
+<div class="modal-social-card disabled-social" aria-disabled="true">
+          <span>TikTok</span>
+          <strong>Coming soon</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Back to top">&#8593;</button>
+  <script src="js/poems.js?v=v18r-label-controls-2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
+  <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
+  <script src="js/main.js?v=v20k1-mobile-hamburger-nav"></script>
+</body>
+</html>

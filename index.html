@@ -6,7 +6,7 @@
 <title>@safespaceofyours | Spoken Poetry</title>
   <meta name="description" content="A personal safe space for spoken poetry, reflections, healing, and written feelings." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="css/style.css?v=v20k1-mobile-hamburger-nav" />
+  <link rel="stylesheet" href="css/style.css?v=v20l-page-split" />
 </head>
 <body>
   <div class="bg-orbs"></div>
@@ -19,8 +19,8 @@
       <span aria-hidden="true"></span>
     </button>
 <nav class="nav-links" id="siteNavLinks">
-      <a href="#pieces">Pieces</a>
-      <a href="#commissions">Commissions</a>
+      <a href="pieces.html">Pieces</a>
+      <a href="commissions.html">Commissions</a>
       <button id="openAboutModal" class="nav-modal-btn" type="button">About</button>
       <button id="openPromoCodesModal" class="nav-modal-btn" type="button">Promo Codes</button>
       <button id="openSocialModal" class="nav-modal-btn" type="button">Connect with Me</button>
@@ -28,7 +28,7 @@
       </nav>
   </header>
 <main>
-    <section class="hero">
+<section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">Spoken poetry</p>
         <h1>For the words we almost kept silent.</h1>
@@ -36,8 +36,8 @@
           A quiet home for reflections, heartbreaks, faith, dreams, and the pieces that still know how to feel.
         </p>
 <div class="hero-actions">
-          <a href="#pieces" class="btn primary">Read the pieces</a>
-          <a href="#commissions" class="btn secondary">Open for inquiries</a>
+          <a href="pieces.html" class="btn primary">Read the pieces</a>
+          <a href="commissions.html" class="btn secondary">Open for inquiries</a>
         </div>
       </div>
 <div class="hero-card">
@@ -48,80 +48,49 @@
         <p>"Be kind to yourself, even on days you are still learning how."</p>
       </div>
     </section>
-<section id="pieces" class="pieces-section">
+
+    <section class="home-overview-section">
       <div class="section-heading">
-        <p class="eyebrow">Pieces</p>
-        <h2>Read the pieces</h2>
-        <p>Browse by title, category, or emotion. Click a card to read the full piece.</p>
-      </div>
-<div class="tools">
-        <input id="searchInput" type="search" placeholder="Search a poem..." />
-        <div id="filterButtons" class="filter-buttons"></div>
-      </div>
-<div id="poemGrid" class="poem-grid"></div>
-<p id="emptyState" class="empty-state" hidden>
-        No pieces found. Try another keyword or category.
-      </p>
-    </section>
-<section id="commissions" class="commissions-section">
-      <div class="section-heading">
-        <p class="eyebrow">Commissions & Support</p>
-        <h2>Words written for your story</h2>
+        <p class="eyebrow">Start here</p>
+        <h2>A softer way to move through this space</h2>
         <p>
-          This space is open for custom spoken poetry inquiries, personal message pieces,
-          and small writing projects.
+          The full archive and commission details now have their own pages, so this home can stay quiet,
+          light, and easier to breathe in.
         </p>
       </div>
-<div class="commission-status">
-        <span>Commission inquiries: Open</span>
-        <span>Payments/support: QR-ready</span>
-</div>
-<div class="commission-cards">
-        <article>
-          <span class="commission-card-label">Custom</span>
-          <h3>Personal Spoken Poetry</h3>
-          <p>
-            For confessions, apologies, healing pieces, closure letters, or words you want to say deeply.
-          </p>
+
+      <div class="home-path-grid">
+        <article class="home-path-card">
+          <span class="commission-card-label">Archive</span>
+          <h3>Read the pieces</h3>
+          <p>Browse all poems, stories, reflections, free reads, and premium previews in one dedicated archive.</p>
+          <a class="btn secondary" href="pieces.html">Open pieces</a>
         </article>
-<article>
-          <span class="commission-card-label">Occasions</span>
-          <h3>Message Pieces</h3>
-          <p>
-            For birthdays, anniversaries, monthsaries, family messages, appreciation, and special moments.
-          </p>
+
+        <article class="home-path-card">
+          <span class="commission-card-label">Custom words</span>
+          <h3>Commissions</h3>
+          <p>See inquiry details for personal spoken poetry, message pieces, creative writing, and support options.</p>
+          <a class="btn secondary" href="commissions.html">View commissions</a>
         </article>
-<article>
-          <span class="commission-card-label">Projects</span>
-          <h3>Contract Writing</h3>
-          <p>
-            For short creative writing tasks, captions, spoken-word drafts, and emotional copy per project.
-          </p>
-        </article>
-<article>
+
+        <article class="home-path-card">
           <span class="commission-card-label">Support</span>
-          <h3>Support & Unlocks</h3>
-          <p>
-            Readers can use manual payment options for support, custom work, or future premium unlock requests.
-          </p>
+          <h3>Premium unlocks & promos</h3>
+          <p>Use promo codes, payment options, and manual unlock support for future premium reading access.</p>
+          <a class="btn secondary" href="pieces.html">Find premium reads</a>
         </article>
       </div>
-<div class="process-panel">
-        <h3>How inquiries work</h3>
-        <ol>
-          <li>Send the story, purpose, mood, and deadline.</li>
-          <li>Scope and writing direction will be confirmed first.</li>
-          <li>The piece will be drafted based on the agreed direction.</li>
-          <li>Final text will be sent after review and confirmation.</li>
-        </ol>
-<div class="commission-actions">
-          <button id="openInquiryModal" class="btn primary" type="button">Start an inquiry</button>
-          <button class="btn secondary" type="button" data-open-payment>Payment options</button>
-          <a class="btn secondary" href="#pieces">Read samples</a>
-        </div>
-<p class="service-note">
-</p>
-</div>
+    </section>
+
+    <section class="home-overview-section home-quiet-note">
+      <div class="section-heading">
+        <p class="eyebrow">A small reminder</p>
+        <h2>Be kind to yourself while reading.</h2>
+        <p>
+          Some pieces may hold grief, faith, longing, and healing. Take only what your heart can carry today.
+        </p>
+      </div>
     </section>
 </main>
 <footer>
@@ -161,7 +130,7 @@
       </div>
     </div>
   </div>
-  <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Back to top">>
+  <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Back to top">&#8593;</button>
 <script src="js/poems.js?v=v18r-label-controls-2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
