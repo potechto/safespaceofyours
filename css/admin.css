@@ -3370,3 +3370,49 @@ body[data-admin-page="payment-methods"] .admin-standalone-grid {
 }
 /* V2.0Q.2 admin same-tab nav and standalone layout END */
 
+
+/* V2.0Q.3 admin piece control visual fix */
+.admin-standalone-note {
+  margin: 0 0 1rem;
+  color: var(--soft);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+body[data-admin-page="piece-control"] .admin-standalone-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: start;
+}
+
+body[data-admin-page="piece-control"] .admin-standalone-grid > .admin-card:nth-child(1),
+body[data-admin-page="piece-control"] .admin-standalone-grid > .admin-card:nth-child(2) {
+  grid-column: auto !important;
+  min-width: 0;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard {
+  grid-column: 1 / -1 !important;
+}
+
+body[data-admin-page="piece-control"] .piece-control-cover {
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body[data-admin-page="piece-control"] .piece-control-cover[src=""],
+body[data-admin-page="piece-control"] .piece-control-cover:not([src]) {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  body[data-admin-page="piece-control"] .admin-standalone-grid {
+    gap: 0.7rem;
+  }
+
+  body[data-admin-page="piece-control"] .admin-standalone-grid > .admin-card:nth-child(1),
+  body[data-admin-page="piece-control"] .admin-standalone-grid > .admin-card:nth-child(2) {
+    padding: 0.9rem;
+  }
+}
+/* V2.0Q.3 admin piece control visual fix END */
+
