@@ -1143,6 +1143,25 @@ document.addEventListener("change", event => {
 });
 
 
+function getAdminCodeLabelFromButton(button, fallbackLabel = "selected code") {
+  const card = button ? button.closest(".admin-code-card") : null;
+  const title = card ? card.querySelector(".admin-code-title") : null;
+  const codeLabel = title ? String(title.textContent || "").trim() : "";
+
+  return codeLabel || fallbackLabel;
+}
+
+function confirmDangerousCodeDelete(kind, codeLabel) {
+  const typeLabel = kind === "promo" ? "promo code" : "unlock code";
+  const typed = window.prompt(
+    `Delete this ${typeLabel}?\n\nCode: ${codeLabel}\n\nThis cannot be undone. If this code was already used, deleting it may remove your admin reference for that code.\n\nType DELETE to confirm.`,
+    ""
+  );
+
+  return typed === "DELETE";
+}
+
+
 document.addEventListener("click", async event => {
   const copyAdminCode = event.target.closest("[data-copy-admin-code]");
   const pieceFilter = event.target.closest("[data-piece-filter]");
@@ -1180,10 +1199,19 @@ document.addEventListener("click", async event => {
     }
 
     if (promoDelete) {
+      const codeLabel = getAdminCodeLabelFromButton(promoDelete, "selected promo code");
+      const confirmed = confirmDangerousCodeDelete("promo", codeLabel);
+
+      if (!confirmed) {
+        setDashboardMessage("Promo delete cancelled.");
+        return;
+      }
+
       const { error } = await adminClient.from("promo_codes").delete().eq("id", promoDelete.dataset.deletePromo);
       if (error) throw error;
       await loadPromos();
       setDashboardMessage("Promo deleted.", "success");
+      return;
     }
 
     if (unlockToggle) {
@@ -1195,10 +1223,19 @@ document.addEventListener("click", async event => {
     }
 
     if (unlockDelete) {
+      const codeLabel = getAdminCodeLabelFromButton(unlockDelete, "selected unlock code");
+      const confirmed = confirmDangerousCodeDelete("unlock", codeLabel);
+
+      if (!confirmed) {
+        setDashboardMessage("Unlock delete cancelled.");
+        return;
+      }
+
       const { error } = await adminClient.from("unlock_codes").delete().eq("id", unlockDelete.dataset.deleteUnlock);
       if (error) throw error;
       await loadUnlocks();
       setDashboardMessage("Unlock deleted.", "success");
+      return;
     }
 
 

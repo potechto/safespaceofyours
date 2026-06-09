@@ -3025,3 +3025,47 @@ button:disabled,
 }
 /* V2.0H depleted promo/unlock code cards END */
 
+
+/* V2.0I code card layout polish */
+.admin-code-card .admin-code-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.9rem;
+}
+
+.admin-code-card .admin-code-identity {
+  min-width: 0;
+}
+
+.admin-code-card .admin-code-title {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-code-card .admin-code-info-wrap {
+  justify-self: end;
+  align-self: start;
+  margin-left: clamp(0.6rem, 2vw, 1.15rem);
+}
+
+.admin-code-card .admin-code-info-btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 520px) {
+  .admin-code-card .admin-code-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .admin-code-card .admin-code-info-wrap {
+    margin-left: 0.35rem;
+  }
+}
+/* V2.0I code card layout polish END */
+
