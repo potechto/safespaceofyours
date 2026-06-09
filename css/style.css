@@ -4209,3 +4209,112 @@ section#about {
 }
 /* V2.0L.1 home cleanup and commissions one-row cards END */
 
+
+/* V2.0Q.10 public viewer polish */
+.site-header {
+  gap: clamp(0.7rem, 2vw, 1.35rem);
+  align-items: center;
+}
+
+.logo {
+  min-width: 0;
+  max-width: min(58vw, 24rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-links {
+  align-items: center;
+  gap: clamp(0.45rem, 1.4vw, 0.95rem);
+}
+
+.nav-links a,
+.nav-modal-btn,
+.nav-link-button {
+  min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.hero,
+.pieces-section,
+.commissions-section,
+.reader-layout {
+  scroll-margin-top: 6rem;
+}
+
+.section-heading {
+  max-width: 64rem;
+}
+
+.piece-card,
+.commission-card,
+.support-card,
+.reader-card {
+  overflow: hidden;
+}
+
+.reader-layout {
+  width: min(100% - 2rem, 960px);
+  margin-inline: auto;
+}
+
+.reader-actions {
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.reader-action-btn {
+  min-width: 0;
+}
+
+.scroll-top {
+  will-change: transform, opacity;
+}
+
+@media (max-width: 700px) {
+  .site-header {
+    padding-inline: 1rem;
+  }
+
+  .logo {
+    max-width: min(62vw, 18rem);
+  }
+
+  .nav-links {
+    max-height: min(72vh, 30rem);
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+
+  .nav-links a,
+  .nav-modal-btn,
+  .nav-link-button {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .hero,
+  .pieces-section,
+  .commissions-section,
+  .reader-layout {
+    padding-inline: 1rem;
+  }
+
+  .reader-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .reader-action-btn {
+    width: 100%;
+  }
+}
+/* V2.0Q.10 public viewer polish END */
+
