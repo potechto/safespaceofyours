@@ -496,46 +496,88 @@ function formatUseStatus(item) {
 
 function promptPromoDetails(pieceTitle) {
   const typeAnswer = window.prompt(
-    `Generate promo for "${pieceTitle}"\n\nType P for percent discount or F for fixed peso discount.`,
+    `Generate promo for "${pieceTitle}"\n\nChoose discount type:\n\nP = Percent discount, example: 10 means 10% off\nF = Fixed PHP discount, example: 50 means PHP 50 off\n\nType P or F.`,
     "P"
   );
 
   if (typeAnswer === null) return null;
 
   const normalizedType = typeAnswer.trim().toLowerCase();
-  const discountType = normalizedType.startsWith("f") ? "fixed" : "percent";
+  const discountType = normalizedType.startsWith("f") || normalizedType.includes("php") || normalizedType.includes("peso")
+    ? "fixed"
+    : "percent";
 
   const valueAnswer = window.prompt(
     discountType === "percent"
-      ? "Enter percent discount value. Example: 10 means 10% off."
-      : "Enter fixed peso discount value. Example: 10 means PHP 10 off.",
-    "10"
+      ? "Enter percent discount.\n\nExample: 10 means 10% off.\nAllowed range: 1 to 100.\nNumbers only; do not include %."
+      : "Enter fixed PHP discount.\n\nExample: 50 means PHP 50 off.\nNumbers only; PHP, ₱, and commas will be cleaned automatically.",
+    discountType === "percent" ? "10" : "50"
   );
 
   if (valueAnswer === null) return null;
 
-  const discountValue = Number(valueAnswer);
+  const cleanedDiscountValue = String(valueAnswer)
+    .replace(/php/gi, "")
+    .replace(/₱/g, "")
+    .replace(/%/g, "")
+    .replace(/,/g, "")
+    .trim();
+
+  const discountValue = Number(cleanedDiscountValue);
 
   if (!Number.isFinite(discountValue) || discountValue <= 0) {
-    setDashboardMessage("Promo discount value must be greater than 0.", "error");
+    setDashboardMessage(
+      discountType === "percent"
+        ? "Percent discount must be a number greater than 0."
+        : "Fixed PHP discount must be a number greater than 0.",
+      "error"
+    );
+    return null;
+  }
+
+  if (discountType === "percent" && discountValue > 100) {
+    setDashboardMessage("Percent discount cannot be higher than 100.", "error");
     return null;
   }
 
   const maxUsesAnswer = window.prompt(
-    "How many times can this promo code be used? Example: 1 for one buyer, 5 for five uses.",
+    "How many times can this promo code be used?\n\n1 = one buyer only\n5 = five uses\n\nEnter a whole number greater than 0.",
     "1"
   );
 
   if (maxUsesAnswer === null) return null;
 
-  const maxUses = Math.max(1, Math.floor(Number(maxUsesAnswer) || 1));
+  const maxUses = Math.floor(Number(String(maxUsesAnswer).replace(/,/g, "").trim()));
 
-  const codeAnswer = window.prompt("Optional: type promo code, or leave blank to auto-generate.", "");
+  if (!Number.isFinite(maxUses) || maxUses <= 0) {
+    setDashboardMessage("Promo uses must be a whole number greater than 0.", "error");
+    return null;
+  }
+
+  const codeAnswer = window.prompt(
+    "Optional custom promo code.\n\nLeave blank to auto-generate.\nAllowed: letters, numbers, and dash only.",
+    ""
+  );
 
   if (codeAnswer === null) return null;
 
+  const code = codeAnswer
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/gi, "")
+    .toUpperCase();
+
+  const confirmed = window.confirm(
+    `Create this promo code?\n\nPiece: ${pieceTitle}\nDiscount: ${formatDiscount(discountType, discountValue)}\nAllowed uses: ${maxUses}\nCode: ${code || "Auto-generate"}`
+  );
+
+  if (!confirmed) {
+    setDashboardMessage("Promo generation cancelled.");
+    return null;
+  }
+
   return {
-    code: codeAnswer.trim().toUpperCase(),
+    code,
     discountType,
     discountValue,
     maxUses
