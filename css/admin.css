@@ -3416,3 +3416,59 @@ body[data-admin-page="piece-control"] .piece-control-cover:not([src]) {
 }
 /* V2.0Q.3 admin piece control visual fix END */
 
+
+/* V2.0Q.4 exact admin piece row layout */
+.admin-standalone-note {
+  margin: 0 0 1rem;
+  color: var(--soft);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+body[data-admin-page="piece-control"] .admin-standalone-grid {
+  display: block;
+}
+
+.admin-piece-control-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.95rem;
+}
+
+.admin-piece-code-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+  align-items: stretch;
+}
+
+.admin-piece-code-row > .admin-card {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+.admin-piece-control-layout #piecesControlCard {
+  width: 100%;
+  grid-column: auto !important;
+}
+
+@media (max-width: 460px) {
+  .admin-piece-code-row {
+    gap: 0.55rem;
+  }
+
+  .admin-piece-code-row > .admin-card {
+    padding: 0.75rem;
+  }
+
+  .admin-piece-code-row .card-heading h3 {
+    font-size: 0.98rem;
+  }
+
+  .admin-piece-code-row .card-heading p {
+    font-size: 0.68rem;
+  }
+}
+/* V2.0Q.4 exact admin piece row layout END */
+
