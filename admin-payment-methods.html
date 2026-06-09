@@ -5,15 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Methods | @safespaceofyours</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/admin.css?v=v20q1-admin-standalone-pages" />
+  <link rel="stylesheet" href="css/admin.css?v=v20q2-admin-same-tab-nav-layout" />
 </head>
 <body class="admin-standalone-page" data-admin-page="payment-methods">
   <main class="admin-shell admin-standalone-shell">
-    <nav class="admin-control-bar hidden" aria-hidden="true">
-      <div class="admin-control-inner admin-standalone-control-inner">
-        <a class="admin-control-link" href="admin.html">Private Space</a>
-        <a class="admin-control-link" href="./" target="_blank" rel="noopener">Back to site</a>
-        <button id="logoutBtn" class="admin-control-btn" type="button">Log out</button>
+    <nav class="admin-control-bar hidden" aria-label="Private Space controls">
+      <p id="dashboardMessage" class="status-message admin-top-status" role="status"></p>
+
+      <div class="admin-control-actions">
+        <button id="promoRequestBell" class="admin-control-btn promo-request-bell icon-only" type="button" aria-label="View promo requests" title="View promo requests">
+          <span class="bell-icon" aria-hidden="true">&#128276;</span>
+          <strong id="promoRequestBellCount">0</strong>
+          <span class="sr-only">View promo requests</span>
+        </button>
+
+        <div class="admin-menu-wrap">
+          <button
+            id="adminMenuToggle"
+            class="admin-control-btn admin-menu-toggle"
+            type="button"
+            aria-label="Open admin menu"
+            aria-expanded="false"
+            aria-controls="adminMenuPanel"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span class="sr-only">Open admin menu</span>
+          </button>
+
+          <div id="adminMenuPanel" class="admin-menu-panel" hidden>
+            <a class="admin-menu-item" href="./">Back to site</a>
+            <a class="admin-menu-item" href="admin-piece-control.html">Piece control</a>
+            <a class="admin-menu-item" href="admin-payment-methods.html">Payment methods</a>
+            <button id="logoutBtn" class="admin-menu-item danger" type="button">Log out</button>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -57,9 +84,6 @@
         <h1>Payment methods</h1>
         <p>View and update visible manual payment methods in a focused workspace.</p>
       </div>
-
-      <p id="dashboardMessage" class="admin-message" role="status"></p>
-
       <div class="admin-grid admin-standalone-grid">
         <section class="admin-card manager-card wide-card" id="paymentMethodsCard">
           <div class="card-heading">
@@ -71,12 +95,28 @@
         </section>
       </div>
     </section>
+
+    <div id="promoRequestModal" class="admin-modal-overlay" aria-hidden="true">
+    <div class="admin-modal-card promo-request-modal-card" role="dialog" aria-modal="true" aria-labelledby="promoRequestModalTitle">
+      <button id="closePromoRequestModal" class="admin-modal-close" type="button" aria-label="Close promo requests">X</button>
+
+      <div class="admin-modal-header">
+        <div>
+          <p class="eyebrow">Viewer requests</p>
+          <h2 id="promoRequestModalTitle">Promo requests</h2>
+          <p class="modal-help">Unread pending requests appear on the bell badge.</p>
+        </div>
+      </div>
+
+      <div id="promoRequestList" class="admin-list promo-request-modal-list"></div>
+    </div>
+  </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
   <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
   <script src="js/admin-auth.js?v=v18r-label-controls-2"></script>
-  <script src="js/admin-dashboard.js?v=v20q1-admin-standalone-pages"></script>
+  <script src="js/admin-dashboard.js?v=v20q2-admin-same-tab-nav-layout"></script>
 </body>
 </html>

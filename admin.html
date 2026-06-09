@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@safespaceofyours | LogIn</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/admin.css?v=v20q1-admin-standalone-pages" />
+  <link rel="stylesheet" href="css/admin.css?v=v20q2-admin-same-tab-nav-layout" />
 </head>
 <body>
   <main class="admin-shell">
@@ -36,8 +36,8 @@
 
           <div id="adminMenuPanel" class="admin-menu-panel" hidden>
             <a class="admin-menu-item" href="./">Back to site</a>
-            <a class="admin-menu-item" href="admin-piece-control.html" target="_blank" rel="noopener">Piece control</a>
-            <a class="admin-menu-item" href="admin-payment-methods.html" target="_blank" rel="noopener">Payment methods</a>
+            <a class="admin-menu-item" href="admin-piece-control.html">Piece control</a>
+            <a class="admin-menu-item" href="admin-payment-methods.html">Payment methods</a>
             <button id="logoutBtn" class="admin-menu-item danger" type="button">Log out</button>
           </div>
         </div>
@@ -157,58 +157,7 @@
           </div>
         </section>
 
-        <section class="admin-card manager-card">
-          <div class="card-heading">
-            <h3>Promo codes</h3>
-            <p>Create discounts for premium reads or commissions.</p>
-          </div>
-          <div id="promoList" class="admin-list"></div>
-        </section>
-
-        <section class="admin-card manager-card">
-          <div class="card-heading">
-            <h3>Unlock codes</h3>
-            <p>Generate codes for paid premium pieces.</p>
-          </div>
-          <div id="unlockList" class="admin-list"></div>
-        </section>
-
-        <section class="admin-card manager-card wide-card" id="piecesControlCard">
-          <div class="card-heading">
-            <h3>Pieces control</h3>
-            <p>Mirror public piece visibility, free/paid status, price, and preview limits.</p>
-          </div>
-
-          <div id="pieceControlFilters" class="piece-control-tabs" role="tablist" aria-label="Filter pieces by access type">
-            <button class="piece-filter-tab active" type="button" data-piece-filter="all">All <span data-piece-count="all">0</span></button>
-            <button class="piece-filter-tab" type="button" data-piece-filter="paid">Paid <span data-piece-count="paid">0</span></button>
-            <button class="piece-filter-tab" type="button" data-piece-filter="free">Free <span data-piece-count="free">0</span></button>
-          </div>
-
-          <!-- V2.0B Pieces Control search -->
-          <div class="piece-control-search" role="search">
-            <label for="pieceControlSearchInput">Search pieces</label>
-            <input
-              id="pieceControlSearchInput"
-              type="search"
-              autocomplete="off"
-              placeholder="Search by title, slug, label, category..."
-            />
-            <p id="pieceControlSearchSummary" class="piece-control-search-summary" aria-live="polite"></p>
-          </div>
-
-          <div id="pieceSettingsList" class="admin-list piece-settings-list"></div>
-        </section>
-
-        <section class="admin-card manager-card wide-card" id="paymentMethodsCard">
-          <div class="card-heading">
-            <h3>Payment methods</h3>
-            <p>View and update visible manual payment methods.</p>
-          </div>
-
-          <div id="paymentList" class="admin-list"></div>
-        </section>
-      </div>
+</div>
 </section>
 </main>
 
@@ -233,7 +182,7 @@
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
   <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
   <script src="js/admin-auth.js?v=v18r-label-controls-2"></script>
-  <script src="js/admin-dashboard.js?v=v20q1-admin-standalone-pages"></script>
+  <script src="js/admin-dashboard.js?v=v20q2-admin-same-tab-nav-layout"></script>
 </body>
 </html>
 

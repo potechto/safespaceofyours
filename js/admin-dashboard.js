@@ -1166,7 +1166,7 @@ window.loadAdminDashboard = async function loadAdminDashboard() {
     setDashboardMessage("Loading dashboard...", "");
 
     if (!tasks.length) {
-      setDashboardMessage("Nothing to load on this page.", "");
+      setDashboardMessage("Private space ready.", "success");
       return;
     }
 

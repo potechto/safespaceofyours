@@ -3332,3 +3332,41 @@ button:disabled,
 }
 /* V2.0Q.1 admin standalone pages END */
 
+
+/* V2.0Q.2 admin same-tab nav and standalone layout */
+.admin-standalone-page .admin-control-bar {
+  width: min(100% - 2rem, 1180px);
+}
+
+.admin-standalone-page .admin-control-inner {
+  width: 100%;
+}
+
+body[data-admin-page="piece-control"] .admin-standalone-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard {
+  grid-column: 1 / -1;
+}
+
+body[data-admin-page="payment-methods"] .admin-standalone-grid {
+  grid-template-columns: 1fr;
+}
+
+.admin-standalone-page .admin-menu-panel a[target="_blank"]::after {
+  content: "";
+}
+
+@media (max-width: 860px) {
+  body[data-admin-page="piece-control"] .admin-standalone-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard {
+    grid-column: auto;
+  }
+}
+/* V2.0Q.2 admin same-tab nav and standalone layout END */
+
