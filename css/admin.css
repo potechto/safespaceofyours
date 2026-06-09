@@ -3069,3 +3069,58 @@ button:disabled,
 }
 /* V2.0I code card layout polish END */
 
+
+/* V2.0I.2 align code info icon to card edge */
+.admin-code-card {
+  position: relative;
+}
+
+.admin-code-card .admin-code-top {
+  display: block;
+  padding-right: clamp(3.8rem, 7vw, 4.8rem);
+}
+
+.admin-code-card .admin-code-identity {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-code-card .admin-code-title {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-code-card .admin-code-info-wrap {
+  position: absolute;
+  top: clamp(1.35rem, 2vw, 1.6rem);
+  right: clamp(1.35rem, 2vw, 1.75rem);
+  margin-left: 0;
+  justify-self: auto;
+  align-self: auto;
+  z-index: 3;
+}
+
+.admin-code-card .admin-code-info-btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 520px) {
+  .admin-code-card .admin-code-top {
+    padding-right: 3.6rem;
+  }
+
+  .admin-code-card .admin-code-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-code-card .admin-code-info-wrap {
+    top: 1.15rem;
+    right: 1.15rem;
+  }
+}
+/* V2.0I.2 align code info icon to card edge END */
+
