@@ -280,23 +280,23 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
-  if current_user.id is null then
+  if active_user.id is null then
     return jsonb_build_object('ok', false);
   end if;
 
   return jsonb_build_object(
     'ok', true,
     'user', jsonb_build_object(
-      'id', current_user.id,
-      'username', current_user.username,
-      'is_admin', current_user.is_admin,
-      'is_premium', current_user.is_premium,
-      'badge_label', current_user.badge_label,
-      'created_at', current_user.created_at
+      'id', active_user.id,
+      'username', active_user.username,
+      'is_admin', active_user.is_admin,
+      'is_premium', active_user.is_premium,
+      'badge_label', active_user.badge_label,
+      'created_at', active_user.created_at
     )
   );
 end;
@@ -374,12 +374,12 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
   new_post public.public_space_posts;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
-  if current_user.id is null then
+  if active_user.id is null then
     raise exception 'Login required.';
   end if;
 
@@ -392,7 +392,7 @@ begin
   end if;
 
   insert into public.public_space_posts (user_id, body, visibility)
-  values (current_user.id, trim(input_body), input_visibility)
+  values (active_user.id, trim(input_body), input_visibility)
   returning * into new_post;
 
   return jsonb_build_object('ok', true, 'post_id', new_post.id);
@@ -406,9 +406,9 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
   return coalesce(
     (
@@ -436,10 +436,10 @@ begin
           ),
           'hearted_by_me', exists (
             select 1 from public.public_space_reactions r
-            where r.post_id = p.id and r.user_id = current_user.id and r.reaction_type = 'heart'
+            where r.post_id = p.id and r.user_id = active_user.id and r.reaction_type = 'heart'
           ),
           'can_manage', (
-            current_user.id = p.user_id or coalesce(current_user.is_admin, false)
+            active_user.id = p.user_id or coalesce(active_user.is_admin, false)
           )
         )
         order by p.created_at desc
@@ -449,12 +449,12 @@ begin
       where p.is_deleted is false
         and (
           p.visibility = 'public'
-          or current_user.id = p.user_id
-          or coalesce(current_user.is_admin, false)
+          or active_user.id = p.user_id
+          or coalesce(active_user.is_admin, false)
         )
         and (
           p.is_hidden is false
-          or coalesce(current_user.is_admin, false)
+          or coalesce(active_user.is_admin, false)
         )
     ),
     '[]'::jsonb
@@ -472,12 +472,12 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
   target_post public.public_space_posts;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
-  if current_user.id is null then
+  if active_user.id is null then
     raise exception 'Login required.';
   end if;
 
@@ -487,7 +487,7 @@ begin
     raise exception 'Post not found.';
   end if;
 
-  if current_user.id <> target_post.user_id and current_user.is_admin is not true then
+  if active_user.id <> target_post.user_id and active_user.is_admin is not true then
     raise exception 'Not allowed.';
   end if;
 
@@ -510,11 +510,11 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
-  if current_user.id is null or current_user.is_admin is not true then
+  if active_user.id is null or active_user.is_admin is not true then
     raise exception 'Admin only.';
   end if;
 
@@ -524,7 +524,7 @@ begin
 
   insert into public.public_space_moderation_log (admin_user_id, action, target_type, target_id, details)
   values (
-    current_user.id,
+    active_user.id,
     case when input_is_hidden then 'hide_post' else 'unhide_post' end,
     'post',
     input_post_id,
@@ -545,13 +545,13 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
   target_post public.public_space_posts;
   deleted_count integer := 0;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
-  if current_user.id is null then
+  if active_user.id is null then
     raise exception 'Login required.';
   end if;
 
@@ -565,18 +565,18 @@ begin
 
   delete from public.public_space_reactions
   where post_id = input_post_id
-    and user_id = current_user.id
+    and user_id = active_user.id
     and reaction_type = 'heart';
 
   get diagnostics deleted_count = row_count;
 
   if deleted_count = 0 then
     insert into public.public_space_reactions (post_id, user_id, reaction_type)
-    values (input_post_id, current_user.id, 'heart');
+    values (input_post_id, active_user.id, 'heart');
 
-    if target_post.user_id <> current_user.id then
+    if target_post.user_id <> active_user.id then
       insert into public.public_space_notifications (recipient_user_id, actor_user_id, post_id, type)
-      values (target_post.user_id, current_user.id, input_post_id, 'heart');
+      values (target_post.user_id, active_user.id, input_post_id, 'heart');
     end if;
   end if;
 
@@ -591,11 +591,11 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
-  if current_user.id is null or current_user.is_admin is not true then
+  if active_user.id is null or active_user.is_admin is not true then
     raise exception 'Admin only.';
   end if;
 
@@ -635,11 +635,11 @@ security definer
 set search_path = public
 as $$
 declare
-  current_user public.public_space_users;
+  active_user public.public_space_users;
 begin
-  current_user := public.public_space_current_user(input_session_token);
+  active_user := public.public_space_current_user(input_session_token);
 
-  if current_user.id is null or current_user.is_admin is not true then
+  if active_user.id is null or active_user.is_admin is not true then
     raise exception 'Admin only.';
   end if;
 
@@ -661,7 +661,7 @@ begin
 
   insert into public.public_space_moderation_log (admin_user_id, action, target_type, target_id, details)
   values (
-    current_user.id,
+    active_user.id,
     'admin_update_user',
     'user',
     input_user_id,
