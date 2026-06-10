@@ -4832,3 +4832,139 @@ button,
   }
 }
 /* V2.0Q.26 mobile public modal scroll fix END */
+
+/* V2.0Q.32 compact desktop reader sizing */
+@media (min-width: 900px) {
+  .reader-page,
+  .reader-wrap,
+  .reader-shell,
+  .poem-reader,
+  .poem-shell,
+  .piece-reader,
+  .story-reader {
+    max-width: min(100% - 3rem, 1040px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .reader-hero,
+  .poem-hero,
+  .piece-hero,
+  .reader-card,
+  .poem-card,
+  .piece-card,
+  .story-card {
+    max-width: 1040px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .reader-hero,
+  .poem-hero,
+  .piece-hero {
+    padding: clamp(1.1rem, 2vw, 1.7rem) !important;
+    gap: clamp(1rem, 2vw, 1.7rem) !important;
+  }
+
+  #readerCover,
+  .reader-cover,
+  .poem-cover,
+  .piece-cover {
+    max-height: min(54vh, 25rem) !important;
+    width: 100% !important;
+    object-fit: cover !important;
+  }
+
+  #readerTitle,
+  .reader-title,
+  .poem-title,
+  .piece-title {
+    font-size: clamp(2.3rem, 5vw, 4.8rem) !important;
+    line-height: 0.95 !important;
+  }
+
+  #readerExcerpt,
+  .reader-excerpt,
+  .poem-excerpt,
+  .piece-excerpt {
+    max-width: 58ch !important;
+    font-size: clamp(0.95rem, 1.1vw, 1.08rem) !important;
+  }
+
+  #poemText,
+  .poem-text,
+  .reader-text,
+  .piece-text,
+  .story-text {
+    max-width: 78ch !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .paid-reader-shell {
+    max-width: 78ch !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    gap: 1.05rem !important;
+  }
+
+  .paid-preview-text,
+  .paid-reader-hero,
+  .paid-reader-actions,
+  .reader-unlock-panel {
+    padding: clamp(1rem, 1.8vw, 1.35rem) !important;
+  }
+
+  .paid-reader-hero {
+    gap: 1rem !important;
+  }
+
+  .reader-navigation,
+  .reader-nav,
+  .poem-navigation,
+  .reader-nav-mobile-row {
+    max-width: 1040px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .reader-page,
+  .reader-wrap,
+  .reader-shell,
+  .poem-reader,
+  .poem-shell,
+  .piece-reader,
+  .story-reader,
+  .reader-hero,
+  .poem-hero,
+  .piece-hero,
+  .reader-card,
+  .poem-card,
+  .piece-card,
+  .story-card,
+  .reader-navigation,
+  .reader-nav,
+  .poem-navigation,
+  .reader-nav-mobile-row {
+    max-width: 980px !important;
+  }
+
+  #readerCover,
+  .reader-cover,
+  .poem-cover,
+  .piece-cover {
+    max-height: 23rem !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #readerCover,
+  .reader-cover,
+  .poem-cover,
+  .piece-cover {
+    max-height: none;
+  }
+}
+/* V2.0Q.32 compact desktop reader sizing END */
