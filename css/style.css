@@ -5273,3 +5273,235 @@ body.reader-body .reader-cover-card {
   }
 }
 /* V2.0Q.34 compact reader payment modal END */
+
+/* V2.0Q.35 pieces archive card polish */
+body:not(.reader-body) #poemGrid {
+  width: min(100% - 2rem, 76rem) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)) !important;
+  gap: clamp(1rem, 2vw, 1.35rem) !important;
+  align-items: stretch !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-card {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-rows: 1fr auto !important;
+  overflow: hidden !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 203, 225, 0.10), transparent 12rem),
+    rgba(255, 255, 255, 0.045) !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-link {
+  min-width: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-rows: auto 1fr !important;
+  text-decoration: none !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-cover {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 4 / 5 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  padding: 0.55rem !important;
+  border-radius: 26px 26px 18px 18px !important;
+  background:
+    radial-gradient(circle at center, rgba(255, 215, 233, 0.10), transparent 62%),
+    rgba(255, 255, 255, 0.035) !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+body:not(.reader-body) #poemGrid .access-badge,
+body:not(.reader-body) #poemGrid .draft-badge {
+  position: absolute !important;
+  z-index: 2 !important;
+  top: 0.85rem !important;
+  max-width: calc(100% - 1.7rem) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+body:not(.reader-body) #poemGrid .access-badge {
+  right: 0.85rem !important;
+}
+
+body:not(.reader-body) #poemGrid .draft-badge {
+  left: 0.85rem !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-info {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto auto 1fr auto !important;
+  gap: 0.58rem !important;
+  padding: 0.95rem 1rem 1.05rem !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-meta-row {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.55rem !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-category,
+body:not(.reader-body) #poemGrid .type-pill {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-category {
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.12em !important;
+}
+
+body:not(.reader-body) #poemGrid .type-pill {
+  flex: 0 1 auto !important;
+  font-size: 0.68rem !important;
+  padding: 0.35rem 0.55rem !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-info h3 {
+  min-width: 0 !important;
+  margin: 0 !important;
+  font-size: clamp(1.12rem, 1.8vw, 1.45rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.025em !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+body:not(.reader-body) #poemGrid .poem-info > p {
+  min-width: 0 !important;
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.76) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.52 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+body:not(.reader-body) #poemGrid .read-more {
+  align-self: end !important;
+  margin-top: 0.15rem !important;
+  font-size: 0.82rem !important;
+}
+
+body:not(.reader-body) #poemGrid .card-payment-btn {
+  width: calc(100% - 2rem) !important;
+  min-height: 2.7rem !important;
+  margin: 0 1rem 1rem !important;
+  padding: 0.72rem 0.9rem !important;
+  border-radius: 999px !important;
+  font-size: 0.82rem !important;
+  line-height: 1.25 !important;
+}
+
+body:not(.reader-body) #filterButtons {
+  width: min(100% - 2rem, 76rem) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  gap: 0.55rem !important;
+  justify-content: center !important;
+}
+
+body:not(.reader-body) #searchInput {
+  max-width: 38rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body:not(.reader-body) #loadMorePieces {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 2.75rem !important;
+  padding: 0.75rem 1.1rem !important;
+}
+
+@media (min-width: 1180px) {
+  body:not(.reader-body) #poemGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 760px) and (max-width: 1179px) {
+  body:not(.reader-body) #poemGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 561px) and (max-width: 759px) {
+  body:not(.reader-body) #poemGrid {
+    width: min(100% - 1.5rem, 42rem) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body:not(.reader-body) #poemGrid {
+    width: min(100% - 1.1rem, 27rem) !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  body:not(.reader-body) #poemGrid .poem-cover {
+    aspect-ratio: 4 / 5 !important;
+    padding: 0.5rem !important;
+  }
+
+  body:not(.reader-body) #poemGrid .poem-info {
+    padding: 0.9rem 0.9rem 1rem !important;
+  }
+
+  body:not(.reader-body) #poemGrid .poem-info h3 {
+    font-size: clamp(1.18rem, 7vw, 1.55rem) !important;
+  }
+
+  body:not(.reader-body) #poemGrid .card-payment-btn {
+    width: calc(100% - 1.8rem) !important;
+    margin: 0 0.9rem 0.95rem !important;
+  }
+
+  body:not(.reader-body) #filterButtons {
+    width: min(100% - 1.1rem, 27rem) !important;
+    justify-content: flex-start !important;
+  }
+}
+/* V2.0Q.35 pieces archive card polish END */
