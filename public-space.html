@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Public Space | Safe Space of Yours</title>
-  <link rel="stylesheet" href="css/style.css?v=v20q39-public-space-float-position" />
+  <link rel="stylesheet" href="css/style.css?v=v20q46-public-space-ui-controller" />
 </head>
 <body class="public-space-body">
   <header class="site-header">
@@ -12,7 +12,7 @@
       <img src="Resources/SS of yours.png" alt="Safe Space of Yours" />
     </a>
 
-    <nav class="nav-links" aria-label="Primary navigation">
+    <nav class="nav-links" aria-label="Main navigation">
       <a href="index.html">Home</a>
       <a href="pieces.html">Pieces</a>
       <a href="commissions.html">Commissions</a>
@@ -20,26 +20,119 @@
     </nav>
   </header>
 
-  <main class="public-space-shell">
-    <section class="public-space-hero">
+  <main class="public-space-shell" data-public-space-root>
+    <section class="public-space-hero ps-panel">
       <p class="eyebrow">Public Space</p>
       <h1>A small wall for quiet thoughts.</h1>
       <p>
-        This will be a text-only space where logged-in readers can share short reflections,
-        reply softly, and keep their own posts manageable.
+        A text-only wall where logged-in readers can share short reflections, reply softly,
+        and manage their own posts.
       </p>
 
       <div class="public-space-status-card">
-        <span>Phase 1</span>
-        <strong>Shell is ready.</strong>
-        <p>Login, posting, comments, and moderation tools will be added next after the database plan is locked.</p>
+        <span>Phase 2</span>
+        <strong>UI is being prepared.</strong>
+        <p>Login, posting, comments, and moderation will connect after the database tables are added.</p>
       </div>
+    </section>
+
+    <section class="ps-layout-grid">
+      <aside class="ps-panel ps-auth-panel" aria-labelledby="psAuthTitle">
+        <div class="ps-panel-heading">
+          <p class="eyebrow">Account</p>
+          <h2 id="psAuthTitle">Enter Public Space</h2>
+          <p>Use a username, password, and PIN. The PIN will be used for password reset later.</p>
+        </div>
+
+        <div class="ps-tabs" role="tablist" aria-label="Public Space account actions">
+          <button class="ps-tab is-active" type="button" data-ps-tab="login">Login</button>
+          <button class="ps-tab" type="button" data-ps-tab="register">Register</button>
+          <button class="ps-tab" type="button" data-ps-tab="reset">Forgot</button>
+        </div>
+
+        <form class="ps-form is-active" data-ps-form="login">
+          <label>
+            <span>Username</span>
+            <input type="text" name="username" autocomplete="username" maxlength="24" placeholder="yourname" />
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="current-password" maxlength="72" placeholder="Password" />
+          </label>
+          <button class="btn primary" type="submit">Login</button>
+        </form>
+
+        <form class="ps-form" data-ps-form="register">
+          <label>
+            <span>Username</span>
+            <input type="text" name="username" autocomplete="username" maxlength="24" placeholder="Choose username" />
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="new-password" maxlength="72" placeholder="Create password" />
+          </label>
+          <label>
+            <span>Reset PIN</span>
+            <input type="password" name="pin" inputmode="numeric" maxlength="12" placeholder="Private PIN" />
+          </label>
+          <button class="btn primary" type="submit">Create account</button>
+        </form>
+
+        <form class="ps-form" data-ps-form="reset">
+          <label>
+            <span>Username</span>
+            <input type="text" name="username" autocomplete="username" maxlength="24" placeholder="yourname" />
+          </label>
+          <label>
+            <span>Reset PIN</span>
+            <input type="password" name="pin" inputmode="numeric" maxlength="12" placeholder="Your PIN" />
+          </label>
+          <label>
+            <span>New password</span>
+            <input type="password" name="password" autocomplete="new-password" maxlength="72" placeholder="New password" />
+          </label>
+          <button class="btn primary" type="submit">Reset password</button>
+        </form>
+
+        <p class="ps-message" data-ps-auth-message>Database connection will be activated in the next step.</p>
+      </aside>
+
+      <section class="ps-panel ps-wall-panel" aria-labelledby="psWallTitle">
+        <div class="ps-panel-heading">
+          <p class="eyebrow">Freedom wall</p>
+          <h2 id="psWallTitle">Share a quiet thought</h2>
+          <p>Text only. Keep it gentle, respectful, and safe to read.</p>
+        </div>
+
+        <form class="ps-composer" data-ps-composer>
+          <label>
+            <span>Your post</span>
+            <textarea name="post" maxlength="1000" rows="6" placeholder="Write something soft here..." disabled></textarea>
+          </label>
+          <div class="ps-composer-footer">
+            <span data-ps-post-count>0 / 1000</span>
+            <button class="btn primary" type="submit" disabled>Post</button>
+          </div>
+        </form>
+
+        <div class="ps-feed-toolbar">
+          <strong>Latest posts</strong>
+          <span data-ps-feed-status>Waiting for database setup</span>
+        </div>
+
+        <div class="ps-feed" data-ps-feed>
+          <article class="ps-empty-state">
+            <h3>No public posts yet.</h3>
+            <p>After Q47 database setup, posts and comments will appear here.</p>
+          </article>
+        </div>
+      </section>
     </section>
 
     <section class="public-space-rules-grid" aria-label="Public Space planned rules">
       <article>
         <h2>Text-only sharing</h2>
-        <p>Posts will be focused on words only, so the space stays light, simple, and safe to read.</p>
+        <p>Posts stay focused on words only so the space remains simple and light.</p>
       </article>
 
       <article>
@@ -65,5 +158,9 @@
     <img src="Resources/ps.png" alt="" />
     <span>Public Space</span>
   </a>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
+  <script src="js/public-space.js?v=v20q46-public-space-ui-controller"></script>
 </body>
 </html>
