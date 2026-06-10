@@ -615,30 +615,61 @@ if (document.readyState === "loading") {
 
       if (!visible.length) return FALLBACK_PAYMENT_METHODS;
 
-      return visible.map(item => ({
-        name: item.name || item.method_name || item.title || "Payment method",
-        details:
-          item.details ||
-          item.account_details ||
-          item.account ||
-          item.account_number ||
-          item.number ||
-          item.description ||
-          "",
-        note:
-          item.note ||
-          item.instructions ||
-          "",
-        image:
-          item.qr_image_url ||
-          item.qr_image ||
-          item.qr_url ||
-          item.image_url ||
-          item.image ||
-          item.qr ||
-          item.qr_path ||
-          ""
-      }));
+      return visible.map(item => {
+        const name =
+          item.name ||
+          item.method_name ||
+          item.title ||
+          item.bank_name ||
+          item.bank ||
+          item.wallet_name ||
+          item.payment_method ||
+          item.method_type ||
+          "Payment method";
+
+        const detailPairs = [
+          ["Bank / Wallet", item.bank_name || item.bank || item.wallet_name || item.wallet],
+          ["Account name", item.account_name || item.account_holder || item.account_owner || item.receiver_name],
+          ["Account number", item.account_number || item.account_no || item.account || item.number],
+          ["Email", item.email || item.account_email || item.paypal_email],
+          ["Mobile number", item.mobile_number || item.phone_number || item.phone || item.contact_number],
+          ["Username", item.username || item.handle],
+          ["Details", item.details || item.account_details || item.description]
+        ];
+
+        const detailLines = [];
+        const seenDetails = new Set();
+
+        detailPairs.forEach(([label, value]) => {
+          const rawValue = String(value ?? "").trim();
+          if (!rawValue) return;
+
+          const normalized = rawValue.toLowerCase();
+          if (seenDetails.has(normalized)) return;
+          seenDetails.add(normalized);
+
+          const alreadyLabeled = /[:：]/.test(rawValue.slice(0, 30));
+          detailLines.push(alreadyLabeled ? rawValue : `${label}: ${rawValue}`);
+        });
+
+        return {
+          name,
+          details: detailLines.join("\n"),
+          note:
+            item.note ||
+            item.instructions ||
+            "",
+          image:
+            item.qr_image_url ||
+            item.qr_image ||
+            item.qr_url ||
+            item.image_url ||
+            item.image ||
+            item.qr ||
+            item.qr_path ||
+            ""
+        };
+      });
     } catch (error) {
       return FALLBACK_PAYMENT_METHODS;
     }
@@ -848,6 +879,13 @@ if (document.readyState === "loading") {
     target.innerHTML = methods.map(method => {
       const image = cleanImage(method.image);
 
+      const detailHtml = method.details
+        ? `<p class="payment-method-detail-lines">${esc(method.details).replace(/\\n/g, "<br />")}</p>`
+        : "";
+      const noteHtml = method.note
+        ? `<p class="payment-method-note">${esc(method.note)}</p>`
+        : "";
+
       return `
         <article class="payment-method-card">
           ${image ? `
@@ -857,8 +895,8 @@ if (document.readyState === "loading") {
             <p class="qr-hint">Click QR to enlarge</p>
           ` : ""}
           <h3>${esc(method.name)}</h3>
-          ${method.details ? `<p>${esc(method.details)}</p>` : ""}
-          ${method.note ? `<p>${esc(method.note)}</p>` : ""}
+          ${detailHtml}
+          ${noteHtml}
         </article>
       `;
     }).join("");
@@ -1327,12 +1365,38 @@ if (document.readyState === "loading") {
     button.dataset.copyValue = buildPaymentSummary(modal);
   }
 
-  function getMethodCopyValue(card) {
-    const clone = card.cloneNode(true);
-    clone.querySelectorAll("button, img, .qr-hint, script, style").forEach(item => item.remove());
+  function readCopyLinesFrom(element) {
+    if (!element) return [];
 
-    const text = compactText(clone.textContent);
-    return text ? `Payment method details:\n${text}` : "";
+    const text = Array.from(element.childNodes)
+      .map(node => node.nodeName === "BR" ? "\n" : (node.textContent || ""))
+      .join("");
+
+    return text
+      .split(/\n+/)
+      .map(compactText)
+      .filter(Boolean);
+  }
+
+  function getMethodCopyValue(card) {
+    const lines = [];
+    const title = compactText(card.querySelector("h3")?.textContent);
+
+    if (title) lines.push(`Payment method: ${title}`);
+
+    card.querySelectorAll(".payment-method-detail-lines, .payment-method-note").forEach(block => {
+      readCopyLinesFrom(block).forEach(line => lines.push(line));
+    });
+
+    if (!lines.length) {
+      const clone = card.cloneNode(true);
+      clone.querySelectorAll("button, img, .qr-hint, script, style").forEach(item => item.remove());
+
+      const text = compactText(clone.textContent);
+      if (text) lines.push(text);
+    }
+
+    return lines.length ? lines.join("\n") : "";
   }
 
   function ensureMethodCopyButtons(modal) {

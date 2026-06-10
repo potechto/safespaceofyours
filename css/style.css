@@ -4477,3 +4477,123 @@ button,
   }
 }
 /* V2.0Q.18 paid reader copy polish END */
+
+
+/* V2.0Q.19 reader payment and desktop nav polish */
+.payment-method-detail-lines {
+  white-space: normal;
+  line-height: 1.55;
+}
+
+.payment-method-detail-lines br {
+  display: block;
+  content: "";
+  margin-top: 0.22rem;
+}
+
+@media (min-width: 900px) {
+  body.reader-body .reader-layout {
+    width: min(100% - 2rem, 900px);
+  }
+
+  body.reader-body .reader-card {
+    max-width: min(100%, 860px);
+  }
+
+  body.reader-body .reader-cover-wrap {
+    width: min(100%, 500px) !important;
+    max-width: 500px !important;
+  }
+
+  body.reader-body .reader-cover-wrap img,
+  body.reader-body #readerCover {
+    width: 100% !important;
+    max-width: 500px !important;
+    object-fit: contain;
+  }
+}
+
+@media (min-width: 681px) {
+  .site-header {
+    position: relative;
+  }
+
+  .mobile-nav-toggle {
+    width: 2.65rem;
+    height: 2.65rem;
+    display: inline-grid;
+    place-items: center;
+    gap: 0.22rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.055);
+    color: var(--text);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .mobile-nav-toggle span {
+    width: 1.05rem;
+    height: 2px;
+    display: block;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+
+  .mobile-nav-toggle.is-open span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .mobile-nav-toggle.is-open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .mobile-nav-toggle.is-open span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .nav-links {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
+    left: auto;
+    z-index: 1000;
+    width: min(18rem, calc(100vw - 2rem)) !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    display: grid !important;
+    gap: 0.45rem;
+    border: 1px solid rgba(255, 244, 251, 0.14);
+    border-radius: 22px;
+    background:
+      radial-gradient(circle at top right, rgba(239, 199, 215, 0.15), transparent 9rem),
+      rgba(23, 17, 31, 0.98);
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.36);
+    backdrop-filter: blur(14px);
+    transform: translateY(-8px);
+    transition: opacity 180ms ease, transform 180ms ease, max-height 180ms ease, padding 180ms ease;
+  }
+
+  .nav-links.is-open {
+    max-height: min(72vh, 30rem) !important;
+    padding: 0.75rem !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    overflow: auto !important;
+    transform: translateY(0);
+  }
+
+  .nav-links a,
+  .nav-modal-btn,
+  .nav-link-button {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: normal;
+  }
+}
+/* V2.0Q.19 reader payment and desktop nav polish END */
