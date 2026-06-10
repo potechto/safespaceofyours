@@ -1448,3 +1448,33 @@ if (document.readyState === "loading") {
   syncPaidReaderPaymentCopy();
 })();
 /* V2.0Q.18 paid reader payment copy polish END */
+
+
+/* V2.0Q.25 auto-close public hamburger on option click */
+(function setupPublicHamburgerAutoClose() {
+  if (window.__safePublicHamburgerAutoCloseBound) return;
+  window.__safePublicHamburgerAutoCloseBound = true;
+
+  function closePublicHamburger() {
+    const nav = document.querySelector('#siteNavLinks');
+    const toggle = document.querySelector('[data-mobile-nav-toggle][aria-controls="siteNavLinks"], [data-mobile-nav-toggle]');
+
+    if (!nav || !nav.classList.contains('is-open')) return;
+
+    nav.classList.remove('is-open');
+
+    if (toggle) {
+      toggle.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open navigation menu');
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const selectedOption = event.target.closest('#siteNavLinks a, #siteNavLinks button');
+    if (!selectedOption) return;
+
+    window.setTimeout(closePublicHamburger, 0);
+  });
+})();
+/* V2.0Q.25 auto-close public hamburger on option click END */
