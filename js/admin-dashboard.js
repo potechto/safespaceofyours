@@ -1153,46 +1153,48 @@ function renderPieceSettingsList() {
           </div>
         </div>
 
-        <div class="piece-control-fields">
-          <label class="piece-field inline-check">
-            <span>Status</span>
-            <span class="switch-line">
-              <input type="checkbox" data-piece-enabled ${item.is_enabled ? "checked" : ""} />
-              Enabled
-            </span>
-          </label>            <label class="piece-field">
+        <div class="piece-control-panel">
+          <div class="piece-control-fields">
+            <label class="piece-field inline-check">
+              <span>Status</span>
+              <span class="switch-line">
+                <input type="checkbox" data-piece-enabled ${item.is_enabled ? "checked" : ""} />
+                Enabled
+              </span>
+            </label>
+
+            <label class="piece-field">
               <span>Label</span>
               <select data-piece-label>
                 ${renderAdminContentLabelOptions(item.content_label || item.type)}
               </select>
             </label>
 
+            <label class="piece-field">
+              <span>Access</span>
+              <select data-piece-access>
+                <option value="free" ${accessType === "free" ? "selected" : ""}>Free</option>
+                <option value="paid" ${accessType === "paid" ? "selected" : ""}>Paid</option>
+              </select>
+            </label>
 
+            <label class="piece-field">
+              <span>Price</span>
+              <input
+                data-piece-price
+                type="number"
+                min="0"
+                step="1"
+                value="${escapeAdminHTML(price)}"
+                ${accessType === "free" ? "disabled" : ""}
+              />
+            </label>
 
-          <label class="piece-field">
-            <span>Access</span>
-            <select data-piece-access>
-              <option value="free" ${accessType === "free" ? "selected" : ""}>Free</option>
-              <option value="paid" ${accessType === "paid" ? "selected" : ""}>Paid</option>
-            </select>
-          </label>
-
-          <label class="piece-field">
-            <span>Price</span>
-            <input
-              data-piece-price
-              type="number"
-              min="0"
-              step="1"
-              value="${escapeAdminHTML(price)}"
-              ${accessType === "free" ? "disabled" : ""}
-            />
-          </label>
-
-          <label class="piece-field">
-            <span>Preview chars</span>
-            <input data-piece-preview type="number" min="120" step="10" value="${escapeAdminHTML(previewLimit)}" />
-          </label>
+            <label class="piece-field">
+              <span>Preview chars</span>
+              <input data-piece-preview type="number" min="120" step="10" value="${escapeAdminHTML(previewLimit)}" />
+            </label>
+          </div>
 
           <div class="item-actions piece-actions">
             <button class="tiny-btn primary-tiny" type="button" data-save-piece="${escapeAdminHTML(item.slug)}">Save changes</button>

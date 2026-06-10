@@ -5276,3 +5276,213 @@ body[data-admin-page="piece-control"] #piecesControlCard .piece-actions .tiny-bt
   }
 }
 /* V2.0Q.42 old zip piece control layout restore END */
+
+/* V2.0Q.43 rebuilt compact piece control rows */
+body[data-admin-page="piece-control"] #piecesControlCard {
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+body[data-admin-page="piece-control"] #pieceSettingsList {
+  display: grid !important;
+  gap: 0.72rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-item {
+  display: grid !important;
+  grid-template-columns: minmax(19.5rem, 0.82fr) minmax(34rem, 1.18fr) !important;
+  gap: 0.82rem !important;
+  align-items: start !important;
+  padding: 0.72rem 0.78rem !important;
+  border-radius: 20px !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-main {
+  display: grid !important;
+  grid-template-columns: 4.1rem minmax(0, 1fr) !important;
+  gap: 0.72rem !important;
+  align-items: start !important;
+  min-width: 0 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-cover {
+  width: 4.1rem !important;
+  height: 5.35rem !important;
+  padding: 0 !important;
+  object-fit: cover !important;
+  border-radius: 13px !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-copy {
+  display: grid !important;
+  gap: 0.38rem !important;
+  align-content: start !important;
+  min-width: 0 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-title-row {
+  display: flex !important;
+  align-items: start !important;
+  justify-content: space-between !important;
+  gap: 0.45rem !important;
+  min-width: 0 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-title-row strong {
+  max-width: 12.8rem !important;
+  font-size: 0.86rem !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.02em !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-status-pill {
+  flex: 0 0 auto !important;
+  padding: 0.18rem 0.42rem !important;
+  font-size: 0.55rem !important;
+  border-radius: 999px !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.25rem !important;
+  max-width: 16rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-meta span {
+  padding: 0.22rem 0.43rem !important;
+  border-radius: 999px !important;
+  font-size: 0.68rem !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-panel {
+  display: grid !important;
+  gap: 0.52rem !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+  display: grid !important;
+  grid-template-columns:
+    minmax(5.1rem, 0.72fr)
+    minmax(8.6rem, 1.08fr)
+    minmax(7.1rem, 0.92fr)
+    minmax(5.4rem, 0.72fr)
+    minmax(7.3rem, 0.92fr) !important;
+  gap: 0.48rem !important;
+  align-items: end !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-field {
+  display: grid !important;
+  gap: 0.22rem !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-field > span:first-child {
+  font-size: 0.52rem !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields input,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields select,
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 2.02rem !important;
+  box-sizing: border-box !important;
+  padding: 0.34rem 0.52rem !important;
+  border-radius: 13px !important;
+  font-size: 0.74rem !important;
+  line-height: 1.05 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.34rem !important;
+  white-space: nowrap !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line input[type="checkbox"] {
+  width: 0.82rem !important;
+  height: 0.82rem !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(6.1rem, 1fr)) !important;
+  gap: 0.42rem !important;
+  width: min(100%, 24rem) !important;
+  max-width: 100% !important;
+  justify-self: start !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-actions .tiny-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 2.02rem !important;
+  padding: 0.36rem 0.58rem !important;
+  border-radius: 999px !important;
+  font-size: 0.72rem !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1180px) {
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-item {
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-main {
+    grid-template-columns: 3.8rem minmax(0, 1fr) !important;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-cover {
+    width: 3.8rem !important;
+    height: 5rem !important;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 460px) {
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* V2.0Q.43 rebuilt compact piece control rows END */
