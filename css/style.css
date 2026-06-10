@@ -4968,3 +4968,50 @@ button,
   }
 }
 /* V2.0Q.32 compact desktop reader sizing END */
+
+/* V2.0Q.33 uncropped reader cover images */
+body.reader-body #readerCover,
+body.reader-body .reader-cover,
+body.reader-body .reader-cover-wrap img,
+body.reader-body .poem-cover,
+body.reader-body .piece-cover {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: min(64vh, 31rem) !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body.reader-body .reader-cover-wrap,
+body.reader-body .reader-cover-frame,
+body.reader-body .reader-cover-card {
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+}
+
+@media (min-width: 1200px) {
+  body.reader-body #readerCover,
+  body.reader-body .reader-cover,
+  body.reader-body .reader-cover-wrap img,
+  body.reader-body .poem-cover,
+  body.reader-body .piece-cover {
+    max-height: 29rem !important;
+  }
+}
+
+@media (max-width: 899px) {
+  body.reader-body #readerCover,
+  body.reader-body .reader-cover,
+  body.reader-body .reader-cover-wrap img,
+  body.reader-body .poem-cover,
+  body.reader-body .piece-cover {
+    width: 100% !important;
+    max-height: none !important;
+    object-fit: contain !important;
+  }
+}
+/* V2.0Q.33 uncropped reader cover images END */
