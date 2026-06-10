@@ -1,6 +1,7 @@
 begin;
 
-create extension if not exists pgcrypto;
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -134,7 +135,7 @@ create or replace function public.public_space_current_user(input_session_token 
 returns public.public_space_users
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   user_record public.public_space_users;
@@ -162,7 +163,7 @@ create or replace function public.register_public_space_user(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   clean_username text := public.public_space_normalize_username(input_username);
@@ -221,7 +222,7 @@ create or replace function public.login_public_space_user(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   clean_username text := public.public_space_normalize_username(input_username);
@@ -277,7 +278,7 @@ create or replace function public.get_public_space_session(input_session_token t
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
@@ -306,7 +307,7 @@ create or replace function public.logout_public_space_user(input_session_token t
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 begin
   delete from public.public_space_sessions
@@ -324,7 +325,7 @@ create or replace function public.reset_public_space_password(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   clean_username text := public.public_space_normalize_username(input_username);
@@ -371,7 +372,7 @@ create or replace function public.create_public_space_post(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
@@ -403,7 +404,7 @@ create or replace function public.list_public_space_posts(input_session_token te
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
@@ -469,7 +470,7 @@ create or replace function public.delete_public_space_post(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
@@ -507,7 +508,7 @@ create or replace function public.admin_set_public_space_post_hidden(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
@@ -542,7 +543,7 @@ create or replace function public.toggle_public_space_heart(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
@@ -588,7 +589,7 @@ create or replace function public.list_public_space_users(input_session_token te
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
@@ -632,7 +633,7 @@ create or replace function public.admin_update_public_space_user(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   active_user public.public_space_users;
