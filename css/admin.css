@@ -4116,3 +4116,132 @@ body[data-admin-page="piece-control"] .admin-code-card.is-touch-peeking .admin-c
   }
 }
 /* V2.0Q.27 custom delete confirmation modal END */
+
+/* V2.0Q.28 modal close layer and code list controls */
+.admin-modal-overlay .admin-modal-card {
+  isolation: isolate;
+}
+
+.admin-modal-overlay .admin-modal-close,
+.code-creation-modal #closeCodeCreationModal,
+.promo-request-modal-card .admin-modal-close,
+.dangerous-delete-modal #closeDangerousDeleteModal {
+  position: absolute !important;
+  top: 0.9rem !important;
+  right: 0.9rem !important;
+  z-index: 9999 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+  transform: translateZ(0);
+}
+
+.admin-modal-overlay .admin-modal-header {
+  padding-right: clamp(3.8rem, 8vw, 5.25rem);
+}
+
+.dangerous-delete-modal .dangerous-delete-modal-card,
+.code-creation-modal .code-creation-modal-card,
+.promo-request-modal-card {
+  position: relative;
+  overflow: visible;
+}
+
+.admin-code-filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: -0.2rem 0 0.9rem;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid rgba(255, 244, 251, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-code-filter-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--soft);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-code-filter-toolbar select {
+  min-width: 10.5rem;
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 999px;
+  padding: 0.58rem 0.85rem;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  outline: none;
+}
+
+.admin-code-filter-toolbar select:focus {
+  border-color: rgba(255, 203, 225, 0.44);
+  box-shadow: 0 0 0 3px rgba(255, 203, 225, 0.12);
+}
+
+.admin-code-filter-toolbar small {
+  color: var(--soft);
+  font-size: 0.78rem;
+}
+
+#promoList.is-code-list-scrollable,
+#unlockList.is-code-list-scrollable,
+body[data-admin-page="piece-control"] #promoList.is-code-list-scrollable,
+body[data-admin-page="piece-control"] #unlockList.is-code-list-scrollable {
+  max-height: min(34rem, 48vh) !important;
+  overflow-y: auto !important;
+  overflow-x: visible !important;
+  padding-right: 0.35rem !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+#promoList[data-filter-empty="true"]::after,
+#unlockList[data-filter-empty="true"]::after {
+  content: attr(data-empty-message);
+  min-height: 4.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255, 244, 251, 0.12);
+  border-radius: 16px;
+  color: var(--soft);
+  text-align: center;
+  padding: 1rem;
+}
+
+#promoList .admin-code-card[hidden],
+#unlockList .admin-code-card[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .admin-code-filter-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-code-filter-toolbar label,
+  .admin-code-filter-toolbar select,
+  .admin-code-filter-toolbar small {
+    width: 100%;
+  }
+
+  #promoList.is-code-list-scrollable,
+  #unlockList.is-code-list-scrollable,
+  body[data-admin-page="piece-control"] #promoList.is-code-list-scrollable,
+  body[data-admin-page="piece-control"] #unlockList.is-code-list-scrollable {
+    max-height: 24rem !important;
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+  }
+}
+/* V2.0Q.28 modal close layer and code list controls END */

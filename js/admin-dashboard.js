@@ -2120,3 +2120,207 @@ setupPrivateAnalyticsCard();
   window.addEventListener("resize", closeMenu);
 })();
 /* V2.0Q admin hamburger menu END */
+
+/* V2.0Q.28 code list filter controls */
+const adminCodeListFilterState = {
+  promo: "active",
+  unlock: "active"
+};
+
+function getAdminCodeListConfig(kind) {
+  if (kind === "promo") {
+    return {
+      kind,
+      list: promoList,
+      label: "Promo codes",
+      activeLabel: "Active codes",
+      usedLabel: "Used codes",
+      emptyActive: "No active promo codes in this view.",
+      emptyUsed: "No used promo codes in this view.",
+      emptyAll: "No promo codes created yet."
+    };
+  }
+
+  return {
+    kind,
+    list: unlockList,
+    label: "Unlock codes",
+    activeLabel: "Active codes",
+    usedLabel: "Used codes",
+    emptyActive: "No active unlock codes in this view.",
+    emptyUsed: "No used unlock codes in this view.",
+    emptyAll: "No unlock codes created yet."
+  };
+}
+
+function getAdminCodeListCards(list) {
+  if (!list) return [];
+  return Array.from(list.querySelectorAll(".admin-code-card"));
+}
+
+function getAdminCodeListCardStatus(card) {
+  const text = String(card?.textContent || "").toLowerCase();
+  const isUsed =
+    card?.classList.contains("is-depleted") ||
+    card?.querySelector(".used-up") ||
+    text.includes("used up") ||
+    text.includes("depleted");
+
+  if (isUsed) return "used";
+
+  const isInactive =
+    card?.querySelector('[data-current="false"]') ||
+    text.includes("inactive") ||
+    text.includes("disabled");
+
+  if (isInactive) return "inactive";
+
+  return "active";
+}
+
+function updateAdminCodeFilterOptionCounts(toolbar, counts) {
+  if (!toolbar) return;
+
+  const allOption = toolbar.querySelector('option[value="all"]');
+  const activeOption = toolbar.querySelector('option[value="active"]');
+  const usedOption = toolbar.querySelector('option[value="used"]');
+
+  if (allOption) allOption.textContent = `All codes (${counts.all})`;
+  if (activeOption) activeOption.textContent = `Active codes (${counts.active})`;
+  if (usedOption) usedOption.textContent = `Used codes (${counts.used})`;
+}
+
+function ensureAdminCodeListFilterControl(kind) {
+  const config = getAdminCodeListConfig(kind);
+  const list = config.list;
+
+  if (!list) return null;
+
+  const card = list.closest(".manager-card, .admin-card");
+  if (!card) return null;
+
+  let toolbar = card.querySelector(`[data-code-list-filter-toolbar="${kind}"]`);
+
+  if (!toolbar) {
+    const toolbarHTML = `
+      <div class="admin-code-filter-toolbar" data-code-list-filter-toolbar="${kind}">
+        <label>
+          <span>View</span>
+          <select data-code-list-filter="${kind}" aria-label="Filter ${config.label}">
+            <option value="active">Active codes</option>
+            <option value="used">Used codes</option>
+            <option value="all">All codes</option>
+          </select>
+        </label>
+        <small data-code-list-filter-count="${kind}">0 shown</small>
+      </div>
+    `;
+
+    const heading = card.querySelector(".card-heading");
+
+    if (heading) {
+      heading.insertAdjacentHTML("afterend", toolbarHTML);
+    } else {
+      list.insertAdjacentHTML("beforebegin", toolbarHTML);
+    }
+
+    toolbar = card.querySelector(`[data-code-list-filter-toolbar="${kind}"]`);
+  }
+
+  const select = toolbar?.querySelector(`[data-code-list-filter="${kind}"]`);
+
+  if (select) {
+    select.value = adminCodeListFilterState[kind] || "active";
+
+    if (select.dataset.boundCodeListFilter !== "true") {
+      select.dataset.boundCodeListFilter = "true";
+      select.addEventListener("change", () => {
+        adminCodeListFilterState[kind] = select.value || "active";
+        applyAdminCodeListFilter(kind);
+      });
+    }
+  }
+
+  return toolbar;
+}
+
+function applyAdminCodeListFilter(kind) {
+  const config = getAdminCodeListConfig(kind);
+  const list = config.list;
+  const toolbar = ensureAdminCodeListFilterControl(kind);
+
+  if (!list) return;
+
+  const selectedFilter = adminCodeListFilterState[kind] || "active";
+  const cards = getAdminCodeListCards(list);
+  const counts = {
+    all: cards.length,
+    active: 0,
+    used: 0
+  };
+
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const status = getAdminCodeListCardStatus(card);
+
+    if (status === "active") counts.active += 1;
+    if (status === "used") counts.used += 1;
+
+    const shouldShow =
+      selectedFilter === "all" ||
+      selectedFilter === status;
+
+    card.hidden = !shouldShow;
+
+    if (shouldShow) visibleCount += 1;
+  });
+
+  const countLabel = toolbar?.querySelector(`[data-code-list-filter-count="${kind}"]`);
+  if (countLabel) {
+    countLabel.textContent = `${visibleCount} shown`;
+  }
+
+  updateAdminCodeFilterOptionCounts(toolbar, counts);
+
+  list.classList.toggle("is-code-list-scrollable", visibleCount >= 4);
+  list.dataset.filterEmpty = cards.length > 0 && visibleCount === 0 ? "true" : "false";
+  list.dataset.filterName = selectedFilter;
+
+  if (selectedFilter === "used") {
+    list.dataset.emptyMessage = config.emptyUsed;
+  } else if (selectedFilter === "all") {
+    list.dataset.emptyMessage = config.emptyAll;
+  } else {
+    list.dataset.emptyMessage = config.emptyActive;
+  }
+}
+
+function setupAdminCodeListFilterControls() {
+  ["promo", "unlock"].forEach(kind => {
+    const config = getAdminCodeListConfig(kind);
+    const list = config.list;
+
+    if (!list) return;
+
+    ensureAdminCodeListFilterControl(kind);
+    applyAdminCodeListFilter(kind);
+
+    if (list.dataset.codeFilterObserverAttached === "true") return;
+
+    const observer = new MutationObserver(() => {
+      ensureAdminCodeListFilterControl(kind);
+      applyAdminCodeListFilter(kind);
+    });
+
+    observer.observe(list, {
+      childList: true
+    });
+
+    list.dataset.codeFilterObserverAttached = "true";
+  });
+}
+
+setupAdminCodeListFilterControls();
+window.setTimeout(setupAdminCodeListFilterControls, 0);
+/* V2.0Q.28 code list filter controls END */
