@@ -5505,3 +5505,167 @@ body:not(.reader-body) #loadMorePieces {
   }
 }
 /* V2.0Q.35 pieces archive card polish END */
+
+/* V2.0Q.38 public space shell */
+.public-space-fab {
+  position: fixed !important;
+  right: clamp(0.85rem, 2.4vw, 1.35rem) !important;
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 1200 !important;
+  width: clamp(3.6rem, 8vw, 4.6rem) !important;
+  height: clamp(3.6rem, 8vw, 4.6rem) !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 215, 233, 0.38) !important;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(255, 215, 233, 0.30), transparent 45%),
+    rgba(22, 13, 26, 0.82) !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.34) !important;
+  backdrop-filter: blur(16px) !important;
+  text-decoration: none !important;
+  overflow: hidden !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.public-space-fab:hover,
+.public-space-fab:focus-visible {
+  transform: translateY(-3px) scale(1.03) !important;
+  border-color: rgba(255, 215, 233, 0.65) !important;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.42) !important;
+}
+
+.public-space-fab img {
+  width: 78% !important;
+  height: 78% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.public-space-fab span {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+
+.public-space-body {
+  min-height: 100vh !important;
+}
+
+.public-space-shell {
+  width: min(100% - 2rem, 74rem) !important;
+  margin: 0 auto !important;
+  padding: clamp(2.2rem, 6vw, 5rem) 0 clamp(5rem, 10vw, 7rem) !important;
+}
+
+.public-space-hero {
+  min-height: min(62vh, 38rem) !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 1rem !important;
+  padding: clamp(1.25rem, 4vw, 3rem) !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: clamp(28px, 5vw, 48px) !important;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 203, 225, 0.16), transparent 22rem),
+    radial-gradient(circle at 92% 18%, rgba(180, 130, 255, 0.12), transparent 20rem),
+    rgba(255, 255, 255, 0.045) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22) !important;
+}
+
+.public-space-hero h1 {
+  max-width: 12ch !important;
+  margin: 0 !important;
+  font-size: clamp(3rem, 11vw, 7.2rem) !important;
+  line-height: 0.9 !important;
+  letter-spacing: -0.07em !important;
+}
+
+.public-space-hero > p {
+  max-width: 42rem !important;
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.78) !important;
+  font-size: clamp(1rem, 2vw, 1.18rem) !important;
+  line-height: 1.7 !important;
+}
+
+.public-space-status-card {
+  width: min(100%, 34rem) !important;
+  margin-top: 0.5rem !important;
+  padding: 1rem !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 215, 233, 0.18) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.public-space-status-card span {
+  display: block !important;
+  margin-bottom: 0.3rem !important;
+  color: rgba(255, 203, 225, 0.86) !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+}
+
+.public-space-status-card strong {
+  display: block !important;
+  font-size: 1.1rem !important;
+}
+
+.public-space-status-card p {
+  margin: 0.35rem 0 0 !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  line-height: 1.55 !important;
+}
+
+.public-space-rules-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 1rem !important;
+  margin-top: 1rem !important;
+}
+
+.public-space-rules-grid article,
+.public-space-note {
+  padding: clamp(1rem, 2.5vw, 1.35rem) !important;
+  border-radius: 26px !important;
+  border: 1px solid rgba(255, 244, 251, 0.10) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.public-space-rules-grid h2,
+.public-space-note h2 {
+  margin: 0 0 0.45rem !important;
+  font-size: 1.1rem !important;
+}
+
+.public-space-rules-grid p,
+.public-space-note p {
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  line-height: 1.58 !important;
+}
+
+.public-space-note {
+  margin-top: 1rem !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-shell {
+    width: min(100% - 1.1rem, 34rem) !important;
+    padding-top: 1.25rem !important;
+  }
+
+  .public-space-rules-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-space-fab {
+    right: 0.85rem !important;
+    bottom: calc(4.35rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+/* V2.0Q.38 public space shell END */

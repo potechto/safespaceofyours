@@ -4630,3 +4630,54 @@ body:has(#pieceSettingsList) .piece-actions .tiny-btn {
   }
 }
 /* V2.0Q.36 admin piece control cleanup END */
+
+/* V2.0Q.38 admin public space floating button */
+.public-space-fab {
+  position: fixed !important;
+  right: clamp(0.85rem, 2.4vw, 1.35rem) !important;
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 1200 !important;
+  width: clamp(3.6rem, 8vw, 4.6rem) !important;
+  height: clamp(3.6rem, 8vw, 4.6rem) !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 215, 233, 0.38) !important;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(255, 215, 233, 0.30), transparent 45%),
+    rgba(22, 13, 26, 0.86) !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.34) !important;
+  backdrop-filter: blur(16px) !important;
+  text-decoration: none !important;
+  overflow: hidden !important;
+}
+
+.public-space-fab img {
+  width: 78% !important;
+  height: 78% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.public-space-fab span {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+
+.public-space-fab:hover,
+.public-space-fab:focus-visible {
+  transform: translateY(-3px) scale(1.03) !important;
+  border-color: rgba(255, 215, 233, 0.65) !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-fab {
+    right: 0.85rem !important;
+    bottom: calc(4.35rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+/* V2.0Q.38 admin public space floating button END */
