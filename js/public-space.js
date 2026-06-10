@@ -330,14 +330,32 @@
   }
 
   function ensureAdminTools() {
+    if (menu && !menu.querySelector("[data-ps-menu-item='admin']")) {
+      const adminButton = document.createElement("button");
+      adminButton.type = "button";
+      adminButton.hidden = true;
+      adminButton.dataset.psMenuItem = "admin";
+      adminButton.dataset.psAdminMenuItem = "";
+      adminButton.textContent = "Admin controls";
+
+      const backLink = menu.querySelector("a");
+      menu.insertBefore(adminButton, backLink || logoutButton || null);
+    }
+
+    const adminMenuItem = menu ? menu.querySelector("[data-ps-menu-item='admin']") : null;
+    if (adminMenuItem) adminMenuItem.hidden = !isAdminMode;
+
     if (!mainSpace || mainSpace.querySelector("[data-ps-admin-tools]")) return;
 
     mainSpace.insertAdjacentHTML("beforeend", `
-      <section class="ps-admin-tools" data-ps-admin-tools hidden>
-        <div>
-          <p class="eyebrow">Admin mode</p>
-          <h2>Public Space controls</h2>
-          <p data-ps-admin-message>Manage users and moderate posts after logging in with a Public Space admin account.</p>
+      <section class="ps-admin-tools ps-admin-screen" data-ps-admin-tools hidden aria-label="Public Space admin controls">
+        <div class="ps-admin-screen-top">
+          <div>
+            <p class="eyebrow">Admin mode</p>
+            <h2>Public Space controls</h2>
+            <p data-ps-admin-message>Manage users and moderate posts after logging in with a Public Space admin account.</p>
+          </div>
+          <button class="ps-admin-close" type="button" data-ps-admin-close aria-label="Close admin controls">&times;</button>
         </div>
         <div class="ps-admin-tool-grid">
           <button type="button" data-ps-admin-action="users">Registered users</button>
@@ -356,8 +374,37 @@
 
     ensureAdminTools();
 
+    const adminMenuItem = menu ? menu.querySelector("[data-ps-menu-item='admin']") : null;
+    if (adminMenuItem) adminMenuItem.hidden = !isAdminMode;
+
     const adminTools = root.querySelector("[data-ps-admin-tools]");
-    if (adminTools) adminTools.hidden = !isAdminMode;
+    if (adminTools && !isAdminMode) adminTools.hidden = true;
+  }
+
+  function openAdminScreen() {
+    if (!isAdminMode) {
+      setFeedStatus("Login with a Public Space admin account first.");
+      return;
+    }
+
+    ensureAdminTools();
+
+    const adminTools = root.querySelector("[data-ps-admin-tools]");
+    if (!adminTools) return;
+
+    adminTools.hidden = false;
+    adminTools.setAttribute("aria-hidden", "false");
+
+    const firstButton = adminTools.querySelector("button");
+    if (firstButton) firstButton.focus();
+  }
+
+  function closeAdminScreen() {
+    const adminTools = root.querySelector("[data-ps-admin-tools]");
+    if (!adminTools) return;
+
+    adminTools.hidden = true;
+    adminTools.setAttribute("aria-hidden", "true");
   }
 
   function showAuth(mode) {
@@ -658,6 +705,12 @@
   }
 
   async function handleAdminAction(event) {
+    const closeButton = event.target.closest("[data-ps-admin-close]");
+    if (closeButton) {
+      closeAdminScreen();
+      return;
+    }
+
     const button = event.target.closest("[data-ps-admin-action]");
     if (!button) return;
 
@@ -758,6 +811,10 @@
         setFeedStatus("Settings will be connected next.");
       }
 
+      if (item.dataset.psMenuItem === "admin") {
+        openAdminScreen();
+      }
+
       menu.hidden = true;
     });
   }
@@ -793,6 +850,7 @@
     if (event.key !== "Escape") return;
     closeModal(forgotModal);
     closeModal(composeModal);
+    closeAdminScreen();
     if (menu) menu.hidden = true;
   });
 

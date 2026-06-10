@@ -6325,3 +6325,228 @@ input[data-ps-pin-only] {
   font-variant-numeric: tabular-nums !important;
 }
 /* V2.0Q.50 standard eye/slashed-eye password icon END */
+
+/* V2.0Q.55 modern public space + admin panel */
+.public-space-body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 203, 225, 0.16), transparent 28rem),
+    radial-gradient(circle at 85% 5%, rgba(169, 121, 255, 0.14), transparent 26rem),
+    radial-gradient(circle at 50% 100%, rgba(255, 244, 251, 0.08), transparent 30rem),
+    #0c0710 !important;
+}
+
+.public-space-body::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background-image:
+    linear-gradient(rgba(255, 244, 251, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 244, 251, 0.03) 1px, transparent 1px) !important;
+  background-size: 52px 52px !important;
+  mask-image: radial-gradient(circle at center, black, transparent 72%) !important;
+  opacity: 0.42 !important;
+}
+
+.ps-app-shell {
+  width: min(100% - 1.25rem, 66rem) !important;
+}
+
+.ps-main-space {
+  max-width: min(100%, 61rem) !important;
+  margin: 0 auto !important;
+  gap: 1.15rem !important;
+}
+
+.ps-space-nav,
+.ps-feed-card,
+.ps-compose-trigger,
+.ps-space-heading,
+.ps-admin-tools.ps-admin-screen {
+  backdrop-filter: blur(22px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.15) !important;
+}
+
+.ps-space-nav {
+  border-color: rgba(255, 244, 251, 0.14) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
+.ps-icon-btn {
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease !important;
+}
+
+.ps-icon-btn:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(255, 203, 225, 0.42) !important;
+  background: rgba(255, 203, 225, 0.10) !important;
+}
+
+.ps-menu {
+  min-width: 14.5rem !important;
+  padding: 0.55rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  border-radius: 22px !important;
+  background: rgba(18, 10, 23, 0.88) !important;
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+
+.ps-menu button,
+.ps-menu a {
+  border-radius: 14px !important;
+  padding: 0.78rem 0.85rem !important;
+}
+
+.ps-menu button:hover,
+.ps-menu a:hover {
+  background: rgba(255, 203, 225, 0.10) !important;
+}
+
+.ps-menu button[hidden] {
+  display: none !important;
+}
+
+.ps-space-heading {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: clamp(1rem, 3vw, 1.35rem) !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 28px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 203, 225, 0.10), rgba(255, 255, 255, 0.035)),
+    rgba(255, 255, 255, 0.035) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.ps-space-heading::after {
+  content: "" !important;
+  position: absolute !important;
+  right: -6rem !important;
+  top: -8rem !important;
+  width: 18rem !important;
+  height: 18rem !important;
+  border-radius: 999px !important;
+  background: radial-gradient(circle, rgba(255, 203, 225, 0.16), transparent 62%) !important;
+  pointer-events: none !important;
+}
+
+.ps-space-heading h1 {
+  max-width: 12ch !important;
+  font-size: clamp(2.65rem, 8vw, 5rem) !important;
+  letter-spacing: -0.075em !important;
+  background: linear-gradient(135deg, #fff4fb 12%, #ffcbe1 48%, #bca5ff 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.ps-compose-trigger {
+  min-height: 4.2rem !important;
+  padding: 1rem 1.25rem !important;
+  border-color: rgba(255, 244, 251, 0.14) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 203, 225, 0.07)),
+    rgba(255, 255, 255, 0.035) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+}
+
+.ps-compose-trigger:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(255, 203, 225, 0.34) !important;
+  box-shadow: 0 18px 60px rgba(255, 203, 225, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.ps-feed-card {
+  border-color: rgba(255, 244, 251, 0.13) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.060), rgba(255, 255, 255, 0.030)),
+    rgba(255, 255, 255, 0.035) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18) !important;
+}
+
+.ps-feed-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+}
+
+.ps-post-card {
+  border-color: rgba(255, 244, 251, 0.14) !important;
+  background: rgba(14, 8, 19, 0.66) !important;
+}
+
+.ps-admin-tools.ps-admin-screen {
+  position: fixed !important;
+  inset: clamp(0.8rem, 4vw, 2rem) !important;
+  z-index: 90 !important;
+  width: min(100% - 1.6rem, 58rem) !important;
+  max-height: min(48rem, calc(100vh - 1.6rem)) !important;
+  margin: auto !important;
+  overflow: auto !important;
+  align-content: start !important;
+  padding: clamp(1rem, 4vw, 1.5rem) !important;
+  border: 1px solid rgba(255, 244, 251, 0.18) !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 203, 225, 0.18), transparent 24rem),
+    radial-gradient(circle at 100% 20%, rgba(178, 148, 255, 0.14), transparent 22rem),
+    rgba(12, 7, 16, 0.94) !important;
+  box-shadow: 0 40px 130px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
+.ps-admin-screen-top {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+}
+
+.ps-admin-close {
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 244, 251, 0.15) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: #fff4fb !important;
+  cursor: pointer !important;
+  font-size: 1.35rem !important;
+}
+
+.ps-admin-tools.ps-admin-screen .ps-admin-tool-grid {
+  margin-top: 1rem !important;
+}
+
+.ps-admin-tools.ps-admin-screen .ps-admin-tool-grid button {
+  min-height: 3.4rem !important;
+  background:
+    linear-gradient(135deg, rgba(255, 203, 225, 0.10), rgba(255, 255, 255, 0.05)) !important;
+}
+
+.ps-admin-tools[hidden],
+.ps-admin-tools.ps-admin-screen[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .ps-space-heading h1 {
+    max-width: 9ch !important;
+  }
+
+  .ps-admin-screen-top {
+    align-items: stretch !important;
+  }
+
+  .ps-admin-tools.ps-admin-screen {
+    inset: 0.65rem !important;
+    width: calc(100% - 1.3rem) !important;
+    max-height: calc(100vh - 1.3rem) !important;
+  }
+}
+/* V2.0Q.55 modern public space + admin panel END */
