@@ -363,6 +363,7 @@
           <button type="button" data-ps-admin-action="reports">Reports</button>
           <button type="button" data-ps-admin-action="settings">Space settings</button>
         </div>
+        <div class="ps-admin-results" data-ps-admin-results></div>
       </section>
     `);
   }
@@ -704,6 +705,172 @@
     }
   }
 
+  function adminResultsNode() {
+    return root.querySelector("[data-ps-admin-results]");
+  }
+
+  function renderAdminUsers(users) {
+    const results = adminResultsNode();
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const list = Array.isArray(users) ? users : [];
+
+    if (!results) return;
+
+    if (!list.length) {
+      results.innerHTML = `
+        <article class="ps-admin-empty">
+          <strong>No registered users yet.</strong>
+          <span>New Public Space accounts will appear here.</span>
+        </article>
+      `;
+      setMessage(messageNode, "Registered users: 0", "info");
+      return;
+    }
+
+    results.innerHTML = `
+      <div class="ps-admin-results-head">
+        <strong>Registered users</strong>
+        <span>${list.length} total</span>
+      </div>
+      <div class="ps-admin-user-list">
+        ${list.map(user => {
+          const isDisabled = Boolean(user.is_disabled);
+          const isPremium = Boolean(user.is_premium);
+          const isAdmin = Boolean(user.is_admin);
+          const badge = user.badge_label || "";
+
+          return `
+            <article class="ps-admin-user-card ${isDisabled ? "is-disabled" : ""}" data-ps-admin-user-card data-user-id="${escapeHtml(user.id)}">
+              <div class="ps-admin-user-main">
+                <div>
+                  <strong>@${escapeHtml(user.username || "user")}</strong>
+                  <span>Joined ${escapeHtml(formatDate(user.created_at) || "recently")}</span>
+                </div>
+                <div class="ps-admin-user-pills">
+                  ${isAdmin ? '<span class="ps-status-pill">Admin</span>' : ""}
+                  ${isPremium ? '<span class="ps-status-pill">Premium</span>' : ""}
+                  ${isDisabled ? '<span class="ps-status-pill is-danger">Disabled</span>' : '<span class="ps-status-pill is-ok">Active</span>'}
+                  ${badge ? `<span class="ps-status-pill">${escapeHtml(badge)}</span>` : ""}
+                </div>
+              </div>
+
+              <div class="ps-admin-user-actions">
+                <button type="button" data-ps-user-action="premium" data-user-id="${escapeHtml(user.id)}" data-next-premium="${isPremium ? "false" : "true"}">
+                  ${isPremium ? "Remove premium" : "Make premium"}
+                </button>
+
+                <button type="button" data-ps-user-action="disable" data-user-id="${escapeHtml(user.id)}" data-next-disabled="${isDisabled ? "false" : "true"}">
+                  ${isDisabled ? "Enable account" : "Disable account"}
+                </button>
+              </div>
+
+              <div class="ps-admin-inline-form">
+                <label>
+                  <span>Badge label</span>
+                  <input type="text" value="${escapeHtml(badge)}" maxlength="24" data-ps-user-badge placeholder="Example: Founder" />
+                </label>
+                <button type="button" data-ps-user-action="badge" data-user-id="${escapeHtml(user.id)}">Save badge</button>
+              </div>
+
+              <div class="ps-admin-inline-form">
+                <label>
+                  <span>Reset password</span>
+                  <input type="text" maxlength="8" data-ps-user-password placeholder="6 to 8 chars" />
+                </label>
+                <button type="button" data-ps-user-action="password" data-user-id="${escapeHtml(user.id)}">Reset password</button>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    setMessage(messageNode, `Registered users: ${list.length}`, "success");
+  }
+
+  async function refreshAdminUsers(message) {
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const results = adminResultsNode();
+
+    if (message) setMessage(messageNode, message, "info");
+    if (results) {
+      results.innerHTML = `
+        <article class="ps-admin-empty">
+          <strong>Loading users...</strong>
+          <span>Please wait while Public Space users are loaded.</span>
+        </article>
+      `;
+    }
+
+    const users = await rpc("list_public_space_users", {
+      input_session_token: sessionToken()
+    });
+
+    renderAdminUsers(users);
+  }
+
+  async function handleAdminUserAction(button) {
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const card = button.closest("[data-ps-admin-user-card]");
+    const userId = button.dataset.userId;
+    const action = button.dataset.psUserAction;
+
+    if (!userId || !action) return;
+
+    const params = {
+      input_session_token: sessionToken(),
+      input_user_id: userId,
+      input_is_premium: null,
+      input_badge_label: null,
+      input_is_disabled: null,
+      input_new_password: null
+    };
+
+    if (action === "premium") {
+      params.input_is_premium = button.dataset.nextPremium === "true";
+    }
+
+    if (action === "disable") {
+      params.input_is_disabled = button.dataset.nextDisabled === "true";
+    }
+
+    if (action === "badge") {
+      const badgeInput = card ? card.querySelector("[data-ps-user-badge]") : null;
+      params.input_badge_label = badgeInput ? badgeInput.value.trim() : "";
+    }
+
+    if (action === "password") {
+      const passwordInput = card ? card.querySelector("[data-ps-user-password]") : null;
+      const newPassword = passwordInput ? passwordInput.value.trim() : "";
+      const passwordError = validatePassword(newPassword);
+
+      if (passwordError) {
+        setMessage(messageNode, passwordError, "error");
+        return;
+      }
+
+      params.input_new_password = newPassword;
+    }
+
+    try {
+      button.disabled = true;
+      setMessage(messageNode, "Saving user changes...", "info");
+
+      await rpc("admin_update_public_space_user", params);
+
+      if (action === "password") {
+        const passwordInput = card ? card.querySelector("[data-ps-user-password]") : null;
+        if (passwordInput) passwordInput.value = "";
+      }
+
+      await refreshAdminUsers("User updated.");
+    } catch (error) {
+      setMessage(messageNode, getErrorMessage(error), "error");
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   async function handleAdminAction(event) {
     const closeButton = event.target.closest("[data-ps-admin-close]");
     if (closeButton) {
@@ -711,10 +878,17 @@
       return;
     }
 
+    const userActionButton = event.target.closest("[data-ps-user-action]");
+    if (userActionButton) {
+      await handleAdminUserAction(userActionButton);
+      return;
+    }
+
     const button = event.target.closest("[data-ps-admin-action]");
     if (!button) return;
 
     const messageNode = root.querySelector("[data-ps-admin-message]");
+    const results = adminResultsNode();
     const action = button.dataset.psAdminAction;
 
     if (!isAdminMode) {
@@ -724,25 +898,31 @@
 
     try {
       if (action === "users") {
-        setMessage(messageNode, "Loading users...", "info");
-
-        const users = await rpc("list_public_space_users", {
-          input_session_token: sessionToken()
-        });
-
-        const count = Array.isArray(users) ? users.length : 0;
-        const names = Array.isArray(users)
-          ? users.slice(0, 8).map(user => `@${user.username}`).join(", ")
-          : "";
-
-        setMessage(messageNode, `Registered users: ${count}${names ? " — " + names : ""}`, "success");
+        await refreshAdminUsers("Loading users...");
         return;
       }
 
       if (action === "posts") {
         await loadPosts();
+        if (results) {
+          results.innerHTML = `
+            <article class="ps-admin-empty">
+              <strong>Posts refreshed.</strong>
+              <span>You can hide/delete posts directly from the public feed while in admin mode.</span>
+            </article>
+          `;
+        }
         setMessage(messageNode, "Posts refreshed.", "success");
         return;
+      }
+
+      if (results) {
+        results.innerHTML = `
+          <article class="ps-admin-empty">
+            <strong>${escapeHtml(button.textContent || "Admin tool")}</strong>
+            <span>This admin tool will be connected in the next phase.</span>
+          </article>
+        `;
       }
 
       setMessage(messageNode, "This admin tool will be connected in the next phase.", "info");

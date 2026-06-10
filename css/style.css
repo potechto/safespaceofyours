@@ -6550,3 +6550,158 @@ input[data-ps-pin-only] {
   }
 }
 /* V2.0Q.55 modern public space + admin panel END */
+
+/* V2.0Q.56 bell + admin user controls */
+.ps-icon-btn[data-ps-bell] {
+  font-size: 1.08rem !important;
+  line-height: 1 !important;
+}
+
+.ps-admin-results {
+  display: grid !important;
+  gap: 0.8rem !important;
+  margin-top: 1rem !important;
+}
+
+.ps-admin-results:empty {
+  display: none !important;
+}
+
+.ps-admin-results-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  color: rgba(255, 244, 251, 0.86) !important;
+}
+
+.ps-admin-results-head span {
+  color: rgba(255, 244, 251, 0.58) !important;
+  font-size: 0.9rem !important;
+}
+
+.ps-admin-user-list {
+  display: grid !important;
+  gap: 0.85rem !important;
+}
+
+.ps-admin-user-card,
+.ps-admin-empty {
+  display: grid !important;
+  gap: 0.85rem !important;
+  padding: 1rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+    rgba(255, 255, 255, 0.035) !important;
+}
+
+.ps-admin-user-card.is-disabled {
+  opacity: 0.72 !important;
+}
+
+.ps-admin-user-main {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+}
+
+.ps-admin-user-main strong {
+  display: block !important;
+  color: #fff4fb !important;
+  font-size: 1.08rem !important;
+}
+
+.ps-admin-user-main span,
+.ps-admin-empty span {
+  color: rgba(255, 244, 251, 0.62) !important;
+}
+
+.ps-admin-user-pills {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: 0.35rem !important;
+}
+
+.ps-status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 1.55rem !important;
+  padding: 0.18rem 0.58rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  border-radius: 999px !important;
+  color: rgba(255, 244, 251, 0.78) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  font-size: 0.74rem !important;
+}
+
+.ps-status-pill.is-ok {
+  border-color: rgba(177, 255, 205, 0.22) !important;
+  color: rgba(202, 255, 220, 0.86) !important;
+}
+
+.ps-status-pill.is-danger {
+  border-color: rgba(255, 145, 174, 0.28) !important;
+  color: rgba(255, 178, 198, 0.92) !important;
+}
+
+.ps-admin-user-actions,
+.ps-admin-inline-form {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.55rem !important;
+}
+
+.ps-admin-user-actions button,
+.ps-admin-inline-form button {
+  min-height: 2.75rem !important;
+}
+
+.ps-admin-inline-form label {
+  display: grid !important;
+  gap: 0.25rem !important;
+}
+
+.ps-admin-inline-form label span {
+  color: rgba(255, 203, 225, 0.88) !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.10em !important;
+  text-transform: uppercase !important;
+}
+
+.ps-admin-inline-form input {
+  width: 100% !important;
+  min-height: 2.75rem !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  border-radius: 15px !important;
+  background: rgba(12, 7, 16, 0.64) !important;
+  color: #fff4fb !important;
+  padding: 0.6rem 0.75rem !important;
+  outline: none !important;
+}
+
+.ps-admin-inline-form input:focus {
+  border-color: rgba(255, 203, 225, 0.42) !important;
+  box-shadow: 0 0 0 4px rgba(255, 203, 225, 0.08) !important;
+}
+
+@media (max-width: 640px) {
+  .ps-admin-user-main,
+  .ps-admin-user-actions,
+  .ps-admin-inline-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ps-admin-user-main {
+    display: grid !important;
+  }
+
+  .ps-admin-user-pills {
+    justify-content: flex-start !important;
+  }
+}
+/* V2.0Q.56 bell + admin user controls END */
