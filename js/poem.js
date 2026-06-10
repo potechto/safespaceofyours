@@ -1257,3 +1257,130 @@ if (document.readyState === "loading") {
 })();
 /* V2.0K.1 mobile hamburger navigation END */
 
+
+
+/* V2.0Q.18 paid reader payment copy polish */
+(function setupPaidReaderPaymentCopyPolish() {
+  if (window.__safePaidReaderPaymentCopyPolishBound) return;
+  window.__safePaidReaderPaymentCopyPolishBound = true;
+
+  function compactText(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
+  }
+
+  function getPaymentModal() {
+    return document.querySelector("#paidReaderPaymentModal");
+  }
+
+  function getSelectedTitle(modal) {
+    return compactText(modal?.querySelector(".payment-selected-box strong")?.textContent) || "Premium piece unlock";
+  }
+
+  function getFinalAmount(modal) {
+    return compactText(modal?.querySelector("[data-paid-reader-final-amount]")?.textContent) || "PHP 0";
+  }
+
+  function getPromoLine(modal) {
+    const code = compactText(modal?.querySelector("[data-paid-reader-promo-code]")?.value);
+    const status = compactText(modal?.querySelector("[data-paid-reader-promo-status]")?.textContent);
+
+    if (!code) return "Promo code: none";
+    return `Promo code: ${code}${status ? ` (${status})` : ""}`;
+  }
+
+  function buildPaymentSummary(modal) {
+    return [
+      "@safespaceofyours payment proof",
+      `Piece: ${getSelectedTitle(modal)}`,
+      `Final amount: ${getFinalAmount(modal)}`,
+      getPromoLine(modal),
+      "Note: Please attach the screenshot/receipt and keep the exact piece title visible."
+    ].join("\n");
+  }
+
+  function ensureSummaryCopyButton(modal) {
+    const note = modal?.querySelector(".paid-reader-proof-note");
+    const strip = modal?.querySelector(".paid-reader-payment-strip");
+    const anchor = note || strip;
+    if (!anchor) return;
+
+    let actions = modal.querySelector("[data-paid-reader-copy-actions]");
+    if (!actions) {
+      actions = document.createElement("div");
+      actions.className = "paid-reader-copy-actions";
+      actions.dataset.paidReaderCopyActions = "";
+      anchor.insertAdjacentElement("afterend", actions);
+    }
+
+    let button = actions.querySelector("[data-paid-reader-copy-summary]");
+    if (!button) {
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "paid-reader-copy-btn";
+      button.dataset.paidReaderCopySummary = "";
+      button.dataset.copyValue = "";
+      button.textContent = "Copy payment summary";
+      button.setAttribute("aria-label", "Copy payment summary");
+      actions.appendChild(button);
+    }
+
+    button.dataset.copyValue = buildPaymentSummary(modal);
+  }
+
+  function getMethodCopyValue(card) {
+    const clone = card.cloneNode(true);
+    clone.querySelectorAll("button, img, .qr-hint, script, style").forEach(item => item.remove());
+
+    const text = compactText(clone.textContent);
+    return text ? `Payment method details:\n${text}` : "";
+  }
+
+  function ensureMethodCopyButtons(modal) {
+    modal?.querySelectorAll("#paidReaderPaymentMethods .payment-method-card").forEach(card => {
+      const value = getMethodCopyValue(card);
+      if (!value) return;
+
+      let button = card.querySelector("[data-paid-reader-copy-method]");
+      if (!button) {
+        button = document.createElement("button");
+        button.type = "button";
+        button.className = "paid-reader-copy-btn paid-reader-copy-method-btn";
+        button.dataset.paidReaderCopyMethod = "";
+        button.dataset.copyValue = "";
+        button.textContent = "Copy details";
+        button.setAttribute("aria-label", "Copy payment method details");
+        card.appendChild(button);
+      }
+
+      button.dataset.copyValue = value;
+    });
+  }
+
+  function syncPaidReaderPaymentCopy() {
+    const modal = getPaymentModal();
+    if (!modal) return;
+
+    ensureSummaryCopyButton(modal);
+    ensureMethodCopyButtons(modal);
+  }
+
+  document.addEventListener("input", event => {
+    if (!event.target.matches("[data-paid-reader-promo-code]")) return;
+    window.setTimeout(syncPaidReaderPaymentCopy, 80);
+    window.setTimeout(syncPaidReaderPaymentCopy, 650);
+    window.setTimeout(syncPaidReaderPaymentCopy, 1100);
+  });
+
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".paid-reader-shell [data-open-payment]")) return;
+    window.setTimeout(syncPaidReaderPaymentCopy, 80);
+    window.setTimeout(syncPaidReaderPaymentCopy, 350);
+    window.setTimeout(syncPaidReaderPaymentCopy, 900);
+  }, true);
+
+  const observer = new MutationObserver(syncPaidReaderPaymentCopy);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  syncPaidReaderPaymentCopy();
+})();
+/* V2.0Q.18 paid reader payment copy polish END */

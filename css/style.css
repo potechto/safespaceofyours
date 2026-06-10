@@ -4425,3 +4425,55 @@ button,
 .load-more-pieces-btn[hidden] {
   display: none;
 }
+
+
+/* V2.0Q.18 paid reader copy polish */
+.paid-reader-copy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.paid-reader-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 244, 251, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.075);
+  color: inherit;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.paid-reader-copy-btn:hover,
+.paid-reader-copy-btn:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(255, 203, 225, 0.42);
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.paid-reader-copy-btn.is-copied {
+  border-color: rgba(126, 240, 199, 0.46);
+}
+
+.payment-method-card .paid-reader-copy-method-btn {
+  margin-top: 0.65rem;
+}
+
+@media (max-width: 560px) {
+  .paid-reader-copy-actions,
+  .paid-reader-copy-btn {
+    width: 100%;
+  }
+}
+/* V2.0Q.18 paid reader copy polish END */
