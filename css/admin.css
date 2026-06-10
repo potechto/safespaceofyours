@@ -4681,3 +4681,61 @@ body:has(#pieceSettingsList) .piece-actions .tiny-btn {
   }
 }
 /* V2.0Q.38 admin public space floating button END */
+
+/* V2.0Q.39 private space public space float alignment */
+:root {
+  --admin-public-space-float-size-q39: clamp(2.95rem, 6.2vw, 3.55rem);
+  --admin-public-space-float-edge-q39: clamp(0.85rem, 2.4vw, 1.35rem);
+  --admin-public-space-float-bottom-q39: calc(1rem + env(safe-area-inset-bottom, 0px));
+  --admin-public-space-float-lifted-bottom-q39: calc(4.85rem + env(safe-area-inset-bottom, 0px));
+}
+
+.public-space-fab,
+.public-space-float {
+  position: fixed !important;
+  right: var(--admin-public-space-float-edge-q39) !important;
+  bottom: var(--admin-public-space-float-bottom-q39) !important;
+  width: var(--admin-public-space-float-size-q39) !important;
+  height: var(--admin-public-space-float-size-q39) !important;
+  z-index: 1200 !important;
+  -webkit-box-reflect: unset !important;
+  box-reflect: unset !important;
+}
+
+body.scroll-top-visible .public-space-fab,
+body.scroll-top-visible .public-space-float,
+body:has(.admin-scroll-top.visible) .public-space-fab,
+body:has(.admin-scroll-top.visible) .public-space-float,
+body:has(.admin-scroll-top.is-visible) .public-space-fab,
+body:has(.admin-scroll-top.is-visible) .public-space-float,
+body:has(#adminScrollTop.visible) .public-space-fab,
+body:has(#adminScrollTop.visible) .public-space-float,
+body:has(#scrollTopBtn.visible) .public-space-fab,
+body:has(#scrollTopBtn.visible) .public-space-float {
+  bottom: var(--admin-public-space-float-lifted-bottom-q39) !important;
+}
+
+.public-space-fab img,
+.public-space-float img {
+  width: 76% !important;
+  height: 76% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.public-space-fab:hover,
+.public-space-fab:focus-visible,
+.public-space-float:hover,
+.public-space-float:focus-visible {
+  transform: translateY(-2px) scale(1.03) !important;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --admin-public-space-float-size-q39: 3rem;
+    --admin-public-space-float-edge-q39: 0.85rem;
+    --admin-public-space-float-bottom-q39: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    --admin-public-space-float-lifted-bottom-q39: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+/* V2.0Q.39 private space public space float alignment END */

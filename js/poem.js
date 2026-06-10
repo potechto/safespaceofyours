@@ -335,7 +335,9 @@ function setupScrollTopButton() {
   if (!scrollTopBtn) return;
 
   function toggleScrollTopButton() {
-    scrollTopBtn.classList.toggle("visible", window.scrollY > 420);
+    const isVisible = window.scrollY > 420;
+    scrollTopBtn.classList.toggle("visible", isVisible);
+    document.body.classList.toggle("scroll-top-visible", isVisible);
   }
 
   scrollTopBtn.addEventListener("click", () => {

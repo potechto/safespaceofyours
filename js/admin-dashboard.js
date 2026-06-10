@@ -2324,3 +2324,47 @@ function setupAdminCodeListFilterControls() {
 setupAdminCodeListFilterControls();
 window.setTimeout(setupAdminCodeListFilterControls, 0);
 /* V2.0Q.28 code list filter controls END */
+
+/* V2.0Q.39 sync public space float with admin scroll arrow */
+(function syncPublicSpaceFloatWithAdminScrollArrow() {
+  const liftedClass = "scroll-top-visible";
+
+  function isVisibleControl(control) {
+    if (!control || control.hidden) return false;
+
+    const style = window.getComputedStyle(control);
+    if (style.display === "none" || style.visibility === "hidden") return false;
+
+    const opacity = Number.parseFloat(style.opacity || "1");
+    const hasVisibleClass =
+      control.classList.contains("visible") ||
+      control.classList.contains("is-visible") ||
+      control.classList.contains("show") ||
+      control.classList.contains("is-active");
+
+    return hasVisibleClass || (window.scrollY > 420 && opacity > 0.2);
+  }
+
+  function syncFloatPosition() {
+    const scrollControl = document.querySelector(".admin-scroll-top, #adminScrollTop, #scrollTopBtn, .scroll-top-btn");
+    document.body.classList.toggle(liftedClass, isVisibleControl(scrollControl));
+  }
+
+  window.addEventListener("scroll", syncFloatPosition, { passive: true });
+  window.addEventListener("resize", syncFloatPosition);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", syncFloatPosition);
+  } else {
+    syncFloatPosition();
+  }
+
+  const observer = new MutationObserver(syncFloatPosition);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+    attributeFilter: ["class", "hidden", "style", "aria-hidden"]
+  });
+})();
+/* V2.0Q.39 sync public space float with admin scroll arrow END */
