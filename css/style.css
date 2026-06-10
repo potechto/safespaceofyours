@@ -5015,3 +5015,261 @@ body.reader-body .reader-cover-card {
   }
 }
 /* V2.0Q.33 uncropped reader cover images END */
+
+/* V2.0Q.34 compact reader payment modal */
+.paid-reader-payment-overlay {
+  padding: clamp(0.75rem, 2vw, 1.25rem) !important;
+}
+
+.paid-reader-payment-overlay .paid-reader-payment-modal {
+  width: min(100%, 42rem) !important;
+  max-height: min(86vh, 42rem) !important;
+  padding: clamp(1rem, 2vw, 1.35rem) !important;
+  border-radius: 24px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+}
+
+.paid-reader-payment-modal .modal-close {
+  top: 0.85rem !important;
+  right: 0.85rem !important;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+}
+
+.paid-reader-payment-modal h2 {
+  max-width: 34rem !important;
+  font-size: clamp(1.85rem, 4.2vw, 3rem) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.035em !important;
+  padding-right: 2.7rem !important;
+}
+
+.paid-reader-payment-modal .modal-lede {
+  max-width: 34rem !important;
+  margin: 0.55rem 0 0 !important;
+  font-size: 0.92rem !important;
+  line-height: 1.55 !important;
+}
+
+.paid-reader-payment-modal .payment-selected-box {
+  margin: 0.85rem 0 !important;
+  padding: 0.78rem 0.9rem !important;
+  border-radius: 18px !important;
+}
+
+.paid-reader-payment-modal .payment-selected-box strong {
+  font-size: 0.95rem !important;
+  line-height: 1.35 !important;
+}
+
+.paid-reader-payment-strip {
+  grid-template-columns: 0.82fr minmax(0, 1fr) 0.82fr !important;
+  gap: 0.62rem !important;
+  margin-bottom: 0.78rem !important;
+}
+
+.paid-reader-payment-strip .payment-calculator-card {
+  min-height: 6.8rem !important;
+  padding: 0.78rem 0.85rem !important;
+  border-radius: 18px !important;
+  gap: 0.42rem !important;
+}
+
+.paid-reader-payment-strip span,
+.paid-reader-payment-modal .payment-selected-box span {
+  font-size: 0.68rem !important;
+  letter-spacing: 0.1em !important;
+}
+
+.paid-reader-payment-strip strong,
+.paid-reader-payment-modal [data-paid-reader-final-amount] {
+  font-size: clamp(1rem, 1.8vw, 1.25rem) !important;
+}
+
+.paid-reader-promo-card input {
+  min-height: 2.35rem !important;
+  padding: 0.55rem 0.72rem !important;
+  font-size: 0.92rem !important;
+}
+
+.paid-reader-proof-note {
+  margin-bottom: 0.78rem !important;
+  padding: 0.78rem 0.9rem !important;
+  border-radius: 18px !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5 !important;
+}
+
+.paid-reader-payment-modal .payment-method-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.62rem !important;
+  margin-top: 0.75rem !important;
+}
+
+.paid-reader-payment-modal .payment-method-card {
+  gap: 0.5rem !important;
+  padding: 0.72rem !important;
+  border-radius: 18px !important;
+  align-content: start !important;
+}
+
+.paid-reader-payment-modal .payment-qr-button {
+  width: min(100%, 8rem) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: zoom-in !important;
+}
+
+.paid-reader-payment-modal .payment-method-card img {
+  width: 100% !important;
+  max-width: 8rem !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+  border-radius: 12px !important;
+}
+
+.paid-reader-payment-modal .qr-hint {
+  margin-top: -0.15rem !important;
+  text-align: center !important;
+  font-size: 0.72rem !important;
+}
+
+.paid-reader-payment-modal .payment-method-card h3 {
+  margin: 0 !important;
+  font-size: 0.98rem !important;
+  line-height: 1.2 !important;
+}
+
+.paid-reader-payment-modal .payment-method-card p,
+.paid-reader-payment-modal .payment-method-detail-lines,
+.paid-reader-payment-modal .payment-method-note {
+  font-size: 0.78rem !important;
+  line-height: 1.42 !important;
+}
+
+.paid-reader-after-note {
+  margin-top: 0.78rem !important;
+  font-size: 0.86rem !important;
+  line-height: 1.5 !important;
+}
+
+.paid-reader-proof-links {
+  margin-top: 0.78rem !important;
+}
+
+.paid-reader-proof-links p {
+  margin-bottom: 0.55rem !important;
+  font-size: 0.88rem !important;
+}
+
+.paid-reader-proof-link-grid {
+  gap: 0.62rem !important;
+}
+
+.paid-reader-proof-link-card {
+  min-height: 5.8rem !important;
+  padding: 0.72rem !important;
+  border-radius: 18px !important;
+  gap: 0.48rem !important;
+}
+
+.paid-reader-proof-link-card .social-platform-icon,
+.paid-reader-proof-link-card span {
+  width: 2.15rem !important;
+  height: 2.15rem !important;
+}
+
+.paid-reader-proof-link-card .social-platform-icon svg {
+  width: 1.18rem !important;
+  height: 1.18rem !important;
+}
+
+.paid-reader-copy-actions {
+  margin: 0.58rem 0 0.18rem !important;
+  gap: 0.45rem !important;
+}
+
+.paid-reader-copy-btn {
+  min-height: 2.05rem !important;
+  padding: 0.38rem 0.65rem !important;
+  font-size: 0.76rem !important;
+}
+
+.reader-qr-preview img {
+  max-width: min(86vw, 30rem) !important;
+  max-height: 80vh !important;
+}
+
+@media (max-width: 860px) {
+  .paid-reader-payment-overlay .paid-reader-payment-modal {
+    width: min(100%, 37rem) !important;
+    max-height: 88vh !important;
+  }
+
+  .paid-reader-payment-strip,
+  .paid-reader-payment-modal .payment-method-grid,
+  .paid-reader-proof-link-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .paid-reader-payment-strip .payment-calculator-card {
+    min-height: auto !important;
+  }
+
+  .paid-reader-payment-modal .payment-method-card {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    align-items: center !important;
+  }
+
+  .paid-reader-payment-modal .payment-qr-button,
+  .paid-reader-payment-modal .payment-method-card img {
+    width: 5.8rem !important;
+    max-width: 5.8rem !important;
+  }
+
+  .paid-reader-payment-modal .qr-hint {
+    display: none !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .paid-reader-payment-overlay {
+    align-items: start !important;
+    padding:
+      max(0.7rem, env(safe-area-inset-top))
+      0.7rem
+      max(0.7rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  .paid-reader-payment-overlay .paid-reader-payment-modal {
+    width: 100% !important;
+    max-height: calc(100svh - 1.4rem) !important;
+    padding: 0.95rem !important;
+    border-radius: 20px !important;
+  }
+
+  .paid-reader-payment-modal h2 {
+    font-size: clamp(1.75rem, 10vw, 2.45rem) !important;
+  }
+
+  .paid-reader-payment-modal .payment-method-card {
+    grid-template-columns: 1fr !important;
+    text-align: left !important;
+  }
+
+  .paid-reader-payment-modal .payment-qr-button,
+  .paid-reader-payment-modal .payment-method-card img {
+    width: min(100%, 9rem) !important;
+    max-width: 9rem !important;
+  }
+
+  .paid-reader-copy-actions,
+  .paid-reader-copy-btn {
+    width: 100% !important;
+  }
+}
+/* V2.0Q.34 compact reader payment modal END */
