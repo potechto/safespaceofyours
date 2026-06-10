@@ -4732,3 +4732,52 @@ button,
   }
 }
 /* V2.0Q.22 private-like public hamburger menu END */
+
+
+/* V2.0Q.23 force left hamburger menu items */
+@media (min-width: 681px) {
+  .site-header .nav-links {
+    width: min(14.6rem, calc(100vw - 2rem)) !important;
+    min-width: 13.2rem !important;
+    display: grid !important;
+    justify-items: stretch !important;
+    align-items: stretch !important;
+    place-items: stretch !important;
+    gap: 0.26rem !important;
+    padding: 0.78rem 0.78rem !important;
+  }
+
+  .site-header .nav-links.is-open {
+    padding: 0.78rem 0.78rem !important;
+  }
+
+  .site-header .nav-links > a,
+  .site-header .nav-links > button,
+  .site-header .nav-links > .nav-modal-btn,
+  .site-header .nav-links > .nav-link-button {
+    justify-self: stretch !important;
+    align-self: stretch !important;
+    margin: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    text-align: left !important;
+    padding: 0.42rem 0.54rem !important;
+    padding-left: 0.54rem !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .site-header .nav-links > a *,
+  .site-header .nav-links > button *,
+  .site-header .nav-links > .nav-modal-btn *,
+  .site-header .nav-links > .nav-link-button * {
+    text-align: left !important;
+    justify-content: flex-start !important;
+  }
+}
+/* V2.0Q.23 force left hamburger menu items END */
