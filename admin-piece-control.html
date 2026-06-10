@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Piece Control | @safespaceofyours</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/admin.css?v=v20q11-remaining-polish-bundle" />
+  <link rel="stylesheet" href="css/admin.css?v=v20q13-code-creation-modal" />
 </head>
 <body class="admin-standalone-page" data-admin-page="piece-control">
   <main class="admin-shell admin-standalone-shell">
@@ -134,6 +134,62 @@
       </div>
     </section>
 
+    <div id="codeCreationModal" class="admin-modal-overlay code-creation-modal" aria-hidden="true">
+    <div class="admin-modal-card code-creation-modal-card" role="dialog" aria-modal="true" aria-labelledby="codeCreationModalTitle">
+      <button id="closeCodeCreationModal" class="admin-modal-close" type="button" aria-label="Close code creator">X</button>
+
+      <div class="admin-modal-header">
+        <div>
+          <p class="eyebrow">Code creator</p>
+          <h2 id="codeCreationModalTitle">Create code</h2>
+          <p id="codeCreationModalHelp" class="modal-help">Create a code for the selected piece only.</p>
+        </div>
+      </div>
+
+      <form id="codeCreationForm" class="admin-form code-creation-form">
+        <input id="codeCreationKind" type="hidden" value="promo" />
+        <input id="codeCreationSlug" type="hidden" value="" />
+
+        <div class="code-creation-target">
+          <span>Selected piece</span>
+          <strong id="codeCreationPieceTitle">Selected piece</strong>
+          <small id="codeCreationPieceSlug">piece-slug</small>
+        </div>
+
+        <div class="code-creation-grid">
+          <label id="codeCreationDiscountTypeWrap">
+            Discount type
+            <select id="codeCreationDiscountType">
+              <option value="percent">Percent discount</option>
+              <option value="fixed">Fixed PHP discount</option>
+            </select>
+          </label>
+
+          <label id="codeCreationDiscountValueWrap">
+            Discount value
+            <input id="codeCreationDiscountValue" type="text" inputmode="decimal" value="10" placeholder="10" />
+          </label>
+
+          <label>
+            Max uses
+            <input id="codeCreationMaxUses" type="number" min="1" step="1" value="1" required />
+          </label>
+
+          <label>
+            Optional custom code
+            <input id="codeCreationCustomCode" type="text" autocomplete="off" placeholder="Leave blank to auto-generate" />
+          </label>
+        </div>
+
+        <div id="codeCreationSummary" class="code-creation-summary" role="status"></div>
+
+        <div class="code-creation-actions">
+          <button id="cancelCodeCreationModal" class="tiny-btn" type="button">Cancel</button>
+          <button id="submitCodeCreationModal" class="tiny-btn primary-tiny" type="submit">Create code</button>
+        </div>
+      </form>
+    </div>
+  </div>
     <div id="promoRequestModal" class="admin-modal-overlay" aria-hidden="true">
     <div class="admin-modal-card promo-request-modal-card" role="dialog" aria-modal="true" aria-labelledby="promoRequestModalTitle">
       <button id="closePromoRequestModal" class="admin-modal-close" type="button" aria-label="Close promo requests">X</button>
@@ -156,6 +212,6 @@
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
   <script src="js/piece-settings.js?v=v18r-label-controls-2"></script>
   <script src="js/admin-auth.js?v=v18r-label-controls-2"></script>
-  <script src="js/admin-dashboard.js?v=v20q11-remaining-polish-bundle"></script>
+  <script src="js/admin-dashboard.js?v=v20q13-code-creation-modal"></script>
 </body>
 </html>

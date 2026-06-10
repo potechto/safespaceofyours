@@ -3869,3 +3869,78 @@ body[data-admin-page="payment-methods"] #paymentList button {
 }
 /* V2.0Q.11 remaining admin polish bundle END */
 
+
+
+/* V2.0Q.13 cleaner code creation modal */
+.code-creation-modal-card {
+  width: min(100% - 2rem, 42rem);
+}
+
+.code-creation-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.code-creation-target {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.code-creation-target span,
+.code-creation-target small {
+  color: var(--soft);
+  font-size: 0.78rem;
+}
+
+.code-creation-target strong {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.code-creation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.code-creation-grid label[hidden] {
+  display: none !important;
+}
+
+.code-creation-summary {
+  min-height: 2.8rem;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed rgba(255, 203, 225, 0.22);
+  border-radius: 16px;
+  color: var(--soft);
+  background: rgba(255, 203, 225, 0.045);
+  overflow-wrap: anywhere;
+}
+
+.code-creation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.code-creation-actions .tiny-btn {
+  min-width: 8.5rem;
+}
+
+@media (max-width: 620px) {
+  .code-creation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .code-creation-actions .tiny-btn {
+    width: 100%;
+  }
+}
+/* V2.0Q.13 cleaner code creation modal END */

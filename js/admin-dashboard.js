@@ -117,6 +117,23 @@ const promoRequestBell = document.querySelector("#promoRequestBell");
 const promoRequestBellCount = document.querySelector("#promoRequestBellCount");
 const promoRequestModal = document.querySelector("#promoRequestModal");
 const closePromoRequestModalBtn = document.querySelector("#closePromoRequestModal");
+const codeCreationModal = document.querySelector("#codeCreationModal");
+const codeCreationForm = document.querySelector("#codeCreationForm");
+const closeCodeCreationModalBtn = document.querySelector("#closeCodeCreationModal");
+const cancelCodeCreationModalBtn = document.querySelector("#cancelCodeCreationModal");
+const codeCreationKindInput = document.querySelector("#codeCreationKind");
+const codeCreationTitle = document.querySelector("#codeCreationModalTitle");
+const codeCreationHelp = document.querySelector("#codeCreationModalHelp");
+const codeCreationPieceTitle = document.querySelector("#codeCreationPieceTitle");
+const codeCreationPieceSlug = document.querySelector("#codeCreationPieceSlug");
+const codeCreationDiscountTypeWrap = document.querySelector("#codeCreationDiscountTypeWrap");
+const codeCreationDiscountValueWrap = document.querySelector("#codeCreationDiscountValueWrap");
+const codeCreationDiscountTypeInput = document.querySelector("#codeCreationDiscountType");
+const codeCreationDiscountValueInput = document.querySelector("#codeCreationDiscountValue");
+const codeCreationMaxUsesInput = document.querySelector("#codeCreationMaxUses");
+const codeCreationCustomCodeInput = document.querySelector("#codeCreationCustomCode");
+const codeCreationSummary = document.querySelector("#codeCreationSummary");
+const submitCodeCreationModalBtn = document.querySelector("#submitCodeCreationModal");
 const promoPiecePicker = document.querySelector("#promoPiecePicker");
 const unlockPiecePicker = document.querySelector("#unlockPiecePicker");
 
@@ -535,36 +552,141 @@ function formatUseStatus(item) {
   return `Partly used - ${left} left`;
 }
 
-function promptPromoDetails(pieceTitle) {
-  const typeAnswer = window.prompt(
-    `Generate promo for "${pieceTitle}"\n\nChoose discount type:\n\nP = Percent discount, example: 10 means 10% off\nF = Fixed PHP discount, example: 50 means PHP 50 off\n\nType P or F.`,
-    "P"
-  );
+let pendingCodeCreationResolver = null;
 
-  if (typeAnswer === null) return null;
+function normalizeCodeCreationKind(value) {
+  return String(value || "").toLowerCase() === "unlock" ? "unlock" : "promo";
+}
 
-  const normalizedType = typeAnswer.trim().toLowerCase();
-  const discountType = normalizedType.startsWith("f") || normalizedType.includes("php") || normalizedType.includes("peso")
-    ? "fixed"
-    : "percent";
+function sanitizeCodeCreationCode(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/gi, "")
+    .toUpperCase();
+}
 
-  const valueAnswer = window.prompt(
-    discountType === "percent"
-      ? "Enter percent discount.\n\nExample: 10 means 10% off.\nAllowed range: 1 to 100.\nNumbers only; do not include %."
-      : "Enter fixed PHP discount.\n\nExample: 50 means PHP 50 off.\nNumbers only; PHP, ₱, and commas will be cleaned automatically.",
-    discountType === "percent" ? "10" : "50"
-  );
+function parseCodeCreationMoney(value) {
+  const cleaned = String(value || "").replace(/[^0-9.-]/g, "").trim();
+  return Number(cleaned);
+}
 
-  if (valueAnswer === null) return null;
+function parseCodeCreationUses(value) {
+  return Math.floor(Number(String(value || "").replace(/,/g, "").trim()));
+}
 
-  const cleanedDiscountValue = String(valueAnswer)
-    .replace(/php/gi, "")
-    .replace(/₱/g, "")
-    .replace(/%/g, "")
-    .replace(/,/g, "")
-    .trim();
+function updateCodeCreationModalSummary() {
+  if (!codeCreationSummary) return;
 
-  const discountValue = Number(cleanedDiscountValue);
+  const kind = normalizeCodeCreationKind(codeCreationKindInput?.value);
+  const maxUses = parseCodeCreationUses(codeCreationMaxUsesInput?.value);
+  const code = sanitizeCodeCreationCode(codeCreationCustomCodeInput?.value);
+  const codeLabel = code || "Auto-generate";
+  const usesLabel = Number.isFinite(maxUses) && maxUses > 0 ? `${maxUses} use/s` : "Enter max uses";
+
+  if (kind === "unlock") {
+    codeCreationSummary.textContent = `Unlock code - ${usesLabel} - ${codeLabel}`;
+    return;
+  }
+
+  const discountType = codeCreationDiscountTypeInput?.value === "fixed" ? "fixed" : "percent";
+  const discountValue = parseCodeCreationMoney(codeCreationDiscountValueInput?.value);
+  const discountLabel = Number.isFinite(discountValue) && discountValue > 0
+    ? formatDiscount(discountType, discountValue)
+    : "Enter discount value";
+
+  codeCreationSummary.textContent = `Promo code - ${discountLabel} - ${usesLabel} - ${codeLabel}`;
+}
+
+function configureCodeCreationModal(kind, piece) {
+  const normalizedKind = normalizeCodeCreationKind(kind);
+  const slug = piece?.slug || "";
+  const title = piece?.title || slug || "Selected piece";
+  const isPromo = normalizedKind === "promo";
+
+  if (codeCreationKindInput) codeCreationKindInput.value = normalizedKind;
+  if (codeCreationTitle) codeCreationTitle.textContent = isPromo ? "Create promo code" : "Create unlock code";
+  if (codeCreationHelp) {
+    codeCreationHelp.textContent = isPromo
+      ? "Set discount, max uses, and optional custom code for the selected piece only."
+      : "Set max uses and optional custom unlock code for the selected piece only.";
+  }
+  if (codeCreationPieceTitle) codeCreationPieceTitle.textContent = title;
+  if (codeCreationPieceSlug) codeCreationPieceSlug.textContent = slug;
+
+  if (codeCreationDiscountTypeWrap) codeCreationDiscountTypeWrap.hidden = !isPromo;
+  if (codeCreationDiscountValueWrap) codeCreationDiscountValueWrap.hidden = !isPromo;
+  if (codeCreationDiscountTypeInput) codeCreationDiscountTypeInput.value = "percent";
+  if (codeCreationDiscountValueInput) codeCreationDiscountValueInput.value = isPromo ? "10" : "";
+  if (codeCreationMaxUsesInput) codeCreationMaxUsesInput.value = "1";
+  if (codeCreationCustomCodeInput) codeCreationCustomCodeInput.value = "";
+  if (submitCodeCreationModalBtn) submitCodeCreationModalBtn.textContent = isPromo ? "Create promo code" : "Create unlock code";
+
+  updateCodeCreationModalSummary();
+}
+
+function closeCodeCreationModal(result = null) {
+  if (codeCreationModal) {
+    codeCreationModal.classList.remove("is-open");
+    codeCreationModal.setAttribute("aria-hidden", "true");
+  }
+
+  if (pendingCodeCreationResolver) {
+    const resolve = pendingCodeCreationResolver;
+    pendingCodeCreationResolver = null;
+    resolve(result);
+  }
+}
+
+function openCodeCreationModal(kind, piece) {
+  if (!codeCreationModal || !codeCreationForm) {
+    setDashboardMessage("Code creation modal is unavailable on this page.", "error");
+    return Promise.resolve(null);
+  }
+
+  if (pendingCodeCreationResolver) closeCodeCreationModal(null);
+
+  configureCodeCreationModal(kind, piece);
+  codeCreationModal.classList.add("is-open");
+  codeCreationModal.setAttribute("aria-hidden", "false");
+
+  window.setTimeout(() => {
+    const focusTarget = normalizeCodeCreationKind(kind) === "promo"
+      ? codeCreationDiscountValueInput
+      : codeCreationMaxUsesInput;
+    focusTarget?.focus();
+  }, 0);
+
+  return new Promise(resolve => {
+    pendingCodeCreationResolver = resolve;
+  });
+}
+
+function getCodeCreationSubmission() {
+  const kind = normalizeCodeCreationKind(codeCreationKindInput?.value);
+  const maxUses = parseCodeCreationUses(codeCreationMaxUsesInput?.value);
+
+  if (!Number.isFinite(maxUses) || maxUses <= 0) {
+    setDashboardMessage("Max uses must be a whole number greater than 0.", "error");
+    codeCreationMaxUsesInput?.focus();
+    return null;
+  }
+
+  const rawCode = String(codeCreationCustomCodeInput?.value || "").trim();
+  const code = sanitizeCodeCreationCode(rawCode);
+
+  if (rawCode && !code) {
+    setDashboardMessage("Custom code must contain letters, numbers, or dash only.", "error");
+    codeCreationCustomCodeInput?.focus();
+    return null;
+  }
+
+  if (codeCreationCustomCodeInput) codeCreationCustomCodeInput.value = code;
+
+  if (kind === "unlock") return { kind, code, maxUses };
+
+  const discountType = codeCreationDiscountTypeInput?.value === "fixed" ? "fixed" : "percent";
+  const discountValue = parseCodeCreationMoney(codeCreationDiscountValueInput?.value);
 
   if (!Number.isFinite(discountValue) || discountValue <= 0) {
     setDashboardMessage(
@@ -573,56 +695,24 @@ function promptPromoDetails(pieceTitle) {
         : "Fixed PHP discount must be a number greater than 0.",
       "error"
     );
+    codeCreationDiscountValueInput?.focus();
     return null;
   }
 
   if (discountType === "percent" && discountValue > 100) {
     setDashboardMessage("Percent discount cannot be higher than 100.", "error");
+    codeCreationDiscountValueInput?.focus();
     return null;
   }
 
-  const maxUsesAnswer = window.prompt(
-    "How many times can this promo code be used?\n\n1 = one buyer only\n5 = five uses\n\nEnter a whole number greater than 0.",
-    "1"
-  );
+  return { kind, code, discountType, discountValue, maxUses };
+}
 
-  if (maxUsesAnswer === null) return null;
-
-  const maxUses = Math.floor(Number(String(maxUsesAnswer).replace(/,/g, "").trim()));
-
-  if (!Number.isFinite(maxUses) || maxUses <= 0) {
-    setDashboardMessage("Promo uses must be a whole number greater than 0.", "error");
-    return null;
-  }
-
-  const codeAnswer = window.prompt(
-    "Optional custom promo code.\n\nLeave blank to auto-generate.\nAllowed: letters, numbers, and dash only.",
-    ""
-  );
-
-  if (codeAnswer === null) return null;
-
-  const code = codeAnswer
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/gi, "")
-    .toUpperCase();
-
-  const confirmed = window.confirm(
-    `Create this promo code?\n\nPiece: ${pieceTitle}\nDiscount: ${formatDiscount(discountType, discountValue)}\nAllowed uses: ${maxUses}\nCode: ${code || "Auto-generate"}`
-  );
-
-  if (!confirmed) {
-    setDashboardMessage("Promo generation cancelled.");
-    return null;
-  }
-
-  return {
-    code,
-    discountType,
-    discountValue,
-    maxUses
-  };
+function submitCodeCreationModal(event) {
+  event.preventDefault();
+  const submission = getCodeCreationSubmission();
+  if (!submission) return;
+  closeCodeCreationModal(submission);
 }
 
 function makePromoCode(slug) {
@@ -1447,7 +1537,7 @@ document.addEventListener("click", async event => {
     if (promoGenerate) {
       const slug = promoGenerate.dataset.generatePromo;
       const piece = latestAdminPieces.find(item => item.slug === slug) || { slug, title: slug };
-      const promoDetails = promptPromoDetails(piece.title || slug);
+      const promoDetails = await openCodeCreationModal("promo", piece);
 
       if (!promoDetails) return;
 
@@ -1479,27 +1569,34 @@ document.addEventListener("click", async event => {
       if (targetError) throw targetError;
 
       await loadPromos();
-loadPromoRequests();
+      loadPromoRequests();
       setDashboardMessage(`Promo code generated: ${code} - ${promoDetails.maxUses} use/s`, "success");
+      return;
     }
 
     if (unlockGenerate) {
       const slug = unlockGenerate.dataset.generateUnlock;
-      const code = makeUnlockCode(slug);
+      const piece = latestAdminPieces.find(item => item.slug === slug) || { slug, title: slug };
+      const unlockDetails = await openCodeCreationModal("unlock", piece);
+
+      if (!unlockDetails) return;
+
+      const code = unlockDetails.code || makeUnlockCode(slug);
 
       const { error } = await adminClient
         .from("unlock_codes")
         .insert({
           code,
           piece_slug: slug,
-          max_uses: 1,
+          max_uses: unlockDetails.maxUses,
           is_active: true
         });
 
       if (error) throw error;
 
       await loadUnlocks();
-      setDashboardMessage(`Unlock code generated: ${code}`, "success");
+      setDashboardMessage(`Unlock code generated: ${code} - ${unlockDetails.maxUses} use/s`, "success");
+      return;
     }
 
     if (paymentToggle) {
@@ -1528,12 +1625,38 @@ if (!window.safePromoRequestPollStarted) {
   }, 60000);
 }
 
+if (closeCodeCreationModalBtn) {
+  closeCodeCreationModalBtn.addEventListener("click", () => closeCodeCreationModal(null));
+}
+
+if (cancelCodeCreationModalBtn) {
+  cancelCodeCreationModalBtn.addEventListener("click", () => closeCodeCreationModal(null));
+}
+
+if (codeCreationForm) {
+  codeCreationForm.addEventListener("submit", submitCodeCreationModal);
+}
+
+[codeCreationDiscountTypeInput, codeCreationDiscountValueInput, codeCreationMaxUsesInput, codeCreationCustomCodeInput]
+  .filter(Boolean)
+  .forEach(input => {
+    input.addEventListener("input", updateCodeCreationModalSummary);
+    input.addEventListener("change", updateCodeCreationModalSummary);
+  });
+
 if (closePromoRequestModalBtn) {
   closePromoRequestModalBtn.addEventListener("click", closePromoRequestModal);
 }
 
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && promoRequestModal?.classList.contains("is-open")) {
+  if (event.key !== "Escape") return;
+
+  if (codeCreationModal?.classList.contains("is-open")) {
+    closeCodeCreationModal(null);
+    return;
+  }
+
+  if (promoRequestModal?.classList.contains("is-open")) {
     closePromoRequestModal();
   }
 });
