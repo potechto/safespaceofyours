@@ -4739,3 +4739,189 @@ body:has(#scrollTopBtn.visible) .public-space-float {
   }
 }
 /* V2.0Q.39 private space public space float alignment END */
+
+/* V2.0Q.40 admin float and piece layout repair */
+:root {
+  --admin-float-edge-q40: clamp(0.85rem, 2.2vw, 1.15rem);
+  --admin-float-bottom-q40: calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  --admin-scroll-size-q40: clamp(2.75rem, 5.4vw, 3.15rem);
+  --admin-ps-size-q40: clamp(2.75rem, 5.4vw, 3.15rem);
+  --admin-float-gap-q40: 0.52rem;
+  --admin-ps-lifted-bottom-q40: calc(
+    var(--admin-float-bottom-q40) + var(--admin-scroll-size-q40) + var(--admin-float-gap-q40)
+  );
+}
+
+.admin-scroll-top {
+  right: var(--admin-float-edge-q40) !important;
+  bottom: var(--admin-float-bottom-q40) !important;
+  width: var(--admin-scroll-size-q40) !important;
+  height: var(--admin-scroll-size-q40) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  border-radius: 999px !important;
+  font-size: clamp(1.25rem, 2.8vw, 1.55rem) !important;
+  line-height: 1 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+}
+
+.public-space-float {
+  right: var(--admin-float-edge-q40) !important;
+  bottom: var(--admin-float-bottom-q40) !important;
+  width: var(--admin-ps-size-q40) !important;
+  height: var(--admin-ps-size-q40) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+.public-space-float img {
+  width: 76% !important;
+  height: 76% !important;
+  object-fit: contain !important;
+}
+
+.public-space-float.is-stacked-over-scroll,
+body.scroll-top-visible .public-space-float,
+body:has(.admin-scroll-top.visible) .public-space-float,
+body:has(#adminScrollTopBtn.visible) .public-space-float {
+  bottom: var(--admin-ps-lifted-bottom-q40) !important;
+}
+
+/* Restore Piece Control desktop proportions after floating-control changes. */
+body[data-admin-page="piece-control"] .admin-shell,
+body[data-admin-page="piece-control"] .admin-workspace,
+body[data-admin-page="piece-control"] .standalone-admin-shell {
+  max-width: 1180px !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard,
+body[data-admin-page="piece-control"] #pieceSettingsList {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body[data-admin-page="piece-control"] #pieceSettingsList {
+  gap: 0.9rem !important;
+}
+
+body[data-admin-page="piece-control"] .piece-control-item {
+  display: grid !important;
+  grid-template-columns: minmax(16.5rem, 0.78fr) minmax(25rem, 1.22fr) !important;
+  gap: clamp(0.85rem, 1.7vw, 1.05rem) !important;
+  align-items: start !important;
+  padding: clamp(0.82rem, 1.5vw, 1rem) !important;
+  min-height: 0 !important;
+}
+
+body[data-admin-page="piece-control"] .piece-control-main {
+  align-self: start !important;
+  grid-template-columns: 5.2rem minmax(0, 1fr) !important;
+  gap: 0.8rem !important;
+}
+
+body[data-admin-page="piece-control"] .piece-control-cover {
+  width: 5.2rem !important;
+  height: 6.65rem !important;
+}
+
+body[data-admin-page="piece-control"] .piece-control-copy {
+  align-content: start !important;
+}
+
+body[data-admin-page="piece-control"] .piece-control-fields {
+  grid-column: 2 !important;
+  align-self: start !important;
+  display: grid !important;
+  grid-template-columns:
+    minmax(7.5rem, 0.72fr)
+    minmax(9rem, 1fr)
+    minmax(8rem, 0.86fr)
+    minmax(7rem, 0.72fr) !important;
+  gap: 0.64rem !important;
+  padding: 0.72rem !important;
+  border-radius: 20px !important;
+}
+
+body[data-admin-page="piece-control"] .piece-field {
+  min-width: 0 !important;
+}
+
+body[data-admin-page="piece-control"] .piece-control-fields input,
+body[data-admin-page="piece-control"] .piece-control-fields select {
+  min-height: 2.5rem !important;
+  padding: 0.52rem 0.64rem !important;
+  border-radius: 15px !important;
+  font-size: 0.92rem !important;
+}
+
+body[data-admin-page="piece-control"] .switch-line {
+  min-height: 2.5rem !important;
+  padding: 0.48rem 0.62rem !important;
+  border-radius: 15px !important;
+}
+
+body[data-admin-page="piece-control"] .piece-actions {
+  grid-column: 2 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(6.8rem, 1fr)) !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+  max-width: 31rem !important;
+  justify-self: end !important;
+  align-self: end !important;
+  padding-top: 0 !important;
+}
+
+body[data-admin-page="piece-control"] .piece-actions .tiny-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 2.38rem !important;
+  padding: 0.48rem 0.66rem !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 980px) {
+  body[data-admin-page="piece-control"] .piece-control-item {
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-admin-page="piece-control"] .piece-control-fields {
+    grid-column: 1 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body[data-admin-page="piece-control"] .piece-actions {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --admin-float-edge-q40: 0.8rem;
+    --admin-float-bottom-q40: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+    --admin-scroll-size-q40: 2.85rem;
+    --admin-ps-size-q40: 2.85rem;
+    --admin-float-gap-q40: 0.45rem;
+  }
+
+  body[data-admin-page="piece-control"] .piece-control-main {
+    grid-template-columns: 4.45rem minmax(0, 1fr) !important;
+  }
+
+  body[data-admin-page="piece-control"] .piece-control-cover {
+    width: 4.45rem !important;
+    height: 5.75rem !important;
+  }
+
+  body[data-admin-page="piece-control"] .piece-control-fields {
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-admin-page="piece-control"] .piece-actions {
+    grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+  }
+}
+/* V2.0Q.40 admin float and piece layout repair END */
