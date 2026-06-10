@@ -2,10 +2,14 @@ const poemGrid = document.querySelector("#poemGrid");
 const searchInput = document.querySelector("#searchInput");
 const filterButtons = document.querySelector("#filterButtons");
 const emptyState = document.querySelector("#emptyState");
+const loadMorePiecesBtn = document.querySelector("#loadMorePieces");
 const year = document.querySelector("#year");
+
+const PIECES_LOAD_MORE_STEP = 8;
 
 let activeCategory = "All";
 let visiblePoems = Array.isArray(window.POEMS) ? window.POEMS : [];
+let visiblePieceCount = getInitialPieceLimit();
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -48,6 +52,14 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
+function getInitialPieceLimit() {
+  return window.matchMedia && window.matchMedia("(max-width: 760px)").matches ? 6 : 12;
+}
+
+function resetPiecesLoadLimit() {
+  visiblePieceCount = getInitialPieceLimit();
+}
+
 function getCategories() {
   return ["All", ...new Set(visiblePoems.map(poem => poem.category))];
 }
@@ -66,6 +78,7 @@ function renderFilters() {
   document.querySelectorAll(".filter-btn").forEach(button => {
     button.addEventListener("click", () => {
       activeCategory = button.dataset.category;
+      resetPiecesLoadLimit();
       renderFilters();
       renderPoems();
     });
@@ -108,9 +121,20 @@ function renderPoems() {
     return categoryMatch && searchMatch;
   });
 
+  const visibleFiltered = filtered.slice(0, visiblePieceCount);
+  const remainingCount = Math.max(filtered.length - visibleFiltered.length, 0);
+
   emptyState.hidden = filtered.length !== 0;
 
-  poemGrid.innerHTML = filtered.map(poem => {
+  if (loadMorePiecesBtn) {
+    loadMorePiecesBtn.hidden = remainingCount === 0;
+    loadMorePiecesBtn.textContent = remainingCount > PIECES_LOAD_MORE_STEP
+      ? `Load ${PIECES_LOAD_MORE_STEP} more pieces`
+      : `Load ${remainingCount} more ${remainingCount === 1 ? "piece" : "pieces"}`;
+    loadMorePiecesBtn.setAttribute("aria-label", `Show more pieces. ${remainingCount} remaining.`);
+  }
+
+  poemGrid.innerHTML = visibleFiltered.map(poem => {
     const access = getPoemAccess(poem);
     const isPremium = access === "paid";
     const price = Number(poem.price) || 49;
@@ -1428,7 +1452,17 @@ function setupSmartScrollbars() {
 }
 
 if (searchInput) {
-  searchInput.addEventListener("input", renderPoems);
+  searchInput.addEventListener("input", () => {
+    resetPiecesLoadLimit();
+    renderPoems();
+  });
+}
+
+if (loadMorePiecesBtn) {
+  loadMorePiecesBtn.addEventListener("click", () => {
+    visiblePieceCount += PIECES_LOAD_MORE_STEP;
+    renderPoems();
+  });
 }
 
 async function syncPublicPieceSettings() {

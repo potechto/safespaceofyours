@@ -4407,3 +4407,21 @@ button,
 }
 /* V2.0Q.11 remaining public polish bundle END */
 
+
+
+/* V2.0Q.12 pieces load-more pagination */
+.pieces-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+.load-more-pieces-btn {
+  min-width: min(100%, 14rem);
+  text-align: center;
+  cursor: pointer;
+}
+
+.load-more-pieces-btn[hidden] {
+  display: none;
+}
