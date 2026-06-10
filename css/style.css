@@ -4632,3 +4632,49 @@ button,
   }
 }
 /* V2.0Q.20 compact desktop hamburger menu END */
+
+
+/* V2.0Q.21 left aligned compact desktop hamburger */
+@media (min-width: 681px) {
+  .site-header .nav-links {
+    width: min(12.6rem, calc(100vw - 2rem)) !important;
+    min-width: 11.4rem !important;
+    gap: 0.18rem !important;
+    border-radius: 18px !important;
+  }
+
+  .site-header .nav-links.is-open {
+    padding: 0.32rem !important;
+  }
+
+  .site-header .nav-links a,
+  .site-header .nav-links .nav-modal-btn,
+  .site-header .nav-links .nav-link-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    min-height: 2.08rem !important;
+    width: 100% !important;
+    padding: 0.48rem 0.72rem !important;
+    padding-left: 0.72rem !important;
+    border-radius: 13px !important;
+    font-size: clamp(0.88rem, 1.02vw, 0.97rem) !important;
+    line-height: 1.08 !important;
+    white-space: normal !important;
+  }
+
+  .site-header .nav-links a span,
+  .site-header .nav-links .nav-modal-btn span,
+  .site-header .nav-links .nav-link-button span {
+    justify-content: flex-start !important;
+    text-align: left !important;
+  }
+
+  .site-header .nav-links a:hover,
+  .site-header .nav-links .nav-modal-btn:hover,
+  .site-header .nav-links .nav-link-button:hover {
+    transform: none !important;
+  }
+}
+/* V2.0Q.21 left aligned compact desktop hamburger END */
