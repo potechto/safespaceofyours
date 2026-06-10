@@ -329,23 +329,163 @@
     }).join("");
   }
 
-  function ensureAdminTools() {
-    if (menu && !menu.querySelector("[data-ps-menu-item='admin']")) {
-      const adminButton = document.createElement("button");
-      adminButton.type = "button";
-      adminButton.hidden = true;
-      adminButton.dataset.psMenuItem = "admin";
-      adminButton.dataset.psAdminMenuItem = "";
-      adminButton.textContent = "Admin controls";
+  function ensureMenuButton(key, label, adminOnly) {
+    if (!menu) return null;
+
+    let button = menu.querySelector(`[data-ps-menu-item='${key}']`);
+
+    if (!button) {
+      button = document.createElement("button");
+      button.type = "button";
+      button.dataset.psMenuItem = key;
+      button.textContent = label;
+
+      if (adminOnly) button.dataset.psAdminMenuItem = "";
 
       const backLink = menu.querySelector("a");
-      menu.insertBefore(adminButton, backLink || logoutButton || null);
+      menu.insertBefore(button, backLink || logoutButton || null);
     }
 
-    const adminMenuItem = menu ? menu.querySelector("[data-ps-menu-item='admin']") : null;
-    if (adminMenuItem) adminMenuItem.hidden = !isAdminMode;
+    if (adminOnly) button.hidden = !isAdminMode;
 
-    if (!mainSpace || mainSpace.querySelector("[data-ps-admin-tools]")) return;
+    return button;
+  }
+
+  function ensureControlScreen() {
+    if (!mainSpace || mainSpace.querySelector("[data-ps-control-screen]")) return;
+
+    mainSpace.insertAdjacentHTML("beforeend", `
+      <section class="ps-admin-tools ps-admin-screen ps-control-screen" data-ps-control-screen hidden aria-label="Public Space controls">
+        <div class="ps-admin-screen-top">
+          <div>
+            <p class="eyebrow" data-ps-control-eyebrow>Public Space</p>
+            <h2 data-ps-control-title>Controls</h2>
+            <p data-ps-control-intro>Manage your Public Space account.</p>
+          </div>
+          <button class="ps-admin-close" type="button" data-ps-control-close aria-label="Close controls">&times;</button>
+        </div>
+        <div class="ps-control-results" data-ps-control-results></div>
+      </section>
+    `);
+  }
+
+  function openControlScreen(title, intro, body, eyebrow) {
+    ensureControlScreen();
+
+    const screen = root.querySelector("[data-ps-control-screen]");
+    if (!screen) return;
+
+    const eyebrowNode = screen.querySelector("[data-ps-control-eyebrow]");
+    const titleNode = screen.querySelector("[data-ps-control-title]");
+    const introNode = screen.querySelector("[data-ps-control-intro]");
+    const resultsNode = screen.querySelector("[data-ps-control-results]");
+
+    setText(eyebrowNode, eyebrow || "Public Space");
+    setText(titleNode, title || "Controls");
+    setText(introNode, intro || "");
+    if (resultsNode) resultsNode.innerHTML = body || "";
+
+    screen.hidden = false;
+    screen.setAttribute("aria-hidden", "false");
+
+    const closeButton = screen.querySelector("[data-ps-control-close]");
+    if (closeButton) closeButton.focus();
+  }
+
+  function closeControlScreen() {
+    const screen = root.querySelector("[data-ps-control-screen]");
+    if (!screen) return;
+
+    screen.hidden = true;
+    screen.setAttribute("aria-hidden", "true");
+  }
+
+  function renderProfileScreen() {
+    const user = currentUser || {};
+    const chips = [
+      user.is_admin ? "Admin" : "",
+      user.is_premium ? "Premium" : "",
+      user.badge_label ? user.badge_label : "",
+      user.is_disabled ? "Disabled" : "Active"
+    ].filter(Boolean);
+
+    openControlScreen(
+      "Profile",
+      currentUser ? `Logged in as @${user.username}.` : "You are not logged in.",
+      `
+        <div class="ps-control-card">
+          <strong>@${escapeHtml(user.username || "guest")}</strong>
+          <span>${currentUser ? "Public Space account" : "Create or login to use Public Space."}</span>
+          <div class="ps-control-chip-row">
+            ${chips.map(chip => `<span class="ps-status-pill">${escapeHtml(chip)}</span>`).join("")}
+          </div>
+        </div>
+        <div class="ps-control-card">
+          <strong>Account notes</strong>
+          <span>Username, premium, badge, disable/enable, and password reset are managed from admin user controls.</span>
+        </div>
+      `,
+      "Account"
+    );
+  }
+
+  function renderSettingsScreen() {
+    openControlScreen(
+      "Settings",
+      "Quick controls for this Public Space session.",
+      `
+        <div class="ps-control-card">
+          <strong>Session</strong>
+          <span>${currentUser ? `Signed in as @${escapeHtml(currentUser.username)}.` : "Not signed in."}</span>
+        </div>
+        <div class="ps-control-card">
+          <strong>Privacy and safety</strong>
+          <span>Admins can disable accounts, reset passwords, assign badges, and moderate posts. More viewer-facing settings will be connected after admin tools are stable.</span>
+        </div>
+        <div class="ps-control-card">
+          <strong>Display</strong>
+          <span>The current Public Space layout is using the modern futuristic compact mode.</span>
+        </div>
+      `,
+      "Menu"
+    );
+  }
+
+  function renderNotificationsScreen() {
+    openControlScreen(
+      "Notifications",
+      "Public Space notifications will appear here.",
+      `
+        <div class="ps-control-card">
+          <strong>No notification center yet.</strong>
+          <span>Bell UI is ready. Database-backed notifications will be connected after admin controls and viewer flow are stable.</span>
+        </div>
+        <div class="ps-control-card">
+          <strong>Planned alerts</strong>
+          <span>New comments, hearts, admin notices, disabled-account notices, and moderation updates.</span>
+        </div>
+      `,
+      "Bell"
+    );
+  }
+
+  function ensureAdminTools() {
+    ensureMenuButton("notifications", "Notifications", false);
+    ensureMenuButton("admin", "Admin overview", true);
+    ensureMenuButton("admin-users", "Registered users", true);
+    ensureMenuButton("admin-posts", "Post moderation", true);
+    ensureMenuButton("admin-reports", "Reports", true);
+    ensureMenuButton("admin-space-settings", "Space settings", true);
+
+    if (menu) {
+      menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
+        item.hidden = !isAdminMode;
+      });
+    }
+
+    ensureControlScreen();
+
+    if (!mainSpace || mainSpace.querySelector("[data-ps-admin-tools]:not([data-ps-control-screen])")) return;
 
     mainSpace.insertAdjacentHTML("beforeend", `
       <section class="ps-admin-tools ps-admin-screen" data-ps-admin-tools hidden aria-label="Public Space admin controls">
@@ -375,22 +515,26 @@
 
     ensureAdminTools();
 
-    const adminMenuItem = menu ? menu.querySelector("[data-ps-menu-item='admin']") : null;
-    if (adminMenuItem) adminMenuItem.hidden = !isAdminMode;
+    if (menu) {
+      menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
+        item.hidden = !isAdminMode;
+      });
+    }
 
-    const adminTools = root.querySelector("[data-ps-admin-tools]");
+    const adminTools = root.querySelector("[data-ps-admin-tools]:not([data-ps-control-screen])");
     if (adminTools && !isAdminMode) adminTools.hidden = true;
   }
 
-  function openAdminScreen() {
+  function openAdminScreen(initialAction) {
     if (!isAdminMode) {
       setFeedStatus("Login with a Public Space admin account first.");
       return;
     }
 
     ensureAdminTools();
+    closeControlScreen();
 
-    const adminTools = root.querySelector("[data-ps-admin-tools]");
+    const adminTools = root.querySelector("[data-ps-admin-tools]:not([data-ps-control-screen])");
     if (!adminTools) return;
 
     adminTools.hidden = false;
@@ -398,10 +542,17 @@
 
     const firstButton = adminTools.querySelector("button");
     if (firstButton) firstButton.focus();
+
+    if (initialAction) {
+      window.setTimeout(() => {
+        const actionButton = adminTools.querySelector(`[data-ps-admin-action='${initialAction}']`);
+        if (actionButton) actionButton.click();
+      }, 0);
+    }
   }
 
   function closeAdminScreen() {
-    const adminTools = root.querySelector("[data-ps-admin-tools]");
+    const adminTools = root.querySelector("[data-ps-admin-tools]:not([data-ps-control-screen])");
     if (!adminTools) return;
 
     adminTools.hidden = true;
@@ -872,6 +1023,12 @@
   }
 
   async function handleAdminAction(event) {
+    const controlCloseButton = event.target.closest("[data-ps-control-close]");
+    if (controlCloseButton) {
+      closeControlScreen();
+      return;
+    }
+
     const closeButton = event.target.closest("[data-ps-admin-close]");
     if (closeButton) {
       closeAdminScreen();
@@ -984,15 +1141,35 @@
       if (!item) return;
 
       if (item.dataset.psMenuItem === "profile") {
-        setFeedStatus(currentUser ? `Logged in as @${currentUser.username}.` : "Not logged in.");
+        renderProfileScreen();
       }
 
       if (item.dataset.psMenuItem === "settings") {
-        setFeedStatus("Settings will be connected next.");
+        renderSettingsScreen();
+      }
+
+      if (item.dataset.psMenuItem === "notifications") {
+        renderNotificationsScreen();
       }
 
       if (item.dataset.psMenuItem === "admin") {
         openAdminScreen();
+      }
+
+      if (item.dataset.psMenuItem === "admin-users") {
+        openAdminScreen("users");
+      }
+
+      if (item.dataset.psMenuItem === "admin-posts") {
+        openAdminScreen("posts");
+      }
+
+      if (item.dataset.psMenuItem === "admin-reports") {
+        openAdminScreen("reports");
+      }
+
+      if (item.dataset.psMenuItem === "admin-space-settings") {
+        openAdminScreen("settings");
       }
 
       menu.hidden = true;
@@ -1012,6 +1189,8 @@
       } catch (error) {}
 
       clearSession();
+      closeAdminScreen();
+      closeControlScreen();
       if (menu) menu.hidden = true;
       renderEmptyFeed();
       showAuth("login");
@@ -1020,7 +1199,7 @@
 
   if (bellButton) {
     bellButton.addEventListener("click", () => {
-      setFeedStatus("Notifications will be connected next.");
+      renderNotificationsScreen();
     });
   }
 
@@ -1031,6 +1210,7 @@
     closeModal(forgotModal);
     closeModal(composeModal);
     closeAdminScreen();
+    closeControlScreen();
     if (menu) menu.hidden = true;
   });
 

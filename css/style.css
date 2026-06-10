@@ -6705,3 +6705,92 @@ input[data-ps-pin-only] {
   }
 }
 /* V2.0Q.56 bell + admin user controls END */
+
+/* V2.0Q.57 hamburger control screens */
+.ps-control-screen {
+  z-index: 92 !important;
+}
+
+.ps-control-results {
+  display: grid !important;
+  gap: 0.85rem !important;
+  margin-top: 1rem !important;
+}
+
+.ps-control-card {
+  display: grid !important;
+  gap: 0.45rem !important;
+  padding: 1rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.060), rgba(255, 255, 255, 0.025)),
+    rgba(255, 255, 255, 0.035) !important;
+}
+
+.ps-control-card strong {
+  color: #fff4fb !important;
+  font-size: 1.02rem !important;
+}
+
+.ps-control-card span {
+  color: rgba(255, 244, 251, 0.66) !important;
+  line-height: 1.5 !important;
+}
+
+.ps-control-chip-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.4rem !important;
+  margin-top: 0.25rem !important;
+}
+
+.ps-menu button[data-ps-admin-menu-item] {
+  color: #fff4fb !important;
+  background:
+    linear-gradient(135deg, rgba(255, 203, 225, 0.12), rgba(188, 165, 255, 0.08)) !important;
+  border: 1px solid rgba(255, 244, 251, 0.10) !important;
+}
+
+.ps-menu button[data-ps-admin-menu-item]:hover {
+  border-color: rgba(255, 203, 225, 0.30) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 203, 225, 0.18), rgba(188, 165, 255, 0.12)) !important;
+}
+
+.ps-menu button[data-ps-menu-item="notifications"]::before,
+.ps-menu button[data-ps-menu-item="admin"]::before,
+.ps-menu button[data-ps-menu-item="admin-users"]::before,
+.ps-menu button[data-ps-menu-item="admin-posts"]::before,
+.ps-menu button[data-ps-menu-item="admin-reports"]::before,
+.ps-menu button[data-ps-menu-item="admin-space-settings"]::before {
+  display: inline-block !important;
+  width: 1.35rem !important;
+  margin-right: 0.25rem !important;
+  opacity: 0.9 !important;
+}
+
+.ps-menu button[data-ps-menu-item="notifications"]::before {
+  content: "B" !important;
+}
+
+.ps-menu button[data-ps-menu-item="admin"]::before {
+  content: "A" !important;
+}
+
+.ps-menu button[data-ps-menu-item="admin-users"]::before {
+  content: "U" !important;
+}
+
+.ps-menu button[data-ps-menu-item="admin-posts"]::before {
+  content: "P" !important;
+}
+
+.ps-menu button[data-ps-menu-item="admin-reports"]::before {
+  content: "R" !important;
+}
+
+.ps-menu button[data-ps-menu-item="admin-space-settings"]::before {
+  content: "S" !important;
+}
+/* V2.0Q.57 hamburger control screens END */
