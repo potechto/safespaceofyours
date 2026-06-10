@@ -4296,3 +4296,42 @@ body[data-admin-page="piece-control"] #unlockList.is-code-list-scrollable::-webk
   line-height: 1;
 }
 /* V2.0Q.30 modal close readable X glyph END */
+
+/* V2.0Q.31 independent promo unlock card heights */
+body[data-admin-page="piece-control"] .admin-piece-code-row {
+  align-items: start !important;
+}
+
+body[data-admin-page="piece-control"] .admin-piece-code-row > .admin-card {
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: start !important;
+}
+
+body[data-admin-page="piece-control"] #promoList,
+body[data-admin-page="piece-control"] #unlockList {
+  flex: 0 1 auto !important;
+  align-content: start !important;
+}
+
+body[data-admin-page="piece-control"] #promoList .admin-code-card,
+body[data-admin-page="piece-control"] #unlockList .admin-code-card {
+  align-self: start !important;
+}
+
+body[data-admin-page="piece-control"] #promoList.is-code-list-scrollable,
+body[data-admin-page="piece-control"] #unlockList.is-code-list-scrollable {
+  max-height: min(28rem, 46vh) !important;
+  overflow-y: auto !important;
+}
+
+@media (max-width: 760px) {
+  body[data-admin-page="piece-control"] .admin-piece-code-row {
+    align-items: stretch !important;
+  }
+
+  body[data-admin-page="piece-control"] .admin-piece-code-row > .admin-card {
+    width: 100%;
+  }
+}
+/* V2.0Q.31 independent promo unlock card heights END */
