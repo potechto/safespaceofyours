@@ -5604,3 +5604,66 @@ body[data-admin-page="piece-control"] #piecesControlCard .piece-actions .tiny-bt
   }
 }
 /* V2.0Q.44 compress piece control row width END */
+
+/* V2.0Q.45 unclip piece control fields */
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-item {
+  overflow: visible !important;
+  grid-template-columns: minmax(17rem, 0.7fr) minmax(0, 1.3fr) !important;
+  gap: 0.78rem !important;
+  padding: 0.66rem 0.92rem 0.66rem 0.66rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-panel {
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  padding-inline: 0.08rem 0.34rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  grid-template-columns:
+    minmax(4.8rem, 0.62fr)
+    minmax(7.1rem, 0.98fr)
+    minmax(5.9rem, 0.82fr)
+    minmax(4.65rem, 0.62fr)
+    minmax(5.75rem, 0.76fr) !important;
+  gap: 0.34rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-field {
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-field > span:first-child {
+  display: block !important;
+  overflow: visible !important;
+  padding-left: 0.04rem !important;
+  margin-left: 0 !important;
+  text-indent: 0 !important;
+  line-height: 1.15 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields input,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields select,
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line {
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  max-width: 100% !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+  overflow: visible !important;
+  width: min(100%, 21rem) !important;
+}
+
+@media (max-width: 1180px) {
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-item,
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-panel,
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+    overflow: visible !important;
+  }
+}
+/* V2.0Q.45 unclip piece control fields END */
