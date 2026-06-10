@@ -1476,8 +1476,8 @@ function submitDangerousDeleteModal() {
   if (dangerousDeleteModalState?.requireTypedDelete) {
     const typed = String(elements.input?.value || "").trim();
 
-    if (typed !== DELETE_CONFIRMATION_WORD) {
-      if (elements.error) elements.error.textContent = "Type DELETE exactly to continue.";
+    if (typed.toUpperCase() !== DELETE_CONFIRMATION_WORD) {
+      if (elements.error) elements.error.textContent = "Type delete to continue.";
       elements.input?.focus();
       return;
     }
