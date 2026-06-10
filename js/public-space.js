@@ -2,8 +2,28 @@
   const root = document.querySelector("[data-public-space-root]");
   if (!root) return;
 
+  const SESSION_KEY = "safespace_public_space_session";
   const ADMIN_HANDOFF_KEY = "safespace_public_space_admin";
-  const ADMIN_HANDOFF_MAX_AGE = 12 * 60 * 60 * 1000;
+
+  const LIMITS = {
+    usernameMin: 3,
+    usernameMax: 15,
+    passwordMin: 6,
+    passwordMax: 8,
+    pinLength: 4,
+    postMax: 1000
+  };
+
+  const COPY = {
+    register: {
+      title: "Create your Public Space",
+      intro: "Start with a username, password, and 4-digit recovery key."
+    },
+    login: {
+      title: "Welcome back",
+      intro: "Login to post, heart, and return to your Public Space."
+    }
+  };
 
   const authScreen = root.querySelector("[data-ps-auth-screen]");
   const mainSpace = root.querySelector("[data-ps-main-space]");
@@ -26,7 +46,6 @@
   const postTextarea = composer ? composer.querySelector("textarea[name='post']") : null;
   const postButton = composer ? composer.querySelector("button[type='submit']") : null;
   const postCount = document.querySelector("[data-ps-post-count]");
-  const composeMessage = document.querySelector("[data-ps-compose-message]");
 
   const menuToggle = root.querySelector("[data-ps-menu-toggle]");
   const menu = root.querySelector("[data-ps-menu]");
@@ -35,40 +54,20 @@
   const feedStatus = root.querySelector("[data-ps-feed-status]");
   const feed = root.querySelector("[data-ps-feed]");
 
-  const LIMITS = {
-    post: 1000,
-    usernameMin: 3,
-    usernameMax: 15,
-    passwordMin: 6,
-    passwordMax: 8,
-    pinLength: 4
-  };
-
-  const COPY = {
-    register: {
-      title: "Create account",
-      intro: "Create your account with a username, password, and 4-digit PIN/key for password recovery."
-    },
-    login: {
-      title: "Login account",
-      intro: "Enter your username and password to open your Public Space."
-    }
-  };
-
-  let isAdminMode = false;
+  let currentSession = readSession();
+  let currentUser = currentSession ? currentSession.user : null;
+  let isAdminMode = Boolean(currentUser && currentUser.is_admin);
 
   function getClient() {
     const candidates = [
       "safeAdminClient",
       "safeSupabase",
       "safeSupabaseClient",
-      "supabaseClient",
-      "SAFE_SUPABASE_CLIENT",
-      "safeSpaceSupabase"
+      "supabaseClient"
     ];
 
     for (const key of candidates) {
-      if (window[key] && typeof window[key].from === "function") {
+      if (window[key] && typeof window[key].rpc === "function") {
         return window[key];
       }
     }
@@ -76,14 +75,18 @@
     return null;
   }
 
-  function setText(node, message) {
-    if (node) node.textContent = message || "";
+  function setText(node, value) {
+    if (node) node.textContent = value || "";
   }
 
   function setMessage(node, message, type) {
     if (!node) return;
     node.textContent = message || "";
     node.dataset.state = type || "info";
+  }
+
+  function setFeedStatus(message) {
+    setText(feedStatus, message || "");
   }
 
   function normalizeUsername(value) {
@@ -113,20 +116,26 @@
     return "";
   }
 
-  function readAdminHandoff() {
+  function getErrorMessage(error) {
+    const raw = error && error.message ? error.message : String(error || "Something went wrong.");
+    return raw
+      .replace(/^Error:\s*/i, "")
+      .replace(/^ERROR:\s*/i, "")
+      .replace(/\s*\(SQLSTATE.*?\)\s*$/i, "")
+      .trim() || "Something went wrong.";
+  }
+
+  function readSession() {
     try {
-      const raw = window.localStorage.getItem(ADMIN_HANDOFF_KEY);
+      const raw = window.localStorage.getItem(SESSION_KEY);
       if (!raw) return null;
 
       const parsed = JSON.parse(raw);
-      if (!parsed || parsed.role !== "admin") return null;
+      if (!parsed || !parsed.session_token || !parsed.user) return null;
 
-      const grantedAt = Number(parsed.grantedAt) || 0;
-      const expiresAt = Number(parsed.expiresAt) || 0;
-      const isFresh = expiresAt ? Date.now() < expiresAt : Date.now() - grantedAt < ADMIN_HANDOFF_MAX_AGE;
-
-      if (!isFresh) {
-        window.localStorage.removeItem(ADMIN_HANDOFF_KEY);
+      const expiresAt = parsed.expires_at ? Date.parse(parsed.expires_at) : 0;
+      if (expiresAt && Date.now() >= expiresAt) {
+        window.localStorage.removeItem(SESSION_KEY);
         return null;
       }
 
@@ -136,18 +145,45 @@
     }
   }
 
-  function writeAdminHandoff(source) {
+  function saveSession(payload) {
+    currentSession = {
+      session_token: payload.session_token,
+      expires_at: payload.expires_at,
+      user: payload.user
+    };
+    currentUser = payload.user;
+    isAdminMode = Boolean(currentUser && currentUser.is_admin);
+
     try {
-      window.localStorage.setItem(
-        ADMIN_HANDOFF_KEY,
-        JSON.stringify({
-          role: "admin",
-          source: source || "public_space",
-          grantedAt: Date.now(),
-          expiresAt: Date.now() + ADMIN_HANDOFF_MAX_AGE
-        })
-      );
+      window.localStorage.setItem(SESSION_KEY, JSON.stringify(currentSession));
     } catch (error) {}
+  }
+
+  function clearSession() {
+    currentSession = null;
+    currentUser = null;
+    isAdminMode = false;
+
+    try {
+      window.localStorage.removeItem(SESSION_KEY);
+      window.localStorage.removeItem(ADMIN_HANDOFF_KEY);
+    } catch (error) {}
+  }
+
+  async function rpc(functionName, params) {
+    const client = getClient();
+
+    if (!client) {
+      throw new Error("Database connection is not ready. Please refresh the page.");
+    }
+
+    const response = await client.rpc(functionName, params || {});
+    if (response.error) throw response.error;
+    return response.data;
+  }
+
+  function sessionToken() {
+    return currentSession && currentSession.session_token ? currentSession.session_token : "";
   }
 
   function enforceNumericPinFields() {
@@ -184,24 +220,22 @@
       });
     });
   }
+
   function enhancePasswordFields() {
     const passwordInputs = Array.from(document.querySelectorAll("input[type='password']:not([name='pin'])"));
 
     passwordInputs.forEach(input => {
       if (input.closest(".ps-password-field")) return;
 
-      const wrapper = document.createElement("div");
+      const wrapper = document.createElement("span");
       wrapper.className = "ps-password-field";
 
-      const parent = input.parentNode;
-      if (!parent) return;
-
-      parent.insertBefore(wrapper, input);
+      input.parentNode.insertBefore(wrapper, input);
       wrapper.appendChild(input);
 
       const toggle = document.createElement("button");
-      toggle.type = "button";
       toggle.className = "ps-password-toggle";
+      toggle.type = "button";
       toggle.setAttribute("aria-label", "Show password");
       toggle.setAttribute("title", "Show password");
       toggle.dataset.state = "hidden";
@@ -219,47 +253,111 @@
     });
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(new Date(value));
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function renderEmptyFeed(message) {
+    if (!feed) return;
+
+    feed.innerHTML = `
+      <article class="ps-empty-state">
+        <h2>No public posts yet.</h2>
+        <p>${escapeHtml(message || "Posts, comments, hearts, and notifications will appear here.")}</p>
+      </article>
+    `;
+  }
+
+  function renderPosts(posts) {
+    if (!feed) return;
+
+    const list = Array.isArray(posts) ? posts : [];
+
+    if (!list.length) {
+      renderEmptyFeed();
+      return;
+    }
+
+    feed.innerHTML = list.map(post => {
+      const author = post.author || {};
+      const username = author.username || "someone";
+      const badge = author.badge_label ? `<span>${escapeHtml(author.badge_label)}</span>` : "";
+      const premium = author.is_premium ? `<span>Premium</span>` : "";
+      const hiddenLabel = post.is_hidden ? `<span>Hidden</span>` : "";
+      const heartLabel = post.hearted_by_me ? "? Hearted" : "? Heart";
+      const manageButtons = post.can_manage
+        ? `<button type="button" data-ps-delete-post="${escapeHtml(post.id)}">Delete</button>`
+        : "";
+      const adminButtons = isAdminMode
+        ? `<button type="button" data-ps-toggle-hidden="${escapeHtml(post.id)}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide" : "Hide"}</button>`
+        : "";
+
+      return `
+        <article class="ps-post-card ${post.is_hidden ? "is-hidden-by-admin" : ""}" data-post-id="${escapeHtml(post.id)}">
+          <div class="ps-post-meta">
+            <strong>@${escapeHtml(username)}</strong>
+            <span>${[premium, badge, hiddenLabel, escapeHtml(formatDate(post.created_at))].filter(Boolean).join(" ")}</span>
+          </div>
+          <p>${escapeHtml(post.body)}</p>
+          <div class="ps-post-actions">
+            <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} · ${Number(post.heart_count || 0)}</button>
+            <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">Comment · ${Number(post.comment_count || 0)}</button>
+            ${manageButtons}
+            ${adminButtons}
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
   function ensureAdminTools() {
     if (!mainSpace || mainSpace.querySelector("[data-ps-admin-tools]")) return;
 
     mainSpace.insertAdjacentHTML("beforeend", `
-      <section class="ps-admin-tools" data-ps-admin-tools>
+      <section class="ps-admin-tools" data-ps-admin-tools hidden>
         <div>
           <p class="eyebrow">Admin mode</p>
           <h2>Public Space controls</h2>
-          <p>Review users, posts, comments, hearts, reports, and moderation actions from here.</p>
+          <p data-ps-admin-message>Manage users and moderate posts after logging in with a Public Space admin account.</p>
         </div>
-
         <div class="ps-admin-tool-grid">
           <button type="button" data-ps-admin-action="users">Registered users</button>
-          <button type="button" data-ps-admin-action="posts">All posts</button>
-          <button type="button" data-ps-admin-action="comments">Comments</button>
+          <button type="button" data-ps-admin-action="posts">Refresh all posts</button>
           <button type="button" data-ps-admin-action="reports">Reports</button>
-          <button type="button" data-ps-admin-action="hidden">Hidden items</button>
           <button type="button" data-ps-admin-action="settings">Space settings</button>
         </div>
-
-        <p class="ps-message" data-ps-admin-message></p>
       </section>
     `);
   }
 
-  function setAdminMode(enabled, source) {
-    isAdminMode = Boolean(enabled);
+  function setAdminMode(enabled) {
+    isAdminMode = Boolean(enabled && currentUser && currentUser.is_admin);
     document.body.classList.toggle("ps-admin-mode", isAdminMode);
     root.classList.toggle("is-admin-mode", isAdminMode);
 
-    if (!isAdminMode) return;
-
-    writeAdminHandoff(source || "public_space");
     ensureAdminTools();
 
     const adminTools = root.querySelector("[data-ps-admin-tools]");
-    if (adminTools) adminTools.hidden = false;
-
-    const adminMessage = root.querySelector("[data-ps-admin-message]");
-    setMessage(adminMessage, "", "info");
-    setText(feedStatus, "Admin mode");
+    if (adminTools) adminTools.hidden = !isAdminMode;
   }
 
   function showAuth(mode) {
@@ -277,199 +375,369 @@
     if (mainSpace) mainSpace.hidden = true;
   }
 
-  function showMainSpace(message) {
+  async function showMainSpace(message) {
     if (authScreen) authScreen.hidden = true;
     if (mainSpace) mainSpace.hidden = false;
     setMessage(authMessage, "", "info");
 
-    if (isAdminMode) {
-      setText(feedStatus, "Admin mode");
-    } else {
-      setText(feedStatus, "");
-    }
+    setAdminMode(Boolean(currentUser && currentUser.is_admin));
 
-    if (message) setText(feedStatus, message);
+    if (message) setFeedStatus(message);
+    await loadPosts(message ? 250 : 0);
   }
 
-  function openModal(modal) {
-    if (!modal) return;
-    modal.hidden = false;
-    document.body.classList.add("ps-modal-open");
-    const firstInput = modal.querySelector("input, textarea, button");
-    if (firstInput) firstInput.focus();
+  async function loadPosts(delayMs) {
+    if (!feed) return;
+
+    window.setTimeout(async () => {
+      try {
+        setFeedStatus("Loading posts...");
+        const posts = await rpc("list_public_space_posts", {
+          input_session_token: sessionToken() || null
+        });
+        renderPosts(posts);
+        setFeedStatus("");
+      } catch (error) {
+        renderEmptyFeed("Could not load posts yet.");
+        setFeedStatus(getErrorMessage(error));
+      }
+    }, delayMs || 0);
+  }
+
+  async function restoreSession() {
+    if (!currentSession || !currentSession.session_token) {
+      showAuth("register");
+      return;
+    }
+
+    try {
+      const data = await rpc("get_public_space_session", {
+        input_session_token: currentSession.session_token
+      });
+
+      if (!data || !data.ok || !data.user) {
+        clearSession();
+        showAuth("login");
+        return;
+      }
+
+      currentUser = data.user;
+      currentSession.user = data.user;
+      saveSession(currentSession);
+
+      await showMainSpace(`Welcome back, @${data.user.username}.`);
+    } catch (error) {
+      clearSession();
+      showAuth("login");
+    }
   }
 
   function closeModal(modal) {
-    if (!modal) return;
-    modal.hidden = true;
-    document.body.classList.remove("ps-modal-open");
+    if (modal) modal.hidden = true;
+  }
+
+  function openModal(modal) {
+    if (modal) modal.hidden = false;
   }
 
   function updateCounter() {
     if (!postTextarea || !postCount) return;
-    const current = postTextarea.value.length;
-    postCount.textContent = String(current) + " / " + String(LIMITS.post);
-    postCount.dataset.state = current > LIMITS.post * 0.9 ? "near" : "ok";
+
+    const length = postTextarea.value.length;
+    postCount.textContent = `${length}/${LIMITS.postMax}`;
+    if (postButton) postButton.disabled = length < 1 || length > LIMITS.postMax;
   }
 
-  function addLocalPreviewPost(body) {
-    if (!feed) return;
+  async function handleAuthSubmit(form) {
+    const mode = form.dataset.psForm;
+    const username = normalizeUsername(form.elements.username ? form.elements.username.value : "");
+    const password = form.elements.password ? form.elements.password.value : "";
+    const pin = form.elements.pin ? form.elements.pin.value : "";
 
-    const emptyState = feed.querySelector(".ps-empty-state");
-    if (emptyState) emptyState.remove();
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setMessage(authMessage, usernameError, "error");
+      return;
+    }
 
-    const article = document.createElement("article");
-    article.className = "ps-post-card";
-    article.innerHTML = `
-      <div class="ps-post-meta">
-        <strong>${isAdminMode ? "Admin" : "You"}</strong>
-        <span>Just now</span>
-      </div>
-      <p></p>
-      <div class="ps-post-actions">
-        <button type="button">Heart</button>
-        <button type="button">Comment</button>
-        ${isAdminMode ? '<button type="button" data-ps-admin-post-action="hide">Hide</button><button type="button" data-ps-admin-post-action="delete">Delete</button>' : ""}
-      </div>
-    `;
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setMessage(authMessage, passwordError, "error");
+      return;
+    }
 
-    const paragraph = article.querySelector("p");
-    if (paragraph) paragraph.textContent = body;
+    if (mode === "register") {
+      const pinError = validatePin(pin);
+      if (pinError) {
+        setMessage(authMessage, pinError, "error");
+        return;
+      }
+    }
 
-    feed.prepend(article);
+    try {
+      const client = getClient();
+      if (!client) throw new Error("Database connection is not ready. Please refresh the page.");
+
+      const button = form.querySelector("button[type='submit']");
+      if (button) button.disabled = true;
+
+      setMessage(authMessage, mode === "register" ? "Creating your account..." : "Logging in...", "info");
+
+      const data = mode === "register"
+        ? await rpc("register_public_space_user", {
+            input_username: username,
+            input_password: password,
+            input_pin: pin
+          })
+        : await rpc("login_public_space_user", {
+            input_username: username,
+            input_password: password
+          });
+
+      if (!data || !data.session_token || !data.user) {
+        throw new Error("Invalid server response.");
+      }
+
+      saveSession(data);
+      form.reset();
+      await showMainSpace(mode === "register" ? "Account created." : "Logged in.");
+    } catch (error) {
+      setMessage(authMessage, getErrorMessage(error), "error");
+    } finally {
+      const button = form.querySelector("button[type='submit']");
+      if (button) button.disabled = false;
+    }
   }
 
-  authSwitches.forEach(button => {
-    button.addEventListener("click", () => showAuth(button.dataset.psShowAuth));
-  });
+  async function handleForgotSubmit(event) {
+    event.preventDefault();
+    if (!forgotForm) return;
+
+    const username = normalizeUsername(forgotForm.elements.username ? forgotForm.elements.username.value : "");
+    const password = forgotForm.elements.password ? forgotForm.elements.password.value : "";
+    const confirmInput = forgotForm.querySelector("input[name='confirm'], input[name='confirmPassword'], input[name='confirm_password']");
+    const confirmPassword = confirmInput ? confirmInput.value : password;
+    const pin = forgotForm.elements.pin ? forgotForm.elements.pin.value : "";
+
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setMessage(forgotMessage, usernameError, "error");
+      return;
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setMessage(forgotMessage, passwordError, "error");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setMessage(forgotMessage, "Passwords do not match.", "error");
+      return;
+    }
+
+    const pinError = validatePin(pin);
+    if (pinError) {
+      setMessage(forgotMessage, pinError, "error");
+      return;
+    }
+
+    try {
+      setMessage(forgotMessage, "Resetting password...", "info");
+
+      await rpc("reset_public_space_password", {
+        input_username: username,
+        input_new_password: password,
+        input_pin: pin
+      });
+
+      forgotForm.reset();
+      clearSession();
+      setMessage(forgotMessage, "Password updated. You can login now.", "success");
+
+      window.setTimeout(() => {
+        closeModal(forgotModal);
+        showAuth("login");
+      }, 700);
+    } catch (error) {
+      setMessage(forgotMessage, getErrorMessage(error), "error");
+    }
+  }
+
+  async function handleComposerSubmit(event) {
+    event.preventDefault();
+
+    const body = postTextarea ? postTextarea.value.trim() : "";
+
+    if (!currentSession || !currentSession.session_token) {
+      closeModal(composeModal);
+      showAuth("login");
+      return;
+    }
+
+    if (!body) {
+      setFeedStatus("Write something first.");
+      return;
+    }
+
+    if (body.length > LIMITS.postMax) {
+      setFeedStatus("Post can only be up to 1,000 characters.");
+      return;
+    }
+
+    try {
+      if (postButton) postButton.disabled = true;
+      setFeedStatus("Posting...");
+
+      await rpc("create_public_space_post", {
+        input_session_token: sessionToken(),
+        input_body: body,
+        input_visibility: "public"
+      });
+
+      if (postTextarea) postTextarea.value = "";
+      updateCounter();
+      closeModal(composeModal);
+      await loadPosts();
+    } catch (error) {
+      setFeedStatus(getErrorMessage(error));
+    } finally {
+      if (postButton) postButton.disabled = false;
+    }
+  }
+
+  async function handleFeedClick(event) {
+    const heartButton = event.target.closest("[data-ps-heart-post]");
+    const deleteButton = event.target.closest("[data-ps-delete-post]");
+    const hideButton = event.target.closest("[data-ps-toggle-hidden]");
+    const commentButton = event.target.closest("[data-ps-comments-post]");
+
+    if (commentButton) {
+      setFeedStatus("Comments UI will be connected next.");
+      return;
+    }
+
+    if (!heartButton && !deleteButton && !hideButton) return;
+
+    if (!currentSession || !currentSession.session_token) {
+      showAuth("login");
+      return;
+    }
+
+    try {
+      if (heartButton) {
+        heartButton.disabled = true;
+        await rpc("toggle_public_space_heart", {
+          input_session_token: sessionToken(),
+          input_post_id: heartButton.dataset.psHeartPost
+        });
+      }
+
+      if (deleteButton) {
+        deleteButton.disabled = true;
+        await rpc("delete_public_space_post", {
+          input_session_token: sessionToken(),
+          input_post_id: deleteButton.dataset.psDeletePost
+        });
+      }
+
+      if (hideButton) {
+        hideButton.disabled = true;
+        const isHidden = hideButton.dataset.hidden === "true";
+        await rpc("admin_set_public_space_post_hidden", {
+          input_session_token: sessionToken(),
+          input_post_id: hideButton.dataset.psToggleHidden,
+          input_is_hidden: !isHidden
+        });
+      }
+
+      await loadPosts();
+    } catch (error) {
+      setFeedStatus(getErrorMessage(error));
+    }
+  }
+
+  async function handleAdminAction(event) {
+    const button = event.target.closest("[data-ps-admin-action]");
+    if (!button) return;
+
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const action = button.dataset.psAdminAction;
+
+    if (!isAdminMode) {
+      setMessage(messageNode, "Login with a Public Space admin account first.", "error");
+      return;
+    }
+
+    try {
+      if (action === "users") {
+        setMessage(messageNode, "Loading users...", "info");
+
+        const users = await rpc("list_public_space_users", {
+          input_session_token: sessionToken()
+        });
+
+        const count = Array.isArray(users) ? users.length : 0;
+        const names = Array.isArray(users)
+          ? users.slice(0, 8).map(user => `@${user.username}`).join(", ")
+          : "";
+
+        setMessage(messageNode, `Registered users: ${count}${names ? " — " + names : ""}`, "success");
+        return;
+      }
+
+      if (action === "posts") {
+        await loadPosts();
+        setMessage(messageNode, "Posts refreshed.", "success");
+        return;
+      }
+
+      setMessage(messageNode, "This admin tool will be connected in the next phase.", "info");
+    } catch (error) {
+      setMessage(messageNode, getErrorMessage(error), "error");
+    }
+  }
 
   forms.forEach(form => {
     form.addEventListener("submit", event => {
       event.preventDefault();
+      handleAuthSubmit(form);
+    });
+  });
 
-      const mode = form.dataset.psForm;
-      const formData = new FormData(form);
-      const username = normalizeUsername(formData.get("username"));
-      const password = String(formData.get("password") || "");
-      const pin = String(formData.get("pin") || "");
-
-      const usernameError = validateUsername(username);
-      if (usernameError) {
-        setMessage(authMessage, usernameError, "error");
-        return;
-      }
-
-      const passwordError = validatePassword(password);
-      if (passwordError) {
-        setMessage(authMessage, passwordError, "error");
-        return;
-      }
-
-      if (mode === "register") {
-        const pinError = validatePin(pin);
-        if (pinError) {
-          setMessage(authMessage, pinError, "error");
-          return;
-        }
-      }
-
-      getClient();
-      showMainSpace("");
+  authSwitches.forEach(button => {
+    button.addEventListener("click", () => {
+      showAuth(button.dataset.psShowAuth);
     });
   });
 
   if (openForgot) {
-    openForgot.addEventListener("click", () => openModal(forgotModal));
-  }
-
-  if (closeForgot) {
-    closeForgot.addEventListener("click", () => closeModal(forgotModal));
-  }
-
-  if (forgotModal) {
-    forgotModal.addEventListener("click", event => {
-      if (event.target === forgotModal) closeModal(forgotModal);
+    openForgot.addEventListener("click", () => {
+      setMessage(forgotMessage, "", "info");
+      openModal(forgotModal);
     });
   }
 
-  if (forgotForm) {
-    forgotForm.addEventListener("submit", event => {
-      event.preventDefault();
-
-      const formData = new FormData(forgotForm);
-      const username = normalizeUsername(formData.get("username"));
-      const password = String(formData.get("password") || "");
-      const confirmPassword = String(formData.get("confirmPassword") || "");
-      const pin = String(formData.get("pin") || "");
-
-      const usernameError = validateUsername(username);
-      if (usernameError) {
-        setMessage(forgotMessage, usernameError, "error");
-        return;
-      }
-
-      const passwordError = validatePassword(password);
-      if (passwordError) {
-        setMessage(forgotMessage, passwordError, "error");
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        setMessage(forgotMessage, "New password and confirm password do not match.", "error");
-        return;
-      }
-
-      const pinError = validatePin(pin);
-      if (pinError) {
-        setMessage(forgotMessage, pinError, "error");
-        return;
-      }
-
-      setMessage(forgotMessage, "Password recovery request accepted.", "info");
-    });
-  }
+  if (closeForgot) closeForgot.addEventListener("click", () => closeModal(forgotModal));
+  if (forgotForm) forgotForm.addEventListener("submit", handleForgotSubmit);
 
   if (openCompose) {
-    openCompose.addEventListener("click", () => openModal(composeModal));
-  }
-
-  if (closeCompose) {
-    closeCompose.addEventListener("click", () => closeModal(composeModal));
-  }
-
-  if (composeModal) {
-    composeModal.addEventListener("click", event => {
-      if (event.target === composeModal) closeModal(composeModal);
-    });
-  }
-
-  if (postTextarea) {
-    postTextarea.addEventListener("input", updateCounter);
-    updateCounter();
-  }
-
-  if (composer) {
-    composer.addEventListener("submit", event => {
-      event.preventDefault();
-      const body = postTextarea ? postTextarea.value.trim() : "";
-
-      if (!body) {
-        setMessage(composeMessage, "Write something first before posting.", "error");
+    openCompose.addEventListener("click", () => {
+      if (!currentSession || !currentSession.session_token) {
+        showAuth("login");
         return;
       }
 
-      if (body.length > LIMITS.post) {
-        setMessage(composeMessage, "Post can only be up to 1,000 characters.", "error");
-        return;
-      }
-
-      addLocalPreviewPost(body);
-      if (postTextarea) postTextarea.value = "";
+      openModal(composeModal);
+      if (postTextarea) postTextarea.focus();
       updateCounter();
-      setMessage(composeMessage, "", "info");
-      closeModal(composeModal);
     });
   }
+
+  if (closeCompose) closeCompose.addEventListener("click", () => closeModal(composeModal));
+  if (composer) composer.addEventListener("submit", handleComposerSubmit);
+  if (postTextarea) postTextarea.addEventListener("input", updateCounter);
+  if (feed) feed.addEventListener("click", handleFeedClick);
 
   if (menuToggle && menu) {
     menuToggle.addEventListener("click", () => {
@@ -477,44 +745,49 @@
     });
   }
 
-  if (bellButton) {
-    bellButton.addEventListener("click", () => {
-      setText(feedStatus, isAdminMode ? "Admin notifications" : "Notifications");
+  if (menu) {
+    menu.addEventListener("click", event => {
+      const item = event.target.closest("[data-ps-menu-item]");
+      if (!item) return;
+
+      if (item.dataset.psMenuItem === "profile") {
+        setFeedStatus(currentUser ? `Logged in as @${currentUser.username}.` : "Not logged in.");
+      }
+
+      if (item.dataset.psMenuItem === "settings") {
+        setFeedStatus("Settings will be connected next.");
+      }
+
+      menu.hidden = true;
     });
   }
 
   if (logoutButton) {
-    logoutButton.addEventListener("click", () => {
+    logoutButton.addEventListener("click", async () => {
+      const token = sessionToken();
+
+      try {
+        if (token) {
+          await rpc("logout_public_space_user", {
+            input_session_token: token
+          });
+        }
+      } catch (error) {}
+
+      clearSession();
       if (menu) menu.hidden = true;
-      if (!isAdminMode) showAuth("login");
-      if (isAdminMode) showMainSpace("Admin mode");
+      renderEmptyFeed();
+      showAuth("login");
     });
   }
 
-  document.addEventListener("click", event => {
-    const adminAction = event.target.closest("[data-ps-admin-action]");
-    if (adminAction) {
-      const label = adminAction.textContent.trim();
-      const adminMessage = root.querySelector("[data-ps-admin-message]");
-      setMessage(adminMessage, label + " panel selected.", "info");
-      return;
-    }
+  if (bellButton) {
+    bellButton.addEventListener("click", () => {
+      setFeedStatus("Notifications will be connected next.");
+    });
+  }
 
-    const adminPostAction = event.target.closest("[data-ps-admin-post-action]");
-    if (adminPostAction && isAdminMode) {
-      const card = adminPostAction.closest(".ps-post-card");
-      const action = adminPostAction.dataset.psAdminPostAction;
-
-      if (action === "hide" && card) {
-        card.classList.toggle("is-hidden-by-admin");
-        adminPostAction.textContent = card.classList.contains("is-hidden-by-admin") ? "Unhide" : "Hide";
-      }
-
-      if (action === "delete" && card) {
-        card.remove();
-      }
-    }
-  });
+  root.addEventListener("click", handleAdminAction);
 
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
@@ -525,12 +798,8 @@
 
   enforceNumericPinFields();
   enhancePasswordFields();
+  updateCounter();
+  renderEmptyFeed();
 
-  const adminHandoff = readAdminHandoff();
-  if (adminHandoff) {
-    setAdminMode(true, adminHandoff.source || "handoff");
-    showMainSpace("Admin mode");
-  } else {
-    showAuth("register");
-  }
+  restoreSession();
 })();
