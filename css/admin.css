@@ -3961,3 +3961,61 @@ body[data-admin-page="payment-methods"] #paymentList button {
   isolation: isolate;
 }
 /* V2.0Q.14 code modal close button layer fix END */
+
+
+/* V2.0Q.15 floating admin code info popovers */
+body[data-admin-page="piece-control"] .admin-piece-code-row,
+body[data-admin-page="piece-control"] .admin-piece-code-row > .admin-card,
+body[data-admin-page="piece-control"] #promoList,
+body[data-admin-page="piece-control"] #unlockList,
+body[data-admin-page="piece-control"] .admin-code-card {
+  overflow: visible !important;
+}
+
+body[data-admin-page="piece-control"] #promoList,
+body[data-admin-page="piece-control"] #unlockList {
+  max-height: none !important;
+  padding-right: 0 !important;
+}
+
+body[data-admin-page="piece-control"] .admin-code-card {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-admin-page="piece-control"] .admin-code-card:hover,
+body[data-admin-page="piece-control"] .admin-code-card:focus-within,
+body[data-admin-page="piece-control"] .admin-code-card.is-touch-peeking {
+  z-index: 80;
+}
+
+body[data-admin-page="piece-control"] .admin-code-info-wrap {
+  z-index: 90;
+}
+
+body[data-admin-page="piece-control"] .admin-code-popover {
+  position: absolute !important;
+  top: calc(100% + 0.55rem) !important;
+  right: 0 !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: min(22rem, calc(100vw - 2.5rem)) !important;
+  max-width: min(22rem, calc(100vw - 2.5rem)) !important;
+  z-index: 120 !important;
+  transform: none !important;
+  pointer-events: none;
+}
+
+body[data-admin-page="piece-control"] .admin-code-info-wrap:hover .admin-code-popover,
+body[data-admin-page="piece-control"] .admin-code-card.is-touch-peeking .admin-code-popover {
+  pointer-events: auto;
+}
+
+@media (max-width: 620px) {
+  body[data-admin-page="piece-control"] .admin-code-popover {
+    right: -0.25rem !important;
+    width: min(18.5rem, calc(100vw - 2rem)) !important;
+    max-width: min(18.5rem, calc(100vw - 2rem)) !important;
+  }
+}
+/* V2.0Q.15 floating admin code info popovers END */
