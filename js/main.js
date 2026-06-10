@@ -137,10 +137,8 @@ function renderPoems() {
   poemGrid.innerHTML = visibleFiltered.map(poem => {
     const access = getPoemAccess(poem);
     const isPremium = access === "paid";
-    const price = Number(poem.price) || 49;
     const accessLabel = isPremium ? "Premium" : "Free";
     const typeLabel = getPoemTypeLabel(poem);
-    const priceLabel = isPremium ? formatPeso(price) : "";
     const readText = isPremium ? "Read preview" : "Read full piece";
 
     return `
@@ -161,19 +159,6 @@ function renderPoems() {
             <span class="read-more">${readText}</span>
           </div>
         </a>
-
-        ${isPremium ? `
-          <button
-            class="card-payment-btn"
-            type="button"
-            data-open-payment
-            data-piece-title="${escapeHTML(poem.title)}"
-            data-piece-price="${price}"
-            data-piece-slug="${escapeHTML(poem.slug)}"
-          >
-            ${priceLabel ? `Support / unlock ${priceLabel}` : "Support / unlock"}
-          </button>
-        ` : ""}
       </article>
     `;
   }).join("");
