@@ -150,8 +150,42 @@
     } catch (error) {}
   }
 
+  function enforceNumericPinFields() {
+    const pinInputs = Array.from(document.querySelectorAll("input[name='pin'], [data-ps-pin-only]"));
+
+    pinInputs.forEach(input => {
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.pattern = "[0-9]*";
+      input.maxLength = LIMITS.pinLength;
+      input.setAttribute("autocomplete", "off");
+      input.setAttribute("data-ps-pin-only", "");
+
+      input.addEventListener("beforeinput", event => {
+        if (!event.data) return;
+        if (!/^[0-9]+$/.test(event.data)) {
+          event.preventDefault();
+        }
+      });
+
+      input.addEventListener("input", () => {
+        input.value = String(input.value || "")
+          .replace(/\D+/g, "")
+          .slice(0, LIMITS.pinLength);
+      });
+
+      input.addEventListener("paste", event => {
+        event.preventDefault();
+        const pasted = (event.clipboardData || window.clipboardData).getData("text");
+        input.value = String(pasted || "")
+          .replace(/\D+/g, "")
+          .slice(0, LIMITS.pinLength);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    });
+  }
   function enhancePasswordFields() {
-    const passwordInputs = Array.from(document.querySelectorAll("input[type='password']"));
+    const passwordInputs = Array.from(document.querySelectorAll("input[type='password']:not([name='pin'])"));
 
     passwordInputs.forEach(input => {
       if (input.closest(".ps-password-field")) return;
@@ -170,7 +204,8 @@
       toggle.className = "ps-password-toggle";
       toggle.setAttribute("aria-label", "Show password");
       toggle.setAttribute("title", "Show password");
-      toggle.innerHTML = "&#128065;";
+      toggle.dataset.state = "hidden";
+      toggle.innerHTML = '<span class="ps-eye-icon" aria-hidden="true"></span>';
 
       toggle.addEventListener("click", () => {
         const isHidden = input.type === "password";
@@ -488,6 +523,7 @@
     if (menu) menu.hidden = true;
   });
 
+  enforceNumericPinFields();
   enhancePasswordFields();
 
   const adminHandoff = readAdminHandoff();

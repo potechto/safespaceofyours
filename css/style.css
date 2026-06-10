@@ -6294,3 +6294,49 @@ body.ps-admin-mode .ps-space-nav {
   }
 }
 /* V2.0Q.48 public space cleanup, password eye, admin handoff END */
+
+/* V2.0Q.49 numeric PIN + clearer password eye icon */
+.ps-eye-icon {
+  position: relative !important;
+  display: inline-block !important;
+  width: 1.12rem !important;
+  height: 0.72rem !important;
+  border: 1.8px solid currentColor !important;
+  border-radius: 999px 999px 999px 999px / 80% 80% 80% 80% !important;
+  opacity: 0.92 !important;
+}
+
+.ps-eye-icon::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 0.28rem !important;
+  height: 0.28rem !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.ps-eye-icon::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 1.42rem !important;
+  height: 2px !important;
+  border-radius: 999px !important;
+  background: currentColor !important;
+  transform: translate(-50%, -50%) rotate(-38deg) !important;
+  transform-origin: center !important;
+}
+
+.ps-password-toggle[data-state="shown"] .ps-eye-icon::after {
+  display: none !important;
+}
+
+input[data-ps-pin-only] {
+  letter-spacing: 0.28em !important;
+  font-variant-numeric: tabular-nums !important;
+}
+/* V2.0Q.49 numeric PIN + clearer password eye icon END */

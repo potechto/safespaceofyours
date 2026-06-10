@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Public Space | Safe Space of Yours</title>
-  <link rel="stylesheet" href="css/style.css?v=v20q48-public-space-admin-handoff" />
+  <link rel="stylesheet" href="css/style.css?v=v20q49-pin-numeric-password-eye" />
 </head>
 <body class="public-space-body ps-compact-body">
   <main class="ps-app-shell" data-public-space-root>
@@ -39,7 +39,7 @@
 
           <label>
             <span>PIN / Key</span>
-            <input type="password" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4 digits" />
+            <input type="text" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4 digits" autocomplete="off" data-ps-pin-only />
           </label>
 
           <p class="ps-helper-note">Save your 4-digit PIN/key. You will need it if you forget your password.</p>
@@ -149,7 +149,7 @@
 
         <label>
           <span>PIN / Key</span>
-          <input type="password" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4 digits" />
+          <input type="text" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4 digits" autocomplete="off" data-ps-pin-only />
         </label>
 
         <button class="btn primary ps-full-btn" type="submit">Change password</button>
@@ -185,6 +185,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
-  <script src="js/public-space.js?v=v20q48-public-space-admin-handoff"></script>
+  <script src="js/public-space.js?v=v20q49-pin-numeric-password-eye"></script>
 </body>
 </html>
