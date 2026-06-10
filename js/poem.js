@@ -1450,18 +1450,19 @@ if (document.readyState === "loading") {
 /* V2.0Q.18 paid reader payment copy polish END */
 
 
-/* V2.0Q.25 auto-close public hamburger on option click */
-(function setupPublicHamburgerAutoClose() {
-  if (window.__safePublicHamburgerAutoCloseBound) return;
-  window.__safePublicHamburgerAutoCloseBound = true;
+
+/* V2.0Q.26 public modal mobile scroll guard */
+(function setupPublicModalMobileScrollGuard() {
+  if (window.__safePublicModalMobileScrollGuardBound) return;
+  window.__safePublicModalMobileScrollGuardBound = true;
 
   function closePublicHamburger() {
     const nav = document.querySelector('#siteNavLinks');
     const toggle = document.querySelector('[data-mobile-nav-toggle][aria-controls="siteNavLinks"], [data-mobile-nav-toggle]');
 
-    if (!nav || !nav.classList.contains('is-open')) return;
+    document.body.classList.remove('mobile-nav-open');
 
-    nav.classList.remove('is-open');
+    if (nav) nav.classList.remove('is-open');
 
     if (toggle) {
       toggle.classList.remove('is-open');
@@ -1470,11 +1471,48 @@ if (document.readyState === "loading") {
     }
   }
 
+  function resetModalScroll(modal) {
+    if (!modal) return;
+    const panel = modal.querySelector('.social-modal, [role="dialog"]');
+
+    modal.scrollTop = 0;
+    if (panel) panel.scrollTop = 0;
+
+    window.requestAnimationFrame(() => {
+      modal.scrollTop = 0;
+      if (panel) panel.scrollTop = 0;
+    });
+  }
+
+  let wasSocialModalOpen = false;
+
+  function syncSocialModalState() {
+    const modal = document.querySelector('#socialModal');
+    const isOpen = Boolean(modal && modal.classList.contains('open'));
+
+    if (isOpen && !wasSocialModalOpen) {
+      closePublicHamburger();
+      resetModalScroll(modal);
+    }
+
+    wasSocialModalOpen = isOpen;
+  }
+
   document.addEventListener('click', event => {
     const selectedOption = event.target.closest('#siteNavLinks a, #siteNavLinks button');
-    if (!selectedOption) return;
+    const opensPublicModal = event.target.closest('#openAboutModal, #openPromoCodesModal, #openSocialModal, a[href="#about"]');
 
-    window.setTimeout(closePublicHamburger, 0);
+    if (selectedOption || opensPublicModal) {
+      window.setTimeout(() => {
+        closePublicHamburger();
+        syncSocialModalState();
+      }, 0);
+    }
   });
+
+  const observer = new MutationObserver(syncSocialModalState);
+  observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'aria-hidden'] });
+
+  syncSocialModalState();
 })();
-/* V2.0Q.25 auto-close public hamburger on option click END */
+/* V2.0Q.26 public modal mobile scroll guard END */
