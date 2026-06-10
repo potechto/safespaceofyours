@@ -6295,48 +6295,33 @@ body.ps-admin-mode .ps-space-nav {
 }
 /* V2.0Q.48 public space cleanup, password eye, admin handoff END */
 
-/* V2.0Q.49 numeric PIN + clearer password eye icon */
+/* V2.0Q.50 standard eye/slashed-eye password icon */
 .ps-eye-icon {
-  position: relative !important;
   display: inline-block !important;
-  width: 1.12rem !important;
-  height: 0.72rem !important;
-  border: 1.8px solid currentColor !important;
-  border-radius: 999px 999px 999px 999px / 80% 80% 80% 80% !important;
-  opacity: 0.92 !important;
+  width: 1.32rem !important;
+  height: 0.92rem !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+  opacity: 0.98 !important;
 }
 
-.ps-eye-icon::before {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  width: 0.28rem !important;
-  height: 0.28rem !important;
-  border-radius: 50% !important;
-  background: currentColor !important;
-  transform: translate(-50%, -50%) !important;
-}
-
+.ps-eye-icon::before,
 .ps-eye-icon::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  width: 1.42rem !important;
-  height: 2px !important;
-  border-radius: 999px !important;
-  background: currentColor !important;
-  transform: translate(-50%, -50%) rotate(-38deg) !important;
-  transform-origin: center !important;
+  content: none !important;
+  display: none !important;
 }
 
-.ps-password-toggle[data-state="shown"] .ps-eye-icon::after {
-  display: none !important;
+.ps-password-toggle[data-state="hidden"] .ps-eye-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff4fb' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6S2 12 2 12Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M3 21 21 3'/%3E%3C/svg%3E") !important;
+}
+
+.ps-password-toggle[data-state="shown"] .ps-eye-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffcbe1' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6S2 12 2 12Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") !important;
 }
 
 input[data-ps-pin-only] {
   letter-spacing: 0.28em !important;
   font-variant-numeric: tabular-nums !important;
 }
-/* V2.0Q.49 numeric PIN + clearer password eye icon END */
+/* V2.0Q.50 standard eye/slashed-eye password icon END */
