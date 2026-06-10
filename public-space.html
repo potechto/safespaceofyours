@@ -4,163 +4,187 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Public Space | Safe Space of Yours</title>
-  <link rel="stylesheet" href="css/style.css?v=v20q46-public-space-ui-controller" />
+  <link rel="stylesheet" href="css/style.css?v=v20q47-public-space-compact-auth" />
 </head>
-<body class="public-space-body">
-  <header class="site-header">
-    <a class="logo" href="index.html" aria-label="Safe Space of Yours home">
-      <img src="Resources/SS of yours.png" alt="Safe Space of Yours" />
+<body class="public-space-body ps-compact-body">
+  <main class="ps-app-shell" data-public-space-root>
+    <a class="ps-back-to-site" href="index.html" aria-label="Back to Safe Space of Yours">
+      <span aria-hidden="true">&larr;</span>
+      Back to site
     </a>
 
-    <nav class="nav-links" aria-label="Main navigation">
-      <a href="index.html">Home</a>
-      <a href="pieces.html">Pieces</a>
-      <a href="commissions.html">Commissions</a>
-      <a href="public-space.html" aria-current="page">Public Space</a>
-    </nav>
-  </header>
-
-  <main class="public-space-shell" data-public-space-root>
-    <section class="public-space-hero ps-panel">
-      <p class="eyebrow">Public Space</p>
-      <h1>A small wall for quiet thoughts.</h1>
-      <p>
-        A text-only wall where logged-in readers can share short reflections, reply softly,
-        and manage their own posts.
-      </p>
-
-      <div class="public-space-status-card">
-        <span>Phase 2</span>
-        <strong>UI is being prepared.</strong>
-        <p>Login, posting, comments, and moderation will connect after the database tables are added.</p>
-      </div>
-    </section>
-
-    <section class="ps-layout-grid">
-      <aside class="ps-panel ps-auth-panel" aria-labelledby="psAuthTitle">
-        <div class="ps-panel-heading">
-          <p class="eyebrow">Account</p>
-          <h2 id="psAuthTitle">Enter Public Space</h2>
-          <p>Use a username, password, and PIN. The PIN will be used for password reset later.</p>
+    <section class="ps-auth-screen" data-ps-auth-screen>
+      <article class="ps-auth-card" aria-labelledby="psAuthTitle">
+        <div class="ps-mini-brand">
+          <span class="ps-brand-mark">PS</span>
+          <span>@safespaceofyours</span>
         </div>
 
-        <div class="ps-tabs" role="tablist" aria-label="Public Space account actions">
-          <button class="ps-tab is-active" type="button" data-ps-tab="login">Login</button>
-          <button class="ps-tab" type="button" data-ps-tab="register">Register</button>
-          <button class="ps-tab" type="button" data-ps-tab="reset">Forgot</button>
+        <div class="ps-auth-heading">
+          <p class="eyebrow">Public Space</p>
+          <h1 id="psAuthTitle" data-ps-auth-title>Create account</h1>
+          <p data-ps-auth-intro>Create your account with a username, password, and 4-digit PIN/key for password recovery.</p>
         </div>
 
-        <form class="ps-form is-active" data-ps-form="login">
+        <form class="ps-form is-active" data-ps-form="register" novalidate>
           <label>
             <span>Username</span>
-            <input type="text" name="username" autocomplete="username" maxlength="24" placeholder="yourname" />
+            <input type="text" name="username" autocomplete="username" minlength="3" maxlength="15" placeholder="yourname" />
           </label>
+
           <label>
             <span>Password</span>
-            <input type="password" name="password" autocomplete="current-password" maxlength="72" placeholder="Password" />
+            <input type="password" name="password" autocomplete="new-password" minlength="6" maxlength="8" placeholder="6 to 8 characters" />
           </label>
-          <button class="btn primary" type="submit">Login</button>
+
+          <label>
+            <span>PIN / Key</span>
+            <input type="password" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4 digits" />
+          </label>
+
+          <p class="ps-helper-note">Save your 4-digit PIN/key. You will need it if you forget your password.</p>
+
+          <button class="btn primary ps-full-btn" type="submit">Create account</button>
+
+          <p class="ps-auth-switch">
+            I already have an account.
+            <button type="button" data-ps-show-auth="login">Login here</button>
+          </p>
         </form>
 
-        <form class="ps-form" data-ps-form="register">
+        <form class="ps-form" data-ps-form="login" novalidate>
           <label>
             <span>Username</span>
-            <input type="text" name="username" autocomplete="username" maxlength="24" placeholder="Choose username" />
+            <input type="text" name="username" autocomplete="username" minlength="3" maxlength="15" placeholder="yourname" />
           </label>
+
           <label>
             <span>Password</span>
-            <input type="password" name="password" autocomplete="new-password" maxlength="72" placeholder="Create password" />
+            <input type="password" name="password" autocomplete="current-password" minlength="6" maxlength="8" placeholder="Password" />
           </label>
-          <label>
-            <span>Reset PIN</span>
-            <input type="password" name="pin" inputmode="numeric" maxlength="12" placeholder="Private PIN" />
-          </label>
-          <button class="btn primary" type="submit">Create account</button>
-        </form>
 
-        <form class="ps-form" data-ps-form="reset">
-          <label>
-            <span>Username</span>
-            <input type="text" name="username" autocomplete="username" maxlength="24" placeholder="yourname" />
-          </label>
-          <label>
-            <span>Reset PIN</span>
-            <input type="password" name="pin" inputmode="numeric" maxlength="12" placeholder="Your PIN" />
-          </label>
-          <label>
-            <span>New password</span>
-            <input type="password" name="password" autocomplete="new-password" maxlength="72" placeholder="New password" />
-          </label>
-          <button class="btn primary" type="submit">Reset password</button>
-        </form>
+          <button class="btn primary ps-full-btn" type="submit">Login</button>
 
-        <p class="ps-message" data-ps-auth-message>Database connection will be activated in the next step.</p>
-      </aside>
-
-      <section class="ps-panel ps-wall-panel" aria-labelledby="psWallTitle">
-        <div class="ps-panel-heading">
-          <p class="eyebrow">Freedom wall</p>
-          <h2 id="psWallTitle">Share a quiet thought</h2>
-          <p>Text only. Keep it gentle, respectful, and safe to read.</p>
-        </div>
-
-        <form class="ps-composer" data-ps-composer>
-          <label>
-            <span>Your post</span>
-            <textarea name="post" maxlength="1000" rows="6" placeholder="Write something soft here..." disabled></textarea>
-          </label>
-          <div class="ps-composer-footer">
-            <span data-ps-post-count>0 / 1000</span>
-            <button class="btn primary" type="submit" disabled>Post</button>
+          <div class="ps-auth-row">
+            <button type="button" data-ps-open-forgot>Forgot password?</button>
+            <button type="button" data-ps-show-auth="register">Create account</button>
           </div>
         </form>
 
+        <p class="ps-message" data-ps-auth-message>Database connection is not active yet. This Q47 screen is UI-only.</p>
+      </article>
+    </section>
+
+    <section class="ps-main-space" data-ps-main-space hidden>
+      <nav class="ps-space-nav" aria-label="Public Space navigation">
+        <div class="ps-mini-brand">
+          <span class="ps-brand-mark">PS</span>
+          <span>@safespaceofyours</span>
+        </div>
+
+        <div class="ps-nav-actions">
+          <button class="ps-icon-btn" type="button" data-ps-bell aria-label="Notifications">&hearts;</button>
+          <button class="ps-icon-btn" type="button" data-ps-menu-toggle aria-label="Open menu">&#9776;</button>
+        </div>
+
+        <div class="ps-menu" data-ps-menu hidden>
+          <button type="button" data-ps-menu-item="profile">Profile</button>
+          <button type="button" data-ps-menu-item="settings">Settings</button>
+          <a href="index.html">Back to site</a>
+          <button type="button" data-ps-logout>Logout</button>
+        </div>
+      </nav>
+
+      <header class="ps-space-heading">
+        <p class="eyebrow">Your Public Space</p>
+        <h1>Your Public Space</h1>
+        <p>Text-only wall for soft thoughts, comments, and hearts. Database saving will be connected after this UI is approved.</p>
+      </header>
+
+      <button class="ps-compose-trigger" type="button" data-ps-open-compose>
+        <span>What’s on your mind?</span>
+      </button>
+
+      <section class="ps-feed-card" aria-label="Public Space feed">
         <div class="ps-feed-toolbar">
           <strong>Latest posts</strong>
-          <span data-ps-feed-status>Waiting for database setup</span>
+          <span data-ps-feed-status>UI preview only</span>
         </div>
 
         <div class="ps-feed" data-ps-feed>
           <article class="ps-empty-state">
-            <h3>No public posts yet.</h3>
-            <p>After Q47 database setup, posts and comments will appear here.</p>
+            <h2>No public posts yet.</h2>
+            <p>After database setup, posts, comments, hearts, and notifications will appear here.</p>
           </article>
         </div>
       </section>
     </section>
-
-    <section class="public-space-rules-grid" aria-label="Public Space planned rules">
-      <article>
-        <h2>Text-only sharing</h2>
-        <p>Posts stay focused on words only so the space remains simple and light.</p>
-      </article>
-
-      <article>
-        <h2>Own posts only</h2>
-        <p>Users will be able to edit or delete their own posts after logging in.</p>
-      </article>
-
-      <article>
-        <h2>Soft moderation</h2>
-        <p>Admin tools will support hiding or deleting harmful posts and comments when needed.</p>
-      </article>
-    </section>
-
-    <section class="public-space-note">
-      <h2>Gentle reminder</h2>
-      <p>
-        Public Space is for reflections and community writing. It is not an emergency or crisis support channel.
-      </p>
-    </section>
   </main>
 
-  <a class="public-space-fab is-current" href="public-space.html" aria-label="Open Public Space">
-    <img src="Resources/ps.png" alt="" />
-    <span>Public Space</span>
-  </a>
+  <div class="ps-modal" data-ps-forgot-modal hidden>
+    <div class="ps-modal-card" role="dialog" aria-modal="true" aria-labelledby="psForgotTitle">
+      <button class="ps-modal-close" type="button" data-ps-close-forgot aria-label="Close forgot password modal">&times;</button>
+
+      <div class="ps-panel-heading">
+        <p class="eyebrow">Password recovery</p>
+        <h2 id="psForgotTitle">Change password</h2>
+        <p>Enter your username, new password, and the 4-digit PIN/key you used when creating your account.</p>
+      </div>
+
+      <form class="ps-form is-active" data-ps-forgot-form novalidate>
+        <label>
+          <span>Username</span>
+          <input type="text" name="username" autocomplete="username" minlength="3" maxlength="15" placeholder="yourname" />
+        </label>
+
+        <label>
+          <span>New password</span>
+          <input type="password" name="password" autocomplete="new-password" minlength="6" maxlength="8" placeholder="6 to 8 characters" />
+        </label>
+
+        <label>
+          <span>Confirm password</span>
+          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="6" maxlength="8" placeholder="Repeat password" />
+        </label>
+
+        <label>
+          <span>PIN / Key</span>
+          <input type="password" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4 digits" />
+        </label>
+
+        <button class="btn primary ps-full-btn" type="submit">Change password</button>
+        <p class="ps-message" data-ps-forgot-message>UI-only for now. Database reset will be connected later.</p>
+      </form>
+    </div>
+  </div>
+
+  <div class="ps-modal" data-ps-compose-modal hidden>
+    <div class="ps-modal-card ps-compose-card" role="dialog" aria-modal="true" aria-labelledby="psComposeTitle">
+      <button class="ps-modal-close" type="button" data-ps-close-compose aria-label="Close post composer">&times;</button>
+
+      <div class="ps-panel-heading">
+        <p class="eyebrow">Create post</p>
+        <h2 id="psComposeTitle">What’s on your mind?</h2>
+      </div>
+
+      <form class="ps-composer" data-ps-composer novalidate>
+        <label>
+          <span>Your post</span>
+          <textarea name="post" maxlength="1000" rows="7" placeholder="Write something soft here..."></textarea>
+        </label>
+
+        <div class="ps-composer-footer">
+          <span data-ps-post-count>0 / 1000</span>
+          <button class="btn primary" type="submit">Post</button>
+        </div>
+
+        <p class="ps-message" data-ps-compose-message>Posting will be connected after database setup.</p>
+      </form>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
-  <script src="js/public-space.js?v=v20q46-public-space-ui-controller"></script>
+  <script src="js/public-space.js?v=v20q47-public-space-compact-auth"></script>
 </body>
 </html>
