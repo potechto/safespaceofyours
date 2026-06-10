@@ -4019,3 +4019,100 @@ body[data-admin-page="piece-control"] .admin-code-card.is-touch-peeking .admin-c
   }
 }
 /* V2.0Q.15 floating admin code info popovers END */
+
+/* V2.0Q.27 custom delete confirmation modal */
+.dangerous-delete-modal .dangerous-delete-modal-card {
+  width: min(100% - 2rem, 36rem);
+  overflow: visible;
+}
+
+.dangerous-delete-header {
+  display: grid;
+  gap: 0.35rem;
+  padding-right: clamp(3.6rem, 8vw, 4.8rem);
+}
+
+.dangerous-delete-kicker {
+  color: var(--danger);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dangerous-delete-target {
+  display: grid;
+  gap: 0.3rem;
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(255, 127, 164, 0.18);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 127, 164, 0.12), transparent 9rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.dangerous-delete-target span,
+.dangerous-delete-confirm-label span {
+  color: var(--soft);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dangerous-delete-target strong {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.dangerous-delete-confirm-label {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+
+.dangerous-delete-confirm-label[hidden] {
+  display: none !important;
+}
+
+.dangerous-delete-confirm-label input {
+  width: 100%;
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 16px;
+  padding: 0.85rem 0.95rem;
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.dangerous-delete-confirm-label input:focus {
+  border-color: rgba(255, 127, 164, 0.42);
+  box-shadow: 0 0 0 3px rgba(255, 127, 164, 0.12);
+}
+
+.dangerous-delete-error {
+  min-height: 1.25rem;
+  margin: 0.65rem 0 0;
+  color: var(--danger);
+  font-size: 0.82rem;
+}
+
+.dangerous-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.dangerous-delete-actions .tiny-btn {
+  min-width: 8.5rem;
+}
+
+@media (max-width: 520px) {
+  .dangerous-delete-actions .tiny-btn {
+    width: 100%;
+  }
+}
+/* V2.0Q.27 custom delete confirmation modal END */

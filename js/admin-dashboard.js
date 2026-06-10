@@ -1367,14 +1367,193 @@ function getAdminCodeLabelFromButton(button, fallbackLabel = "selected code") {
   return codeLabel || fallbackLabel;
 }
 
-function confirmDangerousCodeDelete(kind, codeLabel) {
-  const typeLabel = kind === "promo" ? "promo code" : "unlock code";
-  const typed = window.prompt(
-    `Delete this ${typeLabel}?\n\nCode: ${codeLabel}\n\nThis cannot be undone. If this code was already used, deleting it may remove your admin reference for that code.\n\nType DELETE to confirm.`,
-    ""
-  );
+const DELETE_CONFIRMATION_WORD = "DELETE";
+let dangerousDeleteModalElements = null;
+let dangerousDeleteModalState = null;
+let pendingDangerousDeleteResolver = null;
 
-  return typed === "DELETE";
+function ensureDangerousDeleteModalElements() {
+  if (dangerousDeleteModalElements) return dangerousDeleteModalElements;
+
+  let modal = document.querySelector("#dangerousDeleteModal");
+
+  if (!modal && document.body) {
+    document.body.insertAdjacentHTML("beforeend", `
+      <div class="admin-modal-overlay dangerous-delete-modal" id="dangerousDeleteModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dangerousDeleteModalTitle">
+        <section class="admin-modal-card dangerous-delete-modal-card" role="document">
+          <button class="admin-modal-close" id="closeDangerousDeleteModal" type="button" aria-label="Close delete confirmation">×</button>
+          <div class="admin-modal-header dangerous-delete-header">
+            <span class="dangerous-delete-kicker">Careful action</span>
+            <h2 id="dangerousDeleteModalTitle">Confirm delete</h2>
+            <p class="modal-help" id="dangerousDeleteModalMessage">This action cannot be undone.</p>
+          </div>
+          <div class="dangerous-delete-target">
+            <span id="dangerousDeleteTargetLabel">Selected item</span>
+            <strong id="dangerousDeleteTargetValue">—</strong>
+          </div>
+          <label class="dangerous-delete-confirm-label" id="dangerousDeleteConfirmWrap">
+            <span>Type DELETE to confirm</span>
+            <input id="dangerousDeleteConfirmInput" type="text" autocomplete="off" spellcheck="false" inputmode="text">
+          </label>
+          <p class="dangerous-delete-error" id="dangerousDeleteError" role="alert"></p>
+          <div class="dangerous-delete-actions">
+            <button class="tiny-btn" id="cancelDangerousDeleteModal" type="button">Cancel</button>
+            <button class="tiny-btn danger" id="confirmDangerousDeleteModal" type="button">Delete</button>
+          </div>
+        </section>
+      </div>
+    `);
+    modal = document.querySelector("#dangerousDeleteModal");
+  }
+
+  if (!modal) return null;
+
+  dangerousDeleteModalElements = {
+    modal,
+    title: modal.querySelector("#dangerousDeleteModalTitle"),
+    message: modal.querySelector("#dangerousDeleteModalMessage"),
+    targetLabel: modal.querySelector("#dangerousDeleteTargetLabel"),
+    targetValue: modal.querySelector("#dangerousDeleteTargetValue"),
+    inputWrap: modal.querySelector("#dangerousDeleteConfirmWrap"),
+    input: modal.querySelector("#dangerousDeleteConfirmInput"),
+    error: modal.querySelector("#dangerousDeleteError"),
+    cancelButton: modal.querySelector("#cancelDangerousDeleteModal"),
+    closeButton: modal.querySelector("#closeDangerousDeleteModal"),
+    confirmButton: modal.querySelector("#confirmDangerousDeleteModal")
+  };
+
+  const cancelDelete = () => closeDangerousDeleteModal(false);
+
+  dangerousDeleteModalElements.cancelButton?.addEventListener("click", cancelDelete);
+  dangerousDeleteModalElements.closeButton?.addEventListener("click", cancelDelete);
+  dangerousDeleteModalElements.confirmButton?.addEventListener("click", submitDangerousDeleteModal);
+  dangerousDeleteModalElements.input?.addEventListener("input", () => {
+    if (dangerousDeleteModalElements?.error) dangerousDeleteModalElements.error.textContent = "";
+  });
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) closeDangerousDeleteModal(false);
+  });
+
+  modal.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeDangerousDeleteModal(false);
+      return;
+    }
+
+    if (event.key === "Enter" && event.target === dangerousDeleteModalElements?.input) {
+      event.preventDefault();
+      submitDangerousDeleteModal();
+    }
+  });
+
+  return dangerousDeleteModalElements;
+}
+
+function closeDangerousDeleteModal(result = false) {
+  const elements = ensureDangerousDeleteModalElements();
+
+  if (elements) {
+    elements.modal.classList.remove("is-open");
+    elements.modal.setAttribute("aria-hidden", "true");
+    if (elements.error) elements.error.textContent = "";
+    if (elements.input) elements.input.value = "";
+  }
+
+  dangerousDeleteModalState = null;
+
+  if (pendingDangerousDeleteResolver) {
+    const resolve = pendingDangerousDeleteResolver;
+    pendingDangerousDeleteResolver = null;
+    resolve(result === true);
+  }
+}
+
+function submitDangerousDeleteModal() {
+  const elements = ensureDangerousDeleteModalElements();
+  if (!elements || !pendingDangerousDeleteResolver) return;
+
+  if (dangerousDeleteModalState?.requireTypedDelete) {
+    const typed = String(elements.input?.value || "").trim();
+
+    if (typed !== DELETE_CONFIRMATION_WORD) {
+      if (elements.error) elements.error.textContent = "Type DELETE exactly to continue.";
+      elements.input?.focus();
+      return;
+    }
+  }
+
+  closeDangerousDeleteModal(true);
+}
+
+function openDangerousDeleteModal(options = {}) {
+  const elements = ensureDangerousDeleteModalElements();
+
+  if (!elements) {
+    setDashboardMessage("Delete confirmation modal is unavailable.", "error");
+    return Promise.resolve(false);
+  }
+
+  if (pendingDangerousDeleteResolver) closeDangerousDeleteModal(false);
+
+  dangerousDeleteModalState = {
+    requireTypedDelete: options.requireTypedDelete === true
+  };
+
+  if (elements.title) elements.title.textContent = options.title || "Confirm delete";
+  if (elements.message) elements.message.textContent = options.message || "This action cannot be undone.";
+  if (elements.targetLabel) elements.targetLabel.textContent = options.targetLabel || "Selected item";
+  if (elements.targetValue) elements.targetValue.textContent = options.targetValue || "—";
+  if (elements.confirmButton) elements.confirmButton.textContent = options.confirmText || "Delete";
+  if (elements.error) elements.error.textContent = "";
+
+  if (elements.inputWrap) elements.inputWrap.hidden = !dangerousDeleteModalState.requireTypedDelete;
+
+  if (elements.input) {
+    elements.input.value = "";
+    elements.input.required = dangerousDeleteModalState.requireTypedDelete;
+  }
+
+  elements.modal.classList.add("is-open");
+  elements.modal.setAttribute("aria-hidden", "false");
+
+  window.setTimeout(() => {
+    if (dangerousDeleteModalState?.requireTypedDelete) {
+      elements.input?.focus();
+      return;
+    }
+
+    elements.cancelButton?.focus();
+  }, 0);
+
+  return new Promise(resolve => {
+    pendingDangerousDeleteResolver = resolve;
+  });
+}
+
+function confirmDangerousCodeDelete(kind, codeLabel) {
+  const isPromo = kind === "promo";
+  const typeLabel = isPromo ? "promo code" : "unlock code";
+
+  return openDangerousDeleteModal({
+    title: `Delete this ${typeLabel}?`,
+    message: "This cannot be undone. If this code was already used, deleting it may remove your admin reference for that code.",
+    targetLabel: "Code",
+    targetValue: codeLabel,
+    requireTypedDelete: true,
+    confirmText: isPromo ? "Delete promo" : "Delete unlock"
+  });
+}
+
+function confirmPromoRequestDelete() {
+  return openDangerousDeleteModal({
+    title: "Delete this promo request?",
+    message: "This removes the promo request from your admin list. This cannot be undone.",
+    targetLabel: "Request",
+    targetValue: "Selected promo request",
+    requireTypedDelete: false,
+    confirmText: "Delete request"
+  });
 }
 
 
@@ -1416,7 +1595,7 @@ document.addEventListener("click", async event => {
 
     if (promoDelete) {
       const codeLabel = getAdminCodeLabelFromButton(promoDelete, "selected promo code");
-      const confirmed = confirmDangerousCodeDelete("promo", codeLabel);
+      const confirmed = await confirmDangerousCodeDelete("promo", codeLabel);
 
       if (!confirmed) {
         setDashboardMessage("Promo delete cancelled.");
@@ -1440,7 +1619,7 @@ document.addEventListener("click", async event => {
 
     if (unlockDelete) {
       const codeLabel = getAdminCodeLabelFromButton(unlockDelete, "selected unlock code");
-      const confirmed = confirmDangerousCodeDelete("unlock", codeLabel);
+      const confirmed = await confirmDangerousCodeDelete("unlock", codeLabel);
 
       if (!confirmed) {
         setDashboardMessage("Unlock delete cancelled.");
@@ -1489,9 +1668,12 @@ document.addEventListener("click", async event => {
 
     if (deletePromoRequest) {
       const requestId = deletePromoRequest.dataset.deletePromoRequest;
-      const confirmed = window.confirm("Delete this promo request?");
+      const confirmed = await confirmPromoRequestDelete();
 
-      if (!confirmed) return;
+      if (!confirmed) {
+        setDashboardMessage("Promo request delete cancelled.");
+        return;
+      }
 
       const { error } = await adminClient
         .from("promo_requests")
@@ -1650,6 +1832,11 @@ if (closePromoRequestModalBtn) {
 
 document.addEventListener("keydown", event => {
   if (event.key !== "Escape") return;
+
+  if (dangerousDeleteModalElements?.modal?.classList.contains("is-open")) {
+    closeDangerousDeleteModal(false);
+    return;
+  }
 
   if (codeCreationModal?.classList.contains("is-open")) {
     closeCodeCreationModal(null);
