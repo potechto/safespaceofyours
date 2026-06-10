@@ -3944,3 +3944,20 @@ body[data-admin-page="payment-methods"] #paymentList button {
   }
 }
 /* V2.0Q.13 cleaner code creation modal END */
+
+
+/* V2.0Q.14 code modal close button layer fix */
+.code-creation-modal .code-creation-modal-card {
+  position: relative;
+  overflow: visible;
+}
+
+.code-creation-modal #closeCodeCreationModal {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 50;
+  pointer-events: auto;
+  isolation: isolate;
+}
+/* V2.0Q.14 code modal close button layer fix END */
