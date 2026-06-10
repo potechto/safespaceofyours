@@ -5486,3 +5486,121 @@ body[data-admin-page="piece-control"] #piecesControlCard .piece-actions .tiny-bt
   }
 }
 /* V2.0Q.43 rebuilt compact piece control rows END */
+
+/* V2.0Q.44 compress piece control row width */
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-item {
+  grid-template-columns: minmax(17rem, 0.72fr) minmax(0, 1.28fr) !important;
+  gap: 0.58rem !important;
+  padding: 0.62rem 0.66rem !important;
+  overflow: hidden !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-main {
+  grid-template-columns: 3.8rem minmax(0, 1fr) !important;
+  gap: 0.62rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-cover {
+  width: 3.8rem !important;
+  height: 5rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-title-row strong {
+  max-width: 11.6rem !important;
+  font-size: 0.8rem !important;
+  line-height: 1.08 !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-meta {
+  max-width: 15rem !important;
+  gap: 0.22rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-meta span {
+  font-size: 0.64rem !important;
+  padding: 0.2rem 0.38rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-panel,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-field {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+  grid-template-columns:
+    minmax(4.45rem, 0.58fr)
+    minmax(7.35rem, 0.98fr)
+    minmax(6.15rem, 0.82fr)
+    minmax(4.95rem, 0.64fr)
+    minmax(6.05rem, 0.78fr) !important;
+  gap: 0.36rem !important;
+  align-items: end !important;
+  overflow: hidden !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-field > span:first-child {
+  font-size: 0.49rem !important;
+  letter-spacing: 0.105em !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields input,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields select,
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line {
+  min-height: 1.9rem !important;
+  padding: 0.3rem 0.42rem !important;
+  border-radius: 12px !important;
+  font-size: 0.7rem !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields select {
+  text-overflow: ellipsis !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line {
+  gap: 0.28rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line input[type="checkbox"] {
+  width: 0.74rem !important;
+  height: 0.74rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+  grid-template-columns: repeat(3, minmax(5.55rem, 1fr)) !important;
+  gap: 0.36rem !important;
+  width: min(100%, 21.5rem) !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-actions .tiny-btn {
+  min-height: 1.9rem !important;
+  padding: 0.32rem 0.5rem !important;
+  font-size: 0.68rem !important;
+}
+
+@media (max-width: 1180px) {
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-item {
+    grid-template-columns: 1fr !important;
+    overflow: visible !important;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 700px) {
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+}
+/* V2.0Q.44 compress piece control row width END */
