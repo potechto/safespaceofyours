@@ -2370,3 +2370,16 @@ window.setTimeout(setupAdminCodeListFilterControls, 0);
   });
 })();
 /* V2.0Q.39 sync public space float with admin scroll arrow END */
+
+/* V2.0Q.48 public space admin handoff */
+(function setupPublicSpaceAdminHandoff() {
+  try {
+    window.localStorage.setItem("safespace_public_space_admin", JSON.stringify({
+      role: "admin",
+      source: "private_space",
+      grantedAt: Date.now(),
+      expiresAt: Date.now() + 12 * 60 * 60 * 1000
+    }));
+  } catch (error) {}
+})();
+/* V2.0Q.48 public space admin handoff END */

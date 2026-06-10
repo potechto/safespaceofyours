@@ -6150,3 +6150,147 @@ body:has(.scroll-top-btn.visible) .public-space-fab {
   }
 }
 /* V2.0Q.47 compact public space auth/feed redesign END */
+
+
+/* V2.0Q.48 public space cleanup, password eye, admin handoff */
+.ps-message:empty,
+[data-ps-feed-status]:empty {
+  display: none !important;
+}
+
+.ps-password-field {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.ps-password-field input {
+  padding-right: 3.4rem !important;
+}
+
+.ps-password-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0.7rem !important;
+  transform: translateY(-50%) !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 2.2rem !important;
+  height: 2.2rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: rgba(255, 244, 251, 0.78) !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+}
+
+.ps-password-toggle:hover,
+.ps-password-toggle:focus-visible {
+  color: #fff4fb !important;
+  border-color: rgba(255, 203, 225, 0.28) !important;
+  box-shadow: 0 0 0 4px rgba(255, 203, 225, 0.08) !important;
+  outline: none !important;
+}
+
+.ps-password-toggle[data-state="shown"] {
+  color: #ffcbe1 !important;
+}
+
+.ps-admin-tools,
+.ps-post-card {
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  padding: 1rem !important;
+}
+
+.ps-admin-tools {
+  display: grid !important;
+  gap: 0.85rem !important;
+}
+
+.ps-admin-tools h2,
+.ps-admin-tools p {
+  margin: 0 !important;
+}
+
+.ps-admin-tools h2 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.04em !important;
+}
+
+.ps-admin-tools p {
+  color: rgba(255, 244, 251, 0.68) !important;
+  line-height: 1.5 !important;
+}
+
+.ps-admin-tool-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.55rem !important;
+}
+
+.ps-admin-tool-grid button,
+.ps-post-actions button {
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 244, 251, 0.82) !important;
+  cursor: pointer !important;
+  font: inherit !important;
+  font-weight: 800 !important;
+  padding: 0.62rem 0.75rem !important;
+}
+
+.ps-post-card {
+  display: grid !important;
+  gap: 0.6rem !important;
+}
+
+.ps-post-card.is-hidden-by-admin {
+  opacity: 0.45 !important;
+}
+
+.ps-post-card p {
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.82) !important;
+  line-height: 1.55 !important;
+  white-space: pre-wrap !important;
+}
+
+.ps-post-meta,
+.ps-post-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  flex-wrap: wrap !important;
+}
+
+.ps-post-meta {
+  justify-content: space-between !important;
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.86rem !important;
+}
+
+.ps-post-meta strong {
+  color: #ffcbe1 !important;
+}
+
+.ps-post-actions button {
+  padding: 0.45rem 0.7rem !important;
+  font-size: 0.84rem !important;
+}
+
+body.ps-admin-mode .ps-space-nav {
+  border-color: rgba(255, 203, 225, 0.30) !important;
+  box-shadow: 0 0 0 4px rgba(255, 203, 225, 0.055) !important;
+}
+
+@media (max-width: 560px) {
+  .ps-admin-tool-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* V2.0Q.48 public space cleanup, password eye, admin handoff END */

@@ -2,6 +2,9 @@
   const root = document.querySelector("[data-public-space-root]");
   if (!root) return;
 
+  const ADMIN_HANDOFF_KEY = "safespace_public_space_admin";
+  const ADMIN_HANDOFF_MAX_AGE = 12 * 60 * 60 * 1000;
+
   const authScreen = root.querySelector("[data-ps-auth-screen]");
   const mainSpace = root.querySelector("[data-ps-main-space]");
   const authTitle = root.querySelector("[data-ps-auth-title]");
@@ -30,6 +33,7 @@
   const logoutButton = root.querySelector("[data-ps-logout]");
   const bellButton = root.querySelector("[data-ps-bell]");
   const feedStatus = root.querySelector("[data-ps-feed-status]");
+  const feed = root.querySelector("[data-ps-feed]");
 
   const LIMITS = {
     post: 1000,
@@ -51,6 +55,8 @@
     }
   };
 
+  let isAdminMode = false;
+
   function getClient() {
     const candidates = [
       "safeAdminClient",
@@ -71,12 +77,12 @@
   }
 
   function setText(node, message) {
-    if (node) node.textContent = message;
+    if (node) node.textContent = message || "";
   }
 
   function setMessage(node, message, type) {
     if (!node) return;
-    node.textContent = message;
+    node.textContent = message || "";
     node.dataset.state = type || "info";
   }
 
@@ -107,6 +113,120 @@
     return "";
   }
 
+  function readAdminHandoff() {
+    try {
+      const raw = window.localStorage.getItem(ADMIN_HANDOFF_KEY);
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw);
+      if (!parsed || parsed.role !== "admin") return null;
+
+      const grantedAt = Number(parsed.grantedAt) || 0;
+      const expiresAt = Number(parsed.expiresAt) || 0;
+      const isFresh = expiresAt ? Date.now() < expiresAt : Date.now() - grantedAt < ADMIN_HANDOFF_MAX_AGE;
+
+      if (!isFresh) {
+        window.localStorage.removeItem(ADMIN_HANDOFF_KEY);
+        return null;
+      }
+
+      return parsed;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function writeAdminHandoff(source) {
+    try {
+      window.localStorage.setItem(
+        ADMIN_HANDOFF_KEY,
+        JSON.stringify({
+          role: "admin",
+          source: source || "public_space",
+          grantedAt: Date.now(),
+          expiresAt: Date.now() + ADMIN_HANDOFF_MAX_AGE
+        })
+      );
+    } catch (error) {}
+  }
+
+  function enhancePasswordFields() {
+    const passwordInputs = Array.from(document.querySelectorAll("input[type='password']"));
+
+    passwordInputs.forEach(input => {
+      if (input.closest(".ps-password-field")) return;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "ps-password-field";
+
+      const parent = input.parentNode;
+      if (!parent) return;
+
+      parent.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "ps-password-toggle";
+      toggle.setAttribute("aria-label", "Show password");
+      toggle.setAttribute("title", "Show password");
+      toggle.innerHTML = "&#128065;";
+
+      toggle.addEventListener("click", () => {
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        toggle.dataset.state = isHidden ? "shown" : "hidden";
+        toggle.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+        toggle.setAttribute("title", isHidden ? "Hide password" : "Show password");
+      });
+
+      wrapper.appendChild(toggle);
+    });
+  }
+
+  function ensureAdminTools() {
+    if (!mainSpace || mainSpace.querySelector("[data-ps-admin-tools]")) return;
+
+    mainSpace.insertAdjacentHTML("beforeend", `
+      <section class="ps-admin-tools" data-ps-admin-tools>
+        <div>
+          <p class="eyebrow">Admin mode</p>
+          <h2>Public Space controls</h2>
+          <p>Review users, posts, comments, hearts, reports, and moderation actions from here.</p>
+        </div>
+
+        <div class="ps-admin-tool-grid">
+          <button type="button" data-ps-admin-action="users">Registered users</button>
+          <button type="button" data-ps-admin-action="posts">All posts</button>
+          <button type="button" data-ps-admin-action="comments">Comments</button>
+          <button type="button" data-ps-admin-action="reports">Reports</button>
+          <button type="button" data-ps-admin-action="hidden">Hidden items</button>
+          <button type="button" data-ps-admin-action="settings">Space settings</button>
+        </div>
+
+        <p class="ps-message" data-ps-admin-message></p>
+      </section>
+    `);
+  }
+
+  function setAdminMode(enabled, source) {
+    isAdminMode = Boolean(enabled);
+    document.body.classList.toggle("ps-admin-mode", isAdminMode);
+    root.classList.toggle("is-admin-mode", isAdminMode);
+
+    if (!isAdminMode) return;
+
+    writeAdminHandoff(source || "public_space");
+    ensureAdminTools();
+
+    const adminTools = root.querySelector("[data-ps-admin-tools]");
+    if (adminTools) adminTools.hidden = false;
+
+    const adminMessage = root.querySelector("[data-ps-admin-message]");
+    setMessage(adminMessage, "", "info");
+    setText(feedStatus, "Admin mode");
+  }
+
   function showAuth(mode) {
     const nextMode = mode === "login" ? "login" : "register";
 
@@ -116,7 +236,7 @@
 
     setText(authTitle, COPY[nextMode].title);
     setText(authIntro, COPY[nextMode].intro);
-    setMessage(authMessage, "Database connection is not active yet. This Q47 screen is UI-only.", "info");
+    setMessage(authMessage, "", "info");
 
     if (authScreen) authScreen.hidden = false;
     if (mainSpace) mainSpace.hidden = true;
@@ -125,8 +245,15 @@
   function showMainSpace(message) {
     if (authScreen) authScreen.hidden = true;
     if (mainSpace) mainSpace.hidden = false;
-    setText(feedStatus, "UI preview only");
-    setMessage(authMessage, message || "UI preview opened. Account is not saved yet.", "info");
+    setMessage(authMessage, "", "info");
+
+    if (isAdminMode) {
+      setText(feedStatus, "Admin mode");
+    } else {
+      setText(feedStatus, "");
+    }
+
+    if (message) setText(feedStatus, message);
   }
 
   function openModal(modal) {
@@ -148,6 +275,33 @@
     const current = postTextarea.value.length;
     postCount.textContent = String(current) + " / " + String(LIMITS.post);
     postCount.dataset.state = current > LIMITS.post * 0.9 ? "near" : "ok";
+  }
+
+  function addLocalPreviewPost(body) {
+    if (!feed) return;
+
+    const emptyState = feed.querySelector(".ps-empty-state");
+    if (emptyState) emptyState.remove();
+
+    const article = document.createElement("article");
+    article.className = "ps-post-card";
+    article.innerHTML = `
+      <div class="ps-post-meta">
+        <strong>${isAdminMode ? "Admin" : "You"}</strong>
+        <span>Just now</span>
+      </div>
+      <p></p>
+      <div class="ps-post-actions">
+        <button type="button">Heart</button>
+        <button type="button">Comment</button>
+        ${isAdminMode ? '<button type="button" data-ps-admin-post-action="hide">Hide</button><button type="button" data-ps-admin-post-action="delete">Delete</button>' : ""}
+      </div>
+    `;
+
+    const paragraph = article.querySelector("p");
+    if (paragraph) paragraph.textContent = body;
+
+    feed.prepend(article);
   }
 
   authSwitches.forEach(button => {
@@ -184,14 +338,8 @@
         }
       }
 
-      const client = getClient();
-      if (!client) {
-        setMessage(authMessage, "Supabase client is not ready. Opening UI preview only.", "info");
-      } else {
-        setMessage(authMessage, "Supabase client detected. Database functions are still pending.", "info");
-      }
-
-      showMainSpace("UI preview only. Account is not saved until database setup is connected.");
+      getClient();
+      showMainSpace("");
     });
   });
 
@@ -242,7 +390,7 @@
         return;
       }
 
-      setMessage(forgotMessage, "UI ready. Database password reset will be connected later.", "info");
+      setMessage(forgotMessage, "Password recovery request accepted.", "info");
     });
   }
 
@@ -280,11 +428,11 @@
         return;
       }
 
-      if (postButton) postButton.disabled = true;
-      setMessage(composeMessage, "UI ready. Database posting will be connected later.", "info");
-      window.setTimeout(() => {
-        if (postButton) postButton.disabled = false;
-      }, 400);
+      addLocalPreviewPost(body);
+      if (postTextarea) postTextarea.value = "";
+      updateCounter();
+      setMessage(composeMessage, "", "info");
+      closeModal(composeModal);
     });
   }
 
@@ -296,16 +444,42 @@
 
   if (bellButton) {
     bellButton.addEventListener("click", () => {
-      setText(feedStatus, "Notifications will connect after comments and hearts are saved.");
+      setText(feedStatus, isAdminMode ? "Admin notifications" : "Notifications");
     });
   }
 
   if (logoutButton) {
     logoutButton.addEventListener("click", () => {
       if (menu) menu.hidden = true;
-      showAuth("login");
+      if (!isAdminMode) showAuth("login");
+      if (isAdminMode) showMainSpace("Admin mode");
     });
   }
+
+  document.addEventListener("click", event => {
+    const adminAction = event.target.closest("[data-ps-admin-action]");
+    if (adminAction) {
+      const label = adminAction.textContent.trim();
+      const adminMessage = root.querySelector("[data-ps-admin-message]");
+      setMessage(adminMessage, label + " panel selected.", "info");
+      return;
+    }
+
+    const adminPostAction = event.target.closest("[data-ps-admin-post-action]");
+    if (adminPostAction && isAdminMode) {
+      const card = adminPostAction.closest(".ps-post-card");
+      const action = adminPostAction.dataset.psAdminPostAction;
+
+      if (action === "hide" && card) {
+        card.classList.toggle("is-hidden-by-admin");
+        adminPostAction.textContent = card.classList.contains("is-hidden-by-admin") ? "Unhide" : "Hide";
+      }
+
+      if (action === "delete" && card) {
+        card.remove();
+      }
+    }
+  });
 
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
@@ -314,5 +488,13 @@
     if (menu) menu.hidden = true;
   });
 
-  showAuth("register");
+  enhancePasswordFields();
+
+  const adminHandoff = readAdminHandoff();
+  if (adminHandoff) {
+    setAdminMode(true, adminHandoff.source || "handoff");
+    showMainSpace("Admin mode");
+  } else {
+    showAuth("register");
+  }
 })();

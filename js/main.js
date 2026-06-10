@@ -1297,6 +1297,14 @@ function setupAdminGate() {
 
       if (enteredPin === ADMIN_PIN) {
         clearGateLock();
+        try {
+          localStorage.setItem("safespace_public_space_admin", JSON.stringify({
+            role: "admin",
+            source: "admin_gate",
+            grantedAt: Date.now(),
+            expiresAt: Date.now() + 12 * 60 * 60 * 1000
+          }));
+        } catch (error) {}
         window.location.href = "admin.html";
         return;
       }
