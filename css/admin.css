@@ -4245,3 +4245,54 @@ body[data-admin-page="piece-control"] #unlockList.is-code-list-scrollable {
   }
 }
 /* V2.0Q.28 modal close layer and code list controls END */
+
+/* V2.0Q.29 hidden promo unlock scrollbars */
+#promoList,
+#unlockList,
+#promoList.is-code-list-scrollable,
+#unlockList.is-code-list-scrollable,
+body[data-admin-page="piece-control"] #promoList,
+body[data-admin-page="piece-control"] #unlockList,
+body[data-admin-page="piece-control"] #promoList.is-code-list-scrollable,
+body[data-admin-page="piece-control"] #unlockList.is-code-list-scrollable {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+#promoList::-webkit-scrollbar,
+#unlockList::-webkit-scrollbar,
+#promoList.is-code-list-scrollable::-webkit-scrollbar,
+#unlockList.is-code-list-scrollable::-webkit-scrollbar,
+body[data-admin-page="piece-control"] #promoList::-webkit-scrollbar,
+body[data-admin-page="piece-control"] #unlockList::-webkit-scrollbar,
+body[data-admin-page="piece-control"] #promoList.is-code-list-scrollable::-webkit-scrollbar,
+body[data-admin-page="piece-control"] #unlockList.is-code-list-scrollable::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+/* V2.0Q.29 hidden promo unlock scrollbars END */
+
+/* V2.0Q.30 modal close readable X glyph */
+.admin-modal-overlay .admin-modal-close,
+.code-creation-modal #closeCodeCreationModal,
+.promo-request-modal-card .admin-modal-close,
+.dangerous-delete-modal #closeDangerousDeleteModal {
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+
+.admin-modal-overlay .admin-modal-close::before,
+.code-creation-modal #closeCodeCreationModal::before,
+.promo-request-modal-card .admin-modal-close::before,
+.dangerous-delete-modal #closeDangerousDeleteModal::before {
+  content: "X";
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+/* V2.0Q.30 modal close readable X glyph END */
