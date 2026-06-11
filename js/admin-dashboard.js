@@ -586,6 +586,26 @@ async function loadProtectedTextStatuses() {
   }
 }
 
+
+/* V2.0Q.60D public static text leak guard */
+function hasPublicStaticTextRisk(piece) {
+  const file = String(piece?.file || "").trim();
+  const isProtectedMetadata = piece?.protected === true || String(piece?.protected || "").toLowerCase() === "true";
+
+  return Boolean(file && /^Resources\/.+\.txt$/i.test(file) && !isProtectedMetadata);
+}
+
+function getPublicStaticTextRiskLabel(piece) {
+  if (!hasPublicStaticTextRisk(piece)) return "";
+
+  return `Public .txt linked: ${piece.file}`;
+}
+
+function getPublicStaticTextRiskError(piece) {
+  const file = String(piece?.file || "").trim() || "Resources/*.txt";
+
+  return `Blocked: this piece still points to a public text file (${file}). Before saving as paid/premium, protect it first: save the full text in Protected full text, then stub/remove the public .txt path in code.`;
+}
 function getPieceRowSlug(row) {
   return String(row?.dataset?.pieceRow || "").trim();
 }
@@ -1228,6 +1248,8 @@ function renderPieceSettingsList() {
     const totalCharacters = Number(item.total_characters) || 0;
     const protectedStatusLabel = getProtectedTextStatusLabel(item);
     const protectedStatusClass = item.has_protected_text ? "is-ready" : (accessType === "paid" ? "is-missing" : "is-optional");
+    const hasPublicTextRisk = hasPublicStaticTextRisk(item);
+    const publicTextRiskLabel = getPublicStaticTextRiskLabel(item);
 
     return `
       <article class="list-item piece-control-item" data-piece-row="${escapeAdminHTML(item.slug)}">
@@ -1246,6 +1268,7 @@ function renderPieceSettingsList() {
               <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
               <span>Total ${escapeAdminHTML(formatCharacterCount(totalCharacters))} chars</span>
               <span class="protected-text-status ${protectedStatusClass}">${escapeAdminHTML(protectedStatusLabel)}</span>
+              ${hasPublicTextRisk ? `<span class="piece-public-file-risk">${escapeAdminHTML(publicTextRiskLabel)}</span>` : ""}
             </div>
           </div>
         </div>
@@ -1827,6 +1850,11 @@ document.addEventListener("click", async event => {
       const previewLimit = Number(row.querySelector("[data-piece-preview]").value) || 700;
       const isEnabled = row.querySelector("[data-piece-enabled]").checked;
       const protectedTextValue = String(row.querySelector("[data-piece-protected-text]")?.value || "").trim();
+      const sourcePiece = latestAdminPieces.find(item => item.slug === slug) || {};
+
+      if (accessType === "paid" && hasPublicStaticTextRisk(sourcePiece)) {
+        throw new Error(getPublicStaticTextRiskError(sourcePiece));
+      }
 
       const payload = {
         is_enabled: isEnabled,

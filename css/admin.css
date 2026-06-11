@@ -5720,3 +5720,25 @@ body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
   color: rgba(226, 232, 240, 0.72);
   line-height: 1.45;
 }
+
+/* V2.0Q.60D public file leak guard */
+.piece-public-file-risk {
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  background: rgba(251, 146, 60, 0.15);
+  color: #fed7aa;
+  border: 1px solid rgba(251, 146, 60, 0.38);
+}
+
+.piece-public-file-warning {
+  display: block;
+  margin-top: 0.55rem;
+  border-radius: 0.8rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(251, 146, 60, 0.12);
+  border: 1px solid rgba(251, 146, 60, 0.28);
+  color: #ffedd5 !important;
+  font-weight: 700;
+}
