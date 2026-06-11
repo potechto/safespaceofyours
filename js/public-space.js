@@ -16,6 +16,14 @@
 
   const POST_EDIT_WINDOW_MS = 30 * 60 * 1000;
 
+  const PUBLIC_SPACE_BADGE_LIMIT = 3;
+  const PUBLIC_SPACE_BADGE_OPTIONS = [
+    { value: "Moderator", label: "Moderator", image: "Resources/moderator.png" },
+    { value: "Admin", label: "Admin", image: "Resources/admin.png" },
+    { value: "Beta Tester", label: "Beta Tester", image: "Resources/betatester.png" },
+    { value: "Premium", label: "Premium", image: "Resources/premiumacc.png" }
+  ];
+
   const COPY = {
     register: {
       title: "Create your Public Space",
@@ -62,6 +70,7 @@
   let currentUser = currentSession ? currentSession.user : null;
   let isAdminMode = Boolean(currentUser && currentUser.is_admin);
   let latestPublicSpacePosts = [];
+  let publicSpacePostFilter = { mode: "all", date: "" };
   let composeMode = "create";
   let editingPostId = null;
 
@@ -294,6 +303,105 @@
     `;
   }
 
+  function localDateKey(value) {
+    const date = value ? new Date(value) : new Date();
+    if (!date || Number.isNaN(date.getTime())) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function offsetDateKey(offsetDays) {
+    const date = new Date();
+    date.setDate(date.getDate() + offsetDays);
+    return localDateKey(date);
+  }
+
+  function ensurePostFilterControls() {
+    const feedCard = root.querySelector(".ps-feed-card");
+    if (!feedCard || feedCard.querySelector("[data-ps-post-filter]")) return;
+
+    const filter = document.createElement("div");
+    filter.className = "ps-post-filter";
+    filter.setAttribute("data-ps-post-filter", "");
+    filter.innerHTML = `
+      <label>
+        <span>Filter posts</span>
+        <select data-ps-post-filter-mode aria-label="Filter posts">
+          <option value="all">View all posts</option>
+          <option value="today">Today only</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="custom">Custom date</option>
+        </select>
+      </label>
+      <label data-ps-post-filter-date-wrap hidden>
+        <span>Choose date</span>
+        <input type="date" data-ps-post-filter-date aria-label="Choose post date" />
+      </label>
+    `;
+
+    const heading = feedCard.querySelector("h2, h3, .ps-feed-title");
+    if (heading) heading.insertAdjacentElement("afterend", filter);
+    else feedCard.prepend(filter);
+  }
+
+  function postMatchesFilter(post) {
+    const mode = publicSpacePostFilter.mode || "all";
+    if (mode === "all") return true;
+
+    const postDate = localDateKey(post && post.created_at);
+    if (!postDate) return false;
+
+    if (mode === "today") return postDate === offsetDateKey(0);
+    if (mode === "yesterday") return postDate === offsetDateKey(-1);
+    if (mode === "custom") return Boolean(publicSpacePostFilter.date) && postDate === publicSpacePostFilter.date;
+
+    return true;
+  }
+
+  function applyPostFilter(posts) {
+    return (Array.isArray(posts) ? posts : []).filter(postMatchesFilter);
+  }
+
+  function syncPostFilterControls() {
+    const filter = root.querySelector("[data-ps-post-filter]");
+    if (!filter) return;
+
+    const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
+    const dateWrap = filter.querySelector("[data-ps-post-filter-date-wrap]");
+    const dateInput = filter.querySelector("[data-ps-post-filter-date]");
+
+    if (modeSelect) modeSelect.value = publicSpacePostFilter.mode || "all";
+    if (dateInput) dateInput.value = publicSpacePostFilter.date || "";
+    if (dateWrap) dateWrap.hidden = publicSpacePostFilter.mode !== "custom";
+  }
+
+  function refreshPostFilterView() {
+    ensurePostFilterControls();
+    syncPostFilterControls();
+    renderPosts(latestPublicSpacePosts, { skipCache: true });
+  }
+
+  function handlePostFilterChange(event) {
+    const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
+    const dateInput = event.target.closest("[data-ps-post-filter-date]");
+    if (!modeSelect && !dateInput) return;
+
+    const filter = root.querySelector("[data-ps-post-filter]");
+    const activeMode = filter ? filter.querySelector("[data-ps-post-filter-mode]") : null;
+    const activeDate = filter ? filter.querySelector("[data-ps-post-filter-date]") : null;
+
+    publicSpacePostFilter.mode = activeMode ? activeMode.value : "all";
+    publicSpacePostFilter.date = activeDate ? activeDate.value : "";
+
+    if (publicSpacePostFilter.mode !== "custom") {
+      publicSpacePostFilter.date = "";
+    }
+
+    refreshPostFilterView();
+  }
   function renderPosts(posts) {
     if (!feed) return;
 
@@ -568,6 +676,26 @@
       toggle.setAttribute("aria-label", shouldOpen ? "Close menu" : "Open menu");
     }
   }
+  function normalizeBadgeValue(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
+  }
+
+  function splitBadgeLabels(value) {
+    return String(value || "")
+      .split(/[,|]/)
+      .map(item => item.trim())
+      .filter(Boolean)
+      .slice(0, PUBLIC_SPACE_BADGE_LIMIT);
+  }
+
+  function badgeOptionFor(label) {
+    const clean = normalizeBadgeValue(label);
+    return PUBLIC_SPACE_BADGE_OPTIONS.find(option => normalizeBadgeValue(option.value) === clean || normalizeBadgeValue(option.label) === clean) || null;
+  }
+
   function profileBadgeItems(user) {
     const source = user || {};
     const items = [];
@@ -575,24 +703,31 @@
 
     const pushBadge = (label, className) => {
       const cleanLabel = String(label || "").trim();
-      const key = cleanLabel.toLowerCase();
-      if (!cleanLabel || seen.has(key)) return;
+      const key = normalizeBadgeValue(cleanLabel);
+      if (!cleanLabel || !key || key === "active" || seen.has(key)) return;
+
+      const option = badgeOptionFor(cleanLabel);
       seen.add(key);
-      items.push({ label: cleanLabel, className: className || "" });
+      items.push({
+        label: option ? option.label : cleanLabel,
+        className: className || "",
+        image: option ? option.image : ""
+      });
     };
 
     if (source.is_admin) pushBadge("Admin");
     if (source.is_premium) pushBadge("Premium");
-
-    const customBadge = String(source.badge_label || "").trim();
-    const customKey = customBadge.toLowerCase();
-    if (customBadge && !["admin", "premium", "active"].includes(customKey)) {
-      pushBadge(customBadge);
-    }
-
+    splitBadgeLabels(source.badge_label).forEach(label => pushBadge(label));
     if (source.is_disabled) pushBadge("Disabled", "is-danger");
 
     return items;
+  }
+
+  function renderBadgeChip(badge, modifier) {
+    const extraClass = modifier ? ` ${modifier}` : "";
+    const image = badge.image ? `<img src="${escapeHtml(badge.image)}" alt="" aria-hidden="true" loading="lazy" />` : "";
+
+    return `<span class="ps-badge-chip ${escapeHtml(badge.className || "")}${extraClass}" title="${escapeHtml(badge.label)}">${image}<span>${escapeHtml(badge.label)}</span></span>`;
   }
 
   function renderProfileBadges(user) {
@@ -601,9 +736,16 @@
 
     return `
       <div class="ps-control-chip-row ps-profile-badges" aria-label="Profile badges">
-        ${badges.map(badge => `<span class="ps-status-pill ${escapeHtml(badge.className)}">${escapeHtml(badge.label)}</span>`).join("")}
+        ${badges.map(badge => renderBadgeChip(badge)).join("")}
       </div>
     `;
+  }
+
+  function renderPostBadges(user) {
+    const badges = profileBadgeItems(user).filter(badge => normalizeBadgeValue(badge.label) !== "disabled");
+    if (!badges.length) return "";
+
+    return `<span class="ps-post-badges" data-ps-post-badges>${badges.map(badge => renderBadgeChip(badge, "is-mini")).join("")}</span>`;
   }
 
   function isCurrentUserPost(post) {
@@ -696,6 +838,18 @@
       if (heartButton) {
         heartButton.textContent = `${post.hearted_by_me ? "\u2764\uFE0F" : "\uD83E\uDD0D"} · ${Number(post.heart_count || 0)}`;
         heartButton.setAttribute("aria-label", post.hearted_by_me ? "Remove heart" : "Heart this post");
+      }
+
+      const commentButton = card.querySelector("[data-ps-comments-post]");
+      if (commentButton) {
+        commentButton.textContent = `\uD83D\uDCAC · ${Number(post.comment_count || 0)}`;
+        commentButton.setAttribute("aria-label", "View comments");
+      }
+
+      const meta = card.querySelector(".ps-post-meta");
+      const authorNode = meta ? meta.querySelector("strong") : null;
+      if (authorNode && !meta.querySelector("[data-ps-post-badges]")) {
+        authorNode.insertAdjacentHTML("afterend", renderPostBadges(post.author || post));
       }
 
       const oldMenu = card.querySelector("[data-ps-post-more-wrap]");
@@ -1066,6 +1220,67 @@
 
   function renderCurrentPublicSpaceRoute() {
     return renderPublicSpaceRoute(currentPublicSpaceRoute());
+  }
+  function enhanceAdminBadgeSelectors() {
+    root.querySelectorAll("[data-ps-badge-input]").forEach(input => {
+      if (input.dataset.psBadgeEnhanced === "true") return;
+
+      input.dataset.psBadgeEnhanced = "true";
+      input.type = "hidden";
+      input.hidden = true;
+
+      const selectedValues = splitBadgeLabels(input.value).map(normalizeBadgeValue);
+
+      const picker = document.createElement("div");
+      picker.className = "ps-badge-picker";
+      picker.setAttribute("data-ps-badge-picker", "");
+      picker.innerHTML = `
+        <div class="ps-badge-picker-head">
+          <strong>Select badges</strong>
+          <span>Choose up to ${PUBLIC_SPACE_BADGE_LIMIT}</span>
+        </div>
+        <div class="ps-badge-picker-grid">
+          ${PUBLIC_SPACE_BADGE_OPTIONS.map(option => {
+            const normalized = normalizeBadgeValue(option.value);
+            const checked = selectedValues.includes(normalized) ? " checked" : "";
+            return `
+              <label class="ps-badge-choice">
+                <input type="checkbox" value="${escapeHtml(option.value)}"${checked} />
+                <span>${renderBadgeChip(option, "is-choice")}</span>
+              </label>
+            `;
+          }).join("")}
+        </div>
+        <p class="ps-badge-picker-note" data-ps-badge-picker-note>Maximum ${PUBLIC_SPACE_BADGE_LIMIT} badges per user.</p>
+      `;
+
+      input.insertAdjacentElement("afterend", picker);
+
+      const syncInput = changedBox => {
+        const checkedBoxes = Array.from(picker.querySelectorAll("input[type='checkbox']:checked"));
+
+        if (checkedBoxes.length > PUBLIC_SPACE_BADGE_LIMIT && changedBox) {
+          changedBox.checked = false;
+        }
+
+        const values = Array.from(picker.querySelectorAll("input[type='checkbox']:checked"))
+          .slice(0, PUBLIC_SPACE_BADGE_LIMIT)
+          .map(box => box.value);
+
+        input.value = values.join(", ");
+
+        const note = picker.querySelector("[data-ps-badge-picker-note]");
+        if (note) note.textContent = `${values.length}/${PUBLIC_SPACE_BADGE_LIMIT} selected`;
+      };
+
+      picker.addEventListener("change", event => {
+        const box = event.target.closest("input[type='checkbox']");
+        if (!box) return;
+        syncInput(box);
+      });
+
+      syncInput();
+    });
   }
   function syncPublicSpaceScrollTop() {
     if (!scrollTopButton) return;
@@ -1968,6 +2183,7 @@
 
   root.addEventListener("submit", handleProfileComposerRootSubmit);
   root.addEventListener("input", handleProfileComposerRootInput);
+  root.addEventListener("change", handlePostFilterChange);
 
   window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
   window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);
@@ -2057,6 +2273,10 @@
     window.addEventListener("resize", syncPublicSpaceScrollTop);
     syncPublicSpaceScrollTop();
   }
+
+  const adminBadgeSelectorObserver = new MutationObserver(() => enhanceAdminBadgeSelectors());
+  adminBadgeSelectorObserver.observe(root, { childList: true, subtree: true });
+  enhanceAdminBadgeSelectors();
 
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;

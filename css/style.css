@@ -7721,3 +7721,175 @@ body.ps-route-screen-active .ps-feed-card {
   min-width: 4.1rem !important;
 }
 /* V2.0Q.62K post menu heart edit polish END */
+
+
+/* V2.0Q.62L filter badges menu polish */
+.ps-post-filter {
+  display: flex !important;
+  align-items: end !important;
+  gap: 0.8rem !important;
+  flex-wrap: wrap !important;
+  margin: 0.8rem 0 1rem !important;
+}
+
+.ps-post-filter label {
+  display: grid !important;
+  gap: 0.35rem !important;
+  min-width: min(100%, 13rem) !important;
+  margin: 0 !important;
+}
+
+.ps-post-filter label span {
+  color: rgba(255, 244, 251, 0.72) !important;
+  font-size: 0.82rem !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.ps-post-filter select,
+.ps-post-filter input {
+  min-height: 2.85rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  background: rgba(12, 8, 18, 0.72) !important;
+  color: #fff4fb !important;
+  padding: 0.72rem 0.95rem !important;
+  font: inherit !important;
+}
+
+.ps-post-more-toggle {
+  width: 1.62rem !important;
+  height: 1.62rem !important;
+  min-width: 1.62rem !important;
+  font-size: 0.72rem !important;
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.08) !important;
+  border: 1px solid rgba(255, 244, 251, 0.22) !important;
+  box-shadow: none !important;
+}
+
+.ps-post-more-menu,
+.ps-post-more-menu button {
+  color: #fff4fb !important;
+}
+
+.ps-post-more-menu button {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+}
+
+.ps-post-more-menu button:hover,
+.ps-post-more-menu button:focus-visible {
+  color: #fff !important;
+  background: rgba(255, 244, 251, 0.11) !important;
+}
+
+.ps-badge-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  width: fit-content !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: #fff4fb !important;
+  padding: 0.22rem 0.55rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+}
+
+.ps-badge-chip img {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.ps-badge-chip.is-mini {
+  padding: 0.16rem 0.38rem !important;
+  font-size: 0.7rem !important;
+}
+
+.ps-badge-chip.is-mini img {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.ps-post-badges {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.3rem !important;
+  flex-wrap: wrap !important;
+  margin-left: 0.45rem !important;
+}
+
+.ps-badge-picker {
+  display: grid !important;
+  gap: 0.7rem !important;
+  margin: 0.45rem 0 0.9rem !important;
+  padding: 0.85rem !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  background: rgba(12, 8, 18, 0.34) !important;
+}
+
+.ps-badge-picker-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 0.7rem !important;
+  flex-wrap: wrap !important;
+}
+
+.ps-badge-picker-head strong {
+  color: #fff4fb !important;
+  font-size: 0.95rem !important;
+}
+
+.ps-badge-picker-head span,
+.ps-badge-picker-note {
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.8rem !important;
+  margin: 0 !important;
+}
+
+.ps-badge-picker-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+}
+
+.ps-badge-choice {
+  display: inline-flex !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+}
+
+.ps-badge-choice input {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.ps-badge-choice input:checked + span .ps-badge-chip,
+.ps-badge-choice:has(input:checked) .ps-badge-chip {
+  border-color: rgba(255, 142, 209, 0.58) !important;
+  background: rgba(255, 142, 209, 0.16) !important;
+  box-shadow: 0 0 0 3px rgba(255, 142, 209, 0.1) !important;
+}
+
+@media (max-width: 640px) {
+  .ps-post-filter {
+    display: grid !important;
+  }
+
+  .ps-post-filter label {
+    width: 100% !important;
+  }
+}
+/* V2.0Q.62L filter badges menu polish END */
