@@ -14,6 +14,8 @@
     postMax: 1000
   };
 
+  const POST_EDIT_WINDOW_MS = 30 * 60 * 1000;
+
   const COPY = {
     register: {
       title: "Create your Public Space",
@@ -60,6 +62,8 @@
   let currentUser = currentSession ? currentSession.user : null;
   let isAdminMode = Boolean(currentUser && currentUser.is_admin);
   let latestPublicSpacePosts = [];
+  let composeMode = "create";
+  let editingPostId = null;
 
   function getClient() {
     const candidates = [
@@ -312,10 +316,10 @@
       const hiddenLabel = post.is_hidden ? `<span>Hidden</span>` : "";
       const heartLabel = post.hearted_by_me ? "? Hearted" : "? Heart";
       const manageButtons = post.can_manage
-        ? `<button type="button" data-ps-delete-post="${escapeHtml(post.id)}">Delete</button>`
+        ? `<button type="button" data-ps-delete-post="${escapeHtml(post.id)}">Delete post</button>`
         : "";
       const adminButtons = isAdminMode
-        ? `<button type="button" data-ps-toggle-hidden="${escapeHtml(post.id)}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide" : "Hide"}</button>`
+        ? `<button type="button" data-ps-toggle-hidden="${escapeHtml(post.id)}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide post" : "Hide post"}</button>`
         : "";
 
       return `
@@ -335,6 +339,7 @@
       `;
     }).join("");
 
+    enhancePostCards(feed, list);
     if (currentPublicSpaceRoute() === "profile") {
       renderProfileOwnPosts(list);
     }
@@ -619,14 +624,101 @@
       .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   }
 
+  function postAgeMs(post) {
+    const created = post && post.created_at ? new Date(post.created_at).getTime() : 0;
+    if (!created || Number.isNaN(created)) return Number.POSITIVE_INFINITY;
+    return Date.now() - created;
+  }
+
+  function canEditPost(post) {
+    return Boolean(currentUser && post && isCurrentUserPost(post) && postAgeMs(post) <= POST_EDIT_WINDOW_MS);
+  }
+
+  function postById(postId) {
+    const cleanId = String(postId || "");
+    return latestPublicSpacePosts.find(post => String(post.id) === cleanId) || null;
+  }
+
+  function closePostMenus(exceptMenu) {
+    root.querySelectorAll("[data-ps-post-menu]").forEach(menuNode => {
+      if (exceptMenu && menuNode === exceptMenu) return;
+      menuNode.hidden = true;
+    });
+
+    root.querySelectorAll("[data-ps-post-more]").forEach(button => {
+      const menuNode = button.closest("[data-ps-post-more-wrap]")?.querySelector("[data-ps-post-menu]");
+      if (exceptMenu && menuNode === exceptMenu) return;
+      button.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function postMenuHtml(post) {
+    if (!post || !post.id) return "";
+
+    const postId = escapeHtml(post.id);
+    const editButton = canEditPost(post)
+      ? `<button type="button" role="menuitem" data-ps-post-menu-action="edit" data-ps-edit-post="${postId}">Edit post</button>`
+      : "";
+
+    const deleteButton = post.can_manage
+      ? `<button type="button" role="menuitem" data-ps-post-menu-action="delete" data-ps-delete-post="${postId}">Delete post</button>`
+      : "";
+
+    const hideButton = isAdminMode
+      ? `<button type="button" role="menuitem" data-ps-post-menu-action="hide" data-ps-toggle-hidden="${postId}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide post" : "Hide post"}</button>`
+      : "";
+
+    const options = [editButton, deleteButton, hideButton].filter(Boolean).join("");
+    if (!options) return "";
+
+    return `
+      <span class="ps-post-more" data-ps-post-more-wrap>
+        <button class="ps-post-more-toggle" type="button" data-ps-post-more aria-haspopup="menu" aria-expanded="false" aria-label="Post options">•••</button>
+        <span class="ps-post-more-menu" data-ps-post-menu hidden role="menu">
+          ${options}
+        </span>
+      </span>
+    `;
+  }
+
+  function enhancePostCards(container, posts) {
+    if (!container) return;
+
+    const sourcePosts = Array.isArray(posts) ? posts : [];
+    const byId = new Map(sourcePosts.map(post => [String(post.id), post]));
+
+    container.querySelectorAll(".ps-post-card[data-post-id]").forEach(card => {
+      const postId = String(card.dataset.postId || "");
+      const post = byId.get(postId) || postById(postId);
+      if (!post) return;
+
+      const heartButton = card.querySelector("[data-ps-heart-post]");
+      if (heartButton) {
+        heartButton.textContent = `${post.hearted_by_me ? "\u2764\uFE0F" : "\uD83E\uDD0D"} · ${Number(post.heart_count || 0)}`;
+        heartButton.setAttribute("aria-label", post.hearted_by_me ? "Remove heart" : "Heart this post");
+      }
+
+      const oldMenu = card.querySelector("[data-ps-post-more-wrap]");
+      if (oldMenu) oldMenu.remove();
+
+      const menuMarkup = postMenuHtml(post);
+      if (!menuMarkup) return;
+
+      const meta = card.querySelector(".ps-post-meta");
+      const dateNode = meta ? meta.querySelector("span") : null;
+      if (dateNode) {
+        dateNode.insertAdjacentHTML("beforeend", menuMarkup);
+      }
+    });
+  }
   function renderProfilePostCard(post) {
     const hiddenLabel = post.is_hidden ? `<span>Hidden</span>` : "";
     const heartLabel = post.hearted_by_me ? "Hearted" : "Heart";
     const manageButtons = post.can_manage
-      ? `<button type="button" data-ps-delete-post="${escapeHtml(post.id)}">Delete</button>`
+      ? `<button type="button" data-ps-delete-post="${escapeHtml(post.id)}">Delete post</button>`
       : "";
     const adminButtons = isAdminMode
-      ? `<button type="button" data-ps-toggle-hidden="${escapeHtml(post.id)}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide" : "Hide"}</button>`
+      ? `<button type="button" data-ps-toggle-hidden="${escapeHtml(post.id)}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide post" : "Hide post"}</button>`
       : "";
 
     return `
@@ -664,6 +756,7 @@
       </div>
       ${ownPosts.map(renderProfilePostCard).join("")}
     `;
+    enhancePostCards(listNode, ownPosts);
   }
 
   function updateProfileComposerCounter(form) {
@@ -1078,7 +1171,19 @@
   }
 
 
+  function setComposerSubmitLabel(label) {
+    const button = composer ? composer.querySelector("button[type='submit']") : null;
+    if (button) button.textContent = label || "Post";
+  }
+
+  function resetPostComposerMode() {
+    composeMode = "create";
+    editingPostId = null;
+    setComposerSubmitLabel("Post");
+  }
   function openPostComposer(contextText) {
+    resetPostComposerMode();
+
     if (!currentSession || !currentSession.session_token) {
       showAuth("login");
       return;
@@ -1095,6 +1200,7 @@
       postTextarea.placeholder = text;
     }
 
+    setComposerSubmitLabel("Post");
     setMessage(composeMessage, "", "info");
     openModal(composeModal);
     updateCounter();
@@ -1103,6 +1209,43 @@
       window.setTimeout(() => postTextarea.focus(), 0);
     }
   }
+
+  function openEditPostComposer(post) {
+    if (!post || !post.id) return;
+
+    if (!canEditPost(post)) {
+      setFeedStatus("Posts can only be edited within 30 minutes.");
+      return;
+    }
+
+    if (!currentSession || !currentSession.session_token) {
+      showAuth("login");
+      return;
+    }
+
+    composeMode = "edit";
+    editingPostId = post.id;
+
+    const composeTitle = document.querySelector("#psComposeTitle");
+    const composeLabel = composer ? composer.querySelector("label span") : null;
+
+    if (composeTitle) composeTitle.textContent = "Edit post";
+    if (composeLabel) composeLabel.textContent = "Update your post";
+    if (postTextarea) {
+      postTextarea.value = post.body || "";
+      postTextarea.placeholder = "Update your post...";
+    }
+
+    setComposerSubmitLabel("Save changes");
+    setMessage(composeMessage, "Editing is available for 30 minutes after posting.", "info");
+    openModal(composeModal);
+    updateCounter();
+
+    if (postTextarea) {
+      window.setTimeout(() => postTextarea.focus(), 0);
+    }
+  }
+
   async function handleAuthSubmit(form) {
     const mode = form.dataset.psForm;
     const username = normalizeUsername(form.elements.username ? form.elements.username.value : "");
@@ -1233,6 +1376,7 @@
     const body = postTextarea ? postTextarea.value.trim() : "";
 
     if (!currentSession || !currentSession.session_token) {
+      resetPostComposerMode();
       closeModal(composeModal);
       showAuth("login");
       return;
@@ -1255,11 +1399,23 @@
       setFeedStatus("Posting...");
       setMessage(composeMessage, "Posting...", "info");
 
-      await rpc("create_public_space_post", {
-        input_session_token: sessionToken(),
-        input_body: body,
-        input_visibility: "public"
-      });
+      if (composeMode === "edit" && editingPostId) {
+        await rpc("edit_public_space_post", {
+          input_session_token: sessionToken(),
+          input_post_id: editingPostId,
+          input_body: body
+        });
+        setFeedStatus("Post updated.");
+        setMessage(composeMessage, "Post updated.", "success");
+      } else {
+        await rpc("create_public_space_post", {
+          input_session_token: sessionToken(),
+          input_body: body,
+          input_visibility: "public"
+        });
+        setFeedStatus("Posted.");
+        setMessage(composeMessage, "Posted.", "success");
+      }
 
       if (postTextarea) postTextarea.value = "";
       updateCounter();
@@ -1649,6 +1805,44 @@
   }
 
   async function handleAdminAction(event) {
+    const postMoreButton = event.target.closest("[data-ps-post-more]");
+    if (postMoreButton) {
+      event.preventDefault();
+      const wrapper = postMoreButton.closest("[data-ps-post-more-wrap]");
+      const menuNode = wrapper ? wrapper.querySelector("[data-ps-post-menu]") : null;
+      if (!menuNode) return;
+
+      const willOpen = menuNode.hidden;
+      closePostMenus(menuNode);
+      menuNode.hidden = !willOpen;
+      postMoreButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      return;
+    }
+
+    const postMenuAction = event.target.closest("[data-ps-post-menu-action]");
+    if (postMenuAction) {
+      const postId = postMenuAction.dataset.psEditPost
+        || postMenuAction.dataset.psDeletePost
+        || postMenuAction.dataset.psToggleHidden
+        || "";
+
+      if (postMenuAction.dataset.psPostMenuAction === "edit") {
+        event.preventDefault();
+        closePostMenus();
+        openEditPostComposer(postById(postId));
+        return;
+      }
+
+      if (postMenuAction.dataset.psPostMenuAction === "delete" || postMenuAction.dataset.psPostMenuAction === "hide") {
+        closePostMenus();
+        await handleFeedClick(event);
+        return;
+      }
+    }
+
+    if (!event.target.closest("[data-ps-post-more-wrap]")) {
+      closePostMenus();
+    }
     const profileComposerButton = event.target.closest("[data-ps-profile-open-compose]");
     if (profileComposerButton) {
       event.preventDefault();
