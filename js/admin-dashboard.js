@@ -631,40 +631,157 @@ function getPieceProtectedTextInput(row) {
   return row ? row.querySelector("[data-piece-protected-text]") : null;
 }
 
-async function loadProtectedTextIntoRow(row, slug) {
-  const input = getPieceProtectedTextInput(row);
-  if (!input) return;
+function getReadableAdminError(error) {
+  return error?.message || error?.details || String(error || "Something went wrong.");
+}
 
-  input.value = "Loading protected text...";
+function setProtectedTextRowMessage(row, message = "", type = "idle") {
+  if (!row) return;
+
+  const messageEl = row.querySelector("[data-protected-editor-message]");
+  if (!messageEl) return;
+
+  messageEl.textContent = message || "";
+  messageEl.dataset.status = type || "idle";
+}
+
+function ensurePieceProtectedTextEditor(row, slug = "") {
+  if (!row) return null;
+
+  let editor = row.querySelector("[data-protected-editor]");
+  const editorSlug = String(slug || getPieceRowSlug(row) || "").trim();
+
+  if (!editor) {
+    editor = document.createElement("div");
+    editor.className = "piece-protected-editor";
+    editor.dataset.protectedEditor = editorSlug;
+
+    editor.innerHTML = `
+      <div class="piece-protected-editor-head">
+        <div>
+          <strong>Protected full text</strong>
+          <span>Private Supabase text for paid/premium delivery</span>
+        </div>
+        <small data-protected-editor-message data-status="idle">Click Load to edit existing protected text, or paste full text then Save.</small>
+      </div>
+
+      <textarea
+        data-piece-protected-text
+        rows="8"
+        spellcheck="true"
+        placeholder="Paste the full paid/premium text here. This saves to Supabase piece_full_text, not public Resources/*.txt."
+      ></textarea>
+
+      <div class="piece-protected-editor-note">
+        Slug: <code>${escapeAdminHTML(editorSlug || "unknown")}</code> • Keep public .txt blank/stubbed for paid pieces.
+      </div>
+    `;
+
+    const actions = row.querySelector(".piece-actions");
+
+    if (actions) {
+      actions.insertAdjacentElement("afterend", editor);
+    } else {
+      row.appendChild(editor);
+    }
+  }
+
+  return editor.querySelector("[data-piece-protected-text]");
+}
+
+async function loadProtectedTextIntoRow(row, slug) {
+  const input = ensurePieceProtectedTextEditor(row, slug);
+
+  if (!input) {
+    throw new Error("Protected text editor was not found.");
+  }
+
+  setProtectedTextRowMessage(row, "Loading protected text...", "loading");
   input.disabled = true;
 
-  const { data, error } = await adminClient.rpc("admin_get_piece_full_text", {
-    input_piece_slug: slug
-  });
+  try {
+    const { data, error } = await adminClient.rpc("admin_get_piece_full_text", {
+      input_piece_slug: slug
+    });
 
-  if (error) throw error;
+    if (error) throw error;
 
-  input.value = data?.body || "";
-  input.disabled = false;
-  input.focus();
+    input.value = data?.body || "";
+    input.disabled = false;
+    input.focus();
+
+    const loadedCharacters = input.value.length;
+
+    setProtectedTextRowMessage(
+      row,
+      data?.exists
+        ? `Loaded protected text (${formatCharacterCount(loadedCharacters)} chars).`
+        : "No protected text saved yet. Paste the full text here, then click Save protected text.",
+      data?.exists ? "success" : "warning"
+    );
+
+    return data;
+  } catch (error) {
+    input.disabled = false;
+    setProtectedTextRowMessage(row, getReadableAdminError(error), "error");
+    throw error;
+  }
 }
 
 async function saveProtectedTextFromRow(row, slug) {
-  const input = getPieceProtectedTextInput(row);
-  const body = String(input?.value || "");
+  const input = ensurePieceProtectedTextEditor(row, slug);
 
-  if (!body.trim()) {
-    throw new Error("Paste protected full text before saving.");
+  if (!input) {
+    throw new Error("Protected text editor was not found.");
   }
 
-  const { data, error } = await adminClient.rpc("admin_save_piece_full_text", {
-    input_piece_slug: slug,
-    input_body: body
-  });
+  const body = String(input.value || "");
 
-  if (error) throw error;
+  if (!body.trim()) {
+    const message = "Paste protected full text before saving.";
+    setProtectedTextRowMessage(row, message, "error");
+    input.focus();
+    throw new Error(message);
+  }
 
-  return data;
+  if (body.trim().length < 20) {
+    const message = "Protected full text must be at least 20 characters.";
+    setProtectedTextRowMessage(row, message, "error");
+    input.focus();
+    throw new Error(message);
+  }
+
+  setProtectedTextRowMessage(row, "Saving protected text...", "loading");
+  input.disabled = true;
+
+  try {
+    const { data, error } = await adminClient.rpc("admin_save_piece_full_text", {
+      input_piece_slug: slug,
+      input_body: body
+    });
+
+    if (error) throw error;
+
+    input.disabled = false;
+
+    protectedTextStatusMap.set(String(slug || ""), {
+      has_protected_text: true,
+      protected_characters: Number(data?.characters || body.length) || body.length,
+      protected_updated_at: new Date().toISOString()
+    });
+
+    setProtectedTextRowMessage(
+      row,
+      `Saved protected text (${formatCharacterCount(data?.characters || body.length)} chars).`,
+      "success"
+    );
+
+    return data;
+  } catch (error) {
+    input.disabled = false;
+    setProtectedTextRowMessage(row, getReadableAdminError(error), "error");
+    throw error;
+  }
 }
 
 
@@ -1853,7 +1970,7 @@ document.addEventListener("click", async event => {
       const slug = protectedTextSave.dataset.saveProtectedText || getPieceRowSlug(row);
       const result = await saveProtectedTextFromRow(row, slug);
 
-      await loadPieceSettings();
+      await loadProtectedTextStatuses();
       setDashboardMessage(`Protected full text saved (${formatCharacterCount(result?.characters || 0)} chars).`, "success");
       return;
     }
