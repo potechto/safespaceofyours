@@ -5742,3 +5742,19 @@ body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
   color: #ffedd5 !important;
   font-weight: 700;
 }
+
+/* V2.0Q.60E require protected text */
+.protected-text-status.requires-protected-text-warning {
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12);
+  animation: protectedTextPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes protectedTextPulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.22);
+  }
+}

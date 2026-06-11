@@ -606,6 +606,23 @@ function getPublicStaticTextRiskError(piece) {
 
   return `Blocked: this piece still points to a public text file (${file}). Before saving as paid/premium, protect it first: save the full text in Protected full text, then stub/remove the public .txt path in code.`;
 }
+/* V2.0Q.60E require protected text before paid save */
+function hasProtectedTextReady(piece, draftBody = "") {
+  const draft = String(draftBody || "").trim();
+
+  return Boolean(
+    draft.length >= 20 ||
+    piece?.has_protected_text === true ||
+    Number(piece?.protected_characters || 0) >= 20
+  );
+}
+
+function getMissingProtectedTextError(piece) {
+  const title = piece?.title ? `"${piece.title}"` : "This piece";
+
+  return `Blocked: ${title} is being saved as paid/premium, but it has no protected full text yet. Paste the full story in Protected full text and save again.`;
+}
+
 function getPieceRowSlug(row) {
   return String(row?.dataset?.pieceRow || "").trim();
 }
@@ -1247,7 +1264,7 @@ function renderPieceSettingsList() {
     const previewLimit = Number(item.preview_char_limit) || 700;
     const totalCharacters = Number(item.total_characters) || 0;
     const protectedStatusLabel = getProtectedTextStatusLabel(item);
-    const protectedStatusClass = item.has_protected_text ? "is-ready" : (accessType === "paid" ? "is-missing" : "is-optional");
+    const protectedStatusClass = item.has_protected_text ? "is-ready" : (accessType === "paid" ? "is-missing requires-protected-text-warning" : "is-optional");
     const hasPublicTextRisk = hasPublicStaticTextRisk(item);
     const publicTextRiskLabel = getPublicStaticTextRiskLabel(item);
 
@@ -1854,6 +1871,10 @@ document.addEventListener("click", async event => {
 
       if (accessType === "paid" && hasPublicStaticTextRisk(sourcePiece)) {
         throw new Error(getPublicStaticTextRiskError(sourcePiece));
+      }
+
+      if (accessType === "paid" && !hasProtectedTextReady(sourcePiece, protectedTextValue)) {
+        throw new Error(getMissingProtectedTextError(sourcePiece));
       }
 
       const payload = {
