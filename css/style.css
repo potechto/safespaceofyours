@@ -6847,3 +6847,221 @@ input[data-ps-pin-only] {
   margin-top: 0.35rem !important;
 }
 /* V2.0Q.58B clean hamburger items END */
+
+/* V2.0Q.59A admin UI polish */
+.ps-menu-toggle {
+  position: relative !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+}
+
+.ps-menu-toggle span {
+  position: absolute !important;
+  display: block !important;
+  width: 1.1rem !important;
+  height: 2px !important;
+  border-radius: 999px !important;
+  background: currentColor !important;
+  opacity: 0.96 !important;
+  transform-origin: center !important;
+  transition:
+    transform 180ms ease,
+    opacity 160ms ease,
+    width 180ms ease !important;
+}
+
+.ps-menu-toggle span:nth-child(1) {
+  transform: translateY(-0.34rem) !important;
+}
+
+.ps-menu-toggle span:nth-child(2) {
+  transform: translateY(0) !important;
+}
+
+.ps-menu-toggle span:nth-child(3) {
+  transform: translateY(0.34rem) !important;
+}
+
+.ps-menu-toggle.is-open span:nth-child(1),
+.ps-menu-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: rotate(45deg) !important;
+}
+
+.ps-menu-toggle.is-open span:nth-child(2),
+.ps-menu-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0 !important;
+  width: 0.2rem !important;
+}
+
+.ps-menu-toggle.is-open span:nth-child(3),
+.ps-menu-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: rotate(-45deg) !important;
+}
+
+.ps-menu {
+  width: min(15.5rem, calc(100vw - 2rem)) !important;
+  max-height: min(72vh, 29rem) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  padding: 0.55rem !important;
+  gap: 0.18rem !important;
+  border-radius: 20px !important;
+}
+
+.ps-menu::-webkit-scrollbar {
+  width: 0.35rem !important;
+}
+
+.ps-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 244, 251, 0.18) !important;
+  border-radius: 999px !important;
+}
+
+.ps-menu button,
+.ps-menu a {
+  min-height: 2.35rem !important;
+  padding: 0.5rem 0.68rem !important;
+  border-radius: 12px !important;
+  font-size: clamp(0.92rem, 1.6vw, 1rem) !important;
+  line-height: 1.12 !important;
+  display: flex !important;
+  align-items: center !important;
+  text-align: left !important;
+}
+
+.ps-menu button[data-ps-menu-item="admin"],
+.ps-menu button[data-ps-menu-item="admin-users"],
+.ps-menu button[data-ps-menu-item="admin-posts"],
+.ps-menu button[data-ps-menu-item="admin-reports"],
+.ps-menu button[data-ps-menu-item="admin-space-settings"],
+.ps-menu a[data-ps-admin-menu-item] {
+  min-height: 2.45rem !important;
+  background:
+    linear-gradient(135deg, rgba(255, 203, 225, 0.10), rgba(188, 165, 255, 0.07)) !important;
+  border: 1px solid rgba(255, 244, 251, 0.09) !important;
+}
+
+.ps-menu button[data-ps-menu-item="admin"] {
+  margin-top: 0.42rem !important;
+}
+
+.ps-admin-tools.ps-admin-screen {
+  width: min(100% - 1.4rem, 52rem) !important;
+  max-height: min(42rem, calc(100vh - 1.4rem)) !important;
+  padding: clamp(0.95rem, 2.2vw, 1.25rem) !important;
+  gap: 0.75rem !important;
+  border-radius: 24px !important;
+}
+
+.ps-admin-screen-top {
+  gap: 0.7rem !important;
+}
+
+.ps-admin-screen-top h2 {
+  font-size: clamp(1.55rem, 4.5vw, 2.35rem) !important;
+  line-height: 0.95 !important;
+}
+
+.ps-admin-screen-top p {
+  font-size: clamp(0.95rem, 2vw, 1.08rem) !important;
+}
+
+.ps-admin-close {
+  width: 2.7rem !important;
+  height: 2.7rem !important;
+  min-width: 2.7rem !important;
+  font-size: 1.35rem !important;
+}
+
+.ps-admin-tools.ps-admin-screen .ps-admin-tool-grid {
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)) !important;
+  gap: 0.42rem !important;
+  margin-top: 0.75rem !important;
+}
+
+.ps-admin-tools.ps-admin-screen .ps-admin-tool-grid button {
+  min-height: 2.65rem !important;
+  padding: 0.58rem 0.8rem !important;
+  border-radius: 999px !important;
+  font-size: clamp(0.92rem, 1.7vw, 1.02rem) !important;
+}
+
+.ps-control-results,
+.ps-admin-results,
+.ps-admin-info-grid,
+.ps-admin-user-list {
+  gap: 0.62rem !important;
+  margin-top: 0.75rem !important;
+}
+
+.ps-control-card,
+.ps-admin-info-card,
+.ps-admin-user-card,
+.ps-admin-empty {
+  padding: 0.78rem !important;
+  border-radius: 17px !important;
+}
+
+.ps-control-card strong,
+.ps-admin-info-card strong,
+.ps-admin-user-main strong,
+.ps-admin-empty strong {
+  font-size: clamp(0.95rem, 1.9vw, 1.05rem) !important;
+}
+
+.ps-control-card span,
+.ps-admin-info-card span,
+.ps-admin-user-main span,
+.ps-admin-empty span {
+  font-size: clamp(0.86rem, 1.7vw, 0.95rem) !important;
+}
+
+.ps-admin-user-actions,
+.ps-admin-inline-form {
+  gap: 0.46rem !important;
+}
+
+.ps-admin-user-actions button,
+.ps-admin-inline-form button {
+  min-height: 2.55rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 15px !important;
+  color: rgba(255, 244, 251, 0.92) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 203, 225, 0.12), rgba(188, 165, 255, 0.08)),
+    rgba(255, 255, 255, 0.04) !important;
+  box-shadow: none !important;
+}
+
+.ps-admin-user-actions button:hover,
+.ps-admin-inline-form button:hover {
+  border-color: rgba(255, 203, 225, 0.28) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 203, 225, 0.18), rgba(188, 165, 255, 0.12)),
+    rgba(255, 255, 255, 0.055) !important;
+}
+
+.ps-admin-inline-form input {
+  min-height: 2.55rem !important;
+  border-radius: 15px !important;
+}
+
+@media (max-width: 760px) {
+  .ps-admin-tools.ps-admin-screen {
+    inset: 0.55rem !important;
+    width: calc(100% - 1.1rem) !important;
+    max-height: calc(100vh - 1.1rem) !important;
+  }
+
+  .ps-admin-info-grid,
+  .ps-admin-user-actions,
+  .ps-admin-inline-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ps-menu {
+    right: 0 !important;
+  }
+}
+/* V2.0Q.59A admin UI polish END */

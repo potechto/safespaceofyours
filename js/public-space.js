@@ -422,6 +422,21 @@
     screen.setAttribute("aria-hidden", "true");
   }
 
+  function setMenuOpen(open) {
+    if (!menu) return;
+
+    const shouldOpen = Boolean(open);
+    const toggle = root.querySelector("[data-ps-menu-toggle]");
+
+    menu.hidden = !shouldOpen;
+    menu.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+
+    if (toggle) {
+      toggle.classList.toggle("is-open", shouldOpen);
+      toggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      toggle.setAttribute("aria-label", shouldOpen ? "Close menu" : "Open menu");
+    }
+  }
   function renderProfileScreen() {
     const user = currentUser || {};
     const chips = [
@@ -521,7 +536,7 @@
         <div class="ps-admin-tool-grid">
           <button type="button" data-ps-admin-action="overview">Admin overview</button>
           <button type="button" data-ps-admin-action="users">Registered users</button>
-          <button type="button" data-ps-admin-action="posts">Refresh all posts</button>
+          <button type="button" data-ps-admin-action="posts">Post moderation</button>
           <button type="button" data-ps-admin-action="reports">Reports</button>
           <button type="button" data-ps-admin-action="settings">Space settings</button>
         </div>
@@ -1245,7 +1260,7 @@
 
   if (menuToggle && menu) {
     menuToggle.addEventListener("click", () => {
-      menu.hidden = !menu.hidden;
+      setMenuOpen(menu.hidden);
     });
   }
 
@@ -1283,7 +1298,7 @@
         openAdminScreen("settings");
       }
 
-      menu.hidden = true;
+      setMenuOpen(false);
     });
   }
 
@@ -1302,7 +1317,7 @@
       clearSession();
       closeAdminScreen();
       closeControlScreen();
-      if (menu) menu.hidden = true;
+      setMenuOpen(false);
       renderEmptyFeed();
       showAuth("login");
     });
@@ -1322,7 +1337,7 @@
     closeModal(composeModal);
     closeAdminScreen();
     closeControlScreen();
-    if (menu) menu.hidden = true;
+    setMenuOpen(false);
   });
 
   enforceNumericPinFields();
