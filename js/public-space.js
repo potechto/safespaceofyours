@@ -351,6 +351,28 @@
     return button;
   }
 
+  function ensureMenuLink(key, label, href, adminOnly) {
+    if (!menu) return null;
+
+    let link = menu.querySelector(`[data-ps-menu-link='${key}']`);
+
+    if (!link) {
+      link = document.createElement("a");
+      link.href = href;
+      link.dataset.psMenuLink = key;
+      link.textContent = label;
+
+      if (adminOnly) link.dataset.psAdminMenuItem = "";
+
+      const backLink = menu.querySelector("a[href='index.html']") || menu.querySelector("a");
+      menu.insertBefore(link, backLink || logoutButton || null);
+    }
+
+    if (adminOnly) link.hidden = !isAdminMode;
+
+    return link;
+  }
+
   function ensureControlScreen() {
     if (!mainSpace || mainSpace.querySelector("[data-ps-control-screen]")) return;
 
@@ -470,13 +492,12 @@
   }
 
   function ensureAdminTools() {
-    ensureMenuButton("notifications", "Notifications", false);
     ensureMenuButton("admin", "Admin overview", true);
     ensureMenuButton("admin-users", "Registered users", true);
     ensureMenuButton("admin-posts", "Post moderation", true);
     ensureMenuButton("admin-reports", "Reports", true);
     ensureMenuButton("admin-space-settings", "Space settings", true);
-
+    ensureMenuLink("private-space", "Back to private space", "admin.html", true);
     if (menu) {
       menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
         item.hidden = !isAdminMode;
@@ -498,6 +519,7 @@
           <button class="ps-admin-close" type="button" data-ps-admin-close aria-label="Close admin controls">&times;</button>
         </div>
         <div class="ps-admin-tool-grid">
+          <button type="button" data-ps-admin-action="overview">Admin overview</button>
           <button type="button" data-ps-admin-action="users">Registered users</button>
           <button type="button" data-ps-admin-action="posts">Refresh all posts</button>
           <button type="button" data-ps-admin-action="reports">Reports</button>
@@ -860,6 +882,95 @@
     return root.querySelector("[data-ps-admin-results]");
   }
 
+  function renderAdminInfoCards(status, cards) {
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const results = adminResultsNode();
+    const safeCards = Array.isArray(cards) ? cards : [];
+
+    if (!results) return;
+
+    results.innerHTML = `
+      <div class="ps-admin-info-grid">
+        ${safeCards.map(card => `
+          <article class="ps-admin-info-card">
+            <strong>${escapeHtml(card.title || "Admin tool")}</strong>
+            <span>${escapeHtml(card.body || "")}</span>
+          </article>
+        `).join("")}
+      </div>
+    `;
+
+    setMessage(messageNode, status || "Admin controls ready.", "info");
+  }
+
+  function renderAdminOverview() {
+    renderAdminInfoCards("Admin overview ready.", [
+      {
+        title: "Registered users",
+        body: "View accounts, toggle premium, assign badges, disable or enable accounts, and reset passwords."
+      },
+      {
+        title: "Post moderation",
+        body: "Refresh the feed and use admin-only hide/delete controls directly on posts while in admin mode."
+      },
+      {
+        title: "Reports",
+        body: "Report queue UI is reserved here. Database-backed report creation will be connected after viewer flow is stable."
+      },
+      {
+        title: "Space settings",
+        body: "Current locked mode: text-only posts, 1,000-character composer limit, DB-backed accounts, admin-only controls."
+      }
+    ]);
+  }
+
+  function renderPostModerationAdmin() {
+    renderAdminInfoCards("Post moderation ready.", [
+      {
+        title: "Feed refreshed",
+        body: "Posts were reloaded. Admin-only hide/delete actions are available directly on each post card in the main feed."
+      },
+      {
+        title: "Next moderation upgrade",
+        body: "A dedicated moderation queue can be added after viewer posting, comments, and reports are stable."
+      }
+    ]);
+  }
+
+  function renderAdminReports() {
+    renderAdminInfoCards("Reports section ready.", [
+      {
+        title: "No report queue connected yet",
+        body: "The admin screen is ready. Report submission and report review RPC functions will be added after viewer-side testing."
+      },
+      {
+        title: "Planned report actions",
+        body: "Review report, hide post/comment, dismiss report, and keep a moderation log."
+      }
+    ]);
+  }
+
+  function renderAdminSpaceSettings() {
+    renderAdminInfoCards("Space settings ready.", [
+      {
+        title: "Posting rules",
+        body: "Public Space is currently text-only with a 1,000-character post limit."
+      },
+      {
+        title: "Account controls",
+        body: "Admin can manage premium, badges, disabled state, and password resets from Registered users."
+      },
+      {
+        title: "Security lock",
+        body: "Accounts are DB-backed through Supabase RPC. Do not expose service role keys or rely on frontend-only security."
+      },
+      {
+        title: "Upcoming",
+        body: "Viewer profile/settings, comments, notifications database, reports, and moderation logs."
+      }
+    ]);
+  }
+
   function renderAdminUsers(users) {
     const results = adminResultsNode();
     const messageNode = root.querySelector("[data-ps-admin-message]");
@@ -1054,6 +1165,11 @@
     }
 
     try {
+      if (action === "overview") {
+        renderAdminOverview();
+        return;
+      }
+
       if (action === "users") {
         await refreshAdminUsers("Loading users...");
         return;
@@ -1061,28 +1177,26 @@
 
       if (action === "posts") {
         await loadPosts();
-        if (results) {
-          results.innerHTML = `
-            <article class="ps-admin-empty">
-              <strong>Posts refreshed.</strong>
-              <span>You can hide/delete posts directly from the public feed while in admin mode.</span>
-            </article>
-          `;
-        }
-        setMessage(messageNode, "Posts refreshed.", "success");
+        renderPostModerationAdmin();
         return;
       }
 
-      if (results) {
-        results.innerHTML = `
-          <article class="ps-admin-empty">
-            <strong>${escapeHtml(button.textContent || "Admin tool")}</strong>
-            <span>This admin tool will be connected in the next phase.</span>
-          </article>
-        `;
+      if (action === "reports") {
+        renderAdminReports();
+        return;
       }
 
-      setMessage(messageNode, "This admin tool will be connected in the next phase.", "info");
+      if (action === "settings") {
+        renderAdminSpaceSettings();
+        return;
+      }
+
+      renderAdminInfoCards("Admin section ready.", [
+        {
+          title: button.textContent || "Admin tool",
+          body: "This section is reserved for the next admin upgrade."
+        }
+      ]);
     } catch (error) {
       setMessage(messageNode, getErrorMessage(error), "error");
     }
@@ -1148,12 +1262,9 @@
         renderSettingsScreen();
       }
 
-      if (item.dataset.psMenuItem === "notifications") {
-        renderNotificationsScreen();
-      }
 
       if (item.dataset.psMenuItem === "admin") {
-        openAdminScreen();
+        openAdminScreen("overview");
       }
 
       if (item.dataset.psMenuItem === "admin-users") {
