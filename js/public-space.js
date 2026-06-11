@@ -46,11 +46,13 @@
   const postTextarea = composer ? composer.querySelector("textarea[name='post']") : null;
   const postButton = composer ? composer.querySelector("button[type='submit']") : null;
   const postCount = document.querySelector("[data-ps-post-count]");
+  const composeMessage = document.querySelector("[data-ps-compose-message]");
 
   const menuToggle = root.querySelector("[data-ps-menu-toggle]");
   const menu = root.querySelector("[data-ps-menu]");
   const logoutButton = root.querySelector("[data-ps-logout]");
   const bellButton = root.querySelector("[data-ps-bell]");
+  const scrollTopButton = document.querySelector("#scrollTopBtn");
   const feedStatus = root.querySelector("[data-ps-feed-status]");
   const feed = root.querySelector("[data-ps-feed]");
 
@@ -382,6 +384,34 @@
     return link;
   }
 
+  function syncMenuRouteItems(route) {
+    if (!menu) return;
+
+    ensureMenuButton("home", "Public Space", false);
+
+    const cleanRoute = normalizePublicSpaceRoute(route || currentPublicSpaceRoute());
+    const currentItemByRoute = {
+      "home": "home",
+      "profile": "profile",
+      "settings": "settings",
+      "admin-overview": "admin",
+      "admin-users": "admin-users",
+      "admin-posts": "admin-posts",
+      "admin-reports": "admin-reports",
+      "admin-space-settings": "admin-space-settings"
+    };
+
+    const currentKey = currentItemByRoute[cleanRoute] || "home";
+
+    menu.querySelectorAll("[data-ps-menu-item]").forEach(item => {
+      const key = item.dataset.psMenuItem;
+      const isAdminItem = item.hasAttribute("data-ps-admin-menu-item");
+      const hiddenForRole = isAdminItem && !isAdminMode;
+      const hiddenForRoute = key === currentKey;
+
+      item.hidden = hiddenForRole || hiddenForRoute;
+    });
+  }
   function ensureControlScreen() {
     if (!mainSpace || mainSpace.querySelector("[data-ps-control-screen]")) return;
 
@@ -618,36 +648,22 @@
 
   function renderProfileOwnPosts(posts) {
     const listNode = root.querySelector("[data-ps-profile-post-list]");
-    const totalNode = root.querySelector("[data-ps-profile-post-total]");
     if (!listNode) return;
 
     const ownPosts = currentUserPosts(posts || latestPublicSpacePosts);
 
-    if (totalNode) {
-      totalNode.textContent = `${ownPosts.length} ${ownPosts.length === 1 ? "post" : "posts"}`;
-    }
-
-    if (!currentUser) {
-      listNode.innerHTML = `
-        <article class="ps-profile-empty">
-          <strong>Login required.</strong>
-          <span>Create or login to your Public Space account to see your profile posts.</span>
-        </article>
-      `;
+    if (!currentUser || !ownPosts.length) {
+      listNode.innerHTML = "";
       return;
     }
 
-    if (!ownPosts.length) {
-      listNode.innerHTML = `
-        <article class="ps-profile-empty">
-          <strong>No posts on your profile yet.</strong>
-          <span>Use the profile composer above to start your own post series.</span>
-        </article>
-      `;
-      return;
-    }
-
-    listNode.innerHTML = ownPosts.map(renderProfilePostCard).join("");
+    listNode.innerHTML = `
+      <div class="ps-profile-posts-head">
+        <strong>Your posts</strong>
+        <span>${ownPosts.length} ${ownPosts.length === 1 ? "post" : "posts"}</span>
+      </div>
+      ${ownPosts.map(renderProfilePostCard).join("")}
+    `;
   }
 
   function updateProfileComposerCounter(form) {
@@ -665,8 +681,9 @@
     const user = currentUser || {};
     const username = user.username || "guest";
     const initial = String(username || "@").charAt(0).toUpperCase() || "@";
+    const promptText = `What's on your mind, @${username}?`;
     const profileIntro = currentUser
-      ? `@${username}'s posts and profile composer.`
+      ? `@${username}'s Public Space profile.`
       : "Login to see your profile.";
 
     openControlScreen(
@@ -684,28 +701,11 @@
           </header>
 
           ${currentUser ? `
-            <form class="ps-profile-composer" data-ps-profile-composer novalidate>
-              <label>
-                <span>What's on your mind, @${escapeHtml(username)}?</span>
-                <textarea name="post" maxlength="${LIMITS.postMax}" rows="4" placeholder="Share something from your own space..."></textarea>
-              </label>
-              <div class="ps-profile-composer-footer">
-                <small data-ps-profile-post-count>0/${LIMITS.postMax}</small>
-                <button type="submit" disabled>Post</button>
-              </div>
-              <p class="ps-message" data-ps-profile-message></p>
-            </form>
-          ` : `
-            <article class="ps-profile-empty">
-              <strong>You are not logged in.</strong>
-              <span>Login or create an account to post on your profile.</span>
-            </article>
-          `}
+            <button class="ps-profile-composer-trigger" type="button" data-ps-profile-open-compose aria-label="Create a profile post">
+              <span>${escapeHtml(promptText)}</span>
+            </button>
+          ` : ""}
 
-          <div class="ps-profile-posts-head">
-            <strong>Your posts</strong>
-            <span data-ps-profile-post-total>0 posts</span>
-          </div>
           <div class="ps-profile-post-list" data-ps-profile-post-list></div>
         </section>
       `,
@@ -713,7 +713,6 @@
     );
 
     renderProfileOwnPosts(latestPublicSpacePosts);
-    updateProfileComposerCounter(root.querySelector("[data-ps-profile-composer]"));
   }
 
   function renderSettingsScreen() {
@@ -809,6 +808,7 @@
 
     const adminTools = root.querySelector("[data-ps-admin-tools]:not([data-ps-control-screen])");
     if (adminTools && !isAdminMode) adminTools.hidden = true;
+    syncMenuRouteItems(currentPublicSpaceRoute());
   }
 
   function openAdminScreen(initialAction) {
@@ -890,6 +890,7 @@
     root.dataset.psRoute = cleanRoute;
 
     setPublicSpaceHomeVisible(isHomeRoute);
+    syncMenuRouteItems(cleanRoute);
   }
 
   async function renderPublicSpaceRoute(route) {
@@ -972,6 +973,14 @@
 
   function renderCurrentPublicSpaceRoute() {
     return renderPublicSpaceRoute(currentPublicSpaceRoute());
+  }
+  function syncPublicSpaceScrollTop() {
+    if (!scrollTopButton) return;
+
+    const shouldShow = !mainSpace.hidden && window.scrollY > 380;
+    scrollTopButton.classList.toggle("visible", shouldShow);
+    scrollTopButton.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+    document.body.classList.toggle("scroll-top-visible", shouldShow);
   }
   function showAuth(mode) {
     const nextMode = mode === "login" ? "login" : "register";
@@ -1068,6 +1077,32 @@
     if (postButton) postButton.disabled = length < 1 || length > LIMITS.postMax;
   }
 
+
+  function openPostComposer(contextText) {
+    if (!currentSession || !currentSession.session_token) {
+      showAuth("login");
+      return;
+    }
+
+    const text = String(contextText || "What's on your mind?").trim() || "What's on your mind?";
+    const composeTitle = document.querySelector("#psComposeTitle");
+    const composeLabel = composer ? composer.querySelector("label span") : null;
+
+    if (composeTitle) composeTitle.textContent = text;
+    if (composeLabel) composeLabel.textContent = "Your post";
+    if (postTextarea) {
+      postTextarea.value = "";
+      postTextarea.placeholder = text;
+    }
+
+    setMessage(composeMessage, "", "info");
+    openModal(composeModal);
+    updateCounter();
+
+    if (postTextarea) {
+      window.setTimeout(() => postTextarea.focus(), 0);
+    }
+  }
   async function handleAuthSubmit(form) {
     const mode = form.dataset.psForm;
     const username = normalizeUsername(form.elements.username ? form.elements.username.value : "");
@@ -1205,17 +1240,20 @@
 
     if (!body) {
       setFeedStatus("Write something first.");
+      setMessage(composeMessage, "Write something first.", "error");
       return;
     }
 
     if (body.length > LIMITS.postMax) {
       setFeedStatus("Post can only be up to 1,000 characters.");
+      setMessage(composeMessage, "Post can only be up to 1,000 characters.", "error");
       return;
     }
 
     try {
       if (postButton) postButton.disabled = true;
       setFeedStatus("Posting...");
+      setMessage(composeMessage, "Posting...", "info");
 
       await rpc("create_public_space_post", {
         input_session_token: sessionToken(),
@@ -1229,6 +1267,7 @@
       await loadPosts();
     } catch (error) {
       setFeedStatus(getErrorMessage(error));
+      setMessage(composeMessage, getErrorMessage(error), "error");
     } finally {
       if (postButton) postButton.disabled = false;
     }
@@ -1610,6 +1649,14 @@
   }
 
   async function handleAdminAction(event) {
+    const profileComposerButton = event.target.closest("[data-ps-profile-open-compose]");
+    if (profileComposerButton) {
+      event.preventDefault();
+      const username = currentUser && currentUser.username ? currentUser.username : "user";
+      openPostComposer(`What's on your mind, @${username}?`);
+      return;
+    }
+
     const profilePostList = event.target.closest("[data-ps-profile-post-list]");
     const profilePostAction = profilePostList
       ? event.target.closest("[data-ps-heart-post], [data-ps-delete-post], [data-ps-toggle-hidden], [data-ps-comments-post]")
@@ -1701,14 +1748,7 @@
 
   if (openCompose) {
     openCompose.addEventListener("click", () => {
-      if (!currentSession || !currentSession.session_token) {
-        showAuth("login");
-        return;
-      }
-
-      openModal(composeModal);
-      if (postTextarea) postTextarea.focus();
-      updateCounter();
+      openPostComposer("What's on your mind?");
     });
   }
 
@@ -1747,6 +1787,10 @@
     menu.addEventListener("click", event => {
       const item = event.target.closest("[data-ps-menu-item]");
       if (!item) return;
+
+      if (item.dataset.psMenuItem === "home") {
+        navigatePublicSpaceRoute("home");
+      }
 
       if (item.dataset.psMenuItem === "profile") {
         navigatePublicSpaceRoute("profile");
@@ -1809,6 +1853,16 @@
   }
 
   root.addEventListener("click", handleAdminAction);
+
+  if (scrollTopButton) {
+    scrollTopButton.setAttribute("aria-hidden", "true");
+    scrollTopButton.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    window.addEventListener("scroll", syncPublicSpaceScrollTop, { passive: true });
+    window.addEventListener("resize", syncPublicSpaceScrollTop);
+    syncPublicSpaceScrollTop();
+  }
 
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;

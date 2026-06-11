@@ -7583,3 +7583,63 @@ body.ps-route-screen-active .ps-admin-close,
   }
 }
 /* V2.0Q.62I profile page rebuild END */
+
+
+/* V2.0Q.62J profile composer route menu scroll polish */
+
+/* Routed screens should never show the public feed card above profile/admin/settings. */
+body.ps-route-screen-active .ps-space-heading,
+body.ps-route-screen-active .ps-compose-trigger,
+body.ps-route-screen-active .ps-feed-card {
+  display: none !important;
+}
+
+/* Profile composer is now a field-like trigger that opens the real compose modal. */
+.ps-profile-composer-trigger {
+  width: 100% !important;
+  min-height: 4.35rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  padding: 0.95rem 1.05rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.15) !important;
+  background: rgba(8, 8, 18, 0.42) !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 45px rgba(0, 0, 0, 0.14) !important;
+  cursor: text !important;
+}
+
+.ps-profile-composer-trigger:hover,
+.ps-profile-composer-trigger:focus-visible {
+  border-color: rgba(255, 142, 209, 0.46) !important;
+  color: #fff4fb !important;
+  transform: translateY(-1px) !important;
+}
+
+.ps-profile-composer-trigger span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-weight: 850 !important;
+}
+
+/* Remove old empty profile panels if stale markup is still cached. */
+.ps-profile-post-list:empty,
+.ps-profile-post-list:empty + .ps-profile-empty {
+  display: none !important;
+}
+
+.public-space-body .scroll-top,
+.public-space-body .ps-scroll-top {
+  z-index: 999 !important;
+}
+
+.public-space-body .scroll-top.visible,
+.public-space-body .ps-scroll-top.visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+}
+/* V2.0Q.62J profile composer route menu scroll polish END */

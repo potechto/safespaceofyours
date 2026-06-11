@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Public Space | Safe Space of Yours</title>
-  <link rel="stylesheet" href="css/style.css?v=v20q62i-profile-page-rebuild" />
+  <link rel="stylesheet" href="css/style.css?v=v20q62j-profile-menu-scroll-polish" />
 </head>
 <body class="public-space-body ps-compact-body">
   <main class="ps-app-shell" data-public-space-root>
@@ -83,6 +83,7 @@
         </div>
 
         <div class="ps-menu" data-ps-menu hidden>
+          <button type="button" data-ps-menu-item="home">Public Space</button>
           <button type="button" data-ps-menu-item="profile">Profile</button>
           <button type="button" data-ps-menu-item="settings">Settings</button>
           <a href="index.html">Back to site</a>
@@ -115,6 +116,9 @@
       </section>
     </section>
   </main>
+
+
+  <button id="scrollTopBtn" class="scroll-top ps-scroll-top" type="button" aria-label="Back to top" aria-hidden="true">↑</button>
 
   <div class="ps-modal" data-ps-forgot-modal hidden>
     <div class="ps-modal-card" role="dialog" aria-modal="true" aria-labelledby="psForgotTitle">
@@ -180,6 +184,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js?v=v18r-label-controls-2"></script>
-  <script src="js/public-space.js?v=v20q62i-profile-page-rebuild"></script>
+  <script src="js/public-space.js?v=v20q62j-profile-menu-scroll-polish"></script>
 </body>
 </html>
