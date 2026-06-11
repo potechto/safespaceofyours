@@ -1,4 +1,4 @@
-(function setupPublicSpace() {
+ï»¿(function setupPublicSpace() {
   const root = document.querySelector("[data-public-space-root]");
   if (!root) return;
 
@@ -319,8 +319,8 @@
           </div>
           <p>${escapeHtml(post.body)}</p>
           <div class="ps-post-actions">
-            <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} · ${Number(post.heart_count || 0)}</button>
-            <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">Comment · ${Number(post.comment_count || 0)}</button>
+            <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} ï¿½ ${Number(post.heart_count || 0)}</button>
+            <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">Comment ï¿½ ${Number(post.comment_count || 0)}</button>
             ${manageButtons}
             ${adminButtons}
           </div>
@@ -481,8 +481,8 @@
       setUsernameAvailability(input, (result && result.message) || "Username is already taken.", "error");
       return false;
     } catch (error) {
-      setUsernameAvailability(input, "Username will be verified when you create the account.", "checking");
-      return true;
+      setUsernameAvailability(input, "Could not verify username yet. Please try again.", "error");
+      return false;
     }
   }
 
@@ -548,7 +548,7 @@
         </div>
         <div class="ps-control-card">
           <strong>Account notes</strong>
-          <span>Username, premium, badge, disable/enable, and password reset are managed from admin user controls.</span>
+          <span>Username, premium, badge, disable/enable, and password/PIN reset are managed from admin user controls.</span>
         </div>
       `,
       "Account"
@@ -797,6 +797,13 @@
         setMessage(authMessage, pinError, "error");
         return;
       }
+
+      const usernameInput = form.elements.username || form.querySelector("input[name='username']");
+      const usernameAvailable = await checkRegisterUsername(usernameInput);
+      if (!usernameAvailable) {
+        setMessage(authMessage, "Please use an available username before creating the account.", "error");
+        return;
+      }
     }
 
     try {
@@ -1011,7 +1018,7 @@
     renderAdminInfoCards("Admin overview ready.", [
       {
         title: "Registered users",
-        body: "View accounts, toggle premium, assign badges, disable or enable accounts, and reset passwords."
+        body: "View accounts, toggle premium, assign badges, disable or enable accounts, and reset passwords and PIN/key codes."
       },
       {
         title: "Post moderation",
@@ -1062,7 +1069,7 @@
       },
       {
         title: "Account controls",
-        body: "Admin can manage premium, badges, disabled state, and password resets from Registered users."
+        body: "Admin can manage premium, badges, disabled state, and password/PIN resets from Registered users."
       },
       {
         title: "Security lock",

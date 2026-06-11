@@ -7140,3 +7140,70 @@ input[data-ps-pin-only] {
   display: none !important;
 }
 /* V2.0Q.62D hover-only menu items END */
+
+/* V2.0Q.62E separate admin modals */
+
+/* Make every dropdown item plain by default. Highlight only on hover/focus/touch. */
+.ps-menu button:not(:hover):not(:focus-visible):not(:active),
+.ps-menu a:not(:hover):not(:focus-visible):not(:active),
+.ps-menu button[data-ps-admin-menu-item]:not(:hover):not(:focus-visible):not(:active),
+.ps-menu a[data-ps-admin-menu-item]:not(:hover):not(:focus-visible):not(:active),
+.ps-menu button[data-ps-menu-item^="admin"]:not(:hover):not(:focus-visible):not(:active) {
+  background: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.ps-menu button,
+.ps-menu a {
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ps-menu button:hover,
+  .ps-menu a:hover {
+    background: linear-gradient(135deg, rgba(255, 203, 225, 0.14), rgba(188, 165, 255, 0.10)) !important;
+    border-color: rgba(255, 244, 251, 0.13) !important;
+  }
+}
+
+.ps-menu button:focus-visible,
+.ps-menu a:focus-visible,
+.ps-menu button:active,
+.ps-menu a:active {
+  background: linear-gradient(135deg, rgba(255, 203, 225, 0.16), rgba(188, 165, 255, 0.12)) !important;
+  border-color: rgba(255, 244, 251, 0.16) !important;
+  outline: none !important;
+}
+
+/* Each hamburger admin choice opens its own screen; hide the shared internal admin switcher. */
+.ps-admin-tools.ps-admin-screen .ps-admin-tool-grid {
+  display: none !important;
+}
+
+.ps-admin-tools.ps-admin-screen .ps-admin-results {
+  margin-top: clamp(1rem, 2vw, 1.35rem) !important;
+}
+
+.ps-admin-tools.ps-admin-screen {
+  width: min(calc(100vw - 1.5rem), 58rem) !important;
+  max-height: calc(100dvh - 1.5rem) !important;
+}
+
+.ps-admin-tools.ps-admin-screen .ps-admin-info-grid {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)) !important;
+}
+
+@media (max-width: 720px) {
+  .ps-admin-tools.ps-admin-screen {
+    width: calc(100vw - 1rem) !important;
+    max-height: calc(100dvh - 1rem) !important;
+  }
+
+  .ps-admin-tools.ps-admin-screen .ps-admin-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* V2.0Q.62E separate admin modals END */
