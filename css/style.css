@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #100d14;
   --bg-soft: #17111f;
   --card: rgba(255, 255, 255, 0.07);
@@ -7095,3 +7095,48 @@ input[data-ps-pin-only] {
   letter-spacing: 0.18em !important;
 }
 /* V2.0Q.59B username checker admin PIN END */
+/* V2.0Q.62D hover-only menu items */
+.ps-menu button,
+.ps-menu a,
+.ps-menu button[data-ps-admin-menu-item],
+.ps-menu a[data-ps-admin-menu-item],
+.ps-menu button[data-ps-menu-item="admin"],
+.ps-menu button[data-ps-menu-item="admin-users"],
+.ps-menu button[data-ps-menu-item="admin-posts"],
+.ps-menu button[data-ps-menu-item="admin-reports"],
+.ps-menu button[data-ps-menu-item="admin-space-settings"] {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ps-menu button:hover,
+  .ps-menu a:hover,
+  .ps-menu button[data-ps-admin-menu-item]:hover,
+  .ps-menu a[data-ps-admin-menu-item]:hover,
+  .ps-menu button[data-ps-menu-item="admin"]:hover,
+  .ps-menu button[data-ps-menu-item="admin-users"]:hover,
+  .ps-menu button[data-ps-menu-item="admin-posts"]:hover,
+  .ps-menu button[data-ps-menu-item="admin-reports"]:hover,
+  .ps-menu button[data-ps-menu-item="admin-space-settings"]:hover {
+    background: linear-gradient(135deg, rgba(255, 203, 225, 0.14), rgba(188, 165, 255, 0.10)) !important;
+    border-color: rgba(255, 244, 251, 0.12) !important;
+  }
+}
+
+.ps-menu button:focus-visible,
+.ps-menu a:focus-visible,
+.ps-menu button:active,
+.ps-menu a:active {
+  background: linear-gradient(135deg, rgba(255, 203, 225, 0.16), rgba(188, 165, 255, 0.12)) !important;
+  border-color: rgba(255, 244, 251, 0.16) !important;
+  outline: none !important;
+}
+
+.ps-menu button[hidden],
+.ps-menu a[hidden],
+.ps-menu [data-ps-admin-menu-item][hidden] {
+  display: none !important;
+}
+/* V2.0Q.62D hover-only menu items END */
