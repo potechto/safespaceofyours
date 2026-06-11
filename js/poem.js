@@ -85,6 +85,58 @@ function savePieceUnlock(slug, code) {
   window.localStorage.setItem(UNLOCKED_PIECES_STORAGE_KEY, JSON.stringify(unlockedPieces));
 }
 
+function getSavedUnlockCode(slug) {
+  const unlockedPieces = readUnlockedPieces();
+  const saved = unlockedPieces[String(slug || "")];
+
+  if (!saved || typeof saved !== "object") return "";
+
+  return String(saved.code || "").trim().toUpperCase();
+}
+
+async function fetchProtectedPieceText(poem, code = "") {
+  if (!poem || !poem.slug) {
+    return {
+      ok: false,
+      message: "Missing piece details."
+    };
+  }
+
+  if (!window.safeAdminClient) {
+    return {
+      ok: true,
+      requires_unlock: true,
+      unlocked: false,
+      preview_text: poem.excerpt || "",
+      message: "Protected reader is loading. Please refresh and try again."
+    };
+  }
+
+  try {
+    const { data, error } = await window.safeAdminClient.rpc("get_public_piece_text", {
+      input_piece_slug: poem.slug,
+      input_unlock_code: code || null
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        message: error.message || "Protected piece could not be loaded."
+      };
+    }
+
+    return data || {
+      ok: false,
+      message: "Protected piece could not be loaded."
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.message || "Protected piece could not be loaded."
+    };
+  }
+}
+
 function makePieceAnalyticsVisitorKey() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
     return window.crypto.randomUUID();
@@ -180,7 +232,7 @@ async function claimUnlockCode(poem, code) {
   };
 }
 
-function setupUnlockForm(poem, fullText) {
+function setupUnlockForm(poem) {
   const form = poemText.querySelector("[data-unlock-form]");
   if (!form) return;
 
@@ -207,11 +259,19 @@ function setupUnlockForm(poem, fullText) {
       return;
     }
 
+    const protectedResult = await fetchProtectedPieceText(poem, code);
+
+    if (!protectedResult.ok || !protectedResult.full_text) {
+      if (button) button.disabled = false;
+      setUnlockMessage(form, protectedResult.message || "Code accepted, but protected text could not be loaded yet.", "error");
+      return;
+    }
+
     savePieceUnlock(poem.slug, code);
     queuePieceAnalyticsEvent(poem, "unlock", {
       unlockCodeSnapshot: code
     });
-    poemText.innerHTML = buildUnlockedNotice() + formatPoem(fullText);
+    poemText.innerHTML = buildUnlockedNotice() + formatPoem(protectedResult.full_text);
     window.scrollTo({ top: poemText.offsetTop - 120, behavior: "smooth" });
   });
 }
@@ -411,7 +471,24 @@ async function loadPoem() {
 
   setupReaderNavigation(Math.max(currentIndex, 0), enabledPoems);
 
+  const access = getPoemAccess(poem);
+  queuePieceAnalyticsEvent(poem, "view");
+
   try {
+    if (access === "paid") {
+      const savedCode = getSavedUnlockCode(poem.slug);
+      const protectedResult = await fetchProtectedPieceText(poem, savedCode);
+
+      if (protectedResult.ok && protectedResult.unlocked && protectedResult.full_text) {
+        poemText.innerHTML = buildUnlockedNotice() + formatPoem(protectedResult.full_text);
+        return;
+      }
+
+      poemText.innerHTML = buildPaidPreview(poem, protectedResult.preview_text || poem.excerpt || "");
+      setupUnlockForm(poem);
+      return;
+    }
+
     const response = await fetch(poem.file);
 
     if (!response.ok) {
@@ -419,23 +496,13 @@ async function loadPoem() {
     }
 
     const text = await response.text();
-    const access = getPoemAccess(poem);
-    queuePieceAnalyticsEvent(poem, "view");
-
-    if (access === "paid" && !isPieceUnlocked(poem.slug)) {
-      poemText.innerHTML = buildPaidPreview(poem, text);
-      setupUnlockForm(poem, text);
-      return;
-    }
-
-    poemText.innerHTML = access === "paid"
-      ? buildUnlockedNotice() + formatPoem(text)
-      : formatPoem(text);
+    poemText.innerHTML = formatPoem(text);
   } catch (error) {
     poemText.innerHTML = `
       <p class="reserved-piece">
-        The text file for this piece could not be loaded. Check if this file exists:
-        <strong>${escapeHTML(poem.file)}</strong>
+        ${access === "paid"
+          ? "Protected reader could not be loaded. Please refresh and try again."
+          : `The text file for this piece could not be loaded. Check if this file exists: <strong>${escapeHTML(poem.file)}</strong>`}
       </p>
     `;
   }

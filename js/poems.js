@@ -7,7 +7,7 @@ window.POEMS = [
     price: 49,
     category: "Dreams",
     cover: "Resources/adreamtochooseortofollow.png",
-    file: "Resources/adreamtochooseortofollow.txt",
+    protected: true,
     excerpt: "Minsan iniisip ko, nasa tama pa ba ako? O mapupunta ba talaga ako sa kung saan dapat akong mapunta?"
   },
   {
@@ -18,7 +18,7 @@ window.POEMS = [
     price: 49,
     category: "Reflection",
     cover: "Resources/biglanglingon.png",
-    file: "Resources/biglanglingon.txt",
+    protected: true,
     excerpt: "There are times I am looking back, and I often feel pain from the past."
   },
   {
@@ -40,7 +40,7 @@ window.POEMS = [
     price: 49,
     category: "Healing",
     cover: "Resources/hindikanamantalaganagiisa.png",
-    file: "Resources/hindikanamantalaganagiisa.txt",
+    protected: true,
     excerpt: "Be with others too. Be with your real loved ones."
   },
   {
@@ -95,7 +95,7 @@ window.POEMS = [
     price: 49,
     category: "Heartbreak",
     cover: "Resources/kungangpaglisanmoypaglaya.png",
-    file: "Resources/kungangpaglisanmoypaglaya.txt",
+    protected: true,
     excerpt: "Isa lang naman ang gusto, ang mahalin mo ako nang totoo."
   },
   {
@@ -106,7 +106,7 @@ window.POEMS = [
     price: 49,
     category: "Love",
     cover: "Resources/love.png",
-    file: "Resources/love.txt",
+    protected: true,
     excerpt: "Some people come to teach you how to love, and some people come to teach you how to let go."
   },
   {
@@ -139,7 +139,7 @@ window.POEMS = [
     price: 49,
     category: "Love",
     cover: "Resources/minsannakakalimutannanatinmagmahal.png",
-    file: "Resources/minsannakakalimutannanatinmagmahal.txt",
+    protected: true,
     excerpt: "If you would allow me to borrow your time once more..."
   },
   {
