@@ -2004,14 +2004,7 @@ document.addEventListener("click", async event => {
       const isEnabled = row.querySelector("[data-piece-enabled]").checked;
       const protectedTextValue = String(row.querySelector("[data-piece-protected-text]")?.value || "").trim();
       const sourcePiece = latestAdminPieces.find(item => item.slug === slug) || {};
-
-      if (accessType === "paid" && hasPublicStaticTextRisk(sourcePiece)) {
-        throw new Error(getPublicStaticTextRiskError(sourcePiece));
-      }
-
-      if (accessType === "paid" && !hasProtectedTextReady(sourcePiece, protectedTextValue)) {
-        throw new Error(getMissingProtectedTextError(sourcePiece));
-      }
+      // V2.0Q.60J: protected text admin UI is parked, so normal piece saves stay available.
 
       const payload = {
         is_enabled: isEnabled,
@@ -2027,20 +2020,8 @@ document.addEventListener("click", async event => {
         .eq("slug", slug);
 
       if (error) throw error;
-
-      if (accessType === "paid" && protectedTextValue) {
-        const { error: protectedTextError } = await adminClient.rpc("admin_save_piece_full_text", {
-          input_piece_slug: slug,
-          input_body: protectedTextValue
-        });
-
-        if (protectedTextError) throw protectedTextError;
-      }
-
       await loadPieceSettings();
-      setDashboardMessage(accessType === "paid" && protectedTextValue
-        ? "Piece settings and protected full text saved."
-        : "Piece settings saved.", "success");
+      setDashboardMessage("Piece settings saved.", "success");
     }
 
 

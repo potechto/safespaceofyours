@@ -6122,3 +6122,12 @@ body[data-admin-page="piece-control"] #piecesControlCard [data-protected-editor-
 body[data-admin-page="piece-control"] #piecesControlCard .piece-protected-editor[hidden] {
   display: none !important;
 }
+
+/* V2.0Q.60J park protected text admin UI */
+body[data-admin-page="piece-control"] #piecesControlCard [data-load-protected-text],
+body[data-admin-page="piece-control"] #piecesControlCard [data-save-protected-text],
+body[data-admin-page="piece-control"] #piecesControlCard .protected-text-status,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-public-file-risk,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-protected-editor {
+  display: none !important;
+}
