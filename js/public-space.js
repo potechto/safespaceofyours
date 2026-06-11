@@ -422,6 +422,95 @@
     screen.setAttribute("aria-hidden", "true");
   }
 
+
+  function usernameAvailabilityMessage(input) {
+    if (!input) return null;
+
+    const wrapper = input.closest("label") || input.parentElement;
+    if (!wrapper) return null;
+
+    let node = wrapper.querySelector("[data-ps-username-check]");
+    if (!node) {
+      node = document.createElement("small");
+      node.className = "ps-username-check";
+      node.dataset.psUsernameCheck = "";
+      wrapper.appendChild(node);
+    }
+
+    return node;
+  }
+
+  function setUsernameAvailability(input, message, state) {
+    const node = usernameAvailabilityMessage(input);
+    if (!node) return;
+
+    node.textContent = message || "";
+    node.dataset.state = state || "";
+    node.hidden = !message;
+  }
+
+  async function checkRegisterUsername(input) {
+    if (!input) return false;
+
+    const value = input.value.trim().toLowerCase();
+    input.value = value;
+
+    if (!value) {
+      setUsernameAvailability(input, "", "");
+      return false;
+    }
+
+    const usernameError = validateUsername(value);
+    if (usernameError) {
+      setUsernameAvailability(input, usernameError, "error");
+      return false;
+    }
+
+    setUsernameAvailability(input, "Checking username...", "checking");
+
+    try {
+      const result = await rpc("check_public_space_username", {
+        input_username: value
+      });
+
+      if (result && result.available) {
+        setUsernameAvailability(input, "Username is available.", "success");
+        return true;
+      }
+
+      setUsernameAvailability(input, (result && result.message) || "Username is already taken.", "error");
+      return false;
+    } catch (error) {
+      setUsernameAvailability(input, "Username will be verified when you create the account.", "checking");
+      return true;
+    }
+  }
+
+  function setupUsernameAvailabilityChecker() {
+    const registerForm = Array.from(forms).find(form => {
+      return (form.dataset.psForm || "").toLowerCase() === "register";
+    });
+
+    if (!registerForm) return;
+
+    const input = registerForm.querySelector('input[name="username"], input[autocomplete="username"], input[type="text"]');
+    if (!input || input.dataset.psUsernameCheckerReady === "true") return;
+
+    input.dataset.psUsernameCheckerReady = "true";
+
+    let usernameTimer = null;
+    input.addEventListener("input", () => {
+      window.clearTimeout(usernameTimer);
+      usernameTimer = window.setTimeout(() => {
+        checkRegisterUsername(input);
+      }, 350);
+    });
+
+    input.addEventListener("blur", () => {
+      window.clearTimeout(usernameTimer);
+      checkRegisterUsername(input);
+    });
+  }
   function setMenuOpen(open) {
     if (!menu) return;
 
@@ -1056,12 +1145,20 @@
                 </label>
                 <button type="button" data-ps-user-action="password" data-user-id="${escapeHtml(user.id)}">Reset password</button>
               </div>
+              <div class="ps-admin-inline-form">
+                <label>
+                  <span>Reset PIN/key</span>
+                  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" data-ps-user-pin data-ps-pin-only placeholder="4 numbers" />
+                </label>
+                <button type="button" data-ps-user-action="pin" data-user-id="${escapeHtml(user.id)}">Reset PIN</button>
+              </div>
             </article>
           `;
         }).join("")}
       </div>
     `;
 
+    enforceNumericPinFields();
     setMessage(messageNode, `Registered users: ${list.length}`, "success");
   }
 
@@ -1100,7 +1197,8 @@
       input_is_premium: null,
       input_badge_label: null,
       input_is_disabled: null,
-      input_new_password: null
+      input_new_password: null,
+      input_new_pin: null
     };
 
     if (action === "premium") {
@@ -1129,6 +1227,19 @@
       params.input_new_password = newPassword;
     }
 
+    if (action === "pin") {
+      const pinInput = card ? card.querySelector("[data-ps-user-pin]") : null;
+      const newPin = pinInput ? pinInput.value.trim() : "";
+      const pinError = validatePin(newPin);
+
+      if (pinError) {
+        setMessage(messageNode, pinError, "error");
+        return;
+      }
+
+      params.input_new_pin = newPin;
+    }
+
     try {
       button.disabled = true;
       setMessage(messageNode, "Saving user changes...", "info");
@@ -1140,6 +1251,10 @@
         if (passwordInput) passwordInput.value = "";
       }
 
+      if (action === "pin") {
+        const pinInput = card ? card.querySelector("[data-ps-user-pin]") : null;
+        if (pinInput) pinInput.value = "";
+      }
       await refreshAdminUsers("User updated.");
     } catch (error) {
       setMessage(messageNode, getErrorMessage(error), "error");
@@ -1341,6 +1456,7 @@
   });
 
   enforceNumericPinFields();
+  setupUsernameAvailabilityChecker();
   enhancePasswordFields();
   updateCounter();
   renderEmptyFeed();

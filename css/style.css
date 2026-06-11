@@ -7065,3 +7065,33 @@ input[data-ps-pin-only] {
   }
 }
 /* V2.0Q.59A admin UI polish END */
+
+/* V2.0Q.59B username checker admin PIN */
+.ps-username-check {
+  display: block !important;
+  margin-top: 0.35rem !important;
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+}
+
+.ps-username-check[hidden] {
+  display: none !important;
+}
+
+.ps-username-check[data-state="success"] {
+  color: rgba(184, 255, 213, 0.88) !important;
+}
+
+.ps-username-check[data-state="error"] {
+  color: rgba(255, 166, 194, 0.92) !important;
+}
+
+.ps-username-check[data-state="checking"] {
+  color: rgba(255, 222, 242, 0.72) !important;
+}
+
+.ps-admin-inline-form input[data-ps-user-pin] {
+  letter-spacing: 0.18em !important;
+}
+/* V2.0Q.59B username checker admin PIN END */
