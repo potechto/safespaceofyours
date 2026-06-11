@@ -7407,3 +7407,16 @@ body.ps-route-screen-active .ps-admin-info-grid {
   }
 }
 /* V2.0Q.62G force inline routed screens END */
+
+
+/* V2.0Q.62H remove routed-screen back buttons */
+body.ps-route-screen-active .ps-admin-close,
+.public-space-root.ps-route-screen-active .ps-admin-close {
+  display: none !important;
+}
+
+/* Public Space now uses the hamburger menu for navigation instead of a standalone page back button. */
+.public-space-body .ps-back-to-site {
+  display: none !important;
+}
+/* V2.0Q.62H remove routed-screen back buttons END */

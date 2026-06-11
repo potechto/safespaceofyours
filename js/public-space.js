@@ -377,14 +377,13 @@
     if (!mainSpace || mainSpace.querySelector("[data-ps-control-screen]")) return;
 
     mainSpace.insertAdjacentHTML("beforeend", `
-      <section class="ps-admin-tools ps-admin-screen ps-control-screen" data-ps-control-screen hidden aria-label="Public Space controls">
+      <section class="ps-admin-tools ps-admin-screen ps-control-screen" data-ps-control-screen hidden tabindex="-1" aria-label="Public Space controls">
         <div class="ps-admin-screen-top">
           <div>
             <p class="eyebrow" data-ps-control-eyebrow>Public Space</p>
             <h2 data-ps-control-title>Controls</h2>
             <p data-ps-control-intro>Manage your Public Space account.</p>
           </div>
-          <button class="ps-admin-close" type="button" data-ps-control-close aria-label="Close controls">&times;</button>
         </div>
         <div class="ps-control-results" data-ps-control-results></div>
       </section>
@@ -410,8 +409,7 @@
     screen.hidden = false;
     screen.setAttribute("aria-hidden", "false");
 
-    const closeButton = screen.querySelector("[data-ps-control-close]");
-    if (closeButton) closeButton.focus();
+    screen.focus({ preventScroll: true });
   }
 
   function closeControlScreen() {
@@ -613,14 +611,13 @@
     if (!mainSpace || mainSpace.querySelector("[data-ps-admin-tools]:not([data-ps-control-screen])")) return;
 
     mainSpace.insertAdjacentHTML("beforeend", `
-      <section class="ps-admin-tools ps-admin-screen" data-ps-admin-tools hidden aria-label="Public Space admin controls">
+      <section class="ps-admin-tools ps-admin-screen" data-ps-admin-tools hidden tabindex="-1" aria-label="Public Space admin controls">
         <div class="ps-admin-screen-top">
           <div>
             <p class="eyebrow">Admin mode</p>
             <h2>Public Space controls</h2>
             <p data-ps-admin-message>Manage users and moderate posts after logging in with a Public Space admin account.</p>
           </div>
-          <button class="ps-admin-close" type="button" data-ps-admin-close aria-label="Close admin controls">&times;</button>
         </div>
         <div class="ps-admin-tool-grid">
           <button type="button" data-ps-admin-action="overview">Admin overview</button>
@@ -666,8 +663,7 @@
     adminTools.hidden = false;
     adminTools.setAttribute("aria-hidden", "false");
 
-    const firstButton = adminTools.querySelector("button");
-    if (firstButton) firstButton.focus();
+    adminTools.focus({ preventScroll: true });
 
     if (initialAction) {
       window.setTimeout(() => {
@@ -1402,17 +1398,6 @@
   }
 
   async function handleAdminAction(event) {
-    const controlCloseButton = event.target.closest("[data-ps-control-close]");
-    if (controlCloseButton) {
-      navigatePublicSpaceRoute("home", { replace: true });
-      return;
-    }
-
-    const closeButton = event.target.closest("[data-ps-admin-close]");
-    if (closeButton) {
-      navigatePublicSpaceRoute("home", { replace: true });
-      return;
-    }
 
     const userActionButton = event.target.closest("[data-ps-user-action]");
     if (userActionButton) {
