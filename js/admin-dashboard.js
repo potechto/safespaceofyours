@@ -1,4 +1,4 @@
-const dashboardMessage = document.querySelector("#dashboardMessage");
+ï»¿const dashboardMessage = document.querySelector("#dashboardMessage");
 const promoForm = document.querySelector("#promoForm");
 const unlockForm = document.querySelector("#unlockForm");
 const promoList = document.querySelector("#promoList");
@@ -673,7 +673,7 @@ function ensurePieceProtectedTextEditor(row, slug = "") {
       ></textarea>
 
       <div class="piece-protected-editor-note">
-        Slug: <code>${escapeAdminHTML(editorSlug || "unknown")}</code> • Keep public .txt blank/stubbed for paid pieces.
+        Slug: <code>${escapeAdminHTML(editorSlug || "unknown")}</code> â€” Keep public .txt blank/stubbed for paid pieces.
       </div>
     `;
 
@@ -686,9 +686,24 @@ function ensurePieceProtectedTextEditor(row, slug = "") {
     }
   }
 
+  editor.hidden = false;
+  row.dataset.protectedEditorOpen = "true";
+
   return editor.querySelector("[data-piece-protected-text]");
 }
 
+
+function closePieceProtectedTextEditor(row) {
+  if (!row) return false;
+
+  const editor = row.querySelector("[data-protected-editor]");
+  if (!editor || editor.hidden) return false;
+
+  editor.hidden = true;
+  row.dataset.protectedEditorOpen = "false";
+  setDashboardMessage("Protected text editor closed.");
+  return true;
+}
 async function loadProtectedTextIntoRow(row, slug) {
   const input = ensurePieceProtectedTextEditor(row, slug);
 
@@ -1648,7 +1663,7 @@ function ensureDangerousDeleteModalElements() {
     document.body.insertAdjacentHTML("beforeend", `
       <div class="admin-modal-overlay dangerous-delete-modal" id="dangerousDeleteModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dangerousDeleteModalTitle">
         <section class="admin-modal-card dangerous-delete-modal-card" role="document">
-          <button class="admin-modal-close" id="closeDangerousDeleteModal" type="button" aria-label="Close delete confirmation">×</button>
+          <button class="admin-modal-close" id="closeDangerousDeleteModal" type="button" aria-label="Close delete confirmation">&times;</button>
           <div class="admin-modal-header dangerous-delete-header">
             <span class="dangerous-delete-kicker">Careful action</span>
             <h2 id="dangerousDeleteModalTitle">Confirm delete</h2>
@@ -1656,7 +1671,7 @@ function ensureDangerousDeleteModalElements() {
           </div>
           <div class="dangerous-delete-target">
             <span id="dangerousDeleteTargetLabel">Selected item</span>
-            <strong id="dangerousDeleteTargetValue">—</strong>
+            <strong id="dangerousDeleteTargetValue">Selected item</strong>
           </div>
           <label class="dangerous-delete-confirm-label" id="dangerousDeleteConfirmWrap">
             <span>Type DELETE to confirm</span>
@@ -1770,7 +1785,7 @@ function openDangerousDeleteModal(options = {}) {
   if (elements.title) elements.title.textContent = options.title || "Confirm delete";
   if (elements.message) elements.message.textContent = options.message || "This action cannot be undone.";
   if (elements.targetLabel) elements.targetLabel.textContent = options.targetLabel || "Selected item";
-  if (elements.targetValue) elements.targetValue.textContent = options.targetValue || "—";
+  if (elements.targetValue) elements.targetValue.textContent = options.targetValue || "Selected item";
   if (elements.confirmButton) elements.confirmButton.textContent = options.confirmText || "Delete";
   if (elements.error) elements.error.textContent = "";
 
@@ -1959,6 +1974,10 @@ document.addEventListener("click", async event => {
     if (protectedTextLoad) {
       const row = protectedTextLoad.closest("[data-piece-row]");
       const slug = protectedTextLoad.dataset.loadProtectedText || getPieceRowSlug(row);
+
+      if (closePieceProtectedTextEditor(row)) {
+        return;
+      }
 
       await loadProtectedTextIntoRow(row, slug);
       setDashboardMessage("Protected full text loaded.", "success");

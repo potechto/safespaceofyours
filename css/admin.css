@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #100b14;
   --panel: #1b1420;
   --panel-2: #241b2a;
@@ -6116,4 +6116,9 @@ body[data-admin-page="piece-control"] #piecesControlCard [data-protected-editor-
   body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* V2.0Q.60H protected editor toggle */
+body[data-admin-page="piece-control"] #piecesControlCard .piece-protected-editor[hidden] {
+  display: none !important;
 }
