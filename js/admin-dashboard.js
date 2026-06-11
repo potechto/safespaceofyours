@@ -141,6 +141,7 @@ let latestAdminPieces = [];
 let activePieceControlFilter = "all";
 let activePieceControlSearch = "";
 let pieceCharacterCountCache = new Map();
+let protectedTextStatusMap = new Map();
 let latestPieceAnalytics = [];
 const PIECE_ANALYTICS_COLLAPSED_KEY = "@safespaceofyours.privateAnalyticsCollapsed.v1";
 
@@ -500,6 +501,8 @@ function getInlinePieceTextValue(piece) {
 }
 
 async function loadPieceCharacterCount(piece) {
+  const protectedStatus = getProtectedTextStatus(piece.slug);
+  if (protectedStatus.has_protected_text) return Number(protectedStatus.protected_characters) || 0;
   const inlineText = getInlinePieceTextValue(piece);
   if (inlineText) return inlineText.length;
 
@@ -536,6 +539,97 @@ function formatCharacterCount(count) {
   const numericCount = Number(count) || 0;
   return numericCount.toLocaleString("en-PH");
 }
+/* V2.0Q.60C protected premium full text manager */
+function getProtectedTextStatus(slug) {
+  const key = String(slug || "").trim();
+  return protectedTextStatusMap.get(key) || {
+    has_protected_text: false,
+    protected_characters: 0,
+    protected_updated_at: null
+  };
+}
+
+function getProtectedTextStatusLabel(piece) {
+  const status = getProtectedTextStatus(piece.slug);
+
+  if (status.has_protected_text) {
+    return `Protected text ${formatCharacterCount(status.protected_characters)} chars`;
+  }
+
+  return normalizeAdminAccess(piece.access_type) === "paid"
+    ? "No protected text yet"
+    : "Optional protected text";
+}
+
+async function loadProtectedTextStatuses() {
+  protectedTextStatusMap = new Map();
+
+  if (!adminClient || typeof adminClient.rpc !== "function") return;
+
+  try {
+    const { data, error } = await adminClient.rpc("admin_list_piece_text_status");
+
+    if (error) {
+      console.warn("Protected text statuses unavailable:", error.message || error);
+      return;
+    }
+
+    (data || []).forEach(item => {
+      protectedTextStatusMap.set(String(item.slug || ""), {
+        has_protected_text: Boolean(item.has_protected_text),
+        protected_characters: Number(item.protected_characters) || 0,
+        protected_updated_at: item.protected_updated_at || null
+      });
+    });
+  } catch (error) {
+    console.warn("Protected text status load failed:", error);
+  }
+}
+
+function getPieceRowSlug(row) {
+  return String(row?.dataset?.pieceRow || "").trim();
+}
+
+function getPieceProtectedTextInput(row) {
+  return row ? row.querySelector("[data-piece-protected-text]") : null;
+}
+
+async function loadProtectedTextIntoRow(row, slug) {
+  const input = getPieceProtectedTextInput(row);
+  if (!input) return;
+
+  input.value = "Loading protected text...";
+  input.disabled = true;
+
+  const { data, error } = await adminClient.rpc("admin_get_piece_full_text", {
+    input_piece_slug: slug
+  });
+
+  if (error) throw error;
+
+  input.value = data?.body || "";
+  input.disabled = false;
+  input.focus();
+}
+
+async function saveProtectedTextFromRow(row, slug) {
+  const input = getPieceProtectedTextInput(row);
+  const body = String(input?.value || "");
+
+  if (!body.trim()) {
+    throw new Error("Paste protected full text before saving.");
+  }
+
+  const { data, error } = await adminClient.rpc("admin_save_piece_full_text", {
+    input_piece_slug: slug,
+    input_body: body
+  });
+
+  if (error) throw error;
+
+  return data;
+}
+
 
 function formatUseStatus(item) {
   const usedCount = Number(item.used_count) || 0;
@@ -1132,6 +1226,8 @@ function renderPieceSettingsList() {
     const price = Number(item.price) || 49;
     const previewLimit = Number(item.preview_char_limit) || 700;
     const totalCharacters = Number(item.total_characters) || 0;
+    const protectedStatusLabel = getProtectedTextStatusLabel(item);
+    const protectedStatusClass = item.has_protected_text ? "is-ready" : (accessType === "paid" ? "is-missing" : "is-optional");
 
     return `
       <article class="list-item piece-control-item" data-piece-row="${escapeAdminHTML(item.slug)}">
@@ -1149,6 +1245,7 @@ function renderPieceSettingsList() {
 <span>${accessType === "paid" ? escapeAdminHTML(formatAdminPeso(price)) : "Free access"}</span>
               <span>Preview ${escapeAdminHTML(previewLimit)} chars</span>
               <span>Total ${escapeAdminHTML(formatCharacterCount(totalCharacters))} chars</span>
+              <span class="protected-text-status ${protectedStatusClass}">${escapeAdminHTML(protectedStatusLabel)}</span>
             </div>
           </div>
         </div>
@@ -1198,6 +1295,8 @@ function renderPieceSettingsList() {
 
           <div class="item-actions piece-actions">
             <button class="tiny-btn primary-tiny" type="button" data-save-piece="${escapeAdminHTML(item.slug)}">Save changes</button>
+            <button class="tiny-btn" type="button" data-load-protected-text="${escapeAdminHTML(item.slug)}">Load protected text</button>
+            <button class="tiny-btn" type="button" data-save-protected-text="${escapeAdminHTML(item.slug)}">Save protected text</button>
             <button class="tiny-btn" type="button" data-generate-promo="${escapeAdminHTML(item.slug)}">Promo code</button>
             <button class="tiny-btn" type="button" data-generate-unlock="${escapeAdminHTML(item.slug)}">Unlock code</button>
           </div>
@@ -1226,12 +1325,21 @@ async function loadPieceSettings() {
     return;
   }
 
+  await loadProtectedTextStatuses();
+
   const sourceMap = getPoemSourceMap();
-  latestAdminPieces = data.map(item => ({
-    ...item,
-    ...(sourceMap.get(item.slug) || {}),
-    ...item
-  }));
+  latestAdminPieces = data.map(item => {
+    const protectedStatus = getProtectedTextStatus(item.slug);
+
+    return {
+      ...item,
+      ...(sourceMap.get(item.slug) || {}),
+      ...item,
+      has_protected_text: protectedStatus.has_protected_text,
+      protected_characters: protectedStatus.protected_characters,
+      protected_updated_at: protectedStatus.protected_updated_at
+    };
+  });
 
   latestAdminPieces = await enrichPiecesWithCharacterCounts(latestAdminPieces);
 
@@ -1568,6 +1676,8 @@ document.addEventListener("click", async event => {
   const unlockDelete = event.target.closest("[data-delete-unlock]");
   const paymentToggle = event.target.closest("[data-toggle-payment]");
   const pieceSave = event.target.closest("[data-save-piece]");
+  const protectedTextLoad = event.target.closest("[data-load-protected-text]");
+  const protectedTextSave = event.target.closest("[data-save-protected-text]");
   const promoGenerate = event.target.closest("[data-generate-promo]");
   const unlockGenerate = event.target.closest("[data-generate-unlock]");
   const togglePromoRequestRead = event.target.closest("[data-toggle-promo-request-read]");
@@ -1689,6 +1799,25 @@ document.addEventListener("click", async event => {
       return;
     }
 
+    if (protectedTextLoad) {
+      const row = protectedTextLoad.closest("[data-piece-row]");
+      const slug = protectedTextLoad.dataset.loadProtectedText || getPieceRowSlug(row);
+
+      await loadProtectedTextIntoRow(row, slug);
+      setDashboardMessage("Protected full text loaded.", "success");
+      return;
+    }
+
+    if (protectedTextSave) {
+      const row = protectedTextSave.closest("[data-piece-row]");
+      const slug = protectedTextSave.dataset.saveProtectedText || getPieceRowSlug(row);
+      const result = await saveProtectedTextFromRow(row, slug);
+
+      await loadPieceSettings();
+      setDashboardMessage(`Protected full text saved (${formatCharacterCount(result?.characters || 0)} chars).`, "success");
+      return;
+    }
+
     if (pieceSave) {
       const row = pieceSave.closest("[data-piece-row]");
       const slug = pieceSave.dataset.savePiece;
@@ -1697,6 +1826,7 @@ document.addEventListener("click", async event => {
       const rawPrice = Number(row.querySelector("[data-piece-price]").value);
       const previewLimit = Number(row.querySelector("[data-piece-preview]").value) || 700;
       const isEnabled = row.querySelector("[data-piece-enabled]").checked;
+      const protectedTextValue = String(row.querySelector("[data-piece-protected-text]")?.value || "").trim();
 
       const payload = {
         is_enabled: isEnabled,
@@ -1713,8 +1843,19 @@ document.addEventListener("click", async event => {
 
       if (error) throw error;
 
+      if (accessType === "paid" && protectedTextValue) {
+        const { error: protectedTextError } = await adminClient.rpc("admin_save_piece_full_text", {
+          input_piece_slug: slug,
+          input_body: protectedTextValue
+        });
+
+        if (protectedTextError) throw protectedTextError;
+      }
+
       await loadPieceSettings();
-      setDashboardMessage("Piece settings saved.", "success");
+      setDashboardMessage(accessType === "paid" && protectedTextValue
+        ? "Piece settings and protected full text saved."
+        : "Piece settings saved.", "success");
     }
 
 

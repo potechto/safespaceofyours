@@ -5667,3 +5667,56 @@ body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
   }
 }
 /* V2.0Q.45 unclip piece control fields END */
+
+/* V2.0Q.60C protected text manager */
+.protected-text-status {
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.protected-text-status.is-ready {
+  background: rgba(34, 197, 94, 0.14);
+  color: #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.protected-text-status.is-missing {
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.protected-text-status.is-optional {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.piece-protected-text-field {
+  grid-column: 1 / -1;
+}
+
+.piece-protected-text-field textarea {
+  width: 100%;
+  min-height: 10rem;
+  resize: vertical;
+  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  padding: 0.9rem 1rem;
+  font: inherit;
+  line-height: 1.55;
+}
+
+.piece-protected-text-field textarea:focus {
+  outline: 2px solid rgba(56, 189, 248, 0.45);
+  outline-offset: 2px;
+}
+
+.piece-protected-text-field small {
+  color: rgba(226, 232, 240, 0.72);
+  line-height: 1.45;
+}
