@@ -319,15 +319,42 @@
     return localDateKey(date);
   }
 
+  function filterDateDisplayLabel(dateKey) {
+    const clean = String(dateKey || "").trim();
+    if (!clean) return "";
+
+    const date = new Date(`${clean}T00:00:00`);
+    if (!date || Number.isNaN(date.getTime())) return clean;
+
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function openPostFilterDatePicker(input) {
+    if (!input) return;
+
+    try {
+      input.focus({ preventScroll: true });
+      if (typeof input.showPicker === "function") {
+        input.showPicker();
+      } else {
+        input.click();
+      }
+    } catch (error) {
+      try {
+        input.click();
+      } catch (clickError) {}
+    }
+  }
+
   function ensurePostFilterControls() {
     const feedCard = root.querySelector(".ps-feed-card") || (feed ? feed.closest("section, article, div") : null);
     if (!feedCard || feedCard.querySelector("[data-ps-post-filter]")) return;
 
     const filter = document.createElement("div");
-    filter.className = "ps-post-filter";
+    filter.className = "ps-post-filter ps-post-filter-compact";
     filter.setAttribute("data-ps-post-filter", "");
     filter.innerHTML = `
-      <label>
+      <label class="ps-post-filter-select-label">
         <span>Filter posts</span>
         <select data-ps-post-filter-mode aria-label="Filter posts">
           <option value="all">View all posts</option>
@@ -336,10 +363,7 @@
           <option value="custom">Custom date</option>
         </select>
       </label>
-      <label data-ps-post-filter-date-wrap hidden>
-        <span>Choose date</span>
-        <input type="date" data-ps-post-filter-date aria-label="Choose post date" />
-      </label>
+      <input class="ps-post-filter-date-input" type="date" data-ps-post-filter-date aria-label="Choose custom post date" />
     `;
 
     const headings = Array.from(feedCard.querySelectorAll("h1, h2, h3, strong"));
@@ -372,12 +396,17 @@
     if (!filter) return;
 
     const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
-    const dateWrap = filter.querySelector("[data-ps-post-filter-date-wrap]");
     const dateInput = filter.querySelector("[data-ps-post-filter-date]");
+    const customOption = modeSelect ? modeSelect.querySelector("option[value='custom']") : null;
 
     if (modeSelect) modeSelect.value = publicSpacePostFilter.mode || "all";
     if (dateInput) dateInput.value = publicSpacePostFilter.date || "";
-    if (dateWrap) dateWrap.hidden = publicSpacePostFilter.mode !== "custom";
+
+    if (customOption) {
+      customOption.textContent = publicSpacePostFilter.date
+        ? `Custom date: ${filterDateDisplayLabel(publicSpacePostFilter.date)}`
+        : "Custom date";
+    }
   }
 
   function refreshPostFilterView() {
@@ -388,22 +417,49 @@
 
   function handlePostFilterChange(event) {
     const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
-    const dateInput = event.target.closest("[data-ps-post-filter-date]");
-    if (!modeSelect && !dateInput) return;
+    const changedDateInput = event.target.closest("[data-ps-post-filter-date]");
+    if (!modeSelect && !changedDateInput) return;
 
     const filter = root.querySelector("[data-ps-post-filter]");
     const activeMode = filter ? filter.querySelector("[data-ps-post-filter-mode]") : null;
     const activeDate = filter ? filter.querySelector("[data-ps-post-filter-date]") : null;
 
-    publicSpacePostFilter.mode = activeMode ? activeMode.value : "all";
-    publicSpacePostFilter.date = activeDate ? activeDate.value : "";
+    if (modeSelect) {
+      const selectedMode = activeMode ? activeMode.value : "all";
 
-    if (publicSpacePostFilter.mode !== "custom") {
+      if (selectedMode === "custom") {
+        publicSpacePostFilter.mode = "custom";
+
+        if (activeDate && activeDate.value) {
+          publicSpacePostFilter.date = activeDate.value;
+          refreshPostFilterView();
+          return;
+        }
+
+        syncPostFilterControls();
+        window.setTimeout(() => openPostFilterDatePicker(activeDate), 0);
+        return;
+      }
+
+      publicSpacePostFilter.mode = selectedMode;
       publicSpacePostFilter.date = "";
+      refreshPostFilterView();
+      return;
     }
 
-    refreshPostFilterView();
+    if (changedDateInput) {
+      if (changedDateInput.value) {
+        publicSpacePostFilter.mode = "custom";
+        publicSpacePostFilter.date = changedDateInput.value;
+      } else {
+        publicSpacePostFilter.mode = "all";
+        publicSpacePostFilter.date = "";
+      }
+
+      refreshPostFilterView();
+    }
   }
+
   function renderPosts(posts) {
     if (!feed) return;
 

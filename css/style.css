@@ -8102,3 +8102,91 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62N post meta filter badge polish END */
+
+
+/* V2.0Q.62O compact post filter */
+.public-space-body .ps-feed-card {
+  position: relative !important;
+}
+
+.public-space-body .ps-post-filter.ps-post-filter-compact,
+.public-space-body .ps-post-filter {
+  position: absolute !important;
+  top: 1.05rem !important;
+  right: 1.1rem !important;
+  width: min(13.25rem, 42vw) !important;
+  max-width: 13.25rem !important;
+  min-width: 10.5rem !important;
+  display: grid !important;
+  gap: 0.28rem !important;
+  margin: 0 !important;
+  z-index: 35 !important;
+}
+
+.public-space-body .ps-post-filter label,
+.public-space-body .ps-post-filter .ps-post-filter-select-label {
+  display: grid !important;
+  gap: 0.24rem !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-post-filter label span {
+  font-size: 0.66rem !important;
+  line-height: 1 !important;
+  letter-spacing: 0.09em !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-post-filter select {
+  width: 100% !important;
+  min-height: 2.28rem !important;
+  height: 2.28rem !important;
+  border-radius: 999px !important;
+  padding: 0.42rem 2rem 0.42rem 0.78rem !important;
+  font-size: 0.86rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body .ps-post-filter-date-input {
+  position: absolute !important;
+  right: 0 !important;
+  top: 100% !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.public-space-body .ps-post-filter [data-ps-post-filter-date-wrap],
+.public-space-body .ps-post-filter-date-input[hidden] {
+  display: none !important;
+}
+
+.public-space-body .ps-feed-card > h2,
+.public-space-body .ps-feed-card > h3,
+.public-space-body .ps-feed-card > strong {
+  max-width: calc(100% - 15rem) !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-body .ps-post-filter.ps-post-filter-compact,
+  .public-space-body .ps-post-filter {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0.45rem 0 0.75rem !important;
+  }
+
+  .public-space-body .ps-feed-card > h2,
+  .public-space-body .ps-feed-card > h3,
+  .public-space-body .ps-feed-card > strong {
+    max-width: 100% !important;
+  }
+}
+/* V2.0Q.62O compact post filter END */
