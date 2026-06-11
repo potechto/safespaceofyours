@@ -7893,3 +7893,212 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62L filter badges menu polish END */
+
+
+/* V2.0Q.62N post meta filter badge polish */
+
+/* Keep Public Space nav/header visible while scrolling. */
+.public-space-body .ps-header,
+.public-space-body .ps-space-header,
+.public-space-body .ps-topbar,
+.public-space-body .ps-appbar,
+.public-space-body .ps-app-bar,
+.public-space-body .ps-brand-bar,
+.public-space-body [data-ps-header],
+.public-space-body [data-ps-topbar] {
+  position: sticky !important;
+  top: max(0.65rem, env(safe-area-inset-top)) !important;
+  z-index: 850 !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+/* Filter must stay visible on Latest posts. */
+.public-space-body .ps-post-filter {
+  display: flex !important;
+  align-items: end !important;
+  gap: 0.8rem !important;
+  flex-wrap: wrap !important;
+  margin: 0.8rem 0 1rem !important;
+}
+
+/* Facebook-like post header: user first, date below, menu on card corner. */
+.ps-post-card {
+  position: relative !important;
+}
+
+.ps-post-card-polished .ps-post-meta,
+.ps-post-card .ps-post-meta {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  justify-content: start !important;
+  align-items: center !important;
+  column-gap: 0.55rem !important;
+  row-gap: 0.16rem !important;
+  padding-right: 3rem !important;
+}
+
+.ps-post-card-polished .ps-post-meta > strong,
+.ps-post-card .ps-post-meta > strong {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: fit-content !important;
+}
+
+.ps-post-card-polished .ps-post-badges,
+.ps-post-card .ps-post-badges {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: start !important;
+  margin-left: 0 !important;
+}
+
+.ps-post-card-polished .ps-post-date,
+.ps-post-card .ps-post-date {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  justify-self: start !important;
+  color: rgba(255, 244, 251, 0.58) !important;
+  font-size: 0.86rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.ps-post-card > .ps-post-more {
+  position: absolute !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 50 !important;
+}
+
+/* Smaller clean 3 dots. */
+.ps-post-more-toggle {
+  width: 1.45rem !important;
+  height: 1.45rem !important;
+  min-width: 1.45rem !important;
+  min-height: 1.45rem !important;
+  padding: 0 !important;
+  font-size: 0.68rem !important;
+  line-height: 1 !important;
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.08) !important;
+  border: 1px solid rgba(255, 244, 251, 0.22) !important;
+  box-shadow: none !important;
+}
+
+.ps-post-more-menu {
+  right: 0 !important;
+  color: #fff4fb !important;
+  background: rgba(20, 12, 27, 0.98) !important;
+  border-color: rgba(255, 244, 251, 0.18) !important;
+}
+
+.ps-post-more-menu button {
+  color: #fff4fb !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Badge icons only; labels appear on hover/focus/tap. */
+.ps-badge-chip {
+  position: relative !important;
+  overflow: visible !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 1.8rem !important;
+  height: 1.8rem !important;
+  min-width: 1.8rem !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  cursor: help !important;
+}
+
+.ps-badge-chip.is-mini {
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  min-width: 1.35rem !important;
+  padding: 0 !important;
+}
+
+.ps-badge-chip img {
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  object-fit: contain !important;
+}
+
+.ps-badge-chip.is-mini img {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.ps-badge-text {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+
+.ps-badge-chip[data-ps-badge-label]::after {
+  content: attr(data-ps-badge-label) !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: calc(100% + 0.45rem) !important;
+  transform: translateX(-50%) translateY(0.25rem) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  padding: 0.42rem 0.58rem !important;
+  border-radius: 999px !important;
+  background: rgba(20, 12, 27, 0.98) !important;
+  color: #fff4fb !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.26) !important;
+  font-size: 0.78rem !important;
+  font-weight: 850 !important;
+  z-index: 80 !important;
+  transition: opacity 0.16s ease, transform 0.16s ease !important;
+}
+
+.ps-badge-chip[data-ps-badge-label]:hover::after,
+.ps-badge-chip[data-ps-badge-label]:focus-visible::after,
+.ps-badge-chip[data-ps-badge-label].is-label-open::after {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.ps-post-badges {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.3rem !important;
+  flex-wrap: wrap !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-post-filter {
+    display: grid !important;
+  }
+
+  .public-space-body .ps-post-filter label {
+    width: 100% !important;
+  }
+
+  .ps-post-card-polished .ps-post-meta,
+  .ps-post-card .ps-post-meta {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .ps-post-card-polished .ps-post-badges,
+  .ps-post-card .ps-post-badges {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  .ps-post-card-polished .ps-post-date,
+  .ps-post-card .ps-post-date {
+    grid-row: 3 !important;
+  }
+}
+/* V2.0Q.62N post meta filter badge polish END */

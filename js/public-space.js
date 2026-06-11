@@ -320,7 +320,7 @@
   }
 
   function ensurePostFilterControls() {
-    const feedCard = root.querySelector(".ps-feed-card");
+    const feedCard = root.querySelector(".ps-feed-card") || (feed ? feed.closest("section, article, div") : null);
     if (!feedCard || feedCard.querySelector("[data-ps-post-filter]")) return;
 
     const filter = document.createElement("div");
@@ -342,7 +342,9 @@
       </label>
     `;
 
-    const heading = feedCard.querySelector("h2, h3, .ps-feed-title");
+    const headings = Array.from(feedCard.querySelectorAll("h1, h2, h3, strong"));
+    const heading = headings.find(node => /latest posts/i.test(node.textContent || "")) || headings[0];
+
     if (heading) heading.insertAdjacentElement("afterend", filter);
     else feedCard.prepend(filter);
   }
@@ -448,6 +450,7 @@
     }).join("");
 
     enhancePostCards(feed, list);
+    polishPostCards(feed, list);
     if (currentPublicSpaceRoute() === "profile") {
       renderProfileOwnPosts(list);
     }
@@ -724,10 +727,13 @@
   }
 
   function renderBadgeChip(badge, modifier) {
+    const cleanLabel = String((badge && badge.label) || "").trim();
     const extraClass = modifier ? ` ${modifier}` : "";
-    const image = badge.image ? `<img src="${escapeHtml(badge.image)}" alt="" aria-hidden="true" loading="lazy" />` : "";
+    const image = badge && badge.image
+      ? `<img src="${escapeHtml(badge.image)}" alt="" aria-hidden="true" loading="lazy" />`
+      : `<span class="ps-badge-fallback-icon" aria-hidden="true">${escapeHtml(cleanLabel.charAt(0).toUpperCase() || "?")}</span>`;
 
-    return `<span class="ps-badge-chip ${escapeHtml(badge.className || "")}${extraClass}" title="${escapeHtml(badge.label)}">${image}<span>${escapeHtml(badge.label)}</span></span>`;
+    return `<span class="ps-badge-chip ${escapeHtml((badge && badge.className) || "")}${extraClass}" title="${escapeHtml(cleanLabel)}" data-ps-badge-label="${escapeHtml(cleanLabel)}" tabindex="0" role="img" aria-label="${escapeHtml(cleanLabel)}">${image}<span class="ps-badge-text">${escapeHtml(cleanLabel)}</span></span>`;
   }
 
   function renderProfileBadges(user) {
@@ -766,6 +772,87 @@
       .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   }
 
+  function startOfLocalDay(date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  function postDateDisplayLabel(value) {
+    const date = value ? new Date(value) : null;
+    if (!date || Number.isNaN(date.getTime())) return "";
+
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const minuteMs = 60 * 1000;
+    const hourMs = 60 * minuteMs;
+
+    if (diffMs >= 0 && diffMs < minuteMs) return "Just now";
+    if (diffMs >= 0 && diffMs < hourMs) return `${Math.max(1, Math.floor(diffMs / minuteMs))}m`;
+    if (diffMs >= 0 && diffMs < 24 * hourMs) return `${Math.max(1, Math.floor(diffMs / hourMs))}h`;
+
+    const today = startOfLocalDay(now);
+    const postedDay = startOfLocalDay(date);
+    const dayDiff = Math.round((today.getTime() - postedDay.getTime()) / (24 * hourMs));
+
+    if (dayDiff === 1) return "Yesterday";
+
+    const monthDay = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    if (date.getFullYear() === now.getFullYear()) return monthDay;
+
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function polishPostCards(container, posts) {
+    if (!container) return;
+
+    const sourcePosts = Array.isArray(posts) ? posts : [];
+    const byId = new Map(sourcePosts.map(post => [String(post.id), post]));
+
+    container.querySelectorAll(".ps-post-card[data-post-id]").forEach(card => {
+      const postId = String(card.dataset.postId || "");
+      const post = byId.get(postId) || postById(postId);
+      if (!post) return;
+
+      card.classList.add("ps-post-card-polished");
+
+      const meta = card.querySelector(".ps-post-meta");
+      if (!meta) return;
+
+      const authorNode = meta.querySelector("strong");
+      if (authorNode && !meta.querySelector("[data-ps-post-badges]")) {
+        authorNode.insertAdjacentHTML("afterend", renderPostBadges(post.author || post));
+      }
+
+      const dateNode = Array.from(meta.children).find(node => {
+        if (!node || node.nodeType !== 1) return false;
+        if (node.matches("[data-ps-post-badges], [data-ps-post-more-wrap], .ps-post-more, .ps-badge-chip")) return false;
+        return node.tagName.toLowerCase() === "span";
+      });
+
+      if (dateNode) {
+        dateNode.className = "ps-post-date";
+        dateNode.textContent = postDateDisplayLabel(post.created_at);
+      }
+
+      meta.querySelectorAll("[data-ps-post-more-wrap]").forEach(node => node.remove());
+      Array.from(card.children).forEach(node => {
+        if (node.matches && node.matches("[data-ps-post-more-wrap], .ps-post-more")) node.remove();
+      });
+
+      const menuMarkup = postMenuHtml(post);
+      if (menuMarkup) {
+        card.insertAdjacentHTML("beforeend", menuMarkup);
+      }
+    });
+  }
+
+  function handleBadgeLabelToggle(event) {
+    const chip = event.target.closest("[data-ps-badge-label]");
+    if (!chip || chip.closest("[data-ps-badge-picker]")) return;
+
+    chip.classList.toggle("is-label-open");
+    window.clearTimeout(chip._psBadgeTimer);
+    chip._psBadgeTimer = window.setTimeout(() => chip.classList.remove("is-label-open"), 1800);
+  }
   function postAgeMs(post) {
     const created = post && post.created_at ? new Date(post.created_at).getTime() : 0;
     if (!created || Number.isNaN(created)) return Number.POSITIVE_INFINITY;
@@ -911,6 +998,7 @@
       ${ownPosts.map(renderProfilePostCard).join("")}
     `;
     enhancePostCards(listNode, ownPosts);
+    polishPostCards(listNode, ownPosts);
   }
 
   function updateProfileComposerCounter(form) {
@@ -1694,7 +1782,7 @@
     const commentButton = event.target.closest("[data-ps-comments-post]");
 
     if (commentButton) {
-      setFeedStatus("Comments UI will be connected next.");
+      setFeedStatus("");
       return;
     }
 
@@ -2263,6 +2351,7 @@
   }
 
   root.addEventListener("click", handleAdminAction);
+  root.addEventListener("click", handleBadgeLabelToggle);
 
   if (scrollTopButton) {
     scrollTopButton.setAttribute("aria-hidden", "true");
@@ -2277,6 +2366,11 @@
   const adminBadgeSelectorObserver = new MutationObserver(() => enhanceAdminBadgeSelectors());
   adminBadgeSelectorObserver.observe(root, { childList: true, subtree: true });
   enhanceAdminBadgeSelectors();
+
+  window.setTimeout(() => {
+    ensurePostFilterControls();
+    syncPostFilterControls();
+  }, 0);
 
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
