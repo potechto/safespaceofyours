@@ -846,9 +846,9 @@
         commentButton.setAttribute("aria-label", "View comments");
       }
 
-      const meta = card.querySelector(".ps-post-meta");
-      const authorNode = meta ? meta.querySelector("strong") : null;
-      if (authorNode && !meta.querySelector("[data-ps-post-badges]")) {
+      const cardMeta = card.querySelector(".ps-post-meta");
+      const authorNode = cardMeta ? cardMeta.querySelector("strong") : null;
+      if (authorNode && cardMeta && !cardMeta.querySelector("[data-ps-post-badges]")) {
         authorNode.insertAdjacentHTML("afterend", renderPostBadges(post.author || post));
       }
 
