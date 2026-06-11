@@ -5963,3 +5963,157 @@ body[data-admin-page="piece-control"] #piecesControlCard .piece-protected-editor
     grid-template-columns: 1fr !important;
   }
 }
+
+/* V2.0Q.60G hard compact piece control repair */
+html,
+body {
+  overflow-x: hidden !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard,
+body[data-admin-page="piece-control"] #pieceSettingsList {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard [data-piece-row] {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.95rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  padding: 1rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard [data-piece-row] > * {
+  grid-column: 1 / -1 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-info,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-summary,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-card-main,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-card-meta,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-meta,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-badges {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  gap: 0.68rem !important;
+  align-items: end !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-field,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields label {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields input,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields select,
+body[data-admin-page="piece-control"] #piecesControlCard .switch-line {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)) !important;
+  gap: 0.58rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  justify-self: stretch !important;
+  overflow: visible !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-actions .tiny-btn {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 2.45rem !important;
+  padding: 0.5rem 0.62rem !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.12 !important;
+  font-size: 0.78rem !important;
+  box-sizing: border-box !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .protected-text-status,
+body[data-admin-page="piece-control"] #piecesControlCard .piece-public-file-risk {
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-protected-editor {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-protected-editor textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard .piece-protected-editor-head {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.45rem !important;
+}
+
+body[data-admin-page="piece-control"] #piecesControlCard [data-protected-editor-message] {
+  max-width: 100% !important;
+  text-align: left !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  border-radius: 0.8rem !important;
+}
+
+@media (min-width: 980px) {
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body[data-admin-page="piece-control"] #piecesControlCard [data-piece-row] {
+    padding: 0.82rem !important;
+  }
+
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-control-fields,
+  body[data-admin-page="piece-control"] #piecesControlCard .piece-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
