@@ -57,6 +57,7 @@
   let currentSession = readSession();
   let currentUser = currentSession ? currentSession.user : null;
   let isAdminMode = Boolean(currentUser && currentUser.is_admin);
+  let latestPublicSpacePosts = [];
 
   function getClient() {
     const candidates = [
@@ -291,9 +292,13 @@
     if (!feed) return;
 
     const list = Array.isArray(posts) ? posts : [];
+    latestPublicSpacePosts = list;
 
     if (!list.length) {
       renderEmptyFeed();
+      if (currentPublicSpaceRoute() === "profile") {
+        renderProfileOwnPosts(list);
+      }
       return;
     }
 
@@ -327,6 +332,10 @@
         </article>
       `;
     }).join("");
+
+    if (currentPublicSpaceRoute() === "profile") {
+      renderProfileOwnPosts(list);
+    }
   }
 
   function ensureMenuButton(key, label, adminOnly) {
@@ -524,33 +533,187 @@
       toggle.setAttribute("aria-label", shouldOpen ? "Close menu" : "Open menu");
     }
   }
+  function profileBadgeItems(user) {
+    const source = user || {};
+    const items = [];
+    const seen = new Set();
+
+    const pushBadge = (label, className) => {
+      const cleanLabel = String(label || "").trim();
+      const key = cleanLabel.toLowerCase();
+      if (!cleanLabel || seen.has(key)) return;
+      seen.add(key);
+      items.push({ label: cleanLabel, className: className || "" });
+    };
+
+    if (source.is_admin) pushBadge("Admin");
+    if (source.is_premium) pushBadge("Premium");
+
+    const customBadge = String(source.badge_label || "").trim();
+    const customKey = customBadge.toLowerCase();
+    if (customBadge && !["admin", "premium", "active"].includes(customKey)) {
+      pushBadge(customBadge);
+    }
+
+    if (source.is_disabled) pushBadge("Disabled", "is-danger");
+
+    return items;
+  }
+
+  function renderProfileBadges(user) {
+    const badges = profileBadgeItems(user);
+    if (!badges.length) return "";
+
+    return `
+      <div class="ps-control-chip-row ps-profile-badges" aria-label="Profile badges">
+        ${badges.map(badge => `<span class="ps-status-pill ${escapeHtml(badge.className)}">${escapeHtml(badge.label)}</span>`).join("")}
+      </div>
+    `;
+  }
+
+  function isCurrentUserPost(post) {
+    if (!currentUser || !post) return false;
+
+    const author = post.author || {};
+    const currentId = currentUser.id ? String(currentUser.id) : "";
+    const authorId = author.id ? String(author.id) : "";
+
+    if (currentId && authorId && currentId === authorId) return true;
+
+    return normalizeUsername(author.username) === normalizeUsername(currentUser.username);
+  }
+
+  function currentUserPosts(posts) {
+    return (Array.isArray(posts) ? posts : [])
+      .filter(isCurrentUserPost)
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  }
+
+  function renderProfilePostCard(post) {
+    const hiddenLabel = post.is_hidden ? `<span>Hidden</span>` : "";
+    const heartLabel = post.hearted_by_me ? "Hearted" : "Heart";
+    const manageButtons = post.can_manage
+      ? `<button type="button" data-ps-delete-post="${escapeHtml(post.id)}">Delete</button>`
+      : "";
+    const adminButtons = isAdminMode
+      ? `<button type="button" data-ps-toggle-hidden="${escapeHtml(post.id)}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide" : "Hide"}</button>`
+      : "";
+
+    return `
+      <article class="ps-post-card ps-profile-post-card ${post.is_hidden ? "is-hidden-by-admin" : ""}" data-post-id="${escapeHtml(post.id)}">
+        <div class="ps-post-meta">
+          <strong>@${escapeHtml(currentUser.username || "user")}</strong>
+          <span>${[hiddenLabel, escapeHtml(formatDate(post.created_at))].filter(Boolean).join(" ")}</span>
+        </div>
+        <p>${escapeHtml(post.body)}</p>
+        <div class="ps-post-actions">
+          <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} · ${Number(post.heart_count || 0)}</button>
+          <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">Comment · ${Number(post.comment_count || 0)}</button>
+          ${manageButtons}
+          ${adminButtons}
+        </div>
+      </article>
+    `;
+  }
+
+  function renderProfileOwnPosts(posts) {
+    const listNode = root.querySelector("[data-ps-profile-post-list]");
+    const totalNode = root.querySelector("[data-ps-profile-post-total]");
+    if (!listNode) return;
+
+    const ownPosts = currentUserPosts(posts || latestPublicSpacePosts);
+
+    if (totalNode) {
+      totalNode.textContent = `${ownPosts.length} ${ownPosts.length === 1 ? "post" : "posts"}`;
+    }
+
+    if (!currentUser) {
+      listNode.innerHTML = `
+        <article class="ps-profile-empty">
+          <strong>Login required.</strong>
+          <span>Create or login to your Public Space account to see your profile posts.</span>
+        </article>
+      `;
+      return;
+    }
+
+    if (!ownPosts.length) {
+      listNode.innerHTML = `
+        <article class="ps-profile-empty">
+          <strong>No posts on your profile yet.</strong>
+          <span>Use the profile composer above to start your own post series.</span>
+        </article>
+      `;
+      return;
+    }
+
+    listNode.innerHTML = ownPosts.map(renderProfilePostCard).join("");
+  }
+
+  function updateProfileComposerCounter(form) {
+    if (!form) return;
+    const textarea = form.querySelector("textarea[name='post']");
+    const counter = form.querySelector("[data-ps-profile-post-count]");
+    const button = form.querySelector("button[type='submit']");
+    const length = textarea ? textarea.value.length : 0;
+
+    if (counter) counter.textContent = `${length}/${LIMITS.postMax}`;
+    if (button) button.disabled = length < 1 || length > LIMITS.postMax;
+  }
+
   function renderProfileScreen() {
     const user = currentUser || {};
-    const chips = [
-      user.is_admin ? "Admin" : "",
-      user.is_premium ? "Premium" : "",
-      user.badge_label ? user.badge_label : "",
-      user.is_disabled ? "Disabled" : "Active"
-    ].filter(Boolean);
+    const username = user.username || "guest";
+    const initial = String(username || "@").charAt(0).toUpperCase() || "@";
+    const profileIntro = currentUser
+      ? `@${username}'s posts and profile composer.`
+      : "Login to see your profile.";
 
     openControlScreen(
       "Profile",
-      currentUser ? `Logged in as @${user.username}.` : "You are not logged in.",
+      profileIntro,
       `
-        <div class="ps-control-card">
-          <strong>@${escapeHtml(user.username || "guest")}</strong>
-          <span>${currentUser ? "Public Space account" : "Create or login to use Public Space."}</span>
-          <div class="ps-control-chip-row">
-            ${chips.map(chip => `<span class="ps-status-pill">${escapeHtml(chip)}</span>`).join("")}
+        <section class="ps-profile-page" aria-label="Public Space profile">
+          <header class="ps-profile-hero">
+            <div class="ps-profile-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
+            <div class="ps-profile-heading">
+              <strong>@${escapeHtml(username)}</strong>
+              <span>Public Space profile</span>
+              ${renderProfileBadges(user)}
+            </div>
+          </header>
+
+          ${currentUser ? `
+            <form class="ps-profile-composer" data-ps-profile-composer novalidate>
+              <label>
+                <span>What's on your mind, @${escapeHtml(username)}?</span>
+                <textarea name="post" maxlength="${LIMITS.postMax}" rows="4" placeholder="Share something from your own space..."></textarea>
+              </label>
+              <div class="ps-profile-composer-footer">
+                <small data-ps-profile-post-count>0/${LIMITS.postMax}</small>
+                <button type="submit" disabled>Post</button>
+              </div>
+              <p class="ps-message" data-ps-profile-message></p>
+            </form>
+          ` : `
+            <article class="ps-profile-empty">
+              <strong>You are not logged in.</strong>
+              <span>Login or create an account to post on your profile.</span>
+            </article>
+          `}
+
+          <div class="ps-profile-posts-head">
+            <strong>Your posts</strong>
+            <span data-ps-profile-post-total>0 posts</span>
           </div>
-        </div>
-        <div class="ps-control-card">
-          <strong>Account notes</strong>
-          <span>Username, premium, badge, disable/enable, and password/PIN reset are managed from admin user controls.</span>
-        </div>
+          <div class="ps-profile-post-list" data-ps-profile-post-list></div>
+        </section>
       `,
-      "Account"
+      "Profile"
     );
+
+    renderProfileOwnPosts(latestPublicSpacePosts);
+    updateProfileComposerCounter(root.querySelector("[data-ps-profile-composer]"));
   }
 
   function renderSettingsScreen() {
@@ -837,21 +1000,27 @@
   }
 
   async function loadPosts(delayMs) {
-    if (!feed) return;
+    if (!feed) return [];
 
-    window.setTimeout(async () => {
-      try {
-        setFeedStatus("Loading posts...");
-        const posts = await rpc("list_public_space_posts", {
-          input_session_token: sessionToken() || null
-        });
-        renderPosts(posts);
-        setFeedStatus("");
-      } catch (error) {
-        renderEmptyFeed("Could not load posts yet.");
-        setFeedStatus(getErrorMessage(error));
-      }
-    }, delayMs || 0);
+    return new Promise(resolve => {
+      window.setTimeout(async () => {
+        try {
+          setFeedStatus("Loading posts...");
+          const posts = await rpc("list_public_space_posts", {
+            input_session_token: sessionToken() || null
+          });
+          const list = Array.isArray(posts) ? posts : [];
+          renderPosts(list);
+          setFeedStatus("");
+          resolve(list);
+        } catch (error) {
+          latestPublicSpacePosts = [];
+          renderEmptyFeed("Could not load posts yet.");
+          setFeedStatus(getErrorMessage(error));
+          resolve([]);
+        }
+      }, delayMs || 0);
+    });
   }
 
   async function restoreSession() {
@@ -1062,6 +1231,49 @@
       setFeedStatus(getErrorMessage(error));
     } finally {
       if (postButton) postButton.disabled = false;
+    }
+  }
+
+  async function handleProfileComposerSubmit(form) {
+    const textarea = form ? form.querySelector("textarea[name='post']") : null;
+    const button = form ? form.querySelector("button[type='submit']") : null;
+    const messageNode = form ? form.querySelector("[data-ps-profile-message]") : null;
+    const body = textarea ? textarea.value.trim() : "";
+
+    if (!currentSession || !currentSession.session_token) {
+      showAuth("login");
+      return;
+    }
+
+    if (!body) {
+      setMessage(messageNode, "Write something first.", "error");
+      return;
+    }
+
+    if (body.length > LIMITS.postMax) {
+      setMessage(messageNode, "Post can only be up to 1,000 characters.", "error");
+      return;
+    }
+
+    try {
+      if (button) button.disabled = true;
+      setMessage(messageNode, "Posting to your profile...", "info");
+
+      await rpc("create_public_space_post", {
+        input_session_token: sessionToken(),
+        input_body: body,
+        input_visibility: "public"
+      });
+
+      if (textarea) textarea.value = "";
+      updateProfileComposerCounter(form);
+      const posts = await loadPosts();
+      renderProfileOwnPosts(posts);
+      setMessage(messageNode, "Posted to your profile.", "success");
+    } catch (error) {
+      setMessage(messageNode, getErrorMessage(error), "error");
+    } finally {
+      updateProfileComposerCounter(form);
     }
   }
 
@@ -1398,6 +1610,15 @@
   }
 
   async function handleAdminAction(event) {
+    const profilePostList = event.target.closest("[data-ps-profile-post-list]");
+    const profilePostAction = profilePostList
+      ? event.target.closest("[data-ps-heart-post], [data-ps-delete-post], [data-ps-toggle-hidden], [data-ps-comments-post]")
+      : null;
+
+    if (profilePostAction) {
+      await handleFeedClick(event);
+      return;
+    }
 
     const userActionButton = event.target.closest("[data-ps-user-action]");
     if (userActionButton) {
@@ -1495,6 +1716,24 @@
   if (composer) composer.addEventListener("submit", handleComposerSubmit);
   if (postTextarea) postTextarea.addEventListener("input", updateCounter);
   if (feed) feed.addEventListener("click", handleFeedClick);
+
+  function handleProfileComposerRootSubmit(event) {
+    const form = event.target.closest("[data-ps-profile-composer]");
+    if (!form) return;
+
+    event.preventDefault();
+    handleProfileComposerSubmit(form);
+  }
+
+  function handleProfileComposerRootInput(event) {
+    const form = event.target.closest("[data-ps-profile-composer]");
+    if (!form) return;
+
+    updateProfileComposerCounter(form);
+  }
+
+  root.addEventListener("submit", handleProfileComposerRootSubmit);
+  root.addEventListener("input", handleProfileComposerRootInput);
 
   window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
   window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);

@@ -7420,3 +7420,166 @@ body.ps-route-screen-active .ps-admin-close,
   display: none !important;
 }
 /* V2.0Q.62H remove routed-screen back buttons END */
+
+
+/* V2.0Q.62I profile page rebuild */
+.ps-profile-page {
+  display: grid !important;
+  gap: clamp(1rem, 2.5vw, 1.4rem) !important;
+}
+
+.ps-profile-hero {
+  display: flex !important;
+  align-items: center !important;
+  gap: clamp(0.9rem, 2.4vw, 1.25rem) !important;
+  padding: clamp(1rem, 2.7vw, 1.35rem) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.ps-profile-avatar {
+  width: clamp(4rem, 11vw, 5.6rem) !important;
+  height: clamp(4rem, 11vw, 5.6rem) !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  border: 1px solid rgba(255, 244, 251, 0.18) !important;
+  background: linear-gradient(135deg, rgba(255, 142, 209, 0.32), rgba(132, 96, 255, 0.22)) !important;
+  font-size: clamp(1.6rem, 5vw, 2.4rem) !important;
+  font-weight: 950 !important;
+  color: #fff4fb !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18) !important;
+}
+
+.ps-profile-heading {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 0.35rem !important;
+}
+
+.ps-profile-heading > strong {
+  font-size: clamp(1.55rem, 4vw, 2.35rem) !important;
+  line-height: 1 !important;
+  color: #fff4fb !important;
+  word-break: break-word !important;
+}
+
+.ps-profile-heading > span {
+  color: rgba(255, 244, 251, 0.72) !important;
+}
+
+.ps-profile-badges {
+  margin-top: 0.25rem !important;
+}
+
+.ps-profile-composer,
+.ps-profile-empty,
+.ps-profile-posts-head {
+  border-radius: 22px !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.ps-profile-composer {
+  display: grid !important;
+  gap: 0.85rem !important;
+  padding: clamp(1rem, 2.7vw, 1.25rem) !important;
+}
+
+.ps-profile-composer label {
+  display: grid !important;
+  gap: 0.62rem !important;
+  margin: 0 !important;
+}
+
+.ps-profile-composer label > span {
+  color: rgba(255, 244, 251, 0.82) !important;
+  font-weight: 850 !important;
+}
+
+.ps-profile-composer textarea {
+  width: 100% !important;
+  min-height: 7rem !important;
+  resize: vertical !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background: rgba(8, 8, 18, 0.42) !important;
+  color: #fff4fb !important;
+  padding: 0.95rem 1rem !important;
+  font: inherit !important;
+  outline: none !important;
+}
+
+.ps-profile-composer textarea:focus {
+  border-color: rgba(255, 142, 209, 0.5) !important;
+  box-shadow: 0 0 0 4px rgba(255, 142, 209, 0.12) !important;
+}
+
+.ps-profile-composer-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.8rem !important;
+  flex-wrap: wrap !important;
+}
+
+.ps-profile-composer-footer small {
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-weight: 800 !important;
+}
+
+.ps-profile-composer-footer button {
+  width: auto !important;
+  min-width: 7rem !important;
+}
+
+.ps-profile-posts-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 0.8rem !important;
+  padding: 0.9rem 1rem !important;
+}
+
+.ps-profile-posts-head strong {
+  color: #fff4fb !important;
+  font-size: clamp(1rem, 2.4vw, 1.15rem) !important;
+}
+
+.ps-profile-posts-head span,
+.ps-profile-empty span {
+  color: rgba(255, 244, 251, 0.68) !important;
+}
+
+.ps-profile-post-list {
+  display: grid !important;
+  gap: 0.9rem !important;
+}
+
+.ps-profile-empty {
+  display: grid !important;
+  gap: 0.35rem !important;
+  padding: clamp(1rem, 2.7vw, 1.25rem) !important;
+}
+
+.ps-profile-empty strong {
+  color: #fff4fb !important;
+}
+
+.ps-profile-post-card {
+  margin: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .ps-profile-hero {
+    align-items: flex-start !important;
+  }
+
+  .ps-profile-avatar {
+    width: 3.75rem !important;
+    height: 3.75rem !important;
+  }
+}
+/* V2.0Q.62I profile page rebuild END */
