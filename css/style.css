@@ -7207,3 +7207,83 @@ input[data-ps-pin-only] {
   }
 }
 /* V2.0Q.62E separate admin modals END */
+
+/* V2.0Q.62F routed public space screens */
+.ps-space-heading[hidden],
+.ps-compose-trigger[hidden],
+.ps-feed-card[hidden] {
+  display: none !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-tools.ps-admin-screen,
+.public-space-root.ps-route-screen-active .ps-admin-tools.ps-control-screen {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  height: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+  overflow: visible !important;
+  align-content: start !important;
+  box-sizing: border-box !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-tools.ps-admin-screen[hidden],
+.public-space-root.ps-route-screen-active .ps-admin-tools.ps-control-screen[hidden] {
+  display: none !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-screen-top {
+  position: static !important;
+  top: auto !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-close {
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  padding: 0.7rem 1rem !important;
+  border-radius: 999px !important;
+  font-size: 0 !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-close::before {
+  content: "← Back";
+  font-size: 0.95rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-results,
+.public-space-root.ps-route-screen-active .ps-control-results {
+  margin-top: clamp(1rem, 2vw, 1.35rem) !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-info-grid {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)) !important;
+}
+
+.public-space-root.ps-route-screen-active .ps-admin-tool-grid {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .public-space-root.ps-route-screen-active .ps-admin-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-space-root.ps-route-screen-active .ps-admin-screen-top {
+    display: grid !important;
+  }
+
+  .public-space-root.ps-route-screen-active .ps-admin-close {
+    justify-self: start !important;
+  }
+}
+/* V2.0Q.62F routed public space screens END */

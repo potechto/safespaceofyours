@@ -685,6 +685,131 @@
     adminTools.setAttribute("aria-hidden", "true");
   }
 
+
+  function normalizePublicSpaceRoute(route) {
+    const cleanRoute = String(route || "home").replace(/^#/, "").trim().toLowerCase();
+
+    const allowedRoutes = new Set([
+      "home",
+      "profile",
+      "settings",
+      "notifications",
+      "admin-overview",
+      "admin-users",
+      "admin-posts",
+      "admin-reports",
+      "admin-space-settings"
+    ]);
+
+    return allowedRoutes.has(cleanRoute) ? cleanRoute : "home";
+  }
+
+  function currentPublicSpaceRoute() {
+    return normalizePublicSpaceRoute(window.location.hash || "home");
+  }
+
+  function publicSpaceHomeNodes() {
+    return [
+      root.querySelector(".ps-space-heading"),
+      root.querySelector("[data-ps-open-compose]"),
+      root.querySelector(".ps-feed-card")
+    ].filter(Boolean);
+  }
+
+  function setPublicSpaceHomeVisible(visible) {
+    publicSpaceHomeNodes().forEach(node => {
+      node.hidden = !visible;
+    });
+  }
+
+  function setPublicSpaceRouteMode(route) {
+    const cleanRoute = normalizePublicSpaceRoute(route);
+    const isHomeRoute = cleanRoute === "home";
+
+    document.body.classList.toggle("ps-route-screen-active", !isHomeRoute);
+    root.classList.toggle("ps-route-screen-active", !isHomeRoute);
+    root.dataset.psRoute = cleanRoute;
+
+    setPublicSpaceHomeVisible(isHomeRoute);
+  }
+
+  async function renderPublicSpaceRoute(route) {
+    const cleanRoute = normalizePublicSpaceRoute(route);
+
+    if (cleanRoute === "home") {
+      setPublicSpaceRouteMode("home");
+      closeAdminScreen();
+      closeControlScreen();
+      return;
+    }
+
+    if (cleanRoute === "profile") {
+      setPublicSpaceRouteMode(cleanRoute);
+      closeAdminScreen();
+      renderProfileScreen();
+      return;
+    }
+
+    if (cleanRoute === "settings") {
+      setPublicSpaceRouteMode(cleanRoute);
+      closeAdminScreen();
+      renderSettingsScreen();
+      return;
+    }
+
+    if (cleanRoute === "notifications") {
+      setPublicSpaceRouteMode(cleanRoute);
+      closeAdminScreen();
+      renderNotificationsScreen();
+      return;
+    }
+
+    const adminRoutes = {
+      "admin-overview": "overview",
+      "admin-users": "users",
+      "admin-posts": "posts",
+      "admin-reports": "reports",
+      "admin-space-settings": "settings"
+    };
+
+    if (adminRoutes[cleanRoute]) {
+      if (!isAdminMode) {
+        setPublicSpaceRouteMode("home");
+        closeAdminScreen();
+        closeControlScreen();
+        setFeedStatus("Login with a Public Space admin account first.");
+        return;
+      }
+
+      setPublicSpaceRouteMode(cleanRoute);
+      closeControlScreen();
+      openAdminScreen(adminRoutes[cleanRoute]);
+      return;
+    }
+
+    setPublicSpaceRouteMode("home");
+  }
+
+  function navigatePublicSpaceRoute(route, options = {}) {
+    const cleanRoute = normalizePublicSpaceRoute(route);
+    const baseUrl = `${window.location.pathname}${window.location.search}`;
+    const nextUrl = cleanRoute === "home" ? baseUrl : `${baseUrl}#${cleanRoute}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+    if (currentUrl !== nextUrl) {
+      if (options.replace) {
+        window.history.replaceState({}, "", nextUrl);
+      } else {
+        window.history.pushState({}, "", nextUrl);
+      }
+    }
+
+    return renderPublicSpaceRoute(cleanRoute);
+  }
+
+  function renderCurrentPublicSpaceRoute() {
+    return renderPublicSpaceRoute(currentPublicSpaceRoute());
+  }
   function showAuth(mode) {
     const nextMode = mode === "login" ? "login" : "register";
 
@@ -751,6 +876,7 @@
       saveSession(currentSession);
 
       await showMainSpace(`Welcome back, @${data.user.username}.`);
+      await renderCurrentPublicSpaceRoute();
     } catch (error) {
       clearSession();
       showAuth("login");
@@ -833,6 +959,7 @@
       saveSession(data);
       form.reset();
       await showMainSpace(mode === "register" ? "Account created." : "Logged in.");
+      await renderCurrentPublicSpaceRoute();
     } catch (error) {
       setMessage(authMessage, getErrorMessage(error), "error");
     } finally {
@@ -1273,13 +1400,13 @@
   async function handleAdminAction(event) {
     const controlCloseButton = event.target.closest("[data-ps-control-close]");
     if (controlCloseButton) {
-      closeControlScreen();
+      navigatePublicSpaceRoute("home", { replace: true });
       return;
     }
 
     const closeButton = event.target.closest("[data-ps-admin-close]");
     if (closeButton) {
-      closeAdminScreen();
+      navigatePublicSpaceRoute("home", { replace: true });
       return;
     }
 
@@ -1380,6 +1507,8 @@
   if (postTextarea) postTextarea.addEventListener("input", updateCounter);
   if (feed) feed.addEventListener("click", handleFeedClick);
 
+  window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
+  window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);
   if (menuToggle && menu) {
     menuToggle.addEventListener("click", () => {
       setMenuOpen(menu.hidden);
@@ -1392,32 +1521,32 @@
       if (!item) return;
 
       if (item.dataset.psMenuItem === "profile") {
-        renderProfileScreen();
+        navigatePublicSpaceRoute("profile");
       }
 
       if (item.dataset.psMenuItem === "settings") {
-        renderSettingsScreen();
+        navigatePublicSpaceRoute("settings");
       }
 
 
       if (item.dataset.psMenuItem === "admin") {
-        openAdminScreen("overview");
+        navigatePublicSpaceRoute("admin-overview");
       }
 
       if (item.dataset.psMenuItem === "admin-users") {
-        openAdminScreen("users");
+        navigatePublicSpaceRoute("admin-users");
       }
 
       if (item.dataset.psMenuItem === "admin-posts") {
-        openAdminScreen("posts");
+        navigatePublicSpaceRoute("admin-posts");
       }
 
       if (item.dataset.psMenuItem === "admin-reports") {
-        openAdminScreen("reports");
+        navigatePublicSpaceRoute("admin-reports");
       }
 
       if (item.dataset.psMenuItem === "admin-space-settings") {
-        openAdminScreen("settings");
+        navigatePublicSpaceRoute("admin-space-settings");
       }
 
       setMenuOpen(false);
@@ -1447,7 +1576,7 @@
 
   if (bellButton) {
     bellButton.addEventListener("click", () => {
-      renderNotificationsScreen();
+      navigatePublicSpaceRoute("notifications");
     });
   }
 
