@@ -804,8 +804,12 @@
       }
     }
 
-    return renderPublicSpaceRoute(cleanRoute);
+    const routeRender = renderPublicSpaceRoute(cleanRoute);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+    return routeRender;
   }
+
+  // Q62G scroll routed screen to top
 
   function renderCurrentPublicSpaceRoute() {
     return renderPublicSpaceRoute(currentPublicSpaceRoute());

@@ -7287,3 +7287,123 @@ input[data-ps-pin-only] {
   }
 }
 /* V2.0Q.62F routed public space screens END */
+
+/* V2.0Q.62G force inline routed screens */
+
+/* Route pages must behave like normal same-page screens, not modal/fixed overlays. */
+body.ps-route-screen-active [data-ps-control-screen],
+body.ps-route-screen-active [data-ps-admin-tools],
+body.ps-route-screen-active .ps-control-screen,
+body.ps-route-screen-active .ps-admin-tools.ps-admin-screen {
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+  overflow: visible !important;
+  align-content: start !important;
+  box-sizing: border-box !important;
+}
+
+/* Keep hidden routed screens hidden. */
+body.ps-route-screen-active [data-ps-control-screen][hidden],
+body.ps-route-screen-active [data-ps-admin-tools][hidden],
+body.ps-route-screen-active .ps-control-screen[hidden],
+body.ps-route-screen-active .ps-admin-tools.ps-admin-screen[hidden] {
+  display: none !important;
+}
+
+/* Hide feed/home content while inside a routed screen. */
+body.ps-route-screen-active .ps-space-heading[hidden],
+body.ps-route-screen-active .ps-compose-trigger[hidden],
+body.ps-route-screen-active .ps-feed-card[hidden] {
+  display: none !important;
+}
+
+/* Make the routed screen look like a page card, not a pop-up modal. */
+body.ps-route-screen-active .ps-admin-tools.ps-admin-screen,
+body.ps-route-screen-active .ps-control-screen {
+  border-radius: 28px !important;
+  padding: clamp(1rem, 3vw, 1.35rem) !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.060), rgba(255, 255, 255, 0.030)),
+    rgba(255, 255, 255, 0.035) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: blur(22px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.15) !important;
+}
+
+/* Header inside routed screen should not be sticky/floating. */
+body.ps-route-screen-active .ps-admin-screen-top {
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Close X becomes a normal Back button. */
+body.ps-route-screen-active .ps-admin-close {
+  position: static !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  padding: 0.7rem 1rem !important;
+  border-radius: 999px !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+
+body.ps-route-screen-active .ps-admin-close::before {
+  content: "Back";
+  font-size: 0.95rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Admin menu choices inside the old admin panel should stay hidden;
+   hamburger menu is now the screen router. */
+body.ps-route-screen-active .ps-admin-tools.ps-admin-screen .ps-admin-tool-grid {
+  display: none !important;
+}
+
+body.ps-route-screen-active .ps-admin-results,
+body.ps-route-screen-active .ps-control-results {
+  margin-top: clamp(1rem, 2vw, 1.35rem) !important;
+}
+
+body.ps-route-screen-active .ps-admin-info-grid {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)) !important;
+}
+
+@media (max-width: 720px) {
+  body.ps-route-screen-active .ps-admin-screen-top {
+    display: grid !important;
+  }
+
+  body.ps-route-screen-active .ps-admin-close {
+    justify-self: start !important;
+  }
+
+  body.ps-route-screen-active .ps-admin-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* V2.0Q.62G force inline routed screens END */
