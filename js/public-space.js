@@ -343,6 +343,15 @@
     return String(value || "").padStart(2, "0");
   }
 
+  function monthLabels() {
+    return ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  }
+
+  function monthDisplayLabel(month) {
+    const index = Number(month || 0) - 1;
+    return monthLabels()[index] || "Month";
+  }
+
   function datePartsFromKey(dateKey) {
     const clean = String(dateKey || "").trim();
     const match = clean.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
@@ -382,10 +391,9 @@
   }
 
   function monthOptions() {
-    const labels = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return labels.map((label, index) => {
+    return monthLabels().map((label, index) => {
       const value = padDatePart(index + 1);
-      return `<option value="${value}">${label}</option>`;
+      return `<button type="button" data-ps-calendar-combo-option="month" data-value="${value}">${label}</button>`;
     }).join("");
   }
 
@@ -393,7 +401,7 @@
     const start = filterStartYear();
     return Array.from({ length: Math.max(1, 2040 - start + 1) }, (_, index) => {
       const value = String(start + index);
-      return `<option value="${value}">${value}</option>`;
+      return `<button type="button" data-ps-calendar-combo-option="year" data-value="${value}">${value}</button>`;
     }).join("");
   }
 
@@ -401,10 +409,43 @@
     return dateKeyFromParts(month, day, year);
   }
 
+  function setCalendarComboValue(filter, type, value) {
+    if (!filter) return;
+
+    const input = filter.querySelector(`[data-ps-filter-${type}]`);
+    const label = filter.querySelector(`[data-ps-calendar-combo-label="${type}"]`);
+    const menu = filter.querySelector(`[data-ps-calendar-combo-menu="${type}"]`);
+
+    if (input) input.value = value || "";
+
+    if (label) {
+      label.textContent = type === "month"
+        ? monthDisplayLabel(value)
+        : String(value || defaultFilterYear());
+    }
+
+    if (menu) {
+      menu.querySelectorAll("[data-ps-calendar-combo-option]").forEach(button => {
+        button.classList.toggle("is-selected", button.dataset.value === String(value || ""));
+      });
+    }
+  }
+
+  function closeCalendarComboMenus(filter) {
+    const scope = filter || root;
+    scope.querySelectorAll("[data-ps-calendar-combo-menu]").forEach(menu => {
+      menu.hidden = true;
+    });
+    scope.querySelectorAll("[data-ps-calendar-combo-toggle]").forEach(button => {
+      button.setAttribute("aria-expanded", "false");
+    });
+  }
+
   function ensurePostFilterControls() {
     const feedCard = root.querySelector(".ps-feed-card") || (feed ? feed.closest("section, article, div") : null);
     if (!feedCard || feedCard.querySelector("[data-ps-post-filter]")) return;
 
+    const parts = datePartsFromKey("");
     const filter = document.createElement("div");
     filter.className = "ps-post-filter ps-post-filter-compact";
     filter.setAttribute("data-ps-post-filter", "");
@@ -422,12 +463,27 @@
       <div class="ps-post-filter-custom-tray" data-ps-post-filter-custom-tray hidden>
         <div class="ps-post-calendar" data-ps-post-calendar>
           <div class="ps-post-calendar-top">
-            <select data-ps-filter-month aria-label="Month">
-              ${monthOptions()}
-            </select>
-            <select data-ps-filter-year aria-label="Year">
-              ${yearOptions()}
-            </select>
+            <div class="ps-calendar-combo" data-ps-calendar-combo="month">
+              <button type="button" class="ps-calendar-combo-toggle" data-ps-calendar-combo-toggle aria-haspopup="listbox" aria-expanded="false">
+                <span data-ps-calendar-combo-label="month">${monthDisplayLabel(parts.month)}</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+              <input type="hidden" data-ps-filter-month value="${parts.month}" />
+              <div class="ps-calendar-combo-menu" data-ps-calendar-combo-menu="month" hidden role="listbox">
+                ${monthOptions()}
+              </div>
+            </div>
+
+            <div class="ps-calendar-combo" data-ps-calendar-combo="year">
+              <button type="button" class="ps-calendar-combo-toggle" data-ps-calendar-combo-toggle aria-haspopup="listbox" aria-expanded="false">
+                <span data-ps-calendar-combo-label="year">${parts.year}</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+              <input type="hidden" data-ps-filter-year value="${parts.year}" />
+              <div class="ps-calendar-combo-menu" data-ps-calendar-combo-menu="year" hidden role="listbox">
+                ${yearOptions()}
+              </div>
+            </div>
           </div>
 
           <div class="ps-post-calendar-weekdays" aria-hidden="true">
@@ -483,13 +539,13 @@
   }
 
   function activeCalendarParts(filter) {
-    const monthSelect = filter ? filter.querySelector("[data-ps-filter-month]") : null;
-    const yearSelect = filter ? filter.querySelector("[data-ps-filter-year]") : null;
+    const monthInput = filter ? filter.querySelector("[data-ps-filter-month]") : null;
+    const yearInput = filter ? filter.querySelector("[data-ps-filter-year]") : null;
     const base = datePartsFromKey(filter?.dataset.psDraftDate || publicSpacePostFilter.date || "");
 
     return {
-      year: yearSelect ? (yearSelect.value || base.year || defaultFilterYear()) : (base.year || defaultFilterYear()),
-      month: monthSelect ? (monthSelect.value || base.month || padDatePart(new Date().getMonth() + 1)) : (base.month || padDatePart(new Date().getMonth() + 1)),
+      year: yearInput ? (yearInput.value || base.year || defaultFilterYear()) : (base.year || defaultFilterYear()),
+      month: monthInput ? (monthInput.value || base.month || padDatePart(new Date().getMonth() + 1)) : (base.month || padDatePart(new Date().getMonth() + 1)),
       selectedDate: filter?.dataset.psDraftDate || publicSpacePostFilter.date || ""
     };
   }
@@ -498,12 +554,12 @@
     if (!filter) return;
 
     const daysNode = filter.querySelector("[data-ps-calendar-days]");
-    const monthSelect = filter.querySelector("[data-ps-filter-month]");
-    const yearSelect = filter.querySelector("[data-ps-filter-year]");
-    if (!daysNode || !monthSelect || !yearSelect) return;
+    const monthInput = filter.querySelector("[data-ps-filter-month]");
+    const yearInput = filter.querySelector("[data-ps-filter-year]");
+    if (!daysNode || !monthInput || !yearInput) return;
 
-    const year = Number(yearSelect.value || defaultFilterYear());
-    const month = Number(monthSelect.value || padDatePart(new Date().getMonth() + 1));
+    const year = Number(yearInput.value || defaultFilterYear());
+    const month = Number(monthInput.value || padDatePart(new Date().getMonth() + 1));
     const selectedDate = filter.dataset.psDraftDate || publicSpacePostFilter.date || "";
     const todayKey = localDateKey(new Date());
     const firstDay = new Date(year, month - 1, 1).getDay();
@@ -547,16 +603,12 @@
     if (!filter) return;
 
     const parts = datePartsFromKey(publicSpacePostFilter.date || filter.dataset.psDraftDate || "");
-    const monthSelect = filter.querySelector("[data-ps-filter-month]");
-    const yearSelect = filter.querySelector("[data-ps-filter-year]");
+    const allowedYears = Array.from({ length: Math.max(1, 2040 - filterStartYear() + 1) }, (_, index) => String(filterStartYear() + index));
+    const safeYear = allowedYears.includes(parts.year) ? parts.year : defaultFilterYear();
+    const safeMonth = parts.month || padDatePart(new Date().getMonth() + 1);
 
-    if (monthSelect) monthSelect.value = parts.month || padDatePart(new Date().getMonth() + 1);
-
-    if (yearSelect) {
-      yearSelect.innerHTML = yearOptions();
-      const allowedYears = Array.from(yearSelect.options).map(option => option.value);
-      yearSelect.value = allowedYears.includes(parts.year) ? parts.year : defaultFilterYear();
-    }
+    setCalendarComboValue(filter, "month", safeMonth);
+    setCalendarComboValue(filter, "year", safeYear);
 
     if (publicSpacePostFilter.date) {
       filter.dataset.psDraftDate = publicSpacePostFilter.date;
@@ -610,36 +662,31 @@
 
   function handlePostFilterChange(event) {
     const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
-    const datePart = event.target.closest("[data-ps-filter-month], [data-ps-filter-year]");
-    if (!modeSelect && !datePart) return;
+    if (!modeSelect) return;
 
     const filter = root.querySelector("[data-ps-post-filter]");
     const activeMode = filter ? filter.querySelector("[data-ps-post-filter-mode]") : null;
+    const selectedMode = activeMode ? activeMode.value : "all";
 
-    if (modeSelect) {
-      const selectedMode = activeMode ? activeMode.value : "all";
-
-      if (selectedMode === "custom") {
-        publicSpacePostFilter.mode = "custom";
-        syncPostFilterControls();
-        return;
-      }
-
-      publicSpacePostFilter.mode = selectedMode;
-      publicSpacePostFilter.date = "";
-      if (filter) filter.dataset.psDraftDate = "";
+    if (selectedMode === "custom") {
+      publicSpacePostFilter.mode = "custom";
       syncPostFilterControls();
-      refreshPostFilterView();
       return;
     }
 
-    if (datePart) {
-      if (filter) filter.dataset.psDraftDate = "";
-      renderCustomCalendarDays(filter);
+    publicSpacePostFilter.mode = selectedMode;
+    publicSpacePostFilter.date = "";
+    if (filter) {
+      filter.dataset.psDraftDate = "";
+      closeCalendarComboMenus(filter);
     }
+    syncPostFilterControls();
+    refreshPostFilterView();
   }
 
   function handlePostFilterClick(event) {
+    const comboToggle = event.target.closest("[data-ps-calendar-combo-toggle]");
+    const comboOption = event.target.closest("[data-ps-calendar-combo-option]");
     const dayButton = event.target.closest("[data-ps-calendar-day]");
     const cancelButton = event.target.closest("[data-ps-calendar-cancel]");
     const applyButton = event.target.closest("[data-ps-filter-date-apply]");
@@ -648,9 +695,34 @@
 
     const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
 
+    if (comboToggle) {
+      event.preventDefault();
+      const combo = comboToggle.closest("[data-ps-calendar-combo]");
+      const menu = combo ? combo.querySelector("[data-ps-calendar-combo-menu]") : null;
+      const willOpen = menu ? menu.hidden : false;
+
+      closeCalendarComboMenus(filter);
+
+      if (menu) menu.hidden = !willOpen;
+      comboToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      return;
+    }
+
+    if (comboOption) {
+      event.preventDefault();
+      const type = comboOption.dataset.psCalendarComboOption;
+      const value = comboOption.dataset.value || "";
+      setCalendarComboValue(filter, type, value);
+      filter.dataset.psDraftDate = "";
+      closeCalendarComboMenus(filter);
+      renderCustomCalendarDays(filter);
+      return;
+    }
+
     if (dayButton) {
       event.preventDefault();
       filter.dataset.psDraftDate = dayButton.dataset.psCalendarDay || "";
+      closeCalendarComboMenus(filter);
       renderCustomCalendarDays(filter);
       return;
     }
@@ -660,6 +732,7 @@
       publicSpacePostFilter.mode = "all";
       publicSpacePostFilter.date = "";
       filter.dataset.psDraftDate = "";
+      closeCalendarComboMenus(filter);
       if (modeSelect) modeSelect.value = "all";
       syncPostFilterControls();
       refreshPostFilterView();
@@ -673,6 +746,7 @@
       if (!nextDate) {
         filter.classList.add("is-date-invalid");
         window.setTimeout(() => filter.classList.remove("is-date-invalid"), 900);
+        closeCalendarComboMenus(filter);
         renderCustomCalendarDays(filter);
         return;
       }
@@ -681,6 +755,7 @@
       publicSpacePostFilter.mode = "custom";
       publicSpacePostFilter.date = nextDate;
       filter.dataset.psDraftDate = nextDate;
+      closeCalendarComboMenus(filter);
       if (modeSelect) modeSelect.value = "custom";
       syncPostFilterControls();
       refreshPostFilterView();
