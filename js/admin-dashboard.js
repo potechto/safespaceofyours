@@ -339,11 +339,44 @@ function setupPrivateAnalyticsCard() {
   loadWhenVisible();
 }
 
+function ensureAdminToastStack() {
+  let stack = document.querySelector("[data-admin-toast-stack]");
+
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.className = "admin-toast-stack";
+    stack.dataset.adminToastStack = "true";
+    stack.setAttribute("aria-live", "polite");
+    document.body.appendChild(stack);
+  }
+
+  return stack;
+}
+
+function showAdminToast(message, type = "") {
+  const cleanMessage = String(message || "").trim();
+
+  if (!cleanMessage || cleanMessage.toLowerCase().startsWith("loading")) return;
+
+  const stack = ensureAdminToastStack();
+  const toast = document.createElement("div");
+  toast.className = ["admin-toast", type ? "admin-toast-" + type : ""].filter(Boolean).join(" ");
+  toast.textContent = cleanMessage;
+  stack.appendChild(toast);
+
+  window.setTimeout(() => {
+    toast.classList.add("is-hiding");
+    window.setTimeout(() => toast.remove(), 240);
+  }, type === "error" ? 5200 : 3200);
+}
+
 function setDashboardMessage(message, type = "") {
-  if (!dashboardMessage) return;
-  dashboardMessage.textContent = message || "";
-  dashboardMessage.classList.remove("success", "error");
-  if (type) dashboardMessage.classList.add(type);
+  if (dashboardMessage) {
+    dashboardMessage.textContent = "";
+    dashboardMessage.className = "status-message admin-top-status";
+  }
+
+  showAdminToast(message, type);
 }
 
 function escapeAdminHTML(value) {
@@ -494,6 +527,10 @@ async function loadTargets(tableName, codeIdKey, ids) {
 
 
 
+function countAdminCharacters(value) {
+  return Array.from(String(value || "")).length;
+}
+
 function getInlinePieceTextValue(piece) {
   const value = piece.fullText || piece.text || piece.content || piece.body || piece.poem || "";
   if (Array.isArray(value)) return value.join("\n");
@@ -504,19 +541,15 @@ async function loadPieceCharacterCount(piece) {
   const protectedStatus = getProtectedTextStatus(piece.slug);
   if (protectedStatus.has_protected_text) return Number(protectedStatus.protected_characters) || 0;
   const inlineText = getInlinePieceTextValue(piece);
-  if (inlineText) return inlineText.length;
+  if (inlineText) return countAdminCharacters(inlineText);
 
   if (!piece.file) return 0;
-
-  if (pieceCharacterCountCache.has(piece.file)) {
-    return pieceCharacterCountCache.get(piece.file);
-  }
 
   try {
     const response = await fetch(piece.file, { cache: "no-store" });
     if (!response.ok) throw new Error(`Could not load ${piece.file}`);
     const text = await response.text();
-    const count = text.length;
+    const count = countAdminCharacters(text);
     pieceCharacterCountCache.set(piece.file, count);
     return count;
   } catch (error) {
@@ -781,13 +814,13 @@ async function saveProtectedTextFromRow(row, slug) {
 
     protectedTextStatusMap.set(String(slug || ""), {
       has_protected_text: true,
-      protected_characters: Number(data?.characters || body.length) || body.length,
+      protected_characters: Number(data?.characters || countAdminCharacters(body)) || countAdminCharacters(body),
       protected_updated_at: new Date().toISOString()
     });
 
     setProtectedTextRowMessage(
       row,
-      `Saved protected text (${formatCharacterCount(data?.characters || body.length)} chars).`,
+      `Saved protected text (${formatCharacterCount(data?.characters || countAdminCharacters(body))} chars).`,
       "success"
     );
 
@@ -1532,6 +1565,102 @@ async function syncMissingPieceSettings(sourcePieces = [], settingsRows = []) {
   return missingRows;
 }
 
+
+async function readPublicPieceTextForProtection(piece) {
+  const file = String(piece?.file || "").trim();
+
+  if (!file || !/^Resources\/.+\.txt$/i.test(file)) return "";
+
+  const response = await fetch(file, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Could not load public text file for "${piece?.title || piece?.slug || "selected piece"}".`);
+  }
+
+  return response.text();
+}
+
+async function saveProtectedTextBodyForPiece(slug, body) {
+  const cleanSlug = String(slug || "").trim();
+  const cleanBody = String(body || "");
+  const characters = countAdminCharacters(cleanBody);
+
+  if (!cleanSlug) throw new Error("Missing piece slug for protected text save.");
+
+  if (characters < 20) {
+    throw new Error("Protected full text must be at least 20 characters.");
+  }
+
+  const { data, error } = await adminClient.rpc("admin_save_piece_full_text", {
+    input_piece_slug: cleanSlug,
+    input_body: cleanBody
+  });
+
+  if (error) throw error;
+
+  const savedCharacters = Number(data?.characters || characters) || characters;
+
+  protectedTextStatusMap.set(cleanSlug, {
+    has_protected_text: true,
+    protected_characters: savedCharacters,
+    protected_updated_at: new Date().toISOString()
+  });
+
+  return savedCharacters;
+}
+
+async function resolveProtectedTextBodyForPaidPiece(piece, accessType, draftBody = "") {
+  if (normalizeAdminAccess(accessType) !== "paid") return "";
+
+  const slug = String(piece?.slug || "").trim();
+  const status = getProtectedTextStatus(slug);
+  const draft = String(draftBody || "");
+
+  if (countAdminCharacters(draft.trim()) >= 20) return draft;
+  if (status.has_protected_text && Number(status.protected_characters || 0) >= 20) return "";
+
+  const publicText = await readPublicPieceTextForProtection(piece);
+
+  if (countAdminCharacters(publicText.trim()) >= 20) return publicText;
+
+  throw new Error(`Blocked: "${piece?.title || slug || "This piece"}" is paid, but protected full text is missing. Paste/load the full story in Protected full text first.`);
+}
+
+async function autoProtectPaidPublicTextPieces(pieces = []) {
+  let syncedCount = 0;
+
+  for (const piece of pieces) {
+    const accessType = normalizeAdminAccess(piece?.access_type || piece?.access);
+
+    if (accessType !== "paid") continue;
+
+    const status = getProtectedTextStatus(piece.slug);
+    if (status.has_protected_text && Number(status.protected_characters || 0) >= 20) continue;
+
+    const publicText = await readPublicPieceTextForProtection(piece).catch(() => "");
+
+    if (countAdminCharacters(String(publicText || "").trim()) < 20) continue;
+
+    await saveProtectedTextBodyForPiece(piece.slug, publicText);
+    syncedCount += 1;
+  }
+
+  return syncedCount;
+}
+
+function updateProtectedTextDraftCounter(row) {
+  if (!row) return;
+
+  const input = getPieceProtectedTextInput(row);
+  if (!input) return;
+
+  const characters = countAdminCharacters(input.value);
+  const status = characters >= 20 ? "loading" : "warning";
+  const message = `Draft: ${formatCharacterCount(characters)} chars. Save protected text to update the public preview/count.`;
+
+  setProtectedTextRowMessage(row, message, status);
+}
+
 async function loadPieceSettings() {
   if (!pieceSettingsList) return;
 
@@ -1592,6 +1721,27 @@ async function loadPieceSettings() {
 
   latestAdminPieces = sortAdminPiecesNewestFirst(Array.from(mergedBySlug.values()));
   latestAdminPieces = await enrichPiecesWithCharacterCounts(latestAdminPieces);
+
+  const autoProtectedCount = await autoProtectPaidPublicTextPieces(latestAdminPieces);
+
+  if (autoProtectedCount > 0) {
+    await loadProtectedTextStatuses();
+
+    latestAdminPieces = latestAdminPieces.map(piece => {
+      const protectedStatus = getProtectedTextStatus(piece.slug);
+
+      return {
+        ...piece,
+        has_protected_text: protectedStatus.has_protected_text,
+        protected_characters: protectedStatus.protected_characters,
+        protected_updated_at: protectedStatus.protected_updated_at
+      };
+    });
+
+    latestAdminPieces = await enrichPiecesWithCharacterCounts(latestAdminPieces);
+    showAdminToast(`${autoProtectedCount} paid piece text synced for accurate previews/counts.`, "success");
+  }
+
   latestAdminPieces = sortAdminPiecesNewestFirst(latestAdminPieces);
 
   renderPiecePickers();
@@ -1691,6 +1841,15 @@ if (pieceControlSearchInput) {
     renderPieceSettingsList();
   });
 }
+
+document.addEventListener("input", event => {
+  const protectedTextInput = event.target.closest("[data-piece-protected-text]");
+
+  if (!protectedTextInput) return;
+
+  const row = protectedTextInput.closest("[data-piece-row]");
+  updateProtectedTextDraftCounter(row);
+});
 
 document.addEventListener("change", event => {
   const pieceTarget = event.target.closest("[data-piece-target]");
@@ -2069,6 +2228,7 @@ document.addEventListener("click", async event => {
       const result = await saveProtectedTextFromRow(row, slug);
 
       await loadProtectedTextStatuses();
+      await loadPieceSettings();
       setDashboardMessage(`Protected full text saved (${formatCharacterCount(result?.characters || 0)} chars).`, "success");
       return;
     }
@@ -2098,13 +2258,25 @@ document.addEventListener("click", async event => {
         preview_char_limit: Math.max(120, previewLimit)
       };
 
+      const protectedTextBodyForPaidSave = await resolveProtectedTextBodyForPaidPiece(sourcePiece, accessType, protectedTextValue);
+
       const { error } = await adminClient
         .from("piece_settings")
         .upsert(payload, { onConflict: "slug" });
 
       if (error) throw error;
+
+      if (protectedTextBodyForPaidSave) {
+        await saveProtectedTextBodyForPiece(slug, protectedTextBodyForPaidSave);
+      }
+
       await loadPieceSettings();
-      setDashboardMessage("Piece settings saved.", "success");
+      setDashboardMessage(
+        protectedTextBodyForPaidSave
+          ? "Piece settings saved. Protected text synced for accurate preview/count."
+          : "Piece settings saved.",
+        "success"
+      );
     }
 
 
