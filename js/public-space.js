@@ -77,6 +77,8 @@
   let publicSpaceNotifications = [];
   let notificationsLoading = false;
   let publicSpaceNotificationsLoadedAt = 0;
+  let publicSpaceLiveRefreshTimer = null;
+  let publicSpaceLiveRefreshInFlight = false;
   let composeMode = "create";
   let editingPostId = null;
   let activeCommentsPostId = "";
@@ -2291,6 +2293,85 @@
     badge.textContent = count > 9 ? "9+" : String(count);
   }
 
+  function normalizePublicSpaceNotificationsResult(result) {
+    if (Array.isArray(result)) return result;
+
+    if (typeof result === "string") {
+      try {
+        const parsed = JSON.parse(result);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn("Public Space notification JSON parse failed:", error);
+        return [];
+      }
+    }
+
+    if (result && typeof result === "object") {
+      if (Array.isArray(result.data)) return result.data;
+      if (Array.isArray(result.notifications)) return result.notifications;
+      if (Array.isArray(result.items)) return result.items;
+      if (Array.isArray(result.payload)) return result.payload;
+    }
+
+    return [];
+  }
+
+  function isNotificationPanelVisible() {
+    const panel = document.querySelector("[data-ps-notification-panel]");
+    return Boolean(panel && !panel.hidden);
+  }
+
+  function isNotificationsHistoryVisible() {
+    return Boolean(root.querySelector("[data-ps-notifications-history]"));
+  }
+
+  async function refreshPublicSpaceLiveData() {
+    if (!currentSession || !sessionToken() || publicSpaceLiveRefreshInFlight) return [];
+
+    publicSpaceLiveRefreshInFlight = true;
+
+    try {
+      const posts = await loadPosts(0);
+      await loadPublicSpaceNotifications({ silent: true });
+
+      if (activeCommentsPostId) {
+        try {
+          await refreshCommentsForPost(activeCommentsPostId);
+        } catch (error) {
+          console.warn("Live comments refresh failed:", error);
+        }
+      }
+
+      const ownProfileList = root.querySelector("[data-ps-profile-post-list]");
+      if (ownProfileList && typeof renderProfileOwnPosts === "function") {
+        renderProfileOwnPosts(posts);
+      }
+
+      return posts;
+    } finally {
+      publicSpaceLiveRefreshInFlight = false;
+    }
+  }
+
+  function startPublicSpaceLiveRefresh() {
+    if (publicSpaceLiveRefreshTimer) return;
+
+    publicSpaceLiveRefreshTimer = window.setInterval(() => {
+      if (document.hidden) return;
+      if (!currentSession || !sessionToken()) return;
+
+      refreshPublicSpaceLiveData();
+    }, 3500);
+  }
+
+  function stopPublicSpaceLiveRefresh() {
+    if (!publicSpaceLiveRefreshTimer) return;
+
+    window.clearInterval(publicSpaceLiveRefreshTimer);
+    publicSpaceLiveRefreshTimer = null;
+    publicSpaceLiveRefreshInFlight = false;
+  }
+
   async function loadPublicSpaceNotifications(options = {}) {
     if (!currentSession || !sessionToken()) {
       publicSpaceNotifications = [];
@@ -2308,7 +2389,7 @@
         input_session_token: sessionToken()
       });
 
-      publicSpaceNotifications = Array.isArray(result) ? result : [];
+      publicSpaceNotifications = normalizePublicSpaceNotificationsResult(result);
       publicSpaceNotificationsLoadedAt = Date.now();
       return publicSpaceNotifications;
     } catch (error) {
@@ -2320,7 +2401,14 @@
     } finally {
       notificationsLoading = false;
       updateNotificationBell();
-      renderNotificationPanel();
+
+      if (isNotificationPanelVisible()) {
+        renderNotificationPanel();
+      }
+
+      if (isNotificationsHistoryVisible()) {
+        renderNotificationsScreen();
+      }
     }
   }
 
@@ -2595,7 +2683,9 @@
     if (mainSpace) mainSpace.hidden = true;
 
     publicSpaceNotifications = [];
+    publicSpaceNotificationsLoadedAt = 0;
     updateNotificationBell();
+    stopPublicSpaceLiveRefresh();
   }
 
   async function showMainSpace(message) {
@@ -2611,6 +2701,8 @@
       loadPosts(message ? 250 : 0),
       loadPublicSpaceNotifications({ silent: true })
     ]);
+
+    startPublicSpaceLiveRefresh();
   }
 
   async function loadPosts(delayMs) {
@@ -3030,7 +3122,7 @@
         });
       }
 
-      await loadPosts();
+      await refreshPublicSpaceLiveData();
     } catch (error) {
       setFeedStatus(getErrorMessage(error));
     }
@@ -3498,6 +3590,13 @@
 
   document.addEventListener("click", handleNotificationPanelClick);
   document.addEventListener("keydown", handleNotificationPanelKeydown);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    if (!currentSession || !sessionToken()) return;
+
+    refreshPublicSpaceLiveData();
+  });
 
   window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
   window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);
