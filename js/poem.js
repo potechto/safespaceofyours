@@ -94,26 +94,76 @@ function getSavedUnlockCode(slug) {
   return String(saved.code || "").trim().toUpperCase();
 }
 
+function countReaderCharacters(value) {
+  return Array.from(String(value || "")).length;
+}
+
+function getProtectedReaderClient() {
+  return window.safeAdminClient
+    || window.safeSupabase
+    || window.safeSupabaseClient
+    || window.supabaseClient
+    || null;
+}
+
+async function waitForProtectedReaderClient(maxWaitMs = 3000) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt <= maxWaitMs) {
+    const client = getProtectedReaderClient();
+
+    if (client && typeof client.rpc === "function") {
+      return client;
+    }
+
+    await new Promise(resolve => window.setTimeout(resolve, 100));
+  }
+
+  return null;
+}
+
+async function fetchPublicPieceTextForPreview(poem) {
+  const file = String(poem?.file || "").trim();
+
+  if (!file || !/^Resources\/.+\.txt$/i.test(file)) return "";
+
+  try {
+    const response = await fetch(file, { cache: "no-store" });
+
+    if (!response.ok) return "";
+
+    return response.text();
+  } catch (error) {
+    console.warn("Public preview fallback failed:", error);
+    return "";
+  }
+}
+
 async function fetchProtectedPieceText(poem, code = "") {
   if (!poem || !poem.slug) {
     return {
       ok: false,
+      requires_unlock: true,
+      unlocked: false,
+      preview_text: "",
       message: "Missing piece details."
     };
   }
 
-  if (!window.safeAdminClient) {
+  const client = await waitForProtectedReaderClient();
+
+  if (!client) {
     return {
-      ok: true,
+      ok: false,
       requires_unlock: true,
       unlocked: false,
-      preview_text: poem.excerpt || "",
-      message: "Protected reader is loading. Please refresh and try again."
+      preview_text: "",
+      message: "Protected reader is still loading. Please refresh and try again."
     };
   }
 
   try {
-    const { data, error } = await window.safeAdminClient.rpc("get_public_piece_text", {
+    const { data, error } = await client.rpc("get_public_piece_text", {
       input_piece_slug: poem.slug,
       input_unlock_code: code || null
     });
@@ -121,17 +171,32 @@ async function fetchProtectedPieceText(poem, code = "") {
     if (error) {
       return {
         ok: false,
+        requires_unlock: true,
+        unlocked: false,
+        preview_text: "",
         message: error.message || "Protected piece could not be loaded."
       };
     }
 
-    return data || {
+    const result = data || {
       ok: false,
+      requires_unlock: true,
+      unlocked: false,
+      preview_text: "",
       message: "Protected piece could not be loaded."
     };
+
+    if (result.preview_text) {
+      result.preview_text = getPreviewText(result.preview_text, poem.preview_char_limit);
+    }
+
+    return result;
   } catch (error) {
     return {
       ok: false,
+      requires_unlock: true,
+      unlocked: false,
+      preview_text: "",
       message: error.message || "Protected piece could not be loaded."
     };
   }
@@ -278,21 +343,33 @@ function setupUnlockForm(poem) {
 
 function getPreviewText(text, limit) {
   const cleanText = String(text || "").trim();
-  const safeLimit = Number(limit) || 700;
+  const safeLimit = Math.max(120, Number(limit) || 700);
+  const characters = Array.from(cleanText);
 
-  if (cleanText.length <= safeLimit) return cleanText;
+  if (characters.length <= safeLimit) return cleanText;
 
-  return `${cleanText.slice(0, safeLimit).trim()}...`;
+  return `${characters.slice(0, safeLimit).join("").trim()}...`;
 }
 
-function buildPaidPreview(poem, fullText) {
+function buildPaidPreview(poem, fullText, options = {}) {
   const price = Number(poem.price) || 49;
   const previewText = getPreviewText(fullText, poem.preview_char_limit);
+  const previewCount = countReaderCharacters(previewText.replace(/\.\.\.$/, ""));
+  const previewLimit = Math.max(120, Number(poem.preview_char_limit) || 700);
+  const statusMessage = String(options.message || "").trim();
+  const previewHtml = previewText
+    ? formatPoem(previewText)
+    : `
+      <p class="reserved-piece">
+        ${escapeHTML(statusMessage || "Protected preview is not ready yet. Please refresh or check this piece in admin control.")}
+      </p>
+    `;
 
   return `
     <div class="paid-reader-shell">
-      <div class="paid-preview-text">
-        ${formatPoem(previewText)}
+      <div class="paid-preview-text" data-paid-preview-chars="${previewCount}" data-paid-preview-limit="${previewLimit}">
+        ${previewHtml}
+        ${previewCount ? `<p class="paid-preview-meta">Preview: ${previewCount.toLocaleString("en-PH")} of ${previewLimit.toLocaleString("en-PH")} chars</p>` : ""}
       </div>
 
       <div class="paid-reader-hero">
@@ -313,32 +390,18 @@ function buildPaidPreview(poem, fullText) {
       <div class="paid-reader-actions">
         <button class="reader-action-btn pay-to-view-btn" type="button" data-open-payment
           data-piece-title="${escapeHTML(poem.title || "")}"
-          data-piece-price="${escapeHTML(price)}"
-          data-piece-slug="${escapeHTML(poem.slug || "")}">
-          <span>Manual payment</span>
-          <strong>Open payment options</strong>
+          data-piece-slug="${escapeHTML(poem.slug || "")}"
+          data-piece-price="${escapeHTML(String(price))}">
+          Pay to View
         </button>
 
-        <div class="paid-reader-note">
-          <p><strong>After paying:</strong> send the screenshot/proof through the contact option in the payment panel.</p>
-          <p><strong>After confirmation:</strong> you'll receive an unlock code for this piece.</p>
-        </div>
-      </div>
-
-      <div class="reader-unlock-panel">
-        <div class="reader-unlock-copy">
-          <p class="eyebrow">Already have a code?</p>
-          <h3>Enter unlock code</h3>
-          <p>Use the code sent after confirmation. It unlocks the full piece on this browser/device.</p>
-        </div>
-
-        <form class="unlock-code-form" data-unlock-form>
-          <input data-unlock-code-input type="text" autocomplete="off" placeholder="Unlock code" />
-          <button class="reader-action-btn" type="submit">
-            <span>Code</span>
-            <strong>Unlock piece</strong>
-          </button>
-          <p class="unlock-message" data-unlock-message aria-live="polite"></p>
+        <form class="unlock-form" data-unlock-form>
+          <label>
+            Already have an unlock code?
+            <input type="text" name="unlockCode" placeholder="Enter code" autocomplete="off" />
+          </label>
+          <button class="reader-action-btn ghost" type="submit">Unlock</button>
+          <p class="unlock-message" data-unlock-message></p>
         </form>
       </div>
     </div>
@@ -484,7 +547,15 @@ async function loadPoem() {
         return;
       }
 
-      poemText.innerHTML = buildPaidPreview(poem, protectedResult.preview_text || poem.excerpt || "");
+      let paidPreviewText = protectedResult.preview_text || "";
+
+      if (!paidPreviewText) {
+        paidPreviewText = await fetchPublicPieceTextForPreview(poem);
+      }
+
+      poemText.innerHTML = buildPaidPreview(poem, paidPreviewText, {
+        message: protectedResult.message
+      });
       setupUnlockForm(poem);
       return;
     }
