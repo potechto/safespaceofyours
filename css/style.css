@@ -9284,3 +9284,66 @@ body.ps-route-screen-active .ps-feed-card {
   color: #fff !important;
 }
 /* V2.0Q.62AA direct calendar selection fix END */
+
+
+/* V2.0Q.62AB force calendar click capture */
+.public-space-body .ps-post-filter-custom-tray,
+.public-space-body .ps-post-calendar,
+.public-space-body .ps-post-calendar-days,
+.public-space-body .ps-post-calendar-day {
+  pointer-events: auto !important;
+}
+
+.public-space-body .ps-post-filter-custom-tray {
+  z-index: 3000 !important;
+}
+
+.public-space-body .ps-post-calendar {
+  position: relative !important;
+  z-index: 3001 !important;
+}
+
+.public-space-body .ps-post-calendar-days {
+  position: relative !important;
+  z-index: 3002 !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day {
+  position: relative !important;
+  z-index: 3003 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+  background: rgba(255, 244, 251, 0.045) !important;
+  border: 1px solid rgba(255, 244, 251, 0.085) !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-muted="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-past="true"] {
+  background: rgba(255, 244, 251, 0.022) !important;
+  border-color: rgba(255, 244, 251, 0.05) !important;
+  color: rgba(255, 244, 251, 0.34) !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-selected,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-draft-selected {
+  background: linear-gradient(135deg, rgba(143, 82, 171, 1), rgba(210, 105, 184, 1)) !important;
+  border-color: rgba(255, 244, 251, 0.78) !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 142, 209, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day::before,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day::after {
+  content: none !important;
+  display: none !important;
+}
+/* V2.0Q.62AB force calendar click capture END */

@@ -835,6 +835,48 @@
     applyPostFilter();
   }
 
+  function handleCalendarDayCaptureSelection(event) {
+    const dayButton = event.target.closest("[data-ps-calendar-day]");
+    if (!dayButton) return;
+
+    const filter = dayButton.closest("[data-ps-post-filter]") || root.querySelector("[data-ps-post-filter]");
+    if (!filter) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === "function") {
+      event.stopImmediatePropagation();
+    }
+
+    const dateKey = dayButton.dataset.psCalendarDay || "";
+    if (!dateKey) return;
+
+    selectCalendarDate(filter, dateKey);
+    closeCalendarComboMenus(filter);
+
+    filter.querySelectorAll("[data-ps-calendar-day]").forEach(button => {
+      const selected = button.dataset.psCalendarDay === dateKey;
+      button.dataset.selected = selected ? "true" : "false";
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+      button.classList.toggle("is-selected", selected);
+      button.classList.toggle("is-draft-selected", selected);
+
+      if (selected) {
+        button.style.setProperty("background", "linear-gradient(135deg, rgba(143, 82, 171, 1), rgba(210, 105, 184, 1))", "important");
+        button.style.setProperty("border-color", "rgba(255, 244, 251, 0.78)", "important");
+        button.style.setProperty("color", "#fff", "important");
+        button.style.setProperty("box-shadow", "0 0 0 2px rgba(255, 142, 209, 0.2), 0 12px 24px rgba(0, 0, 0, 0.3)", "important");
+        button.style.setProperty("transform", "translateY(-1px)", "important");
+      } else {
+        button.style.removeProperty("background");
+        button.style.removeProperty("border-color");
+        button.style.removeProperty("color");
+        button.style.removeProperty("box-shadow");
+        button.style.removeProperty("transform");
+      }
+    });
+  }
+
   function handlePostFilterClick(event) {
     const comboToggle = event.target.closest("[data-ps-calendar-combo-toggle]");
     const comboOption = event.target.closest("[data-ps-calendar-combo-option]");
@@ -3003,6 +3045,9 @@
   root.addEventListener("input", handleProfileComposerRootInput);
   root.addEventListener("change", handlePostFilterChange);
   root.addEventListener("click", handlePostFilterClick);
+
+  document.addEventListener("pointerdown", handleCalendarDayCaptureSelection, true);
+  document.addEventListener("click", handleCalendarDayCaptureSelection, true);
 
   if (bellButton) {
     bellButton.addEventListener("click", handleBellNotificationClick, true);
