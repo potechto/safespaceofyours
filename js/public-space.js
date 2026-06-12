@@ -2520,9 +2520,17 @@
       const action = actionButton.dataset.psNotificationAction;
 
       if (action === "mark-read") {
+        const isHistoryScreen = Boolean(actionButton.closest("[data-ps-notifications-history]"));
+
         await markAllPublicSpaceNotificationsRead();
         notificationPanelFilter = "all";
-        renderNotificationsScreen();
+
+        if (isHistoryScreen) {
+          renderNotificationsScreen();
+        } else {
+          renderNotificationPanel();
+        }
+
         return;
       }
 
