@@ -643,9 +643,7 @@
     const selectedDate = String(filter.dataset.psDraftDate || publicSpacePostFilter.date || "").trim();
     const todayKey = localDateKey(new Date());
 
-    if (titleNode) {
-      titleNode.textContent = `${monthDisplayLabel(safeMonth)} ${year}`;
-    }
+    if (titleNode) titleNode.textContent = `${monthDisplayLabel(safeMonth)} ${year}`;
 
     const firstDay = new Date(year, month - 1, 1).getDay();
     const totalDays = daysInMonth(month, year);
@@ -656,19 +654,11 @@
 
     for (let offset = firstDay - 1; offset >= 0; offset -= 1) {
       const day = previousTotalDays - offset;
-      cells.push({
-        day,
-        dateKey: calendarDateKey(previousYear, previousMonth, day),
-        muted: true
-      });
+      cells.push({ day, dateKey: calendarDateKey(previousYear, previousMonth, day), muted: true });
     }
 
     for (let day = 1; day <= totalDays; day += 1) {
-      cells.push({
-        day,
-        dateKey: calendarDateKey(year, month, day),
-        muted: false
-      });
+      cells.push({ day, dateKey: calendarDateKey(year, month, day), muted: false });
     }
 
     const nextMonth = month === 12 ? 1 : month + 1;
@@ -676,11 +666,7 @@
     let nextDay = 1;
 
     while (cells.length < 42) {
-      cells.push({
-        day: nextDay,
-        dateKey: calendarDateKey(nextYear, nextMonth, nextDay),
-        muted: true
-      });
+      cells.push({ day: nextDay, dateKey: calendarDateKey(nextYear, nextMonth, nextDay), muted: true });
       nextDay += 1;
     }
 
@@ -689,13 +675,15 @@
       const isToday = item.dateKey === todayKey;
       const isPast = item.dateKey < todayKey;
 
-      return `<button type="button"
-        class="ps-clean-calendar-day ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""} ${item.muted ? "is-muted" : ""} ${isPast ? "is-past" : ""}"
+      return `<label class="ps-clean-date-choice ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""} ${item.muted ? "is-muted" : ""} ${isPast ? "is-past" : ""}"
+        data-ps-clean-date-choice
         data-ps-calendar-day="${escapeHtml(item.dateKey)}"
         data-selected="${isSelected ? "true" : "false"}"
         data-muted="${item.muted ? "true" : "false"}"
-        data-past="${isPast ? "true" : "false"}"
-        aria-pressed="${isSelected ? "true" : "false"}">${item.day}</button>`;
+        data-past="${isPast ? "true" : "false"}">
+        <input class="ps-clean-date-radio" type="radio" name="ps-clean-calendar-date" value="${escapeHtml(item.dateKey)}" ${isSelected ? "checked" : ""} />
+        <span class="ps-clean-date-face">${item.day}</span>
+      </label>`;
     }).join("");
   }
 
@@ -714,7 +702,8 @@
 
   function readCustomDateParts(filter) {
     if (!filter) return "";
-    return String(filter.dataset.psDraftDate || "").trim();
+    const checked = filter.querySelector(".ps-clean-date-radio:checked");
+    return checked ? String(checked.value || "").trim() : String(filter.dataset.psDraftDate || "").trim();
   }
 
   function syncPostFilterControls() {
@@ -821,7 +810,7 @@
 
   function handlePostFilterClick(event) {
     const shiftButton = event.target.closest("[data-ps-clean-cal-shift]");
-    const dayButton = event.target.closest("[data-ps-calendar-day]");
+    const dateChoice = event.target.closest("[data-ps-clean-date-choice], .ps-clean-date-radio");
     const cancelButton = event.target.closest("[data-ps-calendar-cancel]");
     const applyButton = event.target.closest("[data-ps-filter-date-apply]");
     const filter = root.querySelector("[data-ps-post-filter]");
@@ -857,21 +846,27 @@
       return;
     }
 
-    if (dayButton) {
-      event.preventDefault();
-      event.stopPropagation();
+    if (dateChoice) {
+      const label = dateChoice.closest("[data-ps-clean-date-choice]");
+      const input = dateChoice.matches && dateChoice.matches(".ps-clean-date-radio")
+        ? dateChoice
+        : label?.querySelector(".ps-clean-date-radio");
 
-      const dateKey = dayButton.dataset.psCalendarDay || "";
+      if (!label || !input) return;
+
+      const dateKey = input.value || label.dataset.psCalendarDay || "";
       if (!dateKey) return;
 
+      input.checked = true;
       filter.dataset.psDraftDate = dateKey;
       filter.dataset.psCalendarOpen = "true";
 
-      filter.querySelectorAll("[data-ps-calendar-day]").forEach(button => {
-        const selected = button.dataset.psCalendarDay === dateKey;
-        button.dataset.selected = selected ? "true" : "false";
-        button.setAttribute("aria-pressed", selected ? "true" : "false");
-        button.classList.toggle("is-selected", selected);
+      filter.querySelectorAll("[data-ps-clean-date-choice]").forEach(item => {
+        const selected = item.dataset.psCalendarDay === dateKey;
+        item.dataset.selected = selected ? "true" : "false";
+        item.classList.toggle("is-selected", selected);
+        const radio = item.querySelector(".ps-clean-date-radio");
+        if (radio) radio.checked = selected;
       });
 
       return;

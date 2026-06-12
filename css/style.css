@@ -9517,3 +9517,124 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62AC clean calendar reset END */
+
+
+/* V2.0Q.62AD radio calendar final */
+.public-space-body .ps-post-filter-custom-tray {
+  width: min(18.75rem, calc(100vw - 2rem)) !important;
+  border-radius: 20px !important;
+}
+
+.public-space-body .ps-clean-calendar {
+  gap: 0.52rem !important;
+  padding: 0.72rem !important;
+}
+
+.public-space-body .ps-clean-calendar-head {
+  grid-template-columns: 1.95rem 1fr 1.95rem !important;
+  gap: 0.42rem !important;
+}
+
+.public-space-body .ps-clean-calendar-head strong {
+  min-height: 2.05rem !important;
+  border-radius: 13px !important;
+  font-size: 0.9rem !important;
+}
+
+.public-space-body .ps-clean-calendar-head button {
+  width: 1.95rem !important;
+  height: 1.95rem !important;
+  min-width: 1.95rem !important;
+  min-height: 1.95rem !important;
+  border-radius: 12px !important;
+  font-size: 1.1rem !important;
+}
+
+.public-space-body .ps-clean-calendar-weekdays,
+.public-space-body .ps-clean-calendar-days {
+  gap: 0.22rem !important;
+}
+
+.public-space-body .ps-clean-calendar-weekdays span {
+  font-size: 0.56rem !important;
+}
+
+.public-space-body .ps-clean-calendar-day {
+  display: none !important;
+}
+
+.public-space-body .ps-clean-date-choice {
+  display: block !important;
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  min-height: 1.72rem !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
+.public-space-body .ps-clean-date-radio {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 1px !important;
+  height: 1px !important;
+}
+
+.public-space-body .ps-clean-date-face {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 1.72rem !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255, 244, 251, 0.075) !important;
+  background: rgba(255, 244, 251, 0.035) !important;
+  color: rgba(255, 244, 251, 0.68) !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.12s ease !important;
+}
+
+.public-space-body .ps-clean-date-choice[data-muted="true"] .ps-clean-date-face,
+.public-space-body .ps-clean-date-choice[data-past="true"] .ps-clean-date-face {
+  background: rgba(255, 244, 251, 0.014) !important;
+  border-color: rgba(255, 244, 251, 0.04) !important;
+  color: rgba(255, 244, 251, 0.28) !important;
+}
+
+.public-space-body .ps-clean-date-choice.is-today:not(.is-selected) .ps-clean-date-face {
+  border-color: rgba(255, 244, 251, 0.25) !important;
+  color: rgba(255, 244, 251, 0.85) !important;
+}
+
+.public-space-body .ps-clean-date-radio:checked + .ps-clean-date-face,
+.public-space-body .ps-clean-date-choice[data-selected="true"] .ps-clean-date-face,
+.public-space-body .ps-clean-date-choice.is-selected .ps-clean-date-face {
+  background: linear-gradient(135deg, rgba(132, 73, 160, 1), rgba(205, 99, 180, 1)) !important;
+  border-color: rgba(255, 244, 251, 0.76) !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 142, 209, 0.16),
+    0 10px 20px rgba(0, 0, 0, 0.25) !important;
+  transform: translateY(-1px) !important;
+}
+
+.public-space-body .ps-clean-date-face::before,
+.public-space-body .ps-clean-date-face::after,
+.public-space-body .ps-clean-date-choice::before,
+.public-space-body .ps-clean-date-choice::after {
+  content: none !important;
+  display: none !important;
+}
+
+.public-space-body .ps-clean-calendar-actions {
+  padding-top: 0.1rem !important;
+}
+
+.public-space-body .ps-clean-calendar-actions button {
+  min-height: 1.9rem !important;
+  font-size: 0.78rem !important;
+}
+/* V2.0Q.62AD radio calendar final END */
