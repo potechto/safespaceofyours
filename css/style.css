@@ -8810,3 +8810,143 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62U square custom date picker polish END */
+
+
+/* V2.0Q.62V calendar card date filter */
+.public-space-body .ps-post-filter-custom-tray {
+  width: min(20rem, calc(100vw - 2.2rem)) !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border-radius: 22px !important;
+  background: rgba(29, 20, 38, 0.98) !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.35) !important;
+}
+
+.public-space-body .ps-post-calendar {
+  display: grid !important;
+  gap: 0.75rem !important;
+  padding: 0.9rem !important;
+}
+
+.public-space-body .ps-post-calendar-top {
+  display: grid !important;
+  grid-template-columns: 1fr 0.78fr !important;
+  gap: 0.65rem !important;
+}
+
+.public-space-body .ps-post-calendar-top select {
+  width: 100% !important;
+  min-height: 2.45rem !important;
+  height: 2.45rem !important;
+  border-radius: 13px !important;
+  padding: 0.45rem 0.8rem !important;
+  background: rgba(255, 244, 251, 0.055) !important;
+  color: #fff4fb !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  box-shadow: none !important;
+  font-size: 0.84rem !important;
+  font-weight: 850 !important;
+}
+
+.public-space-body .ps-post-calendar-weekdays,
+.public-space-body .ps-post-calendar-days {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 0.34rem !important;
+}
+
+.public-space-body .ps-post-calendar-weekdays span {
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.58rem !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.public-space-body .ps-post-calendar-day {
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  min-height: 2rem !important;
+  border-radius: 12px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: rgba(255, 244, 251, 0.9) !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 0.78rem !important;
+  font-weight: 850 !important;
+}
+
+.public-space-body .ps-post-calendar-day.is-muted {
+  color: rgba(255, 244, 251, 0.32) !important;
+}
+
+.public-space-body .ps-post-calendar-day.is-today {
+  border-color: rgba(255, 244, 251, 0.22) !important;
+  background: rgba(255, 244, 251, 0.07) !important;
+}
+
+.public-space-body .ps-post-calendar-day.is-selected {
+  background: linear-gradient(135deg, rgba(255, 142, 209, 0.95), rgba(118, 85, 184, 0.95)) !important;
+  color: #fff !important;
+  border-color: rgba(255, 244, 251, 0.42) !important;
+  box-shadow: 0 10px 24px rgba(255, 142, 209, 0.18) !important;
+}
+
+.public-space-body .ps-post-calendar-day:hover,
+.public-space-body .ps-post-calendar-day:focus-visible {
+  background: rgba(255, 244, 251, 0.11) !important;
+  color: #fff !important;
+}
+
+.public-space-body .ps-post-calendar-actions {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  padding-top: 0.15rem !important;
+}
+
+.public-space-body .ps-post-calendar-actions button {
+  width: auto !important;
+  min-height: 2.25rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0.35rem 0.25rem !important;
+  font-size: 0.84rem !important;
+  font-weight: 900 !important;
+}
+
+.public-space-body .ps-post-calendar-actions [data-ps-calendar-cancel] {
+  color: rgba(255, 244, 251, 0.58) !important;
+}
+
+.public-space-body .ps-post-calendar-actions [data-ps-filter-date-apply] {
+  color: #ff8ed1 !important;
+}
+
+.public-space-body .ps-post-date-parts,
+.public-space-body .ps-post-date-slash,
+.public-space-body [data-ps-filter-date-preview] {
+  display: none !important;
+}
+
+.public-space-body .ps-post-filter.is-date-invalid .ps-post-calendar {
+  box-shadow: 0 0 0 3px rgba(255, 91, 132, 0.12) inset !important;
+  border-radius: 18px !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-body .ps-post-filter-custom-tray {
+    width: 100% !important;
+  }
+
+  .public-space-body .ps-post-calendar-day {
+    min-height: 1.9rem !important;
+  }
+}
+/* V2.0Q.62V calendar card date filter END */

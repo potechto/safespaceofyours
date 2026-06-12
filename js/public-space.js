@@ -347,7 +347,12 @@
     const clean = String(dateKey || "").trim();
     const match = clean.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
     if (!match) {
-      return { year: defaultFilterYear(), month: "", day: "" };
+      const now = new Date();
+      return {
+        year: defaultFilterYear(),
+        month: padDatePart(now.getMonth() + 1),
+        day: ""
+      };
     }
 
     return { year: match[1], month: match[2], day: match[3] };
@@ -377,17 +382,10 @@
   }
 
   function monthOptions() {
-    const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const labels = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return labels.map((label, index) => {
       const value = padDatePart(index + 1);
       return `<option value="${value}">${label}</option>`;
-    }).join("");
-  }
-
-  function dayOptions(maxDays) {
-    return Array.from({ length: maxDays || 31 }, (_, index) => {
-      const value = padDatePart(index + 1);
-      return `<option value="${value}">${value}</option>`;
     }).join("");
   }
 
@@ -397,6 +395,10 @@
       const value = String(start + index);
       return `<option value="${value}">${value}</option>`;
     }).join("");
+  }
+
+  function calendarDateKey(year, month, day) {
+    return dateKeyFromParts(month, day, year);
   }
 
   function ensurePostFilterControls() {
@@ -418,22 +420,26 @@
       </label>
 
       <div class="ps-post-filter-custom-tray" data-ps-post-filter-custom-tray hidden>
-        <div class="ps-post-date-parts" aria-label="Choose custom date in month day year format">
-          <span class="ps-post-date-slash" aria-hidden="true">/</span>
-          <select data-ps-filter-month aria-label="Month">
-            <option value="">Mon</option>
-            ${monthOptions()}
-          </select>
-          <span class="ps-post-date-slash" aria-hidden="true">/</span>
-          <select data-ps-filter-day aria-label="Day">
-            <option value="">dd</option>
-            ${dayOptions(31)}
-          </select>
-          <span class="ps-post-date-slash" aria-hidden="true">/</span>
-          <select data-ps-filter-year aria-label="Year">
-            ${yearOptions()}
-          </select>
-          <button type="button" class="ps-post-filter-date-apply" data-ps-filter-date-apply aria-label="Apply custom date">➜</button>
+        <div class="ps-post-calendar" data-ps-post-calendar>
+          <div class="ps-post-calendar-top">
+            <select data-ps-filter-month aria-label="Month">
+              ${monthOptions()}
+            </select>
+            <select data-ps-filter-year aria-label="Year">
+              ${yearOptions()}
+            </select>
+          </div>
+
+          <div class="ps-post-calendar-weekdays" aria-hidden="true">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+
+          <div class="ps-post-calendar-days" data-ps-calendar-days aria-label="Choose day"></div>
+
+          <div class="ps-post-calendar-actions">
+            <button type="button" data-ps-calendar-cancel>Cancel</button>
+            <button type="button" data-ps-filter-date-apply>Confirm</button>
+          </div>
         </div>
       </div>
     `;
@@ -476,59 +482,99 @@
     return (Array.isArray(posts) ? posts : []).filter(postMatchesFilter);
   }
 
-  function syncCustomDateDayOptions(filter, preferredDay) {
+  function activeCalendarParts(filter) {
+    const monthSelect = filter ? filter.querySelector("[data-ps-filter-month]") : null;
+    const yearSelect = filter ? filter.querySelector("[data-ps-filter-year]") : null;
+    const base = datePartsFromKey(filter?.dataset.psDraftDate || publicSpacePostFilter.date || "");
+
+    return {
+      year: yearSelect ? (yearSelect.value || base.year || defaultFilterYear()) : (base.year || defaultFilterYear()),
+      month: monthSelect ? (monthSelect.value || base.month || padDatePart(new Date().getMonth() + 1)) : (base.month || padDatePart(new Date().getMonth() + 1)),
+      selectedDate: filter?.dataset.psDraftDate || publicSpacePostFilter.date || ""
+    };
+  }
+
+  function renderCustomCalendarDays(filter) {
     if (!filter) return;
 
+    const daysNode = filter.querySelector("[data-ps-calendar-days]");
     const monthSelect = filter.querySelector("[data-ps-filter-month]");
-    const daySelect = filter.querySelector("[data-ps-filter-day]");
     const yearSelect = filter.querySelector("[data-ps-filter-year]");
+    if (!daysNode || !monthSelect || !yearSelect) return;
 
-    const activeYear = yearSelect ? (yearSelect.value || defaultFilterYear()) : defaultFilterYear();
-    const activeMonth = monthSelect ? monthSelect.value : "";
-    const activeDay = preferredDay || (daySelect ? daySelect.value : "");
+    const year = Number(yearSelect.value || defaultFilterYear());
+    const month = Number(monthSelect.value || padDatePart(new Date().getMonth() + 1));
+    const selectedDate = filter.dataset.psDraftDate || publicSpacePostFilter.date || "";
+    const todayKey = localDateKey(new Date());
+    const firstDay = new Date(year, month - 1, 1).getDay();
+    const totalDays = daysInMonth(month, year);
+    const previousMonth = month === 1 ? 12 : month - 1;
+    const previousYear = month === 1 ? year - 1 : year;
+    const previousTotalDays = daysInMonth(previousMonth, previousYear);
+    const cells = [];
 
-    const maxDays = daysInMonth(activeMonth, activeYear);
-
-    if (daySelect) {
-      daySelect.innerHTML = `<option value="">dd</option>${dayOptions(maxDays)}`;
-      daySelect.value = Number(activeDay) <= maxDays ? activeDay : "";
+    for (let index = firstDay - 1; index >= 0; index -= 1) {
+      const day = previousTotalDays - index;
+      const dateKey = calendarDateKey(previousYear, previousMonth, day);
+      cells.push({ day, dateKey, muted: true });
     }
+
+    for (let day = 1; day <= totalDays; day += 1) {
+      const dateKey = calendarDateKey(year, month, day);
+      cells.push({ day, dateKey, muted: false });
+    }
+
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+
+    while (cells.length % 7 !== 0 || cells.length < 35) {
+      const day = cells.filter(item => item.muted && item.dateKey.startsWith(`${nextYear}-${padDatePart(nextMonth)}`)).length + 1;
+      const dateKey = calendarDateKey(nextYear, nextMonth, day);
+      cells.push({ day, dateKey, muted: true });
+      if (cells.length >= 42) break;
+    }
+
+    daysNode.innerHTML = cells.map(item => {
+      const selected = item.dateKey === selectedDate ? " is-selected" : "";
+      const today = item.dateKey === todayKey ? " is-today" : "";
+      const muted = item.muted ? " is-muted" : "";
+
+      return `<button type="button" class="ps-post-calendar-day${selected}${today}${muted}" data-ps-calendar-day="${escapeHtml(item.dateKey)}">${item.day}</button>`;
+    }).join("");
   }
 
   function hydrateCustomDateParts(filter) {
     if (!filter) return;
 
-    const parts = datePartsFromKey(publicSpacePostFilter.date);
+    const parts = datePartsFromKey(publicSpacePostFilter.date || filter.dataset.psDraftDate || "");
     const monthSelect = filter.querySelector("[data-ps-filter-month]");
-    const daySelect = filter.querySelector("[data-ps-filter-day]");
     const yearSelect = filter.querySelector("[data-ps-filter-year]");
+
+    if (monthSelect) monthSelect.value = parts.month || padDatePart(new Date().getMonth() + 1);
 
     if (yearSelect) {
       yearSelect.innerHTML = yearOptions();
-
       const allowedYears = Array.from(yearSelect.options).map(option => option.value);
       yearSelect.value = allowedYears.includes(parts.year) ? parts.year : defaultFilterYear();
     }
 
-    if (monthSelect) monthSelect.value = parts.month || "";
-
-    syncCustomDateDayOptions(filter, parts.day || "");
-
-    if (daySelect) {
-      daySelect.value = parts.day || "";
+    if (publicSpacePostFilter.date) {
+      filter.dataset.psDraftDate = publicSpacePostFilter.date;
+    } else if (!filter.dataset.psDraftDate) {
+      filter.dataset.psDraftDate = "";
     }
+
+    renderCustomCalendarDays(filter);
   }
 
   function readCustomDateParts(filter) {
-    const monthSelect = filter ? filter.querySelector("[data-ps-filter-month]") : null;
-    const daySelect = filter ? filter.querySelector("[data-ps-filter-day]") : null;
-    const yearSelect = filter ? filter.querySelector("[data-ps-filter-year]") : null;
+    if (!filter) return "";
 
-    return dateKeyFromParts(
-      monthSelect ? monthSelect.value : "",
-      daySelect ? daySelect.value : "",
-      yearSelect ? yearSelect.value : defaultFilterYear()
-    );
+    const draft = filter.dataset.psDraftDate || "";
+    if (datePartsFromKey(draft).day) return draft;
+
+    const parts = activeCalendarParts(filter);
+    return parts.selectedDate || "";
   }
 
   function syncPostFilterControls() {
@@ -564,7 +610,7 @@
 
   function handlePostFilterChange(event) {
     const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
-    const datePart = event.target.closest("[data-ps-filter-month], [data-ps-filter-day], [data-ps-filter-year]");
+    const datePart = event.target.closest("[data-ps-filter-month], [data-ps-filter-year]");
     if (!modeSelect && !datePart) return;
 
     const filter = root.querySelector("[data-ps-post-filter]");
@@ -581,22 +627,44 @@
 
       publicSpacePostFilter.mode = selectedMode;
       publicSpacePostFilter.date = "";
+      if (filter) filter.dataset.psDraftDate = "";
       syncPostFilterControls();
       refreshPostFilterView();
       return;
     }
 
     if (datePart) {
-      syncCustomDateDayOptions(filter);
+      if (filter) filter.dataset.psDraftDate = "";
+      renderCustomCalendarDays(filter);
     }
   }
 
   function handlePostFilterClick(event) {
+    const dayButton = event.target.closest("[data-ps-calendar-day]");
+    const cancelButton = event.target.closest("[data-ps-calendar-cancel]");
     const applyButton = event.target.closest("[data-ps-filter-date-apply]");
     const filter = root.querySelector("[data-ps-post-filter]");
     if (!filter) return;
 
     const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
+
+    if (dayButton) {
+      event.preventDefault();
+      filter.dataset.psDraftDate = dayButton.dataset.psCalendarDay || "";
+      renderCustomCalendarDays(filter);
+      return;
+    }
+
+    if (cancelButton) {
+      event.preventDefault();
+      publicSpacePostFilter.mode = "all";
+      publicSpacePostFilter.date = "";
+      filter.dataset.psDraftDate = "";
+      if (modeSelect) modeSelect.value = "all";
+      syncPostFilterControls();
+      refreshPostFilterView();
+      return;
+    }
 
     if (applyButton) {
       event.preventDefault();
@@ -605,13 +673,14 @@
       if (!nextDate) {
         filter.classList.add("is-date-invalid");
         window.setTimeout(() => filter.classList.remove("is-date-invalid"), 900);
-        syncCustomDateDayOptions(filter);
+        renderCustomCalendarDays(filter);
         return;
       }
 
       filter.classList.remove("is-date-invalid");
       publicSpacePostFilter.mode = "custom";
       publicSpacePostFilter.date = nextDate;
+      filter.dataset.psDraftDate = nextDate;
       if (modeSelect) modeSelect.value = "custom";
       syncPostFilterControls();
       refreshPostFilterView();
