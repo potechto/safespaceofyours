@@ -79,3 +79,58 @@
   outline: 2px solid rgba(255, 207, 230, 0.45);
   box-shadow: 0 0 0 6px rgba(255, 207, 230, 0.08);
 }
+
+
+/* Q63J-O silent live refresh + mobile filter polish
+   Scoped to public-space.html only through this CSS file. */
+.public-space-body .ps-post-filter-simple {
+  width: min(18rem, 100%);
+  max-width: 100%;
+}
+
+.public-space-body .ps-post-filter-simple .ps-post-filter-select-label {
+  width: 100%;
+}
+
+.public-space-body .ps-post-filter-simple [data-ps-post-filter-mode] {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-post-filter-simple {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    justify-items: stretch !important;
+    gap: 0.42rem !important;
+  }
+
+  .public-space-body .ps-post-filter-simple .ps-post-filter-select-label {
+    width: 100% !important;
+    display: grid !important;
+  }
+
+  .public-space-body .ps-post-filter-simple [data-ps-post-filter-mode] {
+    width: 100% !important;
+    min-height: 2.75rem !important;
+    border-radius: 999px !important;
+    text-align: center !important;
+    text-align-last: center !important;
+  }
+
+  .public-space-body .ps-notification-menu {
+    min-width: min(17rem, calc(100vw - 2rem)) !important;
+  }
+
+  .public-space-body .ps-notifications-history-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-space-body .ps-notifications-history-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}

@@ -79,6 +79,7 @@
   let publicSpaceNotificationsLoadedAt = 0;
   let publicSpaceLiveRefreshTimer = null;
   let publicSpaceLiveRefreshInFlight = false;
+  let publicSpaceLivePostsSnapshot = "";
   let composeMode = "create";
   let editingPostId = null;
   let activeCommentsPostId = "";
@@ -1794,6 +1795,7 @@
         <section class="ps-notifications-history" data-ps-notifications-history>
           <div class="ps-notifications-history-actions">
             <button type="button" data-ps-notification-action="mark-read">Mark all as read</button>
+            <button type="button" role="menuitem" data-ps-notification-action="clear">🧹 <span>Clear notifications</span></button>
             <button type="button" data-ps-notification-refresh>Refresh</button>
           </div>
           <div class="ps-notification-list ps-notifications-history-list">
@@ -2138,6 +2140,7 @@
           <button class="ps-notification-more" type="button" data-ps-notification-more aria-haspopup="menu" aria-expanded="false" aria-label="Notification options">•••</button>
           <div class="ps-notification-menu" data-ps-notification-menu hidden role="menu">
             <button type="button" role="menuitem" data-ps-notification-action="mark-read">✓ <span>Mark all as read</span></button>
+            <button type="button" role="menuitem" data-ps-notification-action="clear">🧹 <span>Clear notifications</span></button>
             <button type="button" role="menuitem" data-ps-notification-action="settings">⚙ <span>Notification settings</span></button>
             <button type="button" role="menuitem" data-ps-notification-action="open">▣ <span>Open Notifications</span></button>
           </div>
@@ -2293,6 +2296,22 @@
     badge.textContent = count > 9 ? "9+" : String(count);
   }
 
+  function getPublicSpaceLivePostsSnapshot(posts) {
+    try {
+      return JSON.stringify((Array.isArray(posts) ? posts : []).map(post => ({
+        id: post.id,
+        updated_at: post.updated_at,
+        heart_count: post.heart_count,
+        comment_count: post.comment_count,
+        hearted_by_me: post.hearted_by_me,
+        is_hidden: post.is_hidden,
+        is_deleted: post.is_deleted
+      })));
+    } catch (error) {
+      return String(Date.now());
+    }
+  }
+
   function normalizePublicSpaceNotificationsResult(result) {
     if (Array.isArray(result)) return result;
 
@@ -2331,7 +2350,19 @@
     publicSpaceLiveRefreshInFlight = true;
 
     try {
-      const posts = await loadPosts(0);
+      const result = await rpc("list_public_space_posts", {
+        input_session_token: sessionToken()
+      });
+      const posts = Array.isArray(result) ? result : [];
+      const nextSnapshot = getPublicSpaceLivePostsSnapshot(posts);
+
+      latestPublicSpacePosts = posts;
+
+      if (nextSnapshot !== publicSpaceLivePostsSnapshot) {
+        publicSpaceLivePostsSnapshot = nextSnapshot;
+        renderPosts(posts);
+      }
+
       await loadPublicSpaceNotifications({ silent: true });
 
       if (activeCommentsPostId) {
@@ -2422,6 +2453,26 @@
         renderNotificationsScreen();
       }
     }, 0);
+  }
+
+  async function clearPublicSpaceNotifications() {
+    if (!currentSession || !sessionToken()) return;
+
+    await rpc("clear_public_space_notifications", {
+      input_session_token: sessionToken()
+    });
+
+    publicSpaceNotifications = [];
+    publicSpaceNotificationsLoadedAt = Date.now();
+    updateNotificationBell();
+
+    if (isNotificationPanelVisible()) {
+      renderNotificationPanel();
+    }
+
+    if (isNotificationsHistoryVisible()) {
+      renderNotificationsScreen();
+    }
   }
 
   async function markAllPublicSpaceNotificationsRead() {
@@ -2627,6 +2678,21 @@
         const isHistoryScreen = Boolean(actionButton.closest("[data-ps-notifications-history]"));
 
         await markAllPublicSpaceNotificationsRead();
+        notificationPanelFilter = "all";
+
+        if (isHistoryScreen) {
+          renderNotificationsScreen();
+        } else {
+          renderNotificationPanel();
+        }
+
+        return;
+      }
+
+      if (action === "clear") {
+        const isHistoryScreen = Boolean(actionButton.closest("[data-ps-notifications-history]"));
+
+        await clearPublicSpaceNotifications();
         notificationPanelFilter = "all";
 
         if (isHistoryScreen) {
