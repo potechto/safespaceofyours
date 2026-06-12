@@ -559,7 +559,8 @@
   }
 
   function commentCountText(post) {
-    return `Comment · ${commentCount(post)}`;
+    const count = commentCount(post);
+    return count > 0 ? `💬 · ${count}` : "💬";
   }
 
   function syncPostCommentCount(postId, count) {
@@ -670,7 +671,7 @@
     const actionMenu = actions.length
       ? `
         <div class="ps-comment-menu" data-ps-comment-menu data-open="false">
-          <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false">•••</button>
+          <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><span></span><span></span><span></span></span></button>
           <div class="ps-comment-menu-popover" role="menu">
             ${actions.join("")}
           </div>
@@ -1393,7 +1394,7 @@
 
       const commentButton = card.querySelector("[data-ps-comments-post]");
       if (commentButton) {
-        commentButton.textContent = `\uD83D\uDCAC · ${Number(post.comment_count || 0)}`;
+        commentButton.textContent = commentCountText(post);
         commentButton.setAttribute("aria-label", "View comments");
       }
 

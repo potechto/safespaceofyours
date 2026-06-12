@@ -10195,3 +10195,114 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.63D comment action menu and badge layout END */
+
+
+/* V2.0Q.63E badge tooltip and comment icon consistency V2 */
+.public-space-body .ps-comments-card,
+.public-space-body .ps-comments-list,
+.public-space-body .ps-comment-item,
+.public-space-body .ps-comment-meta,
+.public-space-body .ps-comment-author-line,
+.public-space-body .ps-comment-author-line .ps-post-badges {
+  overflow: visible !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-post-badges {
+  position: relative !important;
+  z-index: 120 !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-chip.is-mini {
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  min-width: 1.35rem !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-chip.is-mini img {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-text {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-chip[data-ps-badge-label]::after {
+  display: block !important;
+  content: attr(data-ps-badge-label) !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: calc(100% + 0.45rem) !important;
+  transform: translateX(-50%) translateY(0.25rem) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: max-content !important;
+  max-width: 11rem !important;
+  padding: 0.34rem 0.54rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.18) !important;
+  background: rgba(21, 12, 27, 0.98) !important;
+  color: #fff4fb !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42) !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  z-index: 7000 !important;
+  transition: opacity 0.16s ease, transform 0.16s ease !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-chip[data-ps-badge-label]:hover::after,
+.public-space-body .ps-comment-author-line .ps-badge-chip[data-ps-badge-label]:focus-visible::after,
+.public-space-body .ps-comment-author-line .ps-badge-chip[data-ps-badge-label].is-label-open::after {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.public-space-body .ps-comment-menu {
+  z-index: 6000 !important;
+}
+
+.public-space-body .ps-comment-menu-toggle {
+  letter-spacing: normal !important;
+  font-size: 1rem !important;
+  overflow: visible !important;
+}
+
+.public-space-body .ps-comment-menu-dots {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.15rem !important;
+}
+
+.public-space-body .ps-comment-menu-dots span {
+  display: block !important;
+  width: 0.22rem !important;
+  height: 0.22rem !important;
+  border-radius: 999px !important;
+  background: currentColor !important;
+}
+
+.public-space-body .ps-comment-menu-popover {
+  z-index: 7000 !important;
+  top: calc(100% + 0.45rem) !important;
+  right: 0 !important;
+}
+
+.public-space-body [data-ps-comments-post] {
+  white-space: nowrap !important;
+}
+/* V2.0Q.63E badge tooltip and comment icon consistency V2 END */
