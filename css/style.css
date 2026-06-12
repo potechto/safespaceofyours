@@ -8190,3 +8190,136 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62O compact post filter END */
+
+
+/* V2.0Q.62P feed filter and dot menu polish */
+
+/* Keep Latest posts title + filter in one compact row, not as a huge layout block. */
+.public-space-body .ps-feed-card {
+  position: relative !important;
+}
+
+.public-space-body .ps-feed-card-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.85rem !important;
+  margin: 0 0 0.85rem !important;
+}
+
+.public-space-body .ps-feed-card-head > h1,
+.public-space-body .ps-feed-card-head > h2,
+.public-space-body .ps-feed-card-head > h3,
+.public-space-body .ps-feed-card-head > strong {
+  margin: 0 !important;
+  max-width: none !important;
+  flex: 1 1 auto !important;
+}
+
+.public-space-body .ps-post-filter.ps-post-filter-compact,
+.public-space-body .ps-post-filter {
+  position: static !important;
+  inset: auto !important;
+  width: clamp(9.5rem, 20vw, 12rem) !important;
+  max-width: 12rem !important;
+  min-width: 9.5rem !important;
+  display: grid !important;
+  gap: 0.22rem !important;
+  margin: 0 !important;
+  z-index: 35 !important;
+  flex: 0 0 auto !important;
+}
+
+.public-space-body .ps-post-filter label,
+.public-space-body .ps-post-filter .ps-post-filter-select-label {
+  display: grid !important;
+  gap: 0.18rem !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-post-filter label span {
+  font-size: 0.58rem !important;
+  line-height: 1 !important;
+  letter-spacing: 0.09em !important;
+  margin: 0 !important;
+  opacity: 0.76 !important;
+}
+
+.public-space-body .ps-post-filter select {
+  width: 100% !important;
+  min-height: 2.02rem !important;
+  height: 2.02rem !important;
+  border-radius: 999px !important;
+  padding: 0.34rem 1.75rem 0.34rem 0.72rem !important;
+  font-size: 0.78rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body .ps-post-filter-date-input {
+  position: absolute !important;
+  right: 0 !important;
+  top: 2.4rem !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0.01 !important;
+  pointer-events: none !important;
+}
+
+.public-space-body .ps-feed-card > h2,
+.public-space-body .ps-feed-card > h3,
+.public-space-body .ps-feed-card > strong {
+  max-width: none !important;
+}
+
+/* Cleaner 3-dot menu options. */
+.ps-post-more-menu {
+  min-width: 9.25rem !important;
+  padding: 0.38rem !important;
+  gap: 0.16rem !important;
+  border-radius: 15px !important;
+  background: rgba(23, 14, 31, 0.98) !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.34) !important;
+}
+
+.ps-post-more-menu button {
+  min-height: 2.08rem !important;
+  width: 100% !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  border-radius: 10px !important;
+  padding: 0.48rem 0.58rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 760 !important;
+  line-height: 1.15 !important;
+  color: rgba(255, 244, 251, 0.92) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.ps-post-more-menu button:hover,
+.ps-post-more-menu button:focus-visible {
+  color: #fff !important;
+  background: rgba(255, 244, 251, 0.09) !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-body .ps-feed-card-head {
+    display: grid !important;
+    gap: 0.55rem !important;
+  }
+
+  .public-space-body .ps-post-filter.ps-post-filter-compact,
+  .public-space-body .ps-post-filter {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+}
+/* V2.0Q.62P feed filter and dot menu polish END */

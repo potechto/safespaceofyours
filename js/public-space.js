@@ -369,8 +369,18 @@
     const headings = Array.from(feedCard.querySelectorAll("h1, h2, h3, strong"));
     const heading = headings.find(node => /latest posts/i.test(node.textContent || "")) || headings[0];
 
-    if (heading) heading.insertAdjacentElement("afterend", filter);
-    else feedCard.prepend(filter);
+    if (heading) {
+      let row = heading.closest(".ps-feed-card-head");
+      if (!row) {
+        row = document.createElement("div");
+        row.className = "ps-feed-card-head";
+        heading.insertAdjacentElement("beforebegin", row);
+        row.appendChild(heading);
+      }
+      row.appendChild(filter);
+    } else {
+      feedCard.prepend(filter);
+    }
   }
 
   function postMatchesFilter(post) {
@@ -429,15 +439,12 @@
 
       if (selectedMode === "custom") {
         publicSpacePostFilter.mode = "custom";
-
         if (activeDate && activeDate.value) {
           publicSpacePostFilter.date = activeDate.value;
-          refreshPostFilterView();
-          return;
         }
-
         syncPostFilterControls();
-        window.setTimeout(() => openPostFilterDatePicker(activeDate), 0);
+        refreshPostFilterView();
+        openPostFilterDatePicker(activeDate);
         return;
       }
 
@@ -458,6 +465,15 @@
 
       refreshPostFilterView();
     }
+  }
+
+  function handlePostFilterClick(event) {
+    const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
+    if (!modeSelect || modeSelect.value !== "custom") return;
+
+    const filter = modeSelect.closest("[data-ps-post-filter]");
+    const dateInput = filter ? filter.querySelector("[data-ps-post-filter-date]") : null;
+    openPostFilterDatePicker(dateInput);
   }
 
   function renderPosts(posts) {
@@ -2328,6 +2344,7 @@
   root.addEventListener("submit", handleProfileComposerRootSubmit);
   root.addEventListener("input", handleProfileComposerRootInput);
   root.addEventListener("change", handlePostFilterChange);
+  root.addEventListener("click", handlePostFilterClick);
 
   window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
   window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);
