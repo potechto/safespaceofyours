@@ -1,5 +1,17 @@
 window.POEMS = [
   {
+    slug: "lag",
+    title: "Love is a Gamble",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Love",
+    cover: "Resources/lag.jpg",
+    file: "Resources/lag.txt",
+    published_at: "2026-06-12T18:55:27+08:00",
+    excerpt: "Tama naman ako, diba? Ang pag-ibig ay sugal. Dahil kagaya ng sugal, ito'y walang kasiguraduhan."
+  },
+  {
     slug: "adreamtochooseortofollow",
     title: "A Dream to Choose or to Follow?",
     type: "spoken-poetry",

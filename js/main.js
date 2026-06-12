@@ -8,7 +8,7 @@ const year = document.querySelector("#year");
 const PIECES_LOAD_MORE_STEP = 8;
 
 let activeCategory = "All";
-let visiblePoems = Array.isArray(window.POEMS) ? window.POEMS : [];
+let visiblePoems = sortPoemsNewestFirst(Array.isArray(window.POEMS) ? window.POEMS : []);
 let visiblePieceCount = getInitialPieceLimit();
 
 if (year) {
@@ -54,6 +54,16 @@ function escapeHTML(value) {
 
 function getInitialPieceLimit() {
   return window.matchMedia && window.matchMedia("(max-width: 760px)").matches ? 6 : 12;
+}
+
+function piecePublishedTime(poem) {
+  const value = poem && (poem.published_at || poem.publishedAt || poem.created_at || poem.date);
+  const timestamp = value ? Date.parse(value) : 0;
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function sortPoemsNewestFirst(poems) {
+  return [...(Array.isArray(poems) ? poems : [])].sort((a, b) => piecePublishedTime(b) - piecePublishedTime(a));
 }
 
 function resetPiecesLoadLimit() {
@@ -1466,7 +1476,7 @@ async function syncPublicPieceSettings() {
   const settings = await window.SafePieceSettings.loadSettings();
   if (!settings.length) return;
 
-  visiblePoems = window.SafePieceSettings.mergePoemsWithSettings(window.POEMS, settings, { includeDisabled: false });
+  visiblePoems = sortPoemsNewestFirst(window.SafePieceSettings.mergePoemsWithSettings(window.POEMS, settings, { includeDisabled: false }));
   renderFilters();
   renderPoems();
 }
