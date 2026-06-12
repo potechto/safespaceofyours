@@ -2086,16 +2086,21 @@ document.addEventListener("click", async event => {
       // V2.0Q.60J: protected text admin UI is parked, so normal piece saves stay available.
 
       const payload = {
+        slug,
+        title: sourcePiece.title || slug,
+        category: sourcePiece.category || "Uncategorized",
+        type: contentLabel,
         is_enabled: isEnabled,
         content_label: contentLabel,
         access_type: accessType,
         price: accessType === "paid" ? (Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : 49) : null,
+        preview_mode: sourcePiece.preview_mode || "chars",
         preview_char_limit: Math.max(120, previewLimit)
       };
 
       const { error } = await adminClient
         .from("piece_settings")
-        .upsert({ slug, ...payload }, { onConflict: "slug" });
+        .upsert(payload, { onConflict: "slug" });
 
       if (error) throw error;
       await loadPieceSettings();
