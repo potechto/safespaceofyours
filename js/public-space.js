@@ -76,6 +76,7 @@
   let notificationPanelFilter = "all";
   let publicSpaceNotifications = [];
   let notificationsLoading = false;
+  let publicSpaceNotificationsLoadedAt = 0;
   let composeMode = "create";
   let editingPostId = null;
   let activeCommentsPostId = "";
@@ -1810,6 +1811,8 @@
       `,
       "Bell"
     );
+
+    refreshNotificationsScreenAfterLoad();
   }
 
   function ensureAdminTools() {
@@ -2306,6 +2309,7 @@
       });
 
       publicSpaceNotifications = Array.isArray(result) ? result : [];
+      publicSpaceNotificationsLoadedAt = Date.now();
       return publicSpaceNotifications;
     } catch (error) {
       if (!options.silent) {
@@ -2318,6 +2322,18 @@
       updateNotificationBell();
       renderNotificationPanel();
     }
+  }
+
+  function refreshNotificationsScreenAfterLoad() {
+    if (!currentUser || notificationsLoading || publicSpaceNotificationsLoadedAt) return;
+
+    window.setTimeout(async () => {
+      await loadPublicSpaceNotifications({ silent: true });
+
+      if (root.querySelector("[data-ps-notifications-history]")) {
+        renderNotificationsScreen();
+      }
+    }, 0);
   }
 
   async function markAllPublicSpaceNotificationsRead() {
@@ -2542,6 +2558,7 @@
 
       if (action === "open") {
         closeNotificationPanel();
+        await loadPublicSpaceNotifications({ silent: true });
         navigatePublicSpaceRoute("notifications");
         return;
       }
@@ -3553,11 +3570,8 @@
     });
   }
 
-  if (bellButton) {
-    bellButton.addEventListener("click", () => {
-      navigatePublicSpaceRoute("notifications");
-    });
-  }
+  // Bell click is handled by handleBellNotificationClick only.
+  // Use the panel "Open Notifications" action for the full notification history.
 
   root.addEventListener("click", handleAdminAction);
   root.addEventListener("click", handleBadgeLabelToggle);
