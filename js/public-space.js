@@ -517,21 +517,25 @@
     }
   }
 
+  function activePostFilterDateKey() {
+    const mode = publicSpacePostFilter.mode || "all";
+
+    if (mode === "today") return offsetDateKey(0);
+    if (mode === "yesterday") return offsetDateKey(-1);
+    if (mode === "custom") return String(publicSpacePostFilter.date || "").trim();
+
+    return "";
+  }
+
   function postMatchesFilter(post) {
     const mode = publicSpacePostFilter.mode || "all";
     if (mode === "all") return true;
 
+    const targetDate = activePostFilterDateKey();
+    if (!targetDate) return true;
+
     const postDate = localDateKey(post && post.created_at);
-    if (!postDate) return false;
-
-    if (mode === "today") return postDate === offsetDateKey(0);
-    if (mode === "yesterday") return postDate === offsetDateKey(-1);
-    if (mode === "custom") {
-      if (!publicSpacePostFilter.date) return true;
-      return postDate === publicSpacePostFilter.date;
-    }
-
-    return true;
+    return postDate === targetDate;
   }
 
   function applyPostFilter(posts) {
@@ -560,7 +564,9 @@
 
     const year = Number(yearInput.value || defaultFilterYear());
     const month = Number(monthInput.value || padDatePart(new Date().getMonth() + 1));
-    const selectedDate = filter.dataset.psDraftDate || publicSpacePostFilter.date || "";
+    const draftDate = filter.dataset.psDraftDate || "";
+    const appliedDate = publicSpacePostFilter.date || "";
+    const selectedDate = draftDate || appliedDate;
     const todayKey = localDateKey(new Date());
     const firstDay = new Date(year, month - 1, 1).getDay();
     const totalDays = daysInMonth(month, year);
@@ -591,11 +597,13 @@
     }
 
     daysNode.innerHTML = cells.map(item => {
-      const selected = item.dateKey === selectedDate ? " is-selected" : "";
+      const selected = item.dateKey === selectedDate ? " is-selected is-draft-selected" : "";
+      const applied = item.dateKey === appliedDate ? " is-applied" : "";
       const today = item.dateKey === todayKey ? " is-today" : "";
       const muted = item.muted ? " is-muted" : "";
+      const pressed = item.dateKey === selectedDate ? "true" : "false";
 
-      return `<button type="button" class="ps-post-calendar-day${selected}${today}${muted}" data-ps-calendar-day="${escapeHtml(item.dateKey)}">${item.day}</button>`;
+      return `<button type="button" class="ps-post-calendar-day${selected}${applied}${today}${muted}" data-ps-calendar-day="${escapeHtml(item.dateKey)}" aria-pressed="${pressed}">${item.day}</button>`;
     }).join("");
   }
 
@@ -646,7 +654,7 @@
     }
 
     if (tray) {
-      const shouldOpen = publicSpacePostFilter.mode === "custom";
+      const shouldOpen = publicSpacePostFilter.mode === "custom" && filter.dataset.psCalendarOpen !== "false";
       tray.hidden = !shouldOpen;
       filter.classList.toggle("is-custom-open", shouldOpen);
     }
@@ -670,6 +678,9 @@
 
     if (selectedMode === "custom") {
       publicSpacePostFilter.mode = "custom";
+      if (filter) {
+        filter.dataset.psCalendarOpen = "true";
+      }
       syncPostFilterControls();
       return;
     }
@@ -678,6 +689,7 @@
     publicSpacePostFilter.date = "";
     if (filter) {
       filter.dataset.psDraftDate = "";
+      filter.dataset.psCalendarOpen = "false";
       closeCalendarComboMenus(filter);
     }
     syncPostFilterControls();
@@ -714,6 +726,7 @@
       const value = comboOption.dataset.value || "";
       setCalendarComboValue(filter, type, value);
       filter.dataset.psDraftDate = "";
+      filter.dataset.psCalendarOpen = "true";
       closeCalendarComboMenus(filter);
       renderCustomCalendarDays(filter);
       return;
@@ -722,6 +735,7 @@
     if (dayButton) {
       event.preventDefault();
       filter.dataset.psDraftDate = dayButton.dataset.psCalendarDay || "";
+      filter.dataset.psCalendarOpen = "true";
       closeCalendarComboMenus(filter);
       renderCustomCalendarDays(filter);
       return;
@@ -732,6 +746,7 @@
       publicSpacePostFilter.mode = "all";
       publicSpacePostFilter.date = "";
       filter.dataset.psDraftDate = "";
+      filter.dataset.psCalendarOpen = "false";
       closeCalendarComboMenus(filter);
       if (modeSelect) modeSelect.value = "all";
       syncPostFilterControls();
@@ -755,6 +770,7 @@
       publicSpacePostFilter.mode = "custom";
       publicSpacePostFilter.date = nextDate;
       filter.dataset.psDraftDate = nextDate;
+      filter.dataset.psCalendarOpen = "false";
       closeCalendarComboMenus(filter);
       if (modeSelect) modeSelect.value = "custom";
       syncPostFilterControls();
