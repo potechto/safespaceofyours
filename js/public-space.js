@@ -517,6 +517,21 @@
     }
   }
 
+  function postCreatedDateKey(post) {
+    if (!post) return "";
+
+    const value = post.created_at || post.createdAt || post.posted_at || post.postedAt || post.date || post.timestamp;
+    if (!value) return "";
+
+    const date = value instanceof Date ? value : new Date(value);
+    if (!date || Number.isNaN(date.getTime())) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
   function activePostFilterDateKey() {
     const mode = publicSpacePostFilter.mode || "all";
 
@@ -534,12 +549,62 @@
     const targetDate = activePostFilterDateKey();
     if (!targetDate) return true;
 
-    const postDate = localDateKey(post && post.created_at);
+    const postDate = postCreatedDateKey(post);
+    if (!postDate) return false;
+
     return postDate === targetDate;
   }
 
-  function applyPostFilter(posts) {
-    return (Array.isArray(posts) ? posts : []).filter(postMatchesFilter);
+  function postCardNodesForFilter() {
+    const scoped = Array.from(root.querySelectorAll(".ps-feed-card [data-post-id], [data-ps-feed] [data-post-id]"));
+    if (scoped.length) return scoped;
+
+    if (feed) {
+      const feedCards = Array.from(feed.querySelectorAll("[data-post-id]"));
+      if (feedCards.length) return feedCards;
+    }
+
+    return Array.from(root.querySelectorAll("[data-post-id]"));
+  }
+
+  function setPostFilterEmptyState(visibleCount, totalCount) {
+    const feedCard = root.querySelector(".ps-feed-card") || (feed ? feed.closest("section, article, div") : null);
+    if (!feedCard) return;
+
+    let empty = feedCard.querySelector("[data-ps-filter-empty]");
+    if (!empty) {
+      empty = document.createElement("div");
+      empty.className = "ps-filter-empty";
+      empty.setAttribute("data-ps-filter-empty", "");
+      empty.innerHTML = `
+        <strong>No posts for this filter.</strong>
+        <span>Try View all posts or choose another date.</span>
+      `;
+      feedCard.appendChild(empty);
+    }
+
+    const shouldShow = totalCount > 0 && visibleCount === 0 && (publicSpacePostFilter.mode || "all") !== "all";
+    empty.hidden = !shouldShow;
+  }
+
+  function applyPostFilter() {
+    const cards = postCardNodesForFilter();
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const postId = String(card.dataset.postId || card.getAttribute("data-post-id") || "");
+      const post = postById(postId);
+      const shouldShow = !post || postMatchesFilter(post);
+
+      card.hidden = !shouldShow;
+      card.style.display = shouldShow ? "" : "none";
+      card.classList.toggle("is-filter-hidden", !shouldShow);
+
+      if (shouldShow) visibleCount += 1;
+    });
+
+    setPostFilterEmptyState(visibleCount, cards.length);
+    return visibleCount;
   }
 
   function activeCalendarParts(filter) {
@@ -565,7 +630,7 @@
     const year = Number(yearInput.value || defaultFilterYear());
     const month = Number(monthInput.value || padDatePart(new Date().getMonth() + 1));
     const draftDate = filter.dataset.psDraftDate || "";
-    const appliedDate = publicSpacePostFilter.date || "";
+    const appliedDate = publicSpacePostFilter.mode === "custom" ? (publicSpacePostFilter.date || "") : "";
     const selectedDate = draftDate || appliedDate;
     const todayKey = localDateKey(new Date());
     const firstDay = new Date(year, month - 1, 1).getDay();
@@ -597,13 +662,17 @@
     }
 
     daysNode.innerHTML = cells.map(item => {
-      const selected = item.dateKey === selectedDate ? " is-selected is-draft-selected" : "";
-      const applied = item.dateKey === appliedDate ? " is-applied" : "";
-      const today = item.dateKey === todayKey ? " is-today" : "";
+      const isSelected = item.dateKey === selectedDate;
+      const isApplied = item.dateKey === appliedDate;
+      const isToday = item.dateKey === todayKey;
+      const isPast = item.dateKey < todayKey;
+      const selected = isSelected ? " is-selected" : "";
+      const applied = isApplied ? " is-applied" : "";
+      const today = isToday ? " is-today" : "";
       const muted = item.muted ? " is-muted" : "";
-      const pressed = item.dateKey === selectedDate ? "true" : "false";
+      const past = isPast ? " is-past" : "";
 
-      return `<button type="button" class="ps-post-calendar-day${selected}${applied}${today}${muted}" data-ps-calendar-day="${escapeHtml(item.dateKey)}" aria-pressed="${pressed}">${item.day}</button>`;
+      return `<button type="button" class="ps-post-calendar-day${selected}${applied}${today}${muted}${past}" data-ps-calendar-day="${escapeHtml(item.dateKey)}" data-selected="${isSelected ? "true" : "false"}" data-applied="${isApplied ? "true" : "false"}" data-past="${isPast ? "true" : "false"}" aria-pressed="${isSelected ? "true" : "false"}">${item.day}</button>`;
     }).join("");
   }
 
@@ -665,7 +734,7 @@
   function refreshPostFilterView() {
     ensurePostFilterControls();
     syncPostFilterControls();
-    renderPosts(latestPublicSpacePosts, { skipCache: true });
+    applyPostFilter();
   }
 
   function handlePostFilterChange(event) {
@@ -678,22 +747,23 @@
 
     if (selectedMode === "custom") {
       publicSpacePostFilter.mode = "custom";
-      if (filter) {
-        filter.dataset.psCalendarOpen = "true";
-      }
+      if (filter) filter.dataset.psCalendarOpen = "true";
       syncPostFilterControls();
+      applyPostFilter();
       return;
     }
 
     publicSpacePostFilter.mode = selectedMode;
     publicSpacePostFilter.date = "";
+
     if (filter) {
       filter.dataset.psDraftDate = "";
       filter.dataset.psCalendarOpen = "false";
       closeCalendarComboMenus(filter);
     }
+
     syncPostFilterControls();
-    refreshPostFilterView();
+    applyPostFilter();
   }
 
   function handlePostFilterClick(event) {
@@ -750,7 +820,7 @@
       closeCalendarComboMenus(filter);
       if (modeSelect) modeSelect.value = "all";
       syncPostFilterControls();
-      refreshPostFilterView();
+      applyPostFilter();
       return;
     }
 
@@ -774,7 +844,7 @@
       closeCalendarComboMenus(filter);
       if (modeSelect) modeSelect.value = "custom";
       syncPostFilterControls();
-      refreshPostFilterView();
+      applyPostFilter();
     }
   }
 

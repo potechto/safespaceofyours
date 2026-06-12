@@ -9083,3 +9083,86 @@ body.ps-route-screen-active .ps-feed-card {
   position: relative !important;
 }
 /* V2.0Q.62X calendar filter apply fix END */
+
+
+/* V2.0Q.62Y calendar final visual and filter fix */
+
+/* Remove all dot indicators completely. */
+.public-space-body .ps-post-calendar-day::before,
+.public-space-body .ps-post-calendar-day::after,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day::before,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Default days: darker, softer, less painful to the eyes. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day {
+  position: relative !important;
+  background: rgba(255, 244, 251, 0.045) !important;
+  border: 1px solid rgba(255, 244, 251, 0.08) !important;
+  color: rgba(255, 244, 251, 0.76) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Past dates and outside-month days are intentionally dimmer. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-past,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-past="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-muted {
+  background: rgba(255, 244, 251, 0.022) !important;
+  border-color: rgba(255, 244, 251, 0.05) !important;
+  color: rgba(255, 244, 251, 0.34) !important;
+  box-shadow: none !important;
+}
+
+/* Today gets outline only, not full bright fill. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-today {
+  border-color: rgba(255, 244, 251, 0.36) !important;
+  background: rgba(255, 244, 251, 0.065) !important;
+  color: rgba(255, 244, 251, 0.9) !important;
+}
+
+/* Only the clicked/selected date becomes visibly active. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-applied="true"] {
+  background: linear-gradient(135deg, rgba(125, 76, 156, 0.96), rgba(190, 92, 165, 0.96)) !important;
+  border-color: rgba(255, 244, 251, 0.44) !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 142, 209, 0.14),
+    0 10px 24px rgba(0, 0, 0, 0.24) !important;
+  transform: translateY(-1px) !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day:hover,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day:focus-visible {
+  background: rgba(255, 244, 251, 0.09) !important;
+  color: #fff !important;
+  border-color: rgba(255, 244, 251, 0.18) !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"]:hover,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"]:focus-visible {
+  background: linear-gradient(135deg, rgba(125, 76, 156, 1), rgba(190, 92, 165, 1)) !important;
+}
+
+.public-space-body .ps-filter-empty {
+  display: grid !important;
+  gap: 0.2rem !important;
+  margin-top: 0.8rem !important;
+  padding: 1rem !important;
+  border-radius: 18px !important;
+  border: 1px dashed rgba(255, 244, 251, 0.14) !important;
+  background: rgba(255, 244, 251, 0.035) !important;
+  color: rgba(255, 244, 251, 0.78) !important;
+}
+
+.public-space-body .ps-filter-empty[hidden] {
+  display: none !important;
+}
+
+.public-space-body .ps-filter-empty strong {
+  color: #fff4fb !important;
+}
+/* V2.0Q.62Y calendar final visual and filter fix END */
