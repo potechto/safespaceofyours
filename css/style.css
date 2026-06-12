@@ -9764,3 +9764,134 @@ body.ps-route-screen-active .ps-feed-card {
   display: none !important;
 }
 /* V2.0Q.62AF remove custom date filter END */
+
+
+/* V2.0Q.63A comments UI */
+.ps-comments-card {
+  width: min(100%, 44rem) !important;
+  display: grid !important;
+  gap: 0.85rem !important;
+}
+
+.ps-comments-heading {
+  padding-right: 2.4rem !important;
+}
+
+.ps-comments-post-preview,
+.ps-comments-empty,
+.ps-comment-item {
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.ps-comments-post-preview {
+  padding: 0.85rem !important;
+  display: grid !important;
+  gap: 0.38rem !important;
+}
+
+.ps-comments-post-preview strong,
+.ps-comment-meta strong {
+  color: #fff4fb !important;
+}
+
+.ps-comments-post-preview p,
+.ps-comment-item p {
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.78) !important;
+  line-height: 1.5 !important;
+  white-space: pre-wrap !important;
+}
+
+.ps-comments-list {
+  display: grid !important;
+  gap: 0.65rem !important;
+  max-height: min(38vh, 19rem) !important;
+  overflow: auto !important;
+  padding-right: 0.1rem !important;
+}
+
+.ps-comments-empty {
+  padding: 1rem !important;
+  color: rgba(255, 244, 251, 0.66) !important;
+}
+
+.ps-comment-item {
+  padding: 0.82rem !important;
+  display: grid !important;
+  gap: 0.48rem !important;
+}
+
+.ps-comment-item.is-hidden-by-admin {
+  opacity: 0.56 !important;
+}
+
+.ps-comment-meta,
+.ps-comment-actions,
+.ps-comments-form-footer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  flex-wrap: wrap !important;
+}
+
+.ps-comment-meta span,
+.ps-comment-hidden-label,
+.ps-comments-form-footer span {
+  color: rgba(255, 244, 251, 0.58) !important;
+  font-size: 0.78rem !important;
+}
+
+.ps-comment-hidden-label {
+  color: #ff8ed1 !important;
+  font-weight: 800 !important;
+}
+
+.ps-comment-actions button {
+  min-height: 1.85rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 244, 251, 0.82) !important;
+  padding: 0.3rem 0.58rem !important;
+  font-size: 0.78rem !important;
+  cursor: pointer !important;
+}
+
+.ps-comments-form {
+  display: grid !important;
+  gap: 0.62rem !important;
+  border-top: 1px solid rgba(255, 244, 251, 0.1) !important;
+  padding-top: 0.85rem !important;
+}
+
+.ps-comments-form label {
+  display: grid !important;
+  gap: 0.35rem !important;
+}
+
+.ps-comments-form textarea {
+  width: 100% !important;
+  resize: vertical !important;
+  min-height: 5.4rem !important;
+}
+
+.ps-comments-form-footer {
+  justify-content: space-between !important;
+}
+
+.ps-filter-empty strong {
+  color: #fff4fb !important;
+}
+
+@media (max-width: 640px) {
+  .ps-comments-card {
+    max-height: calc(100svh - 1.4rem) !important;
+  }
+
+  .ps-comments-list {
+    max-height: 34vh !important;
+  }
+}
+/* V2.0Q.63A comments UI END */

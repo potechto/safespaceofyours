@@ -1,4 +1,4 @@
-﻿(function setupPublicSpace() {
+(function setupPublicSpace() {
   const root = document.querySelector("[data-public-space-root]");
   if (!root) return;
 
@@ -75,6 +75,9 @@
   let notificationsMarkedRead = false;
   let composeMode = "create";
   let editingPostId = null;
+  let activeCommentsPostId = "";
+  let activeComments = [];
+  let commentsLoading = false;
 
   function getClient() {
     const candidates = [
@@ -297,10 +300,11 @@
   function renderEmptyFeed(message) {
     if (!feed) return;
 
+    const detail = message ? `<p>${escapeHtml(message)}</p>` : "";
     feed.innerHTML = `
       <article class="ps-empty-state">
-        <h2>No public posts yet.</h2>
-        <p>${escapeHtml(message || "Posts, comments, hearts, and notifications will appear here.")}</p>
+        <h2>No post Available</h2>
+        ${detail}
       </article>
     `;
   }
@@ -418,10 +422,7 @@
       empty = document.createElement("div");
       empty.className = "ps-filter-empty";
       empty.setAttribute("data-ps-filter-empty", "");
-      empty.innerHTML = `
-        <strong>No posts for this filter.</strong>
-        <span>Try View all posts.</span>
-      `;
+      empty.innerHTML = `<strong>No post Available</strong>`;
       feedCard.appendChild(empty);
     }
 
@@ -538,7 +539,7 @@
           <p>${escapeHtml(post.body)}</p>
           <div class="ps-post-actions">
             <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} � ${Number(post.heart_count || 0)}</button>
-            <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">Comment � ${Number(post.comment_count || 0)}</button>
+            <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">${commentCountText(post)}</button>
             ${manageButtons}
             ${adminButtons}
           </div>
@@ -551,6 +552,313 @@
     if (currentPublicSpaceRoute() === "profile") {
       renderProfileOwnPosts(list);
     }
+  }
+
+  function commentCount(post) {
+    return Number((post && post.comment_count) || 0);
+  }
+
+  function commentCountText(post) {
+    return `Comment · ${commentCount(post)}`;
+  }
+
+  function syncPostCommentCount(postId, count) {
+    const cleanId = String(postId || "");
+    const nextCount = Number(count || 0);
+
+    publicSpacePosts.forEach(post => {
+      if (String(post.id || "") === cleanId) post.comment_count = nextCount;
+    });
+
+    document.querySelectorAll("[data-ps-comments-post]").forEach(button => {
+      if (String(button.dataset.psCommentsPost || "") === cleanId) {
+        button.textContent = commentCountText({ comment_count: nextCount });
+      }
+    });
+  }
+
+  function currentCommentsPost() {
+    return activeCommentsPostId ? postById(activeCommentsPostId) : null;
+  }
+
+  function ensureCommentsModal() {
+    let modal = document.querySelector("[data-ps-comments-modal]");
+    if (modal) return modal;
+
+    document.body.insertAdjacentHTML("beforeend", `
+      <div class="ps-modal ps-comments-modal" data-ps-comments-modal hidden>
+        <div class="ps-modal-card ps-comments-card" role="dialog" aria-modal="true" aria-labelledby="psCommentsTitle">
+          <button class="ps-modal-close" type="button" data-ps-close-comments aria-label="Close comments modal">&times;</button>
+          <div class="ps-panel-heading ps-comments-heading">
+            <p class="eyebrow">Comments</p>
+            <h2 id="psCommentsTitle" data-ps-comments-title>Post comments</h2>
+            <p data-ps-comments-subtitle>Read and add soft replies.</p>
+          </div>
+          <div class="ps-comments-post-preview" data-ps-comments-post-preview></div>
+          <div class="ps-comments-list" data-ps-comments-list></div>
+          <form class="ps-comments-form" data-ps-comments-form novalidate>
+            <label>
+              <span>Add a comment</span>
+              <textarea name="comment" maxlength="500" rows="3" placeholder="Write a kind comment..."></textarea>
+            </label>
+            <div class="ps-comments-form-footer">
+              <span data-ps-comment-count>0/500</span>
+              <button class="btn primary" type="submit">Comment</button>
+            </div>
+            <p class="ps-message" data-ps-comments-message></p>
+          </form>
+        </div>
+      </div>
+    `);
+
+    return document.querySelector("[data-ps-comments-modal]");
+  }
+
+  function commentsModalNode(selector) {
+    const modal = ensureCommentsModal();
+    return selector ? modal.querySelector(selector) : modal;
+  }
+
+  function setCommentsMessage(message, type) {
+    setMessage(commentsModalNode("[data-ps-comments-message]"), message || "", type || "info");
+  }
+
+  function closeCommentsModal() {
+    const modal = document.querySelector("[data-ps-comments-modal]");
+    if (modal) closeModal(modal);
+    activeCommentsPostId = "";
+    activeComments = [];
+    commentsLoading = false;
+  }
+
+  function renderCommentItem(comment) {
+    const author = comment.author || {};
+    const username = author.username || "someone";
+    const canDelete = Boolean(comment.can_manage || isAdminMode);
+    const canHide = Boolean(comment.can_hide || isAdminMode);
+    const hiddenClass = comment.is_hidden ? " is-hidden-by-admin" : "";
+    const hiddenLabel = comment.is_hidden ? `<span class="ps-comment-hidden-label">Hidden</span>` : "";
+    const deleteButton = canDelete
+      ? `<button type="button" data-ps-delete-comment="${escapeHtml(comment.id)}">Delete</button>`
+      : "";
+    const hideButton = canHide
+      ? `<button type="button" data-ps-toggle-comment-hidden="${escapeHtml(comment.id)}" data-hidden="${comment.is_hidden ? "true" : "false"}">${comment.is_hidden ? "Unhide" : "Hide"}</button>`
+      : "";
+
+    return `
+      <article class="ps-comment-item${hiddenClass}" data-comment-id="${escapeHtml(comment.id)}">
+        <div class="ps-comment-meta">
+          <strong>@${escapeHtml(username)}</strong>
+          ${renderPostBadges(author)}
+          <span>${escapeHtml(postDateDisplayLabel(comment.created_at) || formatDate(comment.created_at))}</span>
+          ${hiddenLabel}
+        </div>
+        <p>${escapeHtml(comment.body)}</p>
+        ${deleteButton || hideButton ? `<div class="ps-comment-actions">${deleteButton}${hideButton}</div>` : ""}
+      </article>
+    `;
+  }
+
+  function renderCommentsModal() {
+    const modal = ensureCommentsModal();
+    const post = currentCommentsPost();
+    const title = modal.querySelector("[data-ps-comments-title]");
+    const subtitle = modal.querySelector("[data-ps-comments-subtitle]");
+    const preview = modal.querySelector("[data-ps-comments-post-preview]");
+    const listNode = modal.querySelector("[data-ps-comments-list]");
+    const textarea = modal.querySelector("textarea[name='comment']");
+    const counter = modal.querySelector("[data-ps-comment-count]");
+    const submitButton = modal.querySelector("[data-ps-comments-form] button[type='submit']");
+
+    if (title) title.textContent = post ? `Comments · ${commentCount(post)}` : "Post comments";
+    if (subtitle) subtitle.textContent = post ? `Replies for @${(post.author && post.author.username) || "someone"}'s post.` : "Read and add soft replies.";
+
+    if (preview) {
+      preview.innerHTML = post
+        ? `<strong>@${escapeHtml((post.author && post.author.username) || "someone")}</strong><p>${escapeHtml(post.body)}</p>`
+        : "";
+    }
+
+    if (listNode) {
+      if (commentsLoading) {
+        listNode.innerHTML = `<div class="ps-comments-empty">Loading comments...</div>`;
+      } else if (!activeComments.length) {
+        listNode.innerHTML = `<div class="ps-comments-empty">No comments yet.</div>`;
+      } else {
+        listNode.innerHTML = activeComments.map(renderCommentItem).join("");
+      }
+    }
+
+    const length = textarea ? textarea.value.length : 0;
+    if (counter) counter.textContent = `${length}/500`;
+    if (submitButton) submitButton.disabled = !currentSession || !sessionToken() || length < 1 || length > 500 || commentsLoading;
+  }
+
+  async function loadCommentsForPost(postId, showLoading = true) {
+    activeCommentsPostId = String(postId || "");
+    if (!activeCommentsPostId) return [];
+
+    if (showLoading) {
+      commentsLoading = true;
+      renderCommentsModal();
+    }
+
+    try {
+      const comments = await rpc("list_public_space_comments", {
+        input_session_token: sessionToken() || null,
+        input_post_id: activeCommentsPostId
+      });
+
+      activeComments = Array.isArray(comments) ? comments : [];
+      syncPostCommentCount(activeCommentsPostId, activeComments.length);
+      setCommentsMessage("", "info");
+      return activeComments;
+    } catch (error) {
+      activeComments = [];
+      setCommentsMessage(getErrorMessage(error), "error");
+      return [];
+    } finally {
+      commentsLoading = false;
+      renderCommentsModal();
+    }
+  }
+
+  async function openCommentsPanel(postId) {
+    const post = postById(postId);
+    if (!post) {
+      setFeedStatus("Post could not be found. Refresh and try again.");
+      return;
+    }
+
+    activeCommentsPostId = String(postId || "");
+    activeComments = [];
+
+    const modal = ensureCommentsModal();
+    const textarea = modal.querySelector("textarea[name='comment']");
+    if (textarea) textarea.value = "";
+
+    setCommentsMessage("", "info");
+    renderCommentsModal();
+    openModal(modal);
+
+    await loadCommentsForPost(activeCommentsPostId, true);
+  }
+
+  async function refreshCommentsAndPosts(postId) {
+    await loadPosts();
+    activeCommentsPostId = String(postId || activeCommentsPostId || "");
+    if (activeCommentsPostId) await loadCommentsForPost(activeCommentsPostId, false);
+  }
+
+  async function handleCommentsSubmit(event) {
+    const form = event.target.closest("[data-ps-comments-form]");
+    if (!form) return;
+
+    event.preventDefault();
+
+    if (!currentSession || !sessionToken()) {
+      closeCommentsModal();
+      showAuth("login");
+      return;
+    }
+
+    const textarea = form.querySelector("textarea[name='comment']");
+    const body = textarea ? textarea.value.trim() : "";
+    const button = form.querySelector("button[type='submit']");
+
+    if (!activeCommentsPostId) {
+      setCommentsMessage("Choose a post first.", "error");
+      return;
+    }
+
+    if (body.length < 1 || body.length > 500) {
+      setCommentsMessage("Comment must be 1 to 500 characters.", "error");
+      return;
+    }
+
+    try {
+      if (button) button.disabled = true;
+      setCommentsMessage("Posting comment...", "info");
+
+      await rpc("create_public_space_comment", {
+        input_session_token: sessionToken(),
+        input_post_id: activeCommentsPostId,
+        input_body: body
+      });
+
+      if (textarea) textarea.value = "";
+
+      await refreshCommentsAndPosts(activeCommentsPostId);
+      setCommentsMessage("Comment posted.", "success");
+    } catch (error) {
+      setCommentsMessage(getErrorMessage(error), "error");
+    } finally {
+      renderCommentsModal();
+    }
+  }
+
+  async function handleCommentsModalClick(event) {
+    const closeButton = event.target.closest("[data-ps-close-comments]");
+    const deleteButton = event.target.closest("[data-ps-delete-comment]");
+    const hideButton = event.target.closest("[data-ps-toggle-comment-hidden]");
+    const modal = event.target.closest("[data-ps-comments-modal]");
+
+    if (closeButton) {
+      event.preventDefault();
+      closeCommentsModal();
+      return;
+    }
+
+    if (!modal || (!deleteButton && !hideButton)) return;
+
+    event.preventDefault();
+
+    if (!currentSession || !sessionToken()) {
+      closeCommentsModal();
+      showAuth("login");
+      return;
+    }
+
+    try {
+      if (deleteButton) {
+        deleteButton.disabled = true;
+        setCommentsMessage("Deleting comment...", "info");
+
+        await rpc("delete_public_space_comment", {
+          input_session_token: sessionToken(),
+          input_comment_id: deleteButton.dataset.psDeleteComment
+        });
+      }
+
+      if (hideButton) {
+        hideButton.disabled = true;
+        const isHidden = hideButton.dataset.hidden === "true";
+        setCommentsMessage(isHidden ? "Unhiding comment..." : "Hiding comment...", "info");
+
+        await rpc("admin_set_public_space_comment_hidden", {
+          input_session_token: sessionToken(),
+          input_comment_id: hideButton.dataset.psToggleCommentHidden,
+          input_is_hidden: !isHidden
+        });
+      }
+
+      await refreshCommentsAndPosts(activeCommentsPostId);
+      setCommentsMessage(deleteButton ? "Comment deleted." : "Comment updated.", "success");
+    } catch (error) {
+      setCommentsMessage(getErrorMessage(error), "error");
+    } finally {
+      renderCommentsModal();
+    }
+  }
+
+  function handleCommentsModalInput(event) {
+    if (!event.target.closest("[data-ps-comments-form]")) return;
+    renderCommentsModal();
+  }
+
+  function handleCommentsModalKeydown(event) {
+    if (event.key !== "Escape") return;
+    if (document.querySelector("[data-ps-comments-modal]:not([hidden])")) closeCommentsModal();
   }
 
   function ensureMenuButton(key, label, adminOnly) {
@@ -1071,7 +1379,7 @@
         <p>${escapeHtml(post.body)}</p>
         <div class="ps-post-actions">
           <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} · ${Number(post.heart_count || 0)}</button>
-          <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">Comment · ${Number(post.comment_count || 0)}</button>
+          <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">${commentCountText(post)}</button>
           ${manageButtons}
           ${adminButtons}
         </div>
@@ -2097,10 +2405,11 @@
     const commentButton = event.target.closest("[data-ps-comments-post]");
 
     if (commentButton) {
-      setFeedStatus("");
+      event.preventDefault();
+      event.stopPropagation();
+      await openCommentsPanel(commentButton.dataset.psCommentsPost);
       return;
     }
-
     if (!heartButton && !deleteButton && !hideButton) return;
 
     if (!currentSession || !currentSession.session_token) {
@@ -2568,6 +2877,10 @@
   if (composer) composer.addEventListener("submit", handleComposerSubmit);
   if (postTextarea) postTextarea.addEventListener("input", updateCounter);
   if (feed) feed.addEventListener("click", handleFeedClick);
+  document.addEventListener("click", handleCommentsModalClick);
+  document.addEventListener("submit", handleCommentsSubmit);
+  document.addEventListener("input", handleCommentsModalInput);
+  document.addEventListener("keydown", handleCommentsModalKeydown);
 
   function handleProfileComposerRootSubmit(event) {
     const form = event.target.closest("[data-ps-profile-composer]");
@@ -2700,6 +3013,7 @@
     if (event.key !== "Escape") return;
     closeModal(forgotModal);
     closeModal(composeModal);
+    closeCommentsModal();
     closeAdminScreen();
     closeControlScreen();
     setMenuOpen(false);
