@@ -8479,3 +8479,215 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62R custom date part selector END */
+
+
+/* V2.0Q.62S bell notification dropdown */
+.ps-notification-panel {
+  position: fixed !important;
+  top: max(5.25rem, calc(env(safe-area-inset-top) + 4.25rem)) !important;
+  right: clamp(0.75rem, 3vw, 1.8rem) !important;
+  width: min(28rem, calc(100vw - 1.5rem)) !important;
+  max-height: min(40rem, calc(100vh - 6.5rem)) !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  gap: 0.75rem !important;
+  padding: 1rem !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background: rgba(25, 17, 32, 0.98) !important;
+  color: #fff4fb !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+  z-index: 1200 !important;
+  backdrop-filter: blur(18px) !important;
+  overflow: visible !important;
+}
+
+.ps-notification-panel[hidden] {
+  display: none !important;
+}
+
+.ps-notification-head {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 0.9rem !important;
+}
+
+.ps-notification-head h2 {
+  margin: 0 !important;
+  font-size: clamp(1.6rem, 4vw, 2.05rem) !important;
+  line-height: 1 !important;
+  color: #fff4fb !important;
+}
+
+.ps-notification-head span {
+  display: block !important;
+  margin-top: 0.25rem !important;
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.82rem !important;
+  font-weight: 760 !important;
+}
+
+.ps-notification-more-wrap {
+  position: relative !important;
+  flex: 0 0 auto !important;
+}
+
+.ps-notification-more {
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  min-height: 2rem !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: #fff4fb !important;
+  box-shadow: none !important;
+}
+
+.ps-notification-menu {
+  position: absolute !important;
+  top: calc(100% + 0.45rem) !important;
+  right: 0 !important;
+  min-width: 15.5rem !important;
+  display: grid !important;
+  gap: 0.2rem !important;
+  padding: 0.45rem !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  background: rgba(22, 14, 30, 0.99) !important;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.36) !important;
+  z-index: 1210 !important;
+}
+
+.ps-notification-menu[hidden] {
+  display: none !important;
+}
+
+.ps-notification-menu button {
+  min-height: 2.5rem !important;
+  width: 100% !important;
+  justify-content: flex-start !important;
+  gap: 0.55rem !important;
+  padding: 0.55rem 0.7rem !important;
+  border-radius: 12px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(255, 244, 251, 0.92) !important;
+  box-shadow: none !important;
+  font-size: 0.9rem !important;
+  font-weight: 820 !important;
+}
+
+.ps-notification-menu button:hover,
+.ps-notification-menu button:focus-visible {
+  background: rgba(255, 244, 251, 0.1) !important;
+  color: #fff !important;
+}
+
+.ps-notification-tabs {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+}
+
+.ps-notification-tabs button {
+  min-height: 2.3rem !important;
+  width: auto !important;
+  padding: 0.52rem 0.85rem !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(255, 244, 251, 0.76) !important;
+  box-shadow: none !important;
+  font-size: 0.9rem !important;
+  font-weight: 850 !important;
+}
+
+.ps-notification-tabs button.is-active {
+  background: rgba(64, 134, 255, 0.24) !important;
+  color: #dcebff !important;
+}
+
+.ps-notification-list {
+  display: grid !important;
+  gap: 0.45rem !important;
+  overflow: auto !important;
+  padding-right: 0.15rem !important;
+}
+
+.ps-notification-item,
+.ps-notification-empty {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  gap: 0.72rem !important;
+  align-items: center !important;
+  padding: 0.7rem !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+}
+
+.ps-notification-item:hover,
+.ps-notification-item:focus-within {
+  background: rgba(255, 244, 251, 0.06) !important;
+}
+
+.ps-notification-empty {
+  grid-template-columns: 1fr !important;
+  border: 1px dashed rgba(255, 244, 251, 0.14) !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.ps-notification-icon {
+  width: 2.6rem !important;
+  height: 2.6rem !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.075) !important;
+  font-size: 1.15rem !important;
+}
+
+.ps-notification-item strong,
+.ps-notification-empty strong {
+  display: block !important;
+  color: #fff4fb !important;
+  font-size: 0.95rem !important;
+  line-height: 1.2 !important;
+}
+
+.ps-notification-item p,
+.ps-notification-empty span {
+  margin: 0.12rem 0 0 !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.28 !important;
+}
+
+.ps-notification-dot {
+  width: 0.62rem !important;
+  height: 0.62rem !important;
+  border-radius: 999px !important;
+  background: #5aa7ff !important;
+}
+
+.public-space-body [data-ps-bell].is-active,
+.public-space-body .ps-bell.is-active {
+  background: rgba(64, 134, 255, 0.22) !important;
+  color: #dcebff !important;
+}
+
+@media (max-width: 640px) {
+  .ps-notification-panel {
+    top: max(4.8rem, calc(env(safe-area-inset-top) + 4rem)) !important;
+    right: 0.6rem !important;
+    left: 0.6rem !important;
+    width: auto !important;
+    max-height: calc(100vh - 5.6rem) !important;
+    border-radius: 20px !important;
+  }
+}
+/* V2.0Q.62S bell notification dropdown END */

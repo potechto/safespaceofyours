@@ -71,6 +71,8 @@
   let isAdminMode = Boolean(currentUser && currentUser.is_admin);
   let latestPublicSpacePosts = [];
   let publicSpacePostFilter = { mode: "all", date: "" };
+  let notificationPanelFilter = "all";
+  let notificationsMarkedRead = false;
   let composeMode = "create";
   let editingPostId = null;
 
@@ -1558,6 +1560,221 @@
     scrollTopButton.setAttribute("aria-hidden", shouldShow ? "false" : "true");
     document.body.classList.toggle("scroll-top-visible", shouldShow);
   }
+  function ensureNotificationPanel() {
+    let panel = document.querySelector("[data-ps-notification-panel]");
+    if (panel) return panel;
+
+    panel = document.createElement("section");
+    panel.className = "ps-notification-panel";
+    panel.setAttribute("data-ps-notification-panel", "");
+    panel.setAttribute("aria-label", "Notifications");
+    panel.hidden = true;
+
+    panel.innerHTML = `
+      <header class="ps-notification-head">
+        <div>
+          <h2>Notifications</h2>
+          <span data-ps-notification-summary>No unread notifications</span>
+        </div>
+        <div class="ps-notification-more-wrap">
+          <button class="ps-notification-more" type="button" data-ps-notification-more aria-haspopup="menu" aria-expanded="false" aria-label="Notification options">•••</button>
+          <div class="ps-notification-menu" data-ps-notification-menu hidden role="menu">
+            <button type="button" role="menuitem" data-ps-notification-action="mark-read">✓ <span>Mark all as read</span></button>
+            <button type="button" role="menuitem" data-ps-notification-action="settings">⚙ <span>Notification settings</span></button>
+            <button type="button" role="menuitem" data-ps-notification-action="open">▣ <span>Open Notifications</span></button>
+          </div>
+        </div>
+      </header>
+
+      <div class="ps-notification-tabs" role="tablist" aria-label="Notification filters">
+        <button type="button" data-ps-notification-filter="all" class="is-active">All</button>
+        <button type="button" data-ps-notification-filter="unread">Unread</button>
+      </div>
+
+      <div class="ps-notification-list" data-ps-notification-list></div>
+    `;
+
+    document.body.appendChild(panel);
+    return panel;
+  }
+
+  function buildNotificationItems() {
+    const username = currentUser && currentUser.username ? `@${currentUser.username}` : "@guest";
+
+    if (!currentUser) {
+      return [{
+        id: "login",
+        unread: false,
+        icon: "🔔",
+        title: "Login to see notifications.",
+        detail: "Hearts, comments, and account updates will appear here.",
+        time: ""
+      }];
+    }
+
+    if (notificationsMarkedRead) {
+      return [{
+        id: "empty-read",
+        unread: false,
+        icon: "✓",
+        title: "You're all caught up.",
+        detail: "No unread notifications for now.",
+        time: ""
+      }];
+    }
+
+    return [{
+      id: "empty",
+      unread: false,
+      icon: "🔔",
+      title: "No notifications yet.",
+      detail: `${username}, new hearts, comments, and admin notices will show here.`,
+      time: ""
+    }];
+  }
+
+  function renderNotificationPanel() {
+    const panel = ensureNotificationPanel();
+    const listNode = panel.querySelector("[data-ps-notification-list]");
+    const summaryNode = panel.querySelector("[data-ps-notification-summary]");
+    const menuNode = panel.querySelector("[data-ps-notification-menu]");
+    const moreButton = panel.querySelector("[data-ps-notification-more]");
+
+    const allItems = buildNotificationItems();
+    const items = allItems.filter(item => {
+      if (notificationPanelFilter === "unread") return item.unread;
+      return true;
+    });
+
+    panel.querySelectorAll("[data-ps-notification-filter]").forEach(button => {
+      button.classList.toggle("is-active", button.dataset.psNotificationFilter === notificationPanelFilter);
+    });
+
+    if (summaryNode) {
+      const unreadCount = allItems.filter(item => item.unread).length;
+      summaryNode.textContent = unreadCount ? `${unreadCount} unread` : "No unread notifications";
+    }
+
+    if (menuNode && moreButton) {
+      menuNode.hidden = true;
+      moreButton.setAttribute("aria-expanded", "false");
+    }
+
+    if (!listNode) return;
+
+    if (!items.length) {
+      listNode.innerHTML = `
+        <article class="ps-notification-empty">
+          <strong>No unread notifications.</strong>
+          <span>Switch to All to view older notices.</span>
+        </article>
+      `;
+      return;
+    }
+
+    listNode.innerHTML = items.map(item => `
+      <article class="ps-notification-item ${item.unread ? "is-unread" : ""}" data-ps-notification-item="${escapeHtml(item.id)}">
+        <span class="ps-notification-icon" aria-hidden="true">${escapeHtml(item.icon)}</span>
+        <div>
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+          ${item.time ? `<small>${escapeHtml(item.time)}</small>` : ""}
+        </div>
+        ${item.unread ? `<span class="ps-notification-dot" aria-hidden="true"></span>` : ""}
+      </article>
+    `).join("");
+  }
+
+  function openNotificationPanel() {
+    const panel = ensureNotificationPanel();
+    renderNotificationPanel();
+    panel.hidden = false;
+    panel.classList.add("is-open");
+    if (bellButton) bellButton.classList.add("is-active");
+  }
+
+  function closeNotificationPanel() {
+    const panel = document.querySelector("[data-ps-notification-panel]");
+    if (!panel) return;
+
+    panel.hidden = true;
+    panel.classList.remove("is-open");
+    const menuNode = panel.querySelector("[data-ps-notification-menu]");
+    const moreButton = panel.querySelector("[data-ps-notification-more]");
+    if (menuNode) menuNode.hidden = true;
+    if (moreButton) moreButton.setAttribute("aria-expanded", "false");
+    if (bellButton) bellButton.classList.remove("is-active");
+  }
+
+  function toggleNotificationPanel() {
+    const panel = ensureNotificationPanel();
+    if (panel.hidden) openNotificationPanel();
+    else closeNotificationPanel();
+  }
+
+  function handleBellNotificationClick(event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    toggleNotificationPanel();
+  }
+
+  function handleNotificationPanelClick(event) {
+    const panel = event.target.closest("[data-ps-notification-panel]");
+    const moreButton = event.target.closest("[data-ps-notification-more]");
+    const filterButton = event.target.closest("[data-ps-notification-filter]");
+    const actionButton = event.target.closest("[data-ps-notification-action]");
+    const bellClick = event.target.closest("[data-ps-bell]");
+
+    if (bellClick) return;
+
+    if (!panel) {
+      closeNotificationPanel();
+      return;
+    }
+
+    if (moreButton) {
+      event.preventDefault();
+      const menuNode = panel.querySelector("[data-ps-notification-menu]");
+      const willOpen = menuNode ? menuNode.hidden : false;
+      if (menuNode) menuNode.hidden = !willOpen;
+      moreButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      return;
+    }
+
+    if (filterButton) {
+      event.preventDefault();
+      notificationPanelFilter = filterButton.dataset.psNotificationFilter || "all";
+      renderNotificationPanel();
+      return;
+    }
+
+    if (actionButton) {
+      event.preventDefault();
+      const action = actionButton.dataset.psNotificationAction;
+
+      if (action === "mark-read") {
+        notificationsMarkedRead = true;
+        notificationPanelFilter = "all";
+        renderNotificationPanel();
+        return;
+      }
+
+      if (action === "settings") {
+        closeNotificationPanel();
+        navigatePublicSpaceRoute("settings");
+        return;
+      }
+
+      if (action === "open") {
+        closeNotificationPanel();
+        navigatePublicSpaceRoute("notifications");
+      }
+    }
+  }
+
+  function handleNotificationPanelKeydown(event) {
+    if (event.key === "Escape") closeNotificationPanel();
+  }
   function showAuth(mode) {
     const nextMode = mode === "login" ? "login" : "register";
 
@@ -2453,6 +2670,13 @@
   root.addEventListener("input", handleProfileComposerRootInput);
   root.addEventListener("change", handlePostFilterChange);
   root.addEventListener("click", handlePostFilterClick);
+
+  if (bellButton) {
+    bellButton.addEventListener("click", handleBellNotificationClick, true);
+  }
+
+  document.addEventListener("click", handleNotificationPanelClick);
+  document.addEventListener("keydown", handleNotificationPanelKeydown);
 
   window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
   window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);
