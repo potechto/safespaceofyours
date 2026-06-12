@@ -9233,3 +9233,54 @@ body.ps-route-screen-active .ps-feed-card {
   display: none !important;
 }
 /* V2.0Q.62Z calendar date filter finalize END */
+
+
+/* V2.0Q.62AA direct calendar selection fix */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  background: rgba(255, 244, 251, 0.055) !important;
+  border-color: rgba(255, 244, 251, 0.09) !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-muted="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-past="true"] {
+  background: rgba(255, 244, 251, 0.026) !important;
+  border-color: rgba(255, 244, 251, 0.055) !important;
+  color: rgba(255, 244, 251, 0.34) !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-selected,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-draft-selected {
+  background: linear-gradient(135deg, rgba(143, 82, 171, 0.98), rgba(210, 105, 184, 0.98)) !important;
+  border-color: rgba(255, 244, 251, 0.72) !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 142, 209, 0.18),
+    0 10px 22px rgba(0, 0, 0, 0.28) !important;
+  transform: translateY(-1px) !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"]::before,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"]::after,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-selected::before,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-selected::after {
+  content: none !important;
+  display: none !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day:hover {
+  background: rgba(255, 244, 251, 0.1) !important;
+  border-color: rgba(255, 244, 251, 0.18) !important;
+  color: #fff !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"]:hover,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-selected:hover {
+  background: linear-gradient(135deg, rgba(143, 82, 171, 1), rgba(210, 105, 184, 1)) !important;
+  color: #fff !important;
+}
+/* V2.0Q.62AA direct calendar selection fix END */

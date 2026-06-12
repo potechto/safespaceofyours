@@ -623,6 +623,52 @@
     };
   }
 
+  function paintCalendarDayButton(button, isSelected) {
+    if (!button) return;
+
+    button.dataset.selected = isSelected ? "true" : "false";
+    button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    button.classList.toggle("is-selected", isSelected);
+    button.classList.toggle("is-draft-selected", isSelected);
+
+    if (isSelected) {
+      button.style.setProperty("background", "linear-gradient(135deg, rgba(143, 82, 171, 0.98), rgba(210, 105, 184, 0.98))", "important");
+      button.style.setProperty("border-color", "rgba(255, 244, 251, 0.72)", "important");
+      button.style.setProperty("color", "#fff", "important");
+      button.style.setProperty("box-shadow", "0 0 0 2px rgba(255, 142, 209, 0.18), 0 10px 22px rgba(0, 0, 0, 0.28)", "important");
+      button.style.setProperty("transform", "translateY(-1px)", "important");
+    } else {
+      button.style.removeProperty("background");
+      button.style.removeProperty("border-color");
+      button.style.removeProperty("color");
+      button.style.removeProperty("box-shadow");
+      button.style.removeProperty("transform");
+    }
+  }
+
+  function selectCalendarDate(filter, dateKey) {
+    if (!filter || !dateKey) return;
+
+    filter.dataset.psDraftDate = dateKey;
+    filter.dataset.psCalendarOpen = "true";
+
+    filter.querySelectorAll("[data-ps-calendar-day]").forEach(button => {
+      paintCalendarDayButton(button, button.dataset.psCalendarDay === dateKey);
+    });
+  }
+
+  function bindCalendarDayButtons(filter) {
+    if (!filter) return;
+
+    filter.querySelectorAll("[data-ps-calendar-day]").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        selectCalendarDate(filter, button.dataset.psCalendarDay || "");
+      });
+    });
+  }
+
   function renderCustomCalendarDays(filter) {
     if (!filter) return;
 
@@ -682,7 +728,7 @@
       const isPast = item.dateKey < todayKey;
       const classes = [
         "ps-post-calendar-day",
-        isSelected ? "is-selected" : "",
+        isSelected ? "is-selected is-draft-selected" : "",
         isApplied ? "is-applied" : "",
         isToday ? "is-today" : "",
         item.muted ? "is-muted" : "",
@@ -691,6 +737,12 @@
 
       return `<button type="button" class="${classes}" data-ps-calendar-day="${escapeHtml(item.dateKey)}" data-selected="${isSelected ? "true" : "false"}" data-applied="${isApplied ? "true" : "false"}" data-past="${isPast ? "true" : "false"}" data-muted="${item.muted ? "true" : "false"}" aria-pressed="${isSelected ? "true" : "false"}">${item.day}</button>`;
     }).join("");
+
+    bindCalendarDayButtons(filter);
+
+    if (selectedDate) {
+      selectCalendarDate(filter, selectedDate);
+    }
   }
 
   function hydrateCustomDateParts(filter) {
@@ -822,10 +874,8 @@
     if (dayButton) {
       event.preventDefault();
       event.stopPropagation();
-      filter.dataset.psDraftDate = dayButton.dataset.psCalendarDay || "";
-      filter.dataset.psCalendarOpen = "true";
+      selectCalendarDate(filter, dayButton.dataset.psCalendarDay || "");
       closeCalendarComboMenus(filter);
-      renderCustomCalendarDays(filter);
       return;
     }
 
