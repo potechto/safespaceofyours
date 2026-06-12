@@ -74,7 +74,8 @@
   let publicProfileBackRoute = "home";
   let publicSpacePostFilter = { mode: "all", date: "" };
   let notificationPanelFilter = "all";
-  let notificationsMarkedRead = false;
+  let publicSpaceNotifications = [];
+  let notificationsLoading = false;
   let composeMode = "create";
   let editingPostId = null;
   let activeCommentsPostId = "";
@@ -1780,18 +1781,32 @@
   }
 
   function renderNotificationsScreen() {
+    const allItems = buildNotificationItems();
+    const unreadCount = unreadNotificationCount();
+
     openControlScreen(
       "Notifications",
-      "Public Space notifications will appear here.",
+      unreadCount ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}.` : "Your notification history.",
       `
-        <div class="ps-control-card">
-          <strong>No notification center yet.</strong>
-          <span>Bell UI is ready. Database-backed notifications will be connected after admin controls and viewer flow are stable.</span>
-        </div>
-        <div class="ps-control-card">
-          <strong>Planned alerts</strong>
-          <span>New comments, hearts, admin notices, disabled-account notices, and moderation updates.</span>
-        </div>
+        <section class="ps-notifications-history" data-ps-notifications-history>
+          <div class="ps-notifications-history-actions">
+            <button type="button" data-ps-notification-action="mark-read">Mark all as read</button>
+            <button type="button" data-ps-notification-refresh>Refresh</button>
+          </div>
+          <div class="ps-notification-list ps-notifications-history-list">
+            ${allItems.map(item => `
+              <article class="ps-notification-item ${item.unread ? "is-unread" : ""}" data-ps-notification-item="${escapeHtml(item.id)}">
+                <span class="ps-notification-icon" aria-hidden="true">${escapeHtml(item.icon)}</span>
+                <div>
+                  <strong>${escapeHtml(item.title)}</strong>
+                  <p>${escapeHtml(item.detail)}</p>
+                  ${item.time ? `<small>${escapeHtml(item.time)}</small>` : ""}
+                </div>
+                ${item.unread ? `<span class="ps-notification-dot" aria-hidden="true"></span>` : ""}
+              </article>
+            `).join("")}
+          </div>
+        </section>
       `,
       "Bell"
     );
@@ -2136,39 +2151,249 @@
     return panel;
   }
 
-  function buildNotificationItems() {
-    const username = currentUser && currentUser.username ? `@${currentUser.username}` : "@guest";
+  function notificationDetails(notification) {
+    const details = notification && typeof notification.details === "object" && notification.details
+      ? notification.details
+      : {};
 
+    return details;
+  }
+
+  function notificationTypeIcon(type, details = {}) {
+    if (details.kind === "new_piece") return "📖";
+    if (type === "heart") return "💗";
+    if (type === "comment") return "💬";
+    if (type === "admin") return "✨";
+    return "🔔";
+  }
+
+  function notificationTimeLabel(value) {
+    const created = value ? new Date(value) : null;
+
+    if (!created || Number.isNaN(created.getTime())) return "";
+
+    const diffMs = Date.now() - created.getTime();
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMinutes / 60);
+
+    if (diffMinutes < 1) return "Just now";
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+
+    return created.toLocaleDateString("en-PH", {
+      month: "short",
+      day: "numeric",
+      year: created.getFullYear() === new Date().getFullYear() ? undefined : "numeric"
+    });
+  }
+
+  function normalizeNotificationItem(notification) {
+    const details = notificationDetails(notification);
+    const type = String(notification?.type || "");
+    const actor = notification?.actor || {};
+    const actorName = actor.username ? `@${actor.username}` : "Someone";
+    const title = details.title
+      || (details.kind === "new_piece" ? "New piece uploaded" : "")
+      || (type === "heart" ? "New heart" : "")
+      || (type === "comment" ? "New comment" : "")
+      || "Notification";
+
+    const detail = details.message
+      || (details.kind === "new_piece" && details.piece_title ? `Admin uploaded “${details.piece_title}”. Check it out.` : "")
+      || (type === "heart" ? `${actorName} hearted your post.` : "")
+      || (type === "comment" ? `${actorName} commented on your post.` : "")
+      || "You have a new Public Space notification.";
+
+    return {
+      id: notification.id,
+      unread: notification.is_read !== true,
+      icon: notificationTypeIcon(type, details),
+      title,
+      detail,
+      time: notificationTimeLabel(notification.created_at),
+      type,
+      details,
+      post_id: notification.post_id || "",
+      comment_id: notification.comment_id || ""
+    };
+  }
+
+  function buildNotificationItems() {
     if (!currentUser) {
       return [{
         id: "login",
         unread: false,
         icon: "🔔",
         title: "Login to see notifications.",
-        detail: "Hearts, comments, and account updates will appear here.",
-        time: ""
+        detail: "Hearts, comments, and admin notices will appear here.",
+        time: "",
+        details: {}
       }];
     }
 
-    if (notificationsMarkedRead) {
+    if (notificationsLoading && !publicSpaceNotifications.length) {
       return [{
-        id: "empty-read",
+        id: "loading",
         unread: false,
-        icon: "✓",
-        title: "You're all caught up.",
-        detail: "No unread notifications for now.",
-        time: ""
+        icon: "⏳",
+        title: "Loading notifications...",
+        detail: "Please wait while your notification history loads.",
+        time: "",
+        details: {}
       }];
     }
 
-    return [{
-      id: "empty",
-      unread: false,
-      icon: "🔔",
-      title: "No notifications yet.",
-      detail: `${username}, new hearts, comments, and admin notices will show here.`,
-      time: ""
-    }];
+    const items = publicSpaceNotifications.map(normalizeNotificationItem);
+
+    if (!items.length) {
+      return [{
+        id: "empty",
+        unread: false,
+        icon: "🔔",
+        title: "No notifications yet.",
+        detail: "New hearts, comments, and admin notices will show here.",
+        time: "",
+        details: {}
+      }];
+    }
+
+    return items;
+  }
+
+  function unreadNotificationCount() {
+    return publicSpaceNotifications.filter(item => item && item.is_read !== true).length;
+  }
+
+  function updateNotificationBell() {
+    if (!bellButton) return;
+
+    const count = unreadNotificationCount();
+    let badge = bellButton.querySelector("[data-ps-bell-count]");
+
+    bellButton.classList.toggle("has-unread", count > 0);
+    bellButton.setAttribute("aria-label", count ? `Notifications, ${count} unread` : "Notifications");
+
+    if (!count) {
+      if (badge) badge.remove();
+      return;
+    }
+
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "ps-bell-count";
+      badge.dataset.psBellCount = "true";
+      bellButton.appendChild(badge);
+    }
+
+    badge.textContent = count > 9 ? "9+" : String(count);
+  }
+
+  async function loadPublicSpaceNotifications(options = {}) {
+    if (!currentSession || !sessionToken()) {
+      publicSpaceNotifications = [];
+      updateNotificationBell();
+      return [];
+    }
+
+    if (!options.silent) {
+      notificationsLoading = true;
+      renderNotificationPanel();
+    }
+
+    try {
+      const result = await rpc("list_public_space_notifications", {
+        input_session_token: sessionToken()
+      });
+
+      publicSpaceNotifications = Array.isArray(result) ? result : [];
+      return publicSpaceNotifications;
+    } catch (error) {
+      if (!options.silent) {
+        publicSpaceNotifications = [];
+        console.warn("Public Space notifications failed:", error);
+      }
+      return [];
+    } finally {
+      notificationsLoading = false;
+      updateNotificationBell();
+      renderNotificationPanel();
+    }
+  }
+
+  async function markAllPublicSpaceNotificationsRead() {
+    if (!currentSession || !sessionToken()) return;
+
+    await rpc("mark_public_space_notifications_read", {
+      input_session_token: sessionToken()
+    });
+
+    publicSpaceNotifications = publicSpaceNotifications.map(item => ({ ...item, is_read: true }));
+    updateNotificationBell();
+    renderNotificationPanel();
+  }
+
+  async function markPublicSpaceNotificationRead(notificationId) {
+    const cleanId = String(notificationId || "").trim();
+    if (!cleanId || !currentSession || !sessionToken()) return;
+
+    await rpc("mark_public_space_notification_read", {
+      input_session_token: sessionToken(),
+      input_notification_id: cleanId
+    });
+
+    publicSpaceNotifications = publicSpaceNotifications.map(item => (
+      String(item.id || "") === cleanId ? { ...item, is_read: true } : item
+    ));
+
+    updateNotificationBell();
+    renderNotificationPanel();
+  }
+
+  function publicSpaceNotificationLink(item) {
+    const details = item && item.details ? item.details : {};
+
+    if (details.url) return String(details.url);
+    if (details.piece_slug) return `poem.html?slug=${encodeURIComponent(details.piece_slug)}`;
+    return "";
+  }
+
+  function scrollToPublicSpacePost(postId) {
+    const cleanId = String(postId || "").trim();
+    if (!cleanId) return;
+
+    window.setTimeout(() => {
+      const card = root.querySelector(`[data-post-id="${CSS.escape(cleanId)}"]`);
+      if (!card) return;
+
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.classList.add("is-highlighted");
+      window.setTimeout(() => card.classList.remove("is-highlighted"), 2200);
+    }, 250);
+  }
+
+  async function openPublicSpaceNotification(itemId) {
+    const item = buildNotificationItems().find(entry => String(entry.id || "") === String(itemId || ""));
+
+    if (!item || ["login", "loading", "empty"].includes(item.id)) return;
+
+    try {
+      await markPublicSpaceNotificationRead(item.id);
+    } catch (error) {
+      console.warn("Notification read update failed:", error);
+    }
+
+    const link = publicSpaceNotificationLink(item);
+
+    if (link) {
+      window.location.href = link;
+      return;
+    }
+
+    if (item.post_id) {
+      closeNotificationPanel();
+      navigatePublicSpaceRoute("home");
+      scrollToPublicSpacePost(item.post_id);
+    }
   }
 
   function renderNotificationPanel() {
@@ -2223,12 +2448,14 @@
     `).join("");
   }
 
-  function openNotificationPanel() {
+  async function openNotificationPanel() {
     const panel = ensureNotificationPanel();
-    renderNotificationPanel();
     panel.hidden = false;
     panel.classList.add("is-open");
     if (bellButton) bellButton.classList.add("is-active");
+
+    renderNotificationPanel();
+    await loadPublicSpaceNotifications({ silent: false });
   }
 
   function closeNotificationPanel() {
@@ -2256,11 +2483,13 @@
     toggleNotificationPanel();
   }
 
-  function handleNotificationPanelClick(event) {
-    const panel = event.target.closest("[data-ps-notification-panel]");
+  async function handleNotificationPanelClick(event) {
+    const panel = event.target.closest("[data-ps-notification-panel], [data-ps-notifications-history]");
     const moreButton = event.target.closest("[data-ps-notification-more]");
     const filterButton = event.target.closest("[data-ps-notification-filter]");
     const actionButton = event.target.closest("[data-ps-notification-action]");
+    const refreshButton = event.target.closest("[data-ps-notification-refresh]");
+    const itemButton = event.target.closest("[data-ps-notification-item]");
     const bellClick = event.target.closest("[data-ps-bell]");
 
     if (bellClick) return;
@@ -2291,9 +2520,9 @@
       const action = actionButton.dataset.psNotificationAction;
 
       if (action === "mark-read") {
-        notificationsMarkedRead = true;
+        await markAllPublicSpaceNotificationsRead();
         notificationPanelFilter = "all";
-        renderNotificationPanel();
+        renderNotificationsScreen();
         return;
       }
 
@@ -2306,7 +2535,20 @@
       if (action === "open") {
         closeNotificationPanel();
         navigatePublicSpaceRoute("notifications");
+        return;
       }
+    }
+
+    if (refreshButton) {
+      event.preventDefault();
+      await loadPublicSpaceNotifications({ silent: false });
+      renderNotificationsScreen();
+      return;
+    }
+
+    if (itemButton) {
+      event.preventDefault();
+      await openPublicSpaceNotification(itemButton.dataset.psNotificationItem);
     }
   }
 
@@ -2326,6 +2568,9 @@
 
     if (authScreen) authScreen.hidden = false;
     if (mainSpace) mainSpace.hidden = true;
+
+    publicSpaceNotifications = [];
+    updateNotificationBell();
   }
 
   async function showMainSpace(message) {
@@ -2336,7 +2581,11 @@
     setAdminMode(Boolean(currentUser && currentUser.is_admin));
 
     if (message) setFeedStatus(message);
-    await loadPosts(message ? 250 : 0);
+
+    await Promise.all([
+      loadPosts(message ? 250 : 0),
+      loadPublicSpaceNotifications({ silent: true })
+    ]);
   }
 
   async function loadPosts(delayMs) {
