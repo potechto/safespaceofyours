@@ -369,7 +369,6 @@ function buildPaidPreview(poem, fullText, options = {}) {
     <div class="paid-reader-shell">
       <div class="paid-preview-text" data-paid-preview-chars="${previewCount}" data-paid-preview-limit="${previewLimit}">
         ${previewHtml}
-        ${previewCount ? `<p class="paid-preview-meta">Preview: ${previewCount.toLocaleString("en-PH")} of ${previewLimit.toLocaleString("en-PH")} chars</p>` : ""}
       </div>
 
       <div class="paid-reader-hero">
