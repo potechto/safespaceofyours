@@ -71,6 +71,7 @@
   let isAdminMode = Boolean(currentUser && currentUser.is_admin);
   let latestPublicSpacePosts = [];
   let activePublicProfileUser = null;
+  let publicProfileBackRoute = "home";
   let publicSpacePostFilter = { mode: "all", date: "" };
   let notificationPanelFilter = "all";
   let notificationsMarkedRead = false;
@@ -1265,6 +1266,21 @@
     return isPublicUserProfileRoute(cleanRoute) ? cleanRoute.replace(/^user-/, "") : "";
   }
 
+  function rememberPublicProfileBackRoute(route, targetRoute) {
+    const cleanRoute = normalizePublicSpaceRoute(route || "home");
+    const cleanTarget = normalizePublicSpaceRoute(targetRoute || "");
+
+    publicProfileBackRoute = cleanRoute && cleanRoute !== cleanTarget ? cleanRoute : "home";
+    return publicProfileBackRoute;
+  }
+
+  function publicProfileBackTarget() {
+    const currentRoute = currentPublicSpaceRoute();
+    const backRoute = normalizePublicSpaceRoute(publicProfileBackRoute || "home");
+
+    return backRoute && backRoute !== currentRoute ? backRoute : "home";
+  }
+
   function renderPublicSpaceUserButton(user, fallbackUsername) {
     const id = publicSpaceUserId(user);
     const username = publicSpaceUsername(user, fallbackUsername);
@@ -1671,6 +1687,7 @@
     const initial = String(username || "@").charAt(0).toUpperCase() || "@";
     const allPosts = publicUserPosts(cleanId, latestPublicSpacePosts);
     const visiblePosts = allPosts.filter(postMatchesFilter);
+    const backRoute = publicProfileBackTarget();
 
     openControlScreen(
       `@${username}`,
@@ -1678,6 +1695,7 @@
       `
         <section class="ps-profile-page ps-public-profile-page" aria-label="@${escapeHtml(username)} Public Space profile" data-ps-public-profile data-user-id="${escapeHtml(cleanId)}">
           <header class="ps-profile-hero ps-public-profile-hero">
+            <button class="ps-public-profile-back" type="button" data-ps-public-profile-back data-back-route="${escapeHtml(backRoute)}" aria-label="Go back">←</button>
             <div class="ps-profile-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
             <div class="ps-profile-heading">
               <strong>@${escapeHtml(username)}</strong>
@@ -1709,6 +1727,17 @@
     renderPublicUserProfilePosts(profile ? profile.dataset.userId : publicUserIdFromRoute(currentPublicSpaceRoute()));
   }
 
+  function handlePublicProfileBackClick(event) {
+    const button = event.target.closest("[data-ps-public-profile-back]");
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const targetRoute = normalizePublicSpaceRoute(button.dataset.backRoute || publicProfileBackRoute || "home");
+    navigatePublicSpaceRoute(targetRoute && targetRoute !== currentPublicSpaceRoute() ? targetRoute : "home");
+  }
+
   function handlePublicUserProfileClick(event) {
     const button = event.target.closest("[data-ps-open-user-profile]");
     if (!button) return;
@@ -1719,10 +1748,13 @@
     const user = userFromPublicProfileClick(button);
     if (!user || !publicSpaceUserId(user)) return;
 
+    const targetRoute = publicUserProfileRoute(user);
+    rememberPublicProfileBackRoute(currentPublicSpaceRoute(), targetRoute);
+
     const modal = button.closest("[data-ps-comments-modal]");
     if (modal) closeCommentsModal();
 
-    navigatePublicSpaceRoute(publicUserProfileRoute(user));
+    navigatePublicSpaceRoute(targetRoute);
   }
 
   function renderSettingsScreen() {
@@ -3178,6 +3210,7 @@
   root.addEventListener("change", handlePostFilterChange);
   root.addEventListener("change", handlePublicUserProfileFilterChange);
   root.addEventListener("click", handlePostFilterClick);
+  root.addEventListener("click", handlePublicProfileBackClick);
   root.addEventListener("click", handlePublicUserProfileClick);
 
 

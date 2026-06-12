@@ -10405,3 +10405,48 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.63F clickable public user profiles END */
+
+
+/* V2.0Q.63G public profile back button */
+.public-space-body .ps-public-profile-hero {
+  position: relative !important;
+}
+
+.public-space-body .ps-public-profile-back {
+  flex: 0 0 auto !important;
+  width: 2.35rem !important;
+  height: 2.35rem !important;
+  min-width: 2.35rem !important;
+  min-height: 2.35rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background: rgba(255, 244, 251, 0.075) !important;
+  color: #fff4fb !important;
+  font-size: 1.18rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.public-space-body .ps-public-profile-back:hover,
+.public-space-body .ps-public-profile-back:focus-visible {
+  border-color: rgba(255, 142, 209, 0.42) !important;
+  background: rgba(255, 142, 209, 0.14) !important;
+  transform: translateX(-1px) !important;
+  outline: none !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-public-profile-back {
+    width: 2.15rem !important;
+    height: 2.15rem !important;
+    min-width: 2.15rem !important;
+    min-height: 2.15rem !important;
+    font-size: 1.05rem !important;
+  }
+}
+/* V2.0Q.63G public profile back button END */
