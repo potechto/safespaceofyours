@@ -8406,3 +8406,76 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62Q filter tray toggle fix END */
+
+
+/* V2.0Q.62R custom date part selector */
+
+.public-space-body .ps-post-filter-custom-tray {
+  min-width: min(100vw - 2rem, 19rem) !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.4rem !important;
+}
+
+.public-space-body .ps-post-date-parts {
+  display: grid !important;
+  grid-template-columns: auto 3.5rem auto 3.5rem auto 4.6rem 2.2rem !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+
+.public-space-body .ps-post-date-parts select,
+.public-space-body .ps-post-date-parts input,
+.public-space-body .ps-post-filter-date-apply {
+  width: 100% !important;
+  min-height: 2.05rem !important;
+  height: 2.05rem !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  background: rgba(8, 8, 18, 0.62) !important;
+  color: #fff4fb !important;
+  font: inherit !important;
+  font-size: 0.8rem !important;
+  font-weight: 780 !important;
+  padding: 0.32rem 0.44rem !important;
+  box-shadow: none !important;
+}
+
+.public-space-body .ps-post-filter-date-apply {
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+}
+
+.public-space-body .ps-post-filter-date-apply:hover,
+.public-space-body .ps-post-filter-date-apply:focus-visible {
+  background: rgba(255, 142, 209, 0.18) !important;
+  border-color: rgba(255, 142, 209, 0.5) !important;
+}
+
+.public-space-body .ps-post-date-slash {
+  color: rgba(255, 244, 251, 0.58) !important;
+  font-weight: 850 !important;
+  text-align: center !important;
+}
+
+.public-space-body [data-ps-filter-date-preview] {
+  color: rgba(255, 244, 251, 0.64) !important;
+  font-size: 0.72rem !important;
+  font-weight: 780 !important;
+  letter-spacing: 0.03em !important;
+}
+
+.public-space-body .ps-post-filter-date-toggle,
+.public-space-body .ps-post-filter-date-clear,
+.public-space-body .ps-post-filter-date-input {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-body .ps-post-date-parts {
+    grid-template-columns: auto 1fr auto 1fr auto 1.25fr 2.2rem !important;
+  }
+}
+/* V2.0Q.62R custom date part selector END */

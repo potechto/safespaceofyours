@@ -329,21 +329,55 @@
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   }
 
-  function openPostFilterDatePicker(input) {
-    if (!input) return;
+  function padDatePart(value) {
+    return String(value || "").padStart(2, "0");
+  }
 
-    try {
-      input.focus({ preventScroll: true });
-      if (typeof input.showPicker === "function") {
-        input.showPicker();
-      } else {
-        input.click();
-      }
-    } catch (error) {
-      try {
-        input.click();
-      } catch (clickError) {}
+  function datePartsFromKey(dateKey) {
+    const clean = String(dateKey || "").trim();
+    const match = clean.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+    if (!match) {
+      return { year: "2026", month: "", day: "" };
     }
+
+    return { year: match[1], month: match[2], day: match[3] };
+  }
+
+  function dateKeyFromParts(month, day, year) {
+    const mm = padDatePart(month);
+    const dd = padDatePart(day);
+    const yyyy = String(year || "2026").trim();
+
+    if (!/^\\d{2}$/.test(mm) || !/^\\d{2}$/.test(dd) || !/^\\d{4}$/.test(yyyy)) return "";
+
+    const date = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+    if (!date || Number.isNaN(date.getTime())) return "";
+    if (date.getFullYear() !== Number(yyyy)) return "";
+    if (date.getMonth() + 1 !== Number(mm)) return "";
+    if (date.getDate() !== Number(dd)) return "";
+
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function daysInMonth(month, year) {
+    const mm = Number(month || 0);
+    const yyyy = Number(year || 2026);
+    if (!mm || !yyyy) return 31;
+    return new Date(yyyy, mm, 0).getDate();
+  }
+
+  function monthOptions() {
+    return Array.from({ length: 12 }, (_, index) => {
+      const value = padDatePart(index + 1);
+      return `<option value="${value}">${value}</option>`;
+    }).join("");
+  }
+
+  function dayOptions(maxDays) {
+    return Array.from({ length: maxDays || 31 }, (_, index) => {
+      const value = padDatePart(index + 1);
+      return `<option value="${value}">${value}</option>`;
+    }).join("");
   }
 
   function ensurePostFilterControls() {
@@ -365,13 +399,22 @@
       </label>
 
       <div class="ps-post-filter-custom-tray" data-ps-post-filter-custom-tray hidden>
-        <button type="button" class="ps-post-filter-date-toggle" data-ps-post-filter-date-toggle>
-          <span data-ps-post-filter-date-label>Select date</span>
-        </button>
-        <button type="button" class="ps-post-filter-date-clear" data-ps-post-filter-date-clear aria-label="Clear custom date">
-          Clear
-        </button>
-        <input class="ps-post-filter-date-input" type="date" data-ps-post-filter-date aria-label="Choose custom post date" />
+        <div class="ps-post-date-parts" aria-label="Choose custom date in month day year format">
+          <span class="ps-post-date-slash" aria-hidden="true">/</span>
+          <select data-ps-filter-month aria-label="Month">
+            <option value="">mm</option>
+            ${monthOptions()}
+          </select>
+          <span class="ps-post-date-slash" aria-hidden="true">/</span>
+          <select data-ps-filter-day aria-label="Day">
+            <option value="">dd</option>
+            ${dayOptions(31)}
+          </select>
+          <span class="ps-post-date-slash" aria-hidden="true">/</span>
+          <input type="number" inputmode="numeric" min="2000" max="2100" step="1" value="2026" data-ps-filter-year aria-label="Year" />
+          <button type="button" class="ps-post-filter-date-apply" data-ps-filter-date-apply aria-label="Apply custom date">➜</button>
+        </div>
+        <small data-ps-filter-date-preview>/mm/dd/yyyy</small>
       </div>
     `;
 
@@ -401,7 +444,10 @@
 
     if (mode === "today") return postDate === offsetDateKey(0);
     if (mode === "yesterday") return postDate === offsetDateKey(-1);
-    if (mode === "custom") return Boolean(publicSpacePostFilter.date) && postDate === publicSpacePostFilter.date;
+    if (mode === "custom") {
+      if (!publicSpacePostFilter.date) return true;
+      return postDate === publicSpacePostFilter.date;
+    }
 
     return true;
   }
@@ -410,18 +456,59 @@
     return (Array.isArray(posts) ? posts : []).filter(postMatchesFilter);
   }
 
+  function syncCustomDateParts(filter) {
+    if (!filter) return;
+
+    const parts = datePartsFromKey(publicSpacePostFilter.date);
+    const monthSelect = filter.querySelector("[data-ps-filter-month]");
+    const daySelect = filter.querySelector("[data-ps-filter-day]");
+    const yearInput = filter.querySelector("[data-ps-filter-year]");
+    const preview = filter.querySelector("[data-ps-filter-date-preview]");
+
+    if (yearInput) yearInput.value = parts.year || "2026";
+    if (monthSelect) monthSelect.value = parts.month || "";
+
+    const maxDays = daysInMonth(parts.month, parts.year || "2026");
+    if (daySelect) {
+      const currentDay = parts.day || daySelect.value || "";
+      daySelect.innerHTML = `<option value="">dd</option>${dayOptions(maxDays)}`;
+      daySelect.value = Number(currentDay) <= maxDays ? currentDay : "";
+    }
+
+    const previewKey = dateKeyFromParts(
+      monthSelect ? monthSelect.value : "",
+      daySelect ? daySelect.value : "",
+      yearInput ? yearInput.value : "2026"
+    );
+
+    if (preview) {
+      preview.textContent = previewKey
+        ? `/${datePartsFromKey(previewKey).month}/${datePartsFromKey(previewKey).day}/${datePartsFromKey(previewKey).year}`
+        : "/mm/dd/yyyy";
+    }
+  }
+
+  function readCustomDateParts(filter) {
+    const monthSelect = filter ? filter.querySelector("[data-ps-filter-month]") : null;
+    const daySelect = filter ? filter.querySelector("[data-ps-filter-day]") : null;
+    const yearInput = filter ? filter.querySelector("[data-ps-filter-year]") : null;
+
+    return dateKeyFromParts(
+      monthSelect ? monthSelect.value : "",
+      daySelect ? daySelect.value : "",
+      yearInput ? yearInput.value : "2026"
+    );
+  }
+
   function syncPostFilterControls() {
     const filter = root.querySelector("[data-ps-post-filter]");
     if (!filter) return;
 
     const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
-    const dateInput = filter.querySelector("[data-ps-post-filter-date]");
     const customOption = modeSelect ? modeSelect.querySelector("option[value='custom']") : null;
     const tray = filter.querySelector("[data-ps-post-filter-custom-tray]");
-    const dateLabel = filter.querySelector("[data-ps-post-filter-date-label]");
 
     if (modeSelect) modeSelect.value = publicSpacePostFilter.mode || "all";
-    if (dateInput) dateInput.value = publicSpacePostFilter.date || "";
 
     if (customOption) {
       customOption.textContent = publicSpacePostFilter.date
@@ -429,17 +516,13 @@
         : "Custom date";
     }
 
-    if (dateLabel) {
-      dateLabel.textContent = publicSpacePostFilter.date
-        ? filterDateDisplayLabel(publicSpacePostFilter.date)
-        : "Select date";
-    }
-
     if (tray) {
       const shouldOpen = publicSpacePostFilter.mode === "custom";
       tray.hidden = !shouldOpen;
       filter.classList.toggle("is-custom-open", shouldOpen);
     }
+
+    syncCustomDateParts(filter);
   }
 
   function refreshPostFilterView() {
@@ -450,12 +533,11 @@
 
   function handlePostFilterChange(event) {
     const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
-    const changedDateInput = event.target.closest("[data-ps-post-filter-date]");
-    if (!modeSelect && !changedDateInput) return;
+    const datePart = event.target.closest("[data-ps-filter-month], [data-ps-filter-day], [data-ps-filter-year]");
+    if (!modeSelect && !datePart) return;
 
     const filter = root.querySelector("[data-ps-post-filter]");
     const activeMode = filter ? filter.querySelector("[data-ps-post-filter-mode]") : null;
-    const activeDate = filter ? filter.querySelector("[data-ps-post-filter-date]") : null;
 
     if (modeSelect) {
       const selectedMode = activeMode ? activeMode.value : "all";
@@ -463,12 +545,6 @@
       if (selectedMode === "custom") {
         publicSpacePostFilter.mode = "custom";
         syncPostFilterControls();
-
-        if (!publicSpacePostFilter.date && activeDate) {
-          window.setTimeout(() => openPostFilterDatePicker(activeDate), 0);
-        } else {
-          refreshPostFilterView();
-        }
         return;
       }
 
@@ -479,64 +555,32 @@
       return;
     }
 
-    if (changedDateInput) {
-      if (changedDateInput.value) {
-        publicSpacePostFilter.mode = "custom";
-        publicSpacePostFilter.date = changedDateInput.value;
-      } else {
-        publicSpacePostFilter.mode = "all";
-        publicSpacePostFilter.date = "";
-      }
-
-      syncPostFilterControls();
-      refreshPostFilterView();
+    if (datePart) {
+      syncCustomDateParts(filter);
     }
   }
 
   function handlePostFilterClick(event) {
-    const toggleButton = event.target.closest("[data-ps-post-filter-date-toggle]");
-    const clearButton = event.target.closest("[data-ps-post-filter-date-clear]");
+    const applyButton = event.target.closest("[data-ps-filter-date-apply]");
     const filter = root.querySelector("[data-ps-post-filter]");
     if (!filter) return;
 
-    const dateInput = filter.querySelector("[data-ps-post-filter-date]");
-    const tray = filter.querySelector("[data-ps-post-filter-custom-tray]");
     const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
 
-    if (clearButton) {
+    if (applyButton) {
       event.preventDefault();
-      publicSpacePostFilter.mode = "all";
-      publicSpacePostFilter.date = "";
-      if (modeSelect) modeSelect.value = "all";
+
+      const nextDate = readCustomDateParts(filter);
+      if (!nextDate) {
+        syncCustomDateParts(filter);
+        return;
+      }
+
+      publicSpacePostFilter.mode = "custom";
+      publicSpacePostFilter.date = nextDate;
+      if (modeSelect) modeSelect.value = "custom";
       syncPostFilterControls();
       refreshPostFilterView();
-      return;
-    }
-
-    if (toggleButton) {
-      event.preventDefault();
-
-      if (publicSpacePostFilter.mode !== "custom") {
-        publicSpacePostFilter.mode = "custom";
-        if (modeSelect) modeSelect.value = "custom";
-        syncPostFilterControls();
-        window.setTimeout(() => openPostFilterDatePicker(dateInput), 0);
-        return;
-      }
-
-      const isOpen = tray && !tray.hidden;
-      if (isOpen) {
-        publicSpacePostFilter.mode = publicSpacePostFilter.date ? "custom" : "all";
-        if (!publicSpacePostFilter.date && modeSelect) {
-          modeSelect.value = "all";
-        }
-        syncPostFilterControls();
-        refreshPostFilterView();
-        return;
-      }
-
-      syncPostFilterControls();
-      window.setTimeout(() => openPostFilterDatePicker(dateInput), 0);
     }
   }
 
