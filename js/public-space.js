@@ -321,126 +321,6 @@
     return localDateKey(date);
   }
 
-  function filterDateDisplayLabel(dateKey) {
-    const clean = String(dateKey || "").trim();
-    if (!clean) return "";
-
-    const date = new Date(`${clean}T00:00:00`);
-    if (!date || Number.isNaN(date.getTime())) return clean;
-
-    return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-  }
-
-  function filterStartYear() {
-    return Math.min(new Date().getFullYear(), 2040);
-  }
-
-  function defaultFilterYear() {
-    return String(filterStartYear());
-  }
-
-  function padDatePart(value) {
-    return String(value || "").padStart(2, "0");
-  }
-
-  function monthLabels() {
-    return ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  }
-
-  function monthDisplayLabel(month) {
-    const index = Number(month || 0) - 1;
-    return monthLabels()[index] || "Month";
-  }
-
-  function datePartsFromKey(dateKey) {
-    const clean = String(dateKey || "").trim();
-    const match = clean.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
-    if (!match) {
-      const now = new Date();
-      return {
-        year: defaultFilterYear(),
-        month: padDatePart(now.getMonth() + 1),
-        day: ""
-      };
-    }
-
-    return { year: match[1], month: match[2], day: match[3] };
-  }
-
-  function dateKeyFromParts(month, day, year) {
-    const mm = padDatePart(month);
-    const dd = padDatePart(day);
-    const yyyy = String(year || defaultFilterYear()).trim();
-
-    if (!/^\\d{2}$/.test(mm) || !/^\\d{2}$/.test(dd) || !/^\\d{4}$/.test(yyyy)) return "";
-
-    const date = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
-    if (!date || Number.isNaN(date.getTime())) return "";
-    if (date.getFullYear() !== Number(yyyy)) return "";
-    if (date.getMonth() + 1 !== Number(mm)) return "";
-    if (date.getDate() !== Number(dd)) return "";
-
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
-  function daysInMonth(month, year) {
-    const mm = Number(month || 0);
-    const yyyy = Number(year || defaultFilterYear());
-    if (!mm || !yyyy) return 31;
-    return new Date(yyyy, mm, 0).getDate();
-  }
-
-  function monthOptions() {
-    return monthLabels().map((label, index) => {
-      const value = padDatePart(index + 1);
-      return `<button type="button" data-ps-calendar-combo-option="month" data-value="${value}">${label}</button>`;
-    }).join("");
-  }
-
-  function yearOptions() {
-    const start = filterStartYear();
-    return Array.from({ length: Math.max(1, 2040 - start + 1) }, (_, index) => {
-      const value = String(start + index);
-      return `<button type="button" data-ps-calendar-combo-option="year" data-value="${value}">${value}</button>`;
-    }).join("");
-  }
-
-  function calendarDateKey(year, month, day) {
-    return dateKeyFromParts(month, day, year);
-  }
-
-  function setCalendarComboValue(filter, type, value) {
-    if (!filter) return;
-
-    const input = filter.querySelector(`[data-ps-filter-${type}]`);
-    const label = filter.querySelector(`[data-ps-calendar-combo-label="${type}"]`);
-    const menu = filter.querySelector(`[data-ps-calendar-combo-menu="${type}"]`);
-
-    if (input) input.value = value || "";
-
-    if (label) {
-      label.textContent = type === "month"
-        ? monthDisplayLabel(value)
-        : String(value || defaultFilterYear());
-    }
-
-    if (menu) {
-      menu.querySelectorAll("[data-ps-calendar-combo-option]").forEach(button => {
-        button.classList.toggle("is-selected", button.dataset.value === String(value || ""));
-      });
-    }
-  }
-
-  function closeCalendarComboMenus(filter) {
-    const scope = filter || root;
-    scope.querySelectorAll("[data-ps-calendar-combo-menu]").forEach(menu => {
-      menu.hidden = true;
-    });
-    scope.querySelectorAll("[data-ps-calendar-combo-toggle]").forEach(button => {
-      button.setAttribute("aria-expanded", "false");
-    });
-  }
-
   function ensurePostFilterControls() {
     const feedCard = root.querySelector(".ps-feed-card") || (feed ? feed.closest("section, article, div") : null);
     if (!feedCard) return;
@@ -501,7 +381,6 @@
 
     if (mode === "today") return offsetDateKey(0);
     if (mode === "yesterday") return offsetDateKey(-1);
-    if (mode === "custom") return String(publicSpacePostFilter.date || "").trim();
 
     return "";
   }
@@ -541,7 +420,7 @@
       empty.setAttribute("data-ps-filter-empty", "");
       empty.innerHTML = `
         <strong>No posts for this filter.</strong>
-        <span>Try View all posts or choose another date.</span>
+        <span>Try View all posts.</span>
       `;
       feedCard.appendChild(empty);
     }
@@ -572,178 +451,6 @@
 
     setPostFilterEmptyState(visibleCount, cards.length);
     return visibleCount;
-  }
-
-  function activeCalendarParts(filter) {
-    const monthInput = filter ? filter.querySelector("[data-ps-filter-month]") : null;
-    const yearInput = filter ? filter.querySelector("[data-ps-filter-year]") : null;
-    const base = datePartsFromKey(filter?.dataset.psDraftDate || publicSpacePostFilter.date || "");
-
-    return {
-      year: yearInput ? (yearInput.value || base.year || defaultFilterYear()) : (base.year || defaultFilterYear()),
-      month: monthInput ? (monthInput.value || base.month || padDatePart(new Date().getMonth() + 1)) : (base.month || padDatePart(new Date().getMonth() + 1)),
-      selectedDate: filter?.dataset.psDraftDate || publicSpacePostFilter.date || ""
-    };
-  }
-
-  function paintCalendarDayButton(button, isSelected) {
-    if (!button) return;
-
-    button.dataset.selected = isSelected ? "true" : "false";
-    button.setAttribute("aria-pressed", isSelected ? "true" : "false");
-    button.classList.toggle("is-selected", isSelected);
-    button.classList.toggle("is-draft-selected", isSelected);
-
-    if (isSelected) {
-      button.style.setProperty("background", "linear-gradient(135deg, rgba(143, 82, 171, 0.98), rgba(210, 105, 184, 0.98))", "important");
-      button.style.setProperty("border-color", "rgba(255, 244, 251, 0.72)", "important");
-      button.style.setProperty("color", "#fff", "important");
-      button.style.setProperty("box-shadow", "0 0 0 2px rgba(255, 142, 209, 0.18), 0 10px 22px rgba(0, 0, 0, 0.28)", "important");
-      button.style.setProperty("transform", "translateY(-1px)", "important");
-    } else {
-      button.style.removeProperty("background");
-      button.style.removeProperty("border-color");
-      button.style.removeProperty("color");
-      button.style.removeProperty("box-shadow");
-      button.style.removeProperty("transform");
-    }
-  }
-
-  function selectCalendarDate(filter, dateKey) {
-    if (!filter || !dateKey) return;
-
-    filter.dataset.psDraftDate = dateKey;
-    filter.dataset.psCalendarOpen = "true";
-
-    filter.querySelectorAll("[data-ps-calendar-day]").forEach(button => {
-      paintCalendarDayButton(button, button.dataset.psCalendarDay === dateKey);
-    });
-  }
-
-  function bindCalendarDayButtons(filter) {
-    if (!filter) return;
-
-    filter.querySelectorAll("[data-ps-calendar-day]").forEach(button => {
-      button.addEventListener("click", event => {
-        event.preventDefault();
-        event.stopPropagation();
-        selectCalendarDate(filter, button.dataset.psCalendarDay || "");
-      });
-    });
-  }
-
-  function renderCleanCalendarJump(filter) {
-    if (!filter) return;
-
-    const calendar = filter.querySelector("[data-ps-clean-calendar]");
-    const monthNode = filter.querySelector("[data-ps-clean-cal-months]");
-    const yearNode = filter.querySelector("[data-ps-clean-cal-years]");
-    if (!calendar || !monthNode || !yearNode) return;
-
-    const activeMonth = String(calendar.dataset.calMonth || padDatePart(new Date().getMonth() + 1));
-    const activeYear = String(calendar.dataset.calYear || defaultFilterYear());
-
-    monthNode.innerHTML = monthLabels().map((label, index) => {
-      const value = padDatePart(index + 1);
-      const shortLabel = label.slice(0, 3);
-      return `<button type="button" data-ps-clean-jump-month="${value}" class="${value === activeMonth ? "is-active" : ""}">${shortLabel}</button>`;
-    }).join("");
-
-    const start = filterStartYear();
-    const years = Array.from({ length: Math.max(1, 2040 - start + 1) }, (_, index) => String(start + index));
-    yearNode.innerHTML = years.map(year => (
-      `<button type="button" data-ps-clean-jump-year="${year}" class="${year === activeYear ? "is-active" : ""}">${year}</button>`
-    )).join("");
-  }
-
-  function toggleCleanCalendarJump(filter, forceOpen) {
-    if (!filter) return;
-
-    const panel = filter.querySelector("[data-ps-clean-cal-jump]");
-    const title = filter.querySelector("[data-ps-clean-cal-title]");
-    if (!panel) return;
-
-    const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : panel.hidden;
-    renderCleanCalendarJump(filter);
-    panel.hidden = !shouldOpen;
-    if (title) title.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
-  }
-  function renderCustomCalendarDays(filter) {
-    if (!filter) return;
-
-    const calendar = filter.querySelector("[data-ps-clean-calendar]");
-    const daysNode = filter.querySelector("[data-ps-calendar-days]");
-    const titleNode = filter.querySelector("[data-ps-clean-cal-title]");
-    if (!calendar || !daysNode) return;
-
-    const year = Number(calendar.dataset.calYear || defaultFilterYear());
-    const month = Number(calendar.dataset.calMonth || padDatePart(new Date().getMonth() + 1));
-    const safeMonth = padDatePart(month);
-    const selectedDate = String(filter.dataset.psDraftDate || publicSpacePostFilter.date || "").trim();
-    const todayKey = localDateKey(new Date());
-
-    if (titleNode) titleNode.textContent = `${monthDisplayLabel(safeMonth)} ${year}`;
-    renderCleanCalendarJump(filter);
-
-    const firstDay = new Date(year, month - 1, 1).getDay();
-    const totalDays = daysInMonth(month, year);
-    const previousMonth = month === 1 ? 12 : month - 1;
-    const previousYear = month === 1 ? year - 1 : year;
-    const previousTotalDays = daysInMonth(previousMonth, previousYear);
-    const cells = [];
-
-    for (let offset = firstDay - 1; offset >= 0; offset -= 1) {
-      const day = previousTotalDays - offset;
-      cells.push({ day, dateKey: calendarDateKey(previousYear, previousMonth, day), muted: true });
-    }
-
-    for (let day = 1; day <= totalDays; day += 1) {
-      cells.push({ day, dateKey: calendarDateKey(year, month, day), muted: false });
-    }
-
-    const nextMonth = month === 12 ? 1 : month + 1;
-    const nextYear = month === 12 ? year + 1 : year;
-    let nextDay = 1;
-
-    while (cells.length < 42) {
-      cells.push({ day: nextDay, dateKey: calendarDateKey(nextYear, nextMonth, nextDay), muted: true });
-      nextDay += 1;
-    }
-
-    daysNode.innerHTML = cells.map(item => {
-      const isSelected = Boolean(selectedDate) && item.dateKey === selectedDate;
-      const isToday = item.dateKey === todayKey;
-      const isPast = item.dateKey < todayKey;
-
-      return `<label class="ps-clean-date-choice ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""} ${item.muted ? "is-muted" : ""} ${isPast ? "is-past" : ""}"
-        data-ps-clean-date-choice
-        data-ps-calendar-day="${escapeHtml(item.dateKey)}"
-        data-selected="${isSelected ? "true" : "false"}"
-        data-muted="${item.muted ? "true" : "false"}"
-        data-past="${isPast ? "true" : "false"}">
-        <input class="ps-clean-date-radio" type="radio" name="ps-clean-calendar-date" value="${escapeHtml(item.dateKey)}" ${isSelected ? "checked" : ""} />
-        <span class="ps-clean-date-face">${item.day}</span>
-      </label>`;
-    }).join("");
-  }
-
-  function hydrateCustomDateParts(filter) {
-    if (!filter) return;
-
-    const calendar = filter.querySelector("[data-ps-clean-calendar]");
-    if (!calendar) return;
-
-    const parts = datePartsFromKey(publicSpacePostFilter.date || filter.dataset.psDraftDate || "");
-    calendar.dataset.calMonth = parts.month || padDatePart(new Date().getMonth() + 1);
-    calendar.dataset.calYear = parts.year || String(new Date().getFullYear());
-
-    renderCustomCalendarDays(filter);
-  }
-
-  function readCustomDateParts(filter) {
-    if (!filter) return "";
-    const checked = filter.querySelector(".ps-clean-date-radio:checked");
-    return checked ? String(checked.value || "").trim() : String(filter.dataset.psDraftDate || "").trim();
   }
 
   function normalizePostFilterMode() {
@@ -2882,7 +2589,6 @@
   root.addEventListener("change", handlePostFilterChange);
   root.addEventListener("click", handlePostFilterClick);
 
-  // Q62AC: old calendar capture disabled; clean calendar uses root delegated clicks only.
 
   if (bellButton) {
     bellButton.addEventListener("click", handleBellNotificationClick, true);
