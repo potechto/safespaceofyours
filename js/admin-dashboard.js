@@ -1,4 +1,4 @@
-﻿const dashboardMessage = document.querySelector("#dashboardMessage");
+const dashboardMessage = document.querySelector("#dashboardMessage");
 const promoForm = document.querySelector("#promoForm");
 const unlockForm = document.querySelector("#unlockForm");
 const promoList = document.querySelector("#promoList");
@@ -1478,6 +1478,60 @@ function renderPieceSettingsList() {
   }).join("");
 }
 
+
+function adminPiecePublishedTime(piece) {
+  const value = piece && (piece.published_at || piece.publishedAt || piece.created_at || piece.createdAt || piece.updated_at || piece.updatedAt || piece.date);
+  const timestamp = value ? Date.parse(value) : 0;
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function sortAdminPiecesNewestFirst(pieces) {
+  return [...(Array.isArray(pieces) ? pieces : [])].sort((a, b) => {
+    const timeDifference = adminPiecePublishedTime(b) - adminPiecePublishedTime(a);
+    if (timeDifference !== 0) return timeDifference;
+    return String(a.title || a.slug || "").localeCompare(String(b.title || b.slug || ""));
+  });
+}
+
+function createPieceSettingSeedFromSource(piece) {
+  const accessType = normalizeAdminAccess(piece.access_type || piece.access);
+  const contentLabel = normalizeAdminContentLabel(piece.content_label || piece.type || "spoken-poetry");
+  const rawPrice = Number(piece.price);
+
+  return {
+    slug: piece.slug,
+    title: piece.title || piece.slug,
+    category: piece.category || "Uncategorized",
+    type: contentLabel,
+    is_enabled: piece.is_enabled !== false,
+    access_type: accessType,
+    price: accessType === "paid" ? (Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : 49) : null,
+    preview_mode: piece.preview_mode || "chars",
+    preview_char_limit: Number(piece.preview_char_limit) || 700,
+    content_label: contentLabel
+  };
+}
+
+async function syncMissingPieceSettings(sourcePieces = [], settingsRows = []) {
+  const existingSlugs = new Set((Array.isArray(settingsRows) ? settingsRows : []).map(item => item.slug));
+  const missingRows = (Array.isArray(sourcePieces) ? sourcePieces : [])
+    .filter(piece => piece && piece.slug && !existingSlugs.has(piece.slug))
+    .map(createPieceSettingSeedFromSource);
+
+  if (!missingRows.length) return [];
+
+  const { error } = await adminClient
+    .from("piece_settings")
+    .insert(missingRows);
+
+  if (error) {
+    console.warn("Missing piece settings could not be auto-created:", error.message || error);
+    return missingRows;
+  }
+
+  return missingRows;
+}
+
 async function loadPieceSettings() {
   if (!pieceSettingsList) return;
 
@@ -1492,28 +1546,53 @@ async function loadPieceSettings() {
     return;
   }
 
-  if (!data.length) {
-    renderEmpty(pieceSettingsList, "No piece settings found. Run the V16 SQL seed first.");
+  const sourcePieces = Array.isArray(window.POEMS) ? window.POEMS : [];
+  const currentSettings = Array.isArray(data) ? data : [];
+  const missingSettings = await syncMissingPieceSettings(sourcePieces, currentSettings);
+  const settingsRows = [...currentSettings, ...missingSettings];
+
+  if (!settingsRows.length && !sourcePieces.length) {
+    renderEmpty(pieceSettingsList, "No piece settings found. Add pieces to js/poems.js first.");
     return;
   }
 
   await loadProtectedTextStatuses();
 
-  const sourceMap = getPoemSourceMap();
-  latestAdminPieces = data.map(item => {
-    const protectedStatus = getProtectedTextStatus(item.slug);
+  const settingsMap = new Map(settingsRows.map(item => [item.slug, item]));
+  const mergedBySlug = new Map();
 
-    return {
-      ...item,
-      ...(sourceMap.get(item.slug) || {}),
-      ...item,
+  sourcePieces.forEach(piece => {
+    const setting = settingsMap.get(piece.slug) || createPieceSettingSeedFromSource(piece);
+    const protectedStatus = getProtectedTextStatus(piece.slug);
+
+    mergedBySlug.set(piece.slug, {
+      ...piece,
+      ...setting,
+      published_at: piece.published_at || setting.published_at,
+      cover: piece.cover || setting.cover || "",
+      file: piece.file || setting.file || "",
       has_protected_text: protectedStatus.has_protected_text,
       protected_characters: protectedStatus.protected_characters,
       protected_updated_at: protectedStatus.protected_updated_at
-    };
+    });
   });
 
+  settingsRows.forEach(setting => {
+    if (mergedBySlug.has(setting.slug)) return;
+
+    const protectedStatus = getProtectedTextStatus(setting.slug);
+
+    mergedBySlug.set(setting.slug, {
+      ...setting,
+      has_protected_text: protectedStatus.has_protected_text,
+      protected_characters: protectedStatus.protected_characters,
+      protected_updated_at: protectedStatus.protected_updated_at
+    });
+  });
+
+  latestAdminPieces = sortAdminPiecesNewestFirst(Array.from(mergedBySlug.values()));
   latestAdminPieces = await enrichPiecesWithCharacterCounts(latestAdminPieces);
+  latestAdminPieces = sortAdminPiecesNewestFirst(latestAdminPieces);
 
   renderPiecePickers();
 
@@ -2016,8 +2095,7 @@ document.addEventListener("click", async event => {
 
       const { error } = await adminClient
         .from("piece_settings")
-        .update(payload)
-        .eq("slug", slug);
+        .upsert({ slug, ...payload }, { onConflict: "slug" });
 
       if (error) throw error;
       await loadPieceSettings();
