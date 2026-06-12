@@ -443,14 +443,18 @@
 
   function ensurePostFilterControls() {
     const feedCard = root.querySelector(".ps-feed-card") || (feed ? feed.closest("section, article, div") : null);
-    if (!feedCard || feedCard.querySelector("[data-ps-post-filter]")) return;
+    if (!feedCard) return;
 
-    const now = new Date();
-    const currentMonth = padDatePart(now.getMonth() + 1);
-    const currentYear = String(now.getFullYear());
+    const existingFilter = feedCard.querySelector("[data-ps-post-filter]");
+    if (existingFilter) {
+      existingFilter.querySelector("option[value='custom']")?.remove();
+      existingFilter.querySelector("[data-ps-post-filter-custom-tray]")?.remove();
+      existingFilter.querySelector("[data-ps-clean-calendar]")?.remove();
+      return;
+    }
 
     const filter = document.createElement("div");
-    filter.className = "ps-post-filter ps-post-filter-compact";
+    filter.className = "ps-post-filter ps-post-filter-compact ps-post-filter-simple";
     filter.setAttribute("data-ps-post-filter", "");
     filter.innerHTML = `
       <label class="ps-post-filter-select-label">
@@ -459,35 +463,8 @@
           <option value="all">View all posts</option>
           <option value="today">Today only</option>
           <option value="yesterday">Yesterday</option>
-          <option value="custom">Custom date</option>
         </select>
       </label>
-
-      <div class="ps-post-filter-custom-tray" data-ps-post-filter-custom-tray hidden>
-        <div class="ps-clean-calendar" data-ps-clean-calendar data-cal-month="${currentMonth}" data-cal-year="${currentYear}">
-          <div class="ps-clean-calendar-head">
-            <button type="button" data-ps-clean-cal-shift="-1" aria-label="Previous month">‹</button>
-            <button type="button" class="ps-clean-calendar-title" data-ps-clean-cal-title aria-expanded="false">${monthDisplayLabel(currentMonth)} ${currentYear}</button>
-            <button type="button" data-ps-clean-cal-shift="1" aria-label="Next month">›</button>
-          </div>
-
-          <div class="ps-clean-calendar-jump" data-ps-clean-cal-jump hidden>
-            <div class="ps-clean-calendar-jump-months" data-ps-clean-cal-months></div>
-            <div class="ps-clean-calendar-jump-years" data-ps-clean-cal-years></div>
-          </div>
-
-          <div class="ps-clean-calendar-weekdays" aria-hidden="true">
-            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-          </div>
-
-          <div class="ps-clean-calendar-days" data-ps-calendar-days aria-label="Choose day"></div>
-
-          <div class="ps-clean-calendar-actions">
-            <button type="button" data-ps-calendar-cancel>Cancel</button>
-            <button type="button" data-ps-filter-date-apply>Confirm</button>
-          </div>
-        </div>
-      </div>
     `;
 
     const headings = Array.from(feedCard.querySelectorAll("h1, h2, h3, strong"));
@@ -769,29 +746,26 @@
     return checked ? String(checked.value || "").trim() : String(filter.dataset.psDraftDate || "").trim();
   }
 
+  function normalizePostFilterMode() {
+    const allowedModes = new Set(["all", "today", "yesterday"]);
+    if (!allowedModes.has(publicSpacePostFilter.mode || "all")) {
+      publicSpacePostFilter.mode = "all";
+      publicSpacePostFilter.date = "";
+    }
+  }
+
   function syncPostFilterControls() {
+    normalizePostFilterMode();
+
     const filter = root.querySelector("[data-ps-post-filter]");
     if (!filter) return;
 
     const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
-    const customOption = modeSelect ? modeSelect.querySelector("option[value='custom']") : null;
-    const tray = filter.querySelector("[data-ps-post-filter-custom-tray]");
+    filter.querySelector("option[value='custom']")?.remove();
+    filter.querySelector("[data-ps-post-filter-custom-tray]")?.remove();
+    filter.querySelector("[data-ps-clean-calendar]")?.remove();
 
     if (modeSelect) modeSelect.value = publicSpacePostFilter.mode || "all";
-
-    if (customOption) {
-      customOption.textContent = publicSpacePostFilter.date
-        ? `Custom date: ${filterDateDisplayLabel(publicSpacePostFilter.date)}`
-        : "Custom date";
-    }
-
-    if (tray) {
-      const shouldOpen = publicSpacePostFilter.mode === "custom" && filter.dataset.psCalendarOpen !== "false";
-      tray.hidden = !shouldOpen;
-      filter.classList.toggle("is-custom-open", shouldOpen);
-    }
-
-    hydrateCustomDateParts(filter);
   }
 
   function refreshPostFilterView() {
@@ -804,198 +778,20 @@
     const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
     if (!modeSelect) return;
 
-    const filter = root.querySelector("[data-ps-post-filter]");
-    const activeMode = filter ? filter.querySelector("[data-ps-post-filter-mode]") : null;
-    const selectedMode = activeMode ? activeMode.value : "all";
-
-    if (selectedMode === "custom") {
-      publicSpacePostFilter.mode = "custom";
-      if (filter) filter.dataset.psCalendarOpen = "true";
-      syncPostFilterControls();
-      applyPostFilter();
-      return;
-    }
-
-    publicSpacePostFilter.mode = selectedMode;
+    const selectedMode = modeSelect.value || "all";
+    publicSpacePostFilter.mode = ["all", "today", "yesterday"].includes(selectedMode) ? selectedMode : "all";
     publicSpacePostFilter.date = "";
-
-    if (filter) {
-      filter.dataset.psDraftDate = "";
-      filter.dataset.psCalendarOpen = "false";
-      closeCalendarComboMenus(filter);
-    }
 
     syncPostFilterControls();
     applyPostFilter();
   }
 
-  function handleCalendarDayCaptureSelection(event) {
-    const dayButton = event.target.closest("[data-ps-calendar-day]");
-    if (!dayButton) return;
-
-    const filter = dayButton.closest("[data-ps-post-filter]") || root.querySelector("[data-ps-post-filter]");
-    if (!filter) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    if (typeof event.stopImmediatePropagation === "function") {
-      event.stopImmediatePropagation();
-    }
-
-    const dateKey = dayButton.dataset.psCalendarDay || "";
-    if (!dateKey) return;
-
-    selectCalendarDate(filter, dateKey);
-    closeCalendarComboMenus(filter);
-
-    filter.querySelectorAll("[data-ps-calendar-day]").forEach(button => {
-      const selected = button.dataset.psCalendarDay === dateKey;
-      button.dataset.selected = selected ? "true" : "false";
-      button.setAttribute("aria-pressed", selected ? "true" : "false");
-      button.classList.toggle("is-selected", selected);
-      button.classList.toggle("is-draft-selected", selected);
-
-      if (selected) {
-        button.style.setProperty("background", "linear-gradient(135deg, rgba(143, 82, 171, 1), rgba(210, 105, 184, 1))", "important");
-        button.style.setProperty("border-color", "rgba(255, 244, 251, 0.78)", "important");
-        button.style.setProperty("color", "#fff", "important");
-        button.style.setProperty("box-shadow", "0 0 0 2px rgba(255, 142, 209, 0.2), 0 12px 24px rgba(0, 0, 0, 0.3)", "important");
-        button.style.setProperty("transform", "translateY(-1px)", "important");
-      } else {
-        button.style.removeProperty("background");
-        button.style.removeProperty("border-color");
-        button.style.removeProperty("color");
-        button.style.removeProperty("box-shadow");
-        button.style.removeProperty("transform");
-      }
-    });
-  }
-
   function handlePostFilterClick(event) {
-    const shiftButton = event.target.closest("[data-ps-clean-cal-shift]");
-    const titleButton = event.target.closest("[data-ps-clean-cal-title]");
-    const jumpMonth = event.target.closest("[data-ps-clean-jump-month]");
-    const jumpYear = event.target.closest("[data-ps-clean-jump-year]");
-    const dateChoice = event.target.closest("[data-ps-clean-date-choice], .ps-clean-date-radio");
-    const cancelButton = event.target.closest("[data-ps-calendar-cancel]");
-    const applyButton = event.target.closest("[data-ps-filter-date-apply]");
-    const filter = root.querySelector("[data-ps-post-filter]");
+    const filter = event.target.closest("[data-ps-post-filter]");
     if (!filter) return;
 
-    const calendar = filter.querySelector("[data-ps-clean-calendar]");
-    const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
-
-    if (titleButton && calendar) {
-      event.preventDefault();
-      event.stopPropagation();
-      toggleCleanCalendarJump(filter);
-      return;
-    }
-
-    if ((jumpMonth || jumpYear) && calendar) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (jumpMonth) calendar.dataset.calMonth = jumpMonth.dataset.psCleanJumpMonth || calendar.dataset.calMonth;
-      if (jumpYear) calendar.dataset.calYear = jumpYear.dataset.psCleanJumpYear || calendar.dataset.calYear;
-
-      filter.dataset.psDraftDate = "";
-      renderCustomCalendarDays(filter);
-      toggleCleanCalendarJump(filter, true);
-      return;
-    }
-
-    if (shiftButton && calendar) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const amount = Number(shiftButton.dataset.psCleanCalShift || 0);
-      let month = Number(calendar.dataset.calMonth || padDatePart(new Date().getMonth() + 1));
-      let year = Number(calendar.dataset.calYear || new Date().getFullYear());
-
-      month += amount;
-
-      if (month < 1) {
-        month = 12;
-        year -= 1;
-      }
-
-      if (month > 12) {
-        month = 1;
-        year += 1;
-      }
-
-      calendar.dataset.calMonth = padDatePart(month);
-      calendar.dataset.calYear = String(year);
-      filter.dataset.psDraftDate = "";
-      toggleCleanCalendarJump(filter, false);
-      renderCustomCalendarDays(filter);
-      return;
-    }
-
-    if (dateChoice) {
-      const label = dateChoice.closest("[data-ps-clean-date-choice]");
-      const input = dateChoice.matches && dateChoice.matches(".ps-clean-date-radio")
-        ? dateChoice
-        : label?.querySelector(".ps-clean-date-radio");
-
-      if (!label || !input) return;
-
-      const dateKey = input.value || label.dataset.psCalendarDay || "";
-      if (!dateKey) return;
-
-      input.checked = true;
-      filter.dataset.psDraftDate = dateKey;
-      filter.dataset.psCalendarOpen = "true";
-
-      filter.querySelectorAll("[data-ps-clean-date-choice]").forEach(item => {
-        const selected = item.dataset.psCalendarDay === dateKey;
-        item.dataset.selected = selected ? "true" : "false";
-        item.classList.toggle("is-selected", selected);
-        const radio = item.querySelector(".ps-clean-date-radio");
-        if (radio) radio.checked = selected;
-      });
-
-      return;
-    }
-
-    if (cancelButton) {
-      event.preventDefault();
-
-      publicSpacePostFilter.mode = "all";
-      publicSpacePostFilter.date = "";
-      filter.dataset.psDraftDate = "";
-      filter.dataset.psCalendarOpen = "false";
-      toggleCleanCalendarJump(filter, false);
-
-      if (modeSelect) modeSelect.value = "all";
-
-      syncPostFilterControls();
-      applyPostFilter();
-      return;
-    }
-
-    if (applyButton) {
-      event.preventDefault();
-
-      const nextDate = readCustomDateParts(filter);
-      if (!nextDate) {
-        filter.classList.add("is-date-invalid");
-        window.setTimeout(() => filter.classList.remove("is-date-invalid"), 900);
-        return;
-      }
-
-      publicSpacePostFilter.mode = "custom";
-      publicSpacePostFilter.date = nextDate;
-      filter.dataset.psDraftDate = nextDate;
-      filter.dataset.psCalendarOpen = "false";
-      toggleCleanCalendarJump(filter, false);
-
-      if (modeSelect) modeSelect.value = "custom";
-
-      syncPostFilterControls();
-      applyPostFilter();
-    }
+    filter.querySelector("[data-ps-post-filter-custom-tray]")?.remove();
+    filter.querySelector("[data-ps-clean-calendar]")?.remove();
   }
 
   function renderPosts(posts) {

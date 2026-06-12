@@ -9732,3 +9732,35 @@ body.ps-route-screen-active .ps-feed-card {
   transform: translateY(-1px) !important;
 }
 /* V2.0Q.62AE calendar runtime and inverted selection END */
+
+
+/* V2.0Q.62AF remove custom date filter */
+.public-space-body .ps-post-filter-custom-tray,
+.public-space-body .ps-clean-calendar,
+.public-space-body .ps-clean-calendar-jump,
+.public-space-body .ps-post-calendar,
+.public-space-body .ps-post-calendar-top,
+.public-space-body .ps-post-date-parts,
+.public-space-body .ps-calendar-combo,
+.public-space-body .ps-calendar-combo-menu {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.public-space-body .ps-post-filter-simple {
+  width: min(17rem, 100%) !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-post-filter-simple .ps-post-filter-select-label {
+  width: 100% !important;
+}
+
+.public-space-body .ps-post-filter-simple [data-ps-post-filter-mode] {
+  width: 100% !important;
+}
+
+.public-space-body [data-ps-post-filter-mode] option[value="custom"] {
+  display: none !important;
+}
+/* V2.0Q.62AF remove custom date filter END */
