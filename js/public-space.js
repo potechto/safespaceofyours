@@ -377,9 +377,10 @@
   }
 
   function monthOptions() {
-    return Array.from({ length: 12 }, (_, index) => {
+    const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return labels.map((label, index) => {
       const value = padDatePart(index + 1);
-      return `<option value="${value}">${value}</option>`;
+      return `<option value="${value}">${label}</option>`;
     }).join("");
   }
 
@@ -420,7 +421,7 @@
         <div class="ps-post-date-parts" aria-label="Choose custom date in month day year format">
           <span class="ps-post-date-slash" aria-hidden="true">/</span>
           <select data-ps-filter-month aria-label="Month">
-            <option value="">mm</option>
+            <option value="">Mon</option>
             ${monthOptions()}
           </select>
           <span class="ps-post-date-slash" aria-hidden="true">/</span>

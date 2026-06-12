@@ -8733,3 +8733,80 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62T custom date year dropdown polish END */
+
+
+/* V2.0Q.62U square custom date picker polish */
+.public-space-body .ps-post-filter-custom-tray {
+  min-width: min(100vw - 2rem, 17.25rem) !important;
+  width: max-content !important;
+  padding: 0.45rem !important;
+  border-radius: 18px !important;
+}
+
+.public-space-body .ps-post-date-parts {
+  display: grid !important;
+  grid-template-columns: 3.85rem 0.45rem 3.35rem 0.45rem 4.3rem 2.2rem !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+
+.public-space-body .ps-post-date-parts .ps-post-date-slash:first-child {
+  display: none !important;
+}
+
+.public-space-body .ps-post-date-parts select,
+.public-space-body .ps-post-filter-date-apply {
+  height: 2.38rem !important;
+  min-height: 2.38rem !important;
+  border-radius: 13px !important;
+  text-align: center !important;
+  text-align-last: center !important;
+  padding: 0.35rem 0.42rem !important;
+  background: rgba(14, 10, 22, 0.82) !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
+
+.public-space-body .ps-post-date-parts [data-ps-filter-month] {
+  min-width: 3.85rem !important;
+}
+
+.public-space-body .ps-post-date-parts [data-ps-filter-day] {
+  min-width: 3.35rem !important;
+}
+
+.public-space-body .ps-post-date-parts [data-ps-filter-year] {
+  min-width: 4.3rem !important;
+}
+
+.public-space-body .ps-post-filter-date-apply {
+  width: 2.2rem !important;
+  min-width: 2.2rem !important;
+  border-radius: 14px !important;
+  font-size: 1rem !important;
+}
+
+.public-space-body .ps-post-date-slash {
+  font-size: 1.2rem !important;
+  opacity: 0.62 !important;
+}
+
+.public-space-body .ps-post-date-parts select:hover,
+.public-space-body .ps-post-date-parts select:focus-visible,
+.public-space-body .ps-post-filter-date-apply:hover,
+.public-space-body .ps-post-filter-date-apply:focus-visible {
+  border-color: rgba(255, 142, 209, 0.48) !important;
+  background: rgba(255, 142, 209, 0.1) !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-body .ps-post-filter-custom-tray {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .public-space-body .ps-post-date-parts {
+    grid-template-columns: 1fr 0.45rem 1fr 0.45rem 1.2fr 2.2rem !important;
+  }
+}
+/* V2.0Q.62U square custom date picker polish END */
