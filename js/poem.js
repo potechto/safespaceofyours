@@ -394,7 +394,7 @@ function buildPaidPreview(poem, fullText, options = {}) {
           Pay to View
         </button>
 
-        <form class="unlock-form" data-unlock-form>
+        <form class="unlock-form unlock-code-form" data-unlock-form>
           <label>
             Already have an unlock code?
             <input type="text" name="unlockCode" placeholder="Enter code" autocomplete="off" />

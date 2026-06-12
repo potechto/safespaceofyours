@@ -1,0 +1,49 @@
+/* Q63J-H scoped admin toast
+   Loaded only by private/admin pages. Keep toast changes here, not in admin.css. */
+
+.admin-toast-stack {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(1.35rem, 4.5vh, 2.75rem);
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: grid;
+  gap: 0.65rem;
+  width: min(32rem, calc(100vw - 2rem));
+  justify-items: center;
+  pointer-events: none;
+}
+
+.admin-toast {
+  width: fit-content;
+  max-width: min(32rem, calc(100vw - 2rem));
+  padding: 0.9rem 1.2rem;
+  border: 1px solid rgba(255, 207, 230, 0.16);
+  border-radius: 18px;
+  background: rgba(29, 22, 35, 0.58);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.22);
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: auto;
+  transform: translateY(0);
+  opacity: 1;
+  transition: opacity 220ms ease, transform 220ms ease;
+  backdrop-filter: blur(16px);
+}
+
+.admin-toast-success {
+  border-color: rgba(159, 255, 207, 0.18);
+  color: var(--success);
+}
+
+.admin-toast-error {
+  border-color: rgba(255, 159, 173, 0.22);
+  color: var(--danger);
+}
+
+.admin-toast.is-hiding {
+  opacity: 0;
+  transform: translateY(0.35rem);
+}

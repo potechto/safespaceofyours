@@ -353,10 +353,30 @@ function ensureAdminToastStack() {
   return stack;
 }
 
+const ADMIN_TOAST_LOAD_ONLY_MESSAGES = new Set([
+  "private space ready.",
+  "piece control loaded.",
+  "payment methods loaded.",
+  "dashboard loaded."
+]);
+
+let lastAdminToastKey = "";
+let lastAdminToastAt = 0;
+
 function showAdminToast(message, type = "") {
   const cleanMessage = String(message || "").trim();
 
-  if (!cleanMessage || cleanMessage.toLowerCase().startsWith("loading")) return;
+  if (!cleanMessage) return;
+  if (cleanMessage.toLowerCase().startsWith("loading")) return;
+  if (ADMIN_TOAST_LOAD_ONLY_MESSAGES.has(cleanMessage.toLowerCase())) return;
+
+  const now = Date.now();
+  const toastKey = `${type || ""}|${cleanMessage}`;
+
+  if (toastKey === lastAdminToastKey && now - lastAdminToastAt < 2500) return;
+
+  lastAdminToastKey = toastKey;
+  lastAdminToastAt = now;
 
   const stack = ensureAdminToastStack();
   const toast = document.createElement("div");

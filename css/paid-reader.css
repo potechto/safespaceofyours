@@ -1,0 +1,168 @@
+/* Q63J-H scoped paid reader layout
+   Loaded only by poem.html. Do not move to global style.css. */
+
+.reader-body .paid-reader-shell {
+  width: min(100%, 78ch);
+  margin: clamp(2rem, 4vw, 3.5rem) auto 0;
+  display: grid;
+  gap: clamp(1.25rem, 2.5vw, 1.8rem);
+}
+
+.reader-body .paid-preview-text {
+  padding: 0;
+}
+
+.reader-body .paid-preview-text p {
+  margin-bottom: 1.65rem;
+}
+
+.reader-body .paid-reader-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.65fr);
+  gap: clamp(1.1rem, 2vw, 1.55rem);
+  align-items: stretch;
+  padding: clamp(1.35rem, 2.5vw, 2rem);
+  border: 1px solid rgba(255, 207, 230, 0.2);
+  border-radius: clamp(24px, 3vw, 34px);
+  background:
+    radial-gradient(circle at top right, rgba(255, 207, 230, 0.11), transparent 14rem),
+    rgba(255, 255, 255, 0.045);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+}
+
+.reader-body .paid-reader-hero .eyebrow {
+  margin: 0 0 0.75rem;
+  color: rgba(255, 231, 244, 0.78);
+  font-size: clamp(0.78rem, 1vw, 0.9rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.reader-body .paid-reader-hero h2 {
+  margin: 0;
+  max-width: 12ch;
+  color: var(--text);
+  font-size: clamp(2rem, 4vw, 3.15rem);
+  line-height: 0.98;
+}
+
+.reader-body .paid-reader-hero p:not(.eyebrow) {
+  max-width: 46ch;
+  margin: 0.8rem 0 0;
+  color: rgba(255, 244, 251, 0.74);
+  font-size: clamp(0.98rem, 1.35vw, 1.15rem);
+  line-height: 1.7;
+}
+
+.reader-body .paid-reader-price-card {
+  min-height: 12rem;
+  display: grid;
+  align-content: center;
+  gap: 0.65rem;
+  padding: clamp(1.1rem, 2vw, 1.45rem);
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 24px;
+  background: rgba(18, 15, 22, 0.3);
+}
+
+.reader-body .paid-reader-price-card span {
+  color: rgba(255, 231, 244, 0.8);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.reader-body .paid-reader-price-card strong {
+  color: var(--accent-strong);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1;
+}
+
+.reader-body .paid-reader-actions {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.65fr) minmax(260px, 1fr);
+  gap: clamp(1rem, 2vw, 1.35rem);
+  align-items: start;
+}
+
+.reader-body .paid-reader-actions .pay-to-view-btn {
+  min-width: 0;
+  width: 100%;
+  min-height: 4.1rem;
+  align-self: start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.reader-body .unlock-form,
+.reader-body .unlock-code-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: end;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.reader-body .unlock-form label,
+.reader-body .unlock-code-form label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.reader-body .unlock-form input,
+.reader-body .unlock-code-form input {
+  width: 100%;
+  min-height: 3.1rem;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid rgba(255, 207, 230, 0.18);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text);
+  outline: none;
+}
+
+.reader-body .unlock-form input:focus,
+.reader-body .unlock-code-form input:focus {
+  border-color: rgba(255, 207, 230, 0.48);
+  box-shadow: 0 0 0 4px rgba(255, 207, 230, 0.08);
+}
+
+.reader-body .unlock-form .reader-action-btn,
+.reader-body .unlock-code-form .reader-action-btn {
+  min-height: 3.1rem;
+  min-width: 8.5rem;
+  border-radius: 999px;
+}
+
+.reader-body .unlock-message {
+  grid-column: 1 / -1;
+  margin: -0.25rem 0 0;
+  min-height: 1.4rem;
+  color: var(--accent-strong);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 860px) {
+  .reader-body .paid-reader-hero,
+  .reader-body .paid-reader-actions,
+  .reader-body .unlock-form,
+  .reader-body .unlock-code-form {
+    grid-template-columns: 1fr;
+  }
+
+  .reader-body .paid-reader-price-card {
+    min-height: auto;
+  }
+
+  .reader-body .unlock-form .reader-action-btn,
+  .reader-body .unlock-code-form .reader-action-btn {
+    width: 100%;
+  }
+}
