@@ -134,3 +134,49 @@
     justify-content: center !important;
   }
 }
+
+
+/* Q63J-P stronger mobile filter layout
+   Scoped to public-space.html only. */
+@media (max-width: 640px) {
+  .public-space-body [data-ps-feed],
+  .public-space-body .ps-feed,
+  .public-space-body .ps-posts,
+  .public-space-body .ps-post-filter,
+  .public-space-body .ps-post-filter-simple,
+  .public-space-body .ps-post-filter-select-label {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .public-space-body .ps-post-filter,
+  .public-space-body .ps-post-filter-simple {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: stretch !important;
+    align-items: stretch !important;
+    margin-inline: auto !important;
+  }
+
+  .public-space-body .ps-post-filter-select-label {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: stretch !important;
+  }
+
+  .public-space-body [data-ps-post-filter-mode],
+  .public-space-body .ps-post-filter select,
+  .public-space-body .ps-post-filter-simple select {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    min-height: 2.8rem !important;
+    padding-inline: 1rem !important;
+    text-align: center !important;
+    text-align-last: center !important;
+  }
+}

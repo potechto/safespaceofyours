@@ -2363,7 +2363,7 @@
         renderPosts(posts);
       }
 
-      await loadPublicSpaceNotifications({ silent: true });
+      await loadPublicSpaceNotifications({ silent: true, background: true });
 
       if (activeCommentsPostId) {
         try {
@@ -2437,7 +2437,7 @@
         renderNotificationPanel();
       }
 
-      if (isNotificationsHistoryVisible()) {
+      if (!options.background && isNotificationsHistoryVisible()) {
         renderNotificationsScreen();
       }
     }
