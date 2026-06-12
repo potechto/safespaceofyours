@@ -90,6 +90,7 @@
   width: 100%;
   min-height: 4.1rem;
   align-self: start;
+  margin-top: clamp(2.55rem, 4vw, 3.15rem);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -159,6 +160,10 @@
 
   .reader-body .paid-reader-price-card {
     min-height: auto;
+  }
+
+  .reader-body .paid-reader-actions .pay-to-view-btn {
+    margin-top: 0;
   }
 
   .reader-body .unlock-form .reader-action-btn,
