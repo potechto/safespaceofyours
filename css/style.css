@@ -9895,3 +9895,142 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.63A comments UI END */
+
+
+/* V2.0Q.63B comments modal polish and badge compatibility */
+.public-space-body .ps-comments-modal {
+  padding: clamp(0.8rem, 2.4vw, 1.3rem) !important;
+}
+
+.public-space-body .ps-comments-card {
+  width: min(100%, 47rem) !important;
+  max-height: min(88vh, 46rem) !important;
+  overflow: auto !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 142, 209, 0.08), transparent 32%),
+    linear-gradient(145deg, rgba(38, 26, 43, 0.98), rgba(16, 10, 20, 0.99)) !important;
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 244, 251, 0.08) !important;
+}
+
+.public-space-body .ps-comments-heading .eyebrow {
+  color: rgba(255, 244, 251, 0.66) !important;
+  letter-spacing: 0.16em !important;
+}
+
+.public-space-body .ps-comments-heading h2 {
+  color: #fff4fb !important;
+  font-size: clamp(2.15rem, 5vw, 3.2rem) !important;
+  line-height: 0.98 !important;
+}
+
+.public-space-body .ps-comments-heading p:not(.eyebrow) {
+  color: rgba(255, 244, 251, 0.7) !important;
+}
+
+.public-space-body .ps-comments-post-preview,
+.public-space-body .ps-comments-empty,
+.public-space-body .ps-comment-item {
+  border-color: rgba(255, 244, 251, 0.14) !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 244, 251, 0.055) !important;
+}
+
+.public-space-body .ps-comments-form {
+  gap: 0.72rem !important;
+  border-top-color: rgba(255, 244, 251, 0.13) !important;
+}
+
+.public-space-body .ps-comments-form label > span {
+  color: #fff4fb !important;
+  font-weight: 850 !important;
+}
+
+.public-space-body .ps-comments-form textarea,
+.public-space-body .ps-comments-modal textarea[name="comment"] {
+  width: 100% !important;
+  min-height: 7.2rem !important;
+  resize: vertical !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(255, 244, 251, 0.18) !important;
+  border-radius: 18px !important;
+  outline: none !important;
+  background:
+    linear-gradient(145deg, rgba(255, 244, 251, 0.075), rgba(255, 244, 251, 0.035)) !important;
+  color: #fff4fb !important;
+  caret-color: #ff8ed1 !important;
+  padding: 0.9rem 1rem !important;
+  font: inherit !important;
+  line-height: 1.5 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 251, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.12) !important;
+}
+
+.public-space-body .ps-comments-form textarea::placeholder,
+.public-space-body .ps-comments-modal textarea[name="comment"]::placeholder {
+  color: rgba(255, 244, 251, 0.45) !important;
+}
+
+.public-space-body .ps-comments-form textarea:focus,
+.public-space-body .ps-comments-modal textarea[name="comment"]:focus {
+  border-color: rgba(255, 142, 209, 0.52) !important;
+  box-shadow:
+    0 0 0 4px rgba(255, 142, 209, 0.12),
+    inset 0 1px 0 rgba(255, 244, 251, 0.08) !important;
+}
+
+.public-space-body .ps-comments-form-footer {
+  align-items: center !important;
+  gap: 0.8rem !important;
+}
+
+.public-space-body .ps-comments-form-footer [data-ps-comment-count] {
+  color: rgba(255, 244, 251, 0.58) !important;
+  font-weight: 850 !important;
+}
+
+.public-space-body .ps-comments-form-footer button[type="submit"] {
+  min-width: 9.2rem !important;
+  min-height: 3rem !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #ffd2e8, #ffadd4) !important;
+  color: #21111b !important;
+  font-weight: 900 !important;
+  box-shadow:
+    0 16px 30px rgba(255, 142, 209, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+}
+
+.public-space-body .ps-comments-form-footer button[type="submit"]:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.25) !important;
+}
+
+.public-space-body .ps-comments-message,
+.public-space-body [data-ps-comments-message] {
+  min-height: 1.25rem !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-comments-card {
+    border-radius: 22px !important;
+    padding: 1rem !important;
+  }
+
+  .public-space-body .ps-comments-form-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .public-space-body .ps-comments-form-footer button[type="submit"] {
+    width: 100% !important;
+  }
+}
+/* V2.0Q.63B comments modal polish and badge compatibility END */
