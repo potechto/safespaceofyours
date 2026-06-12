@@ -2437,9 +2437,8 @@
         renderNotificationPanel();
       }
 
-      if (!options.background && isNotificationsHistoryVisible()) {
-        renderNotificationsScreen();
-      }
+      // Do not auto-render the full Notifications screen from a data refresh.
+      // Explicit actions such as Open Notifications / Refresh / Mark Read render it manually.
     }
   }
 
@@ -2447,11 +2446,7 @@
     if (!currentUser || notificationsLoading || publicSpaceNotificationsLoadedAt) return;
 
     window.setTimeout(async () => {
-      await loadPublicSpaceNotifications({ silent: true });
-
-      if (root.querySelector("[data-ps-notifications-history]")) {
-        renderNotificationsScreen();
-      }
+      await loadPublicSpaceNotifications({ silent: true, background: true });
     }, 0);
   }
 
