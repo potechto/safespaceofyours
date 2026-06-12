@@ -331,6 +331,14 @@
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   }
 
+  function filterStartYear() {
+    return Math.min(new Date().getFullYear(), 2040);
+  }
+
+  function defaultFilterYear() {
+    return String(filterStartYear());
+  }
+
   function padDatePart(value) {
     return String(value || "").padStart(2, "0");
   }
@@ -339,7 +347,7 @@
     const clean = String(dateKey || "").trim();
     const match = clean.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
     if (!match) {
-      return { year: "2026", month: "", day: "" };
+      return { year: defaultFilterYear(), month: "", day: "" };
     }
 
     return { year: match[1], month: match[2], day: match[3] };
@@ -348,7 +356,7 @@
   function dateKeyFromParts(month, day, year) {
     const mm = padDatePart(month);
     const dd = padDatePart(day);
-    const yyyy = String(year || "2026").trim();
+    const yyyy = String(year || defaultFilterYear()).trim();
 
     if (!/^\\d{2}$/.test(mm) || !/^\\d{2}$/.test(dd) || !/^\\d{4}$/.test(yyyy)) return "";
 
@@ -363,7 +371,7 @@
 
   function daysInMonth(month, year) {
     const mm = Number(month || 0);
-    const yyyy = Number(year || 2026);
+    const yyyy = Number(year || defaultFilterYear());
     if (!mm || !yyyy) return 31;
     return new Date(yyyy, mm, 0).getDate();
   }
@@ -378,6 +386,14 @@
   function dayOptions(maxDays) {
     return Array.from({ length: maxDays || 31 }, (_, index) => {
       const value = padDatePart(index + 1);
+      return `<option value="${value}">${value}</option>`;
+    }).join("");
+  }
+
+  function yearOptions() {
+    const start = filterStartYear();
+    return Array.from({ length: Math.max(1, 2040 - start + 1) }, (_, index) => {
+      const value = String(start + index);
       return `<option value="${value}">${value}</option>`;
     }).join("");
   }
@@ -413,10 +429,11 @@
             ${dayOptions(31)}
           </select>
           <span class="ps-post-date-slash" aria-hidden="true">/</span>
-          <input type="number" inputmode="numeric" min="2000" max="2100" step="1" value="2026" data-ps-filter-year aria-label="Year" />
+          <select data-ps-filter-year aria-label="Year">
+            ${yearOptions()}
+          </select>
           <button type="button" class="ps-post-filter-date-apply" data-ps-filter-date-apply aria-label="Apply custom date">➜</button>
         </div>
-        <small data-ps-filter-date-preview>/mm/dd/yyyy</small>
       </div>
     `;
 
@@ -458,47 +475,58 @@
     return (Array.isArray(posts) ? posts : []).filter(postMatchesFilter);
   }
 
-  function syncCustomDateParts(filter) {
+  function syncCustomDateDayOptions(filter, preferredDay) {
+    if (!filter) return;
+
+    const monthSelect = filter.querySelector("[data-ps-filter-month]");
+    const daySelect = filter.querySelector("[data-ps-filter-day]");
+    const yearSelect = filter.querySelector("[data-ps-filter-year]");
+
+    const activeYear = yearSelect ? (yearSelect.value || defaultFilterYear()) : defaultFilterYear();
+    const activeMonth = monthSelect ? monthSelect.value : "";
+    const activeDay = preferredDay || (daySelect ? daySelect.value : "");
+
+    const maxDays = daysInMonth(activeMonth, activeYear);
+
+    if (daySelect) {
+      daySelect.innerHTML = `<option value="">dd</option>${dayOptions(maxDays)}`;
+      daySelect.value = Number(activeDay) <= maxDays ? activeDay : "";
+    }
+  }
+
+  function hydrateCustomDateParts(filter) {
     if (!filter) return;
 
     const parts = datePartsFromKey(publicSpacePostFilter.date);
     const monthSelect = filter.querySelector("[data-ps-filter-month]");
     const daySelect = filter.querySelector("[data-ps-filter-day]");
-    const yearInput = filter.querySelector("[data-ps-filter-year]");
-    const preview = filter.querySelector("[data-ps-filter-date-preview]");
+    const yearSelect = filter.querySelector("[data-ps-filter-year]");
 
-    if (yearInput) yearInput.value = parts.year || "2026";
-    if (monthSelect) monthSelect.value = parts.month || "";
+    if (yearSelect) {
+      yearSelect.innerHTML = yearOptions();
 
-    const maxDays = daysInMonth(parts.month, parts.year || "2026");
-    if (daySelect) {
-      const currentDay = parts.day || daySelect.value || "";
-      daySelect.innerHTML = `<option value="">dd</option>${dayOptions(maxDays)}`;
-      daySelect.value = Number(currentDay) <= maxDays ? currentDay : "";
+      const allowedYears = Array.from(yearSelect.options).map(option => option.value);
+      yearSelect.value = allowedYears.includes(parts.year) ? parts.year : defaultFilterYear();
     }
 
-    const previewKey = dateKeyFromParts(
-      monthSelect ? monthSelect.value : "",
-      daySelect ? daySelect.value : "",
-      yearInput ? yearInput.value : "2026"
-    );
+    if (monthSelect) monthSelect.value = parts.month || "";
 
-    if (preview) {
-      preview.textContent = previewKey
-        ? `/${datePartsFromKey(previewKey).month}/${datePartsFromKey(previewKey).day}/${datePartsFromKey(previewKey).year}`
-        : "/mm/dd/yyyy";
+    syncCustomDateDayOptions(filter, parts.day || "");
+
+    if (daySelect) {
+      daySelect.value = parts.day || "";
     }
   }
 
   function readCustomDateParts(filter) {
     const monthSelect = filter ? filter.querySelector("[data-ps-filter-month]") : null;
     const daySelect = filter ? filter.querySelector("[data-ps-filter-day]") : null;
-    const yearInput = filter ? filter.querySelector("[data-ps-filter-year]") : null;
+    const yearSelect = filter ? filter.querySelector("[data-ps-filter-year]") : null;
 
     return dateKeyFromParts(
       monthSelect ? monthSelect.value : "",
       daySelect ? daySelect.value : "",
-      yearInput ? yearInput.value : "2026"
+      yearSelect ? yearSelect.value : defaultFilterYear()
     );
   }
 
@@ -524,7 +552,7 @@
       filter.classList.toggle("is-custom-open", shouldOpen);
     }
 
-    syncCustomDateParts(filter);
+    hydrateCustomDateParts(filter);
   }
 
   function refreshPostFilterView() {
@@ -558,7 +586,7 @@
     }
 
     if (datePart) {
-      syncCustomDateParts(filter);
+      syncCustomDateDayOptions(filter);
     }
   }
 
@@ -574,10 +602,13 @@
 
       const nextDate = readCustomDateParts(filter);
       if (!nextDate) {
-        syncCustomDateParts(filter);
+        filter.classList.add("is-date-invalid");
+        window.setTimeout(() => filter.classList.remove("is-date-invalid"), 900);
+        syncCustomDateDayOptions(filter);
         return;
       }
 
+      filter.classList.remove("is-date-invalid");
       publicSpacePostFilter.mode = "custom";
       publicSpacePostFilter.date = nextDate;
       if (modeSelect) modeSelect.value = "custom";
