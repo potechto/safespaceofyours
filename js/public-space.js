@@ -566,15 +566,24 @@
     const cleanId = String(postId || "");
     const nextCount = Number(count || 0);
 
-    publicSpacePosts.forEach(post => {
-      if (String(post.id || "") === cleanId) post.comment_count = nextCount;
-    });
+    if (!cleanId) return;
+
+    if (Array.isArray(latestPublicSpacePosts)) {
+      latestPublicSpacePosts.forEach(post => {
+        if (String(post.id || "") === cleanId) post.comment_count = nextCount;
+      });
+    }
 
     document.querySelectorAll("[data-ps-comments-post]").forEach(button => {
       if (String(button.dataset.psCommentsPost || "") === cleanId) {
         button.textContent = commentCountText({ comment_count: nextCount });
       }
     });
+
+    const modalTitle = document.querySelector("[data-ps-comments-modal]:not([hidden]) [data-ps-comments-title]");
+    if (modalTitle && String(activeCommentsPostId || "") === cleanId) {
+      modalTitle.textContent = `Comments · ${nextCount}`;
+    }
   }
 
   function currentCommentsPost() {
