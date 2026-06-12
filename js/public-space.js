@@ -640,6 +640,15 @@
     commentsLoading = false;
   }
 
+  function closeCommentActionMenus(exceptMenu) {
+    document.querySelectorAll("[data-ps-comment-menu]").forEach(menu => {
+      if (exceptMenu && menu === exceptMenu) return;
+      menu.dataset.open = "false";
+      const button = menu.querySelector("[data-ps-comment-menu-toggle]");
+      if (button) button.setAttribute("aria-expanded", "false");
+    });
+  }
+
   function renderCommentItem(comment) {
     const author = comment.author || {};
     const username = author.username || "someone";
@@ -647,23 +656,40 @@
     const canHide = Boolean(comment.can_hide || isAdminMode);
     const hiddenClass = comment.is_hidden ? " is-hidden-by-admin" : "";
     const hiddenLabel = comment.is_hidden ? `<span class="ps-comment-hidden-label">Hidden</span>` : "";
-    const deleteButton = canDelete
-      ? `<button type="button" data-ps-delete-comment="${escapeHtml(comment.id)}">Delete</button>`
-      : "";
-    const hideButton = canHide
-      ? `<button type="button" data-ps-toggle-comment-hidden="${escapeHtml(comment.id)}" data-hidden="${comment.is_hidden ? "true" : "false"}">${comment.is_hidden ? "Unhide" : "Hide"}</button>`
+    const dateLabel = escapeHtml(postDateDisplayLabel(comment.created_at) || formatDate(comment.created_at));
+    const actions = [];
+
+    if (canDelete) {
+      actions.push(`<button type="button" data-ps-delete-comment="${escapeHtml(comment.id)}">Delete</button>`);
+    }
+
+    if (canHide) {
+      actions.push(`<button type="button" data-ps-toggle-comment-hidden="${escapeHtml(comment.id)}" data-hidden="${comment.is_hidden ? "true" : "false"}">${comment.is_hidden ? "Unhide" : "Hide"}</button>`);
+    }
+
+    const actionMenu = actions.length
+      ? `
+        <div class="ps-comment-menu" data-ps-comment-menu data-open="false">
+          <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false">•••</button>
+          <div class="ps-comment-menu-popover" role="menu">
+            ${actions.join("")}
+          </div>
+        </div>
+      `
       : "";
 
     return `
       <article class="ps-comment-item${hiddenClass}" data-comment-id="${escapeHtml(comment.id)}">
         <div class="ps-comment-meta">
-          <strong>@${escapeHtml(username)}</strong>
-          ${renderPostBadges(author)}
-          <span>${escapeHtml(postDateDisplayLabel(comment.created_at) || formatDate(comment.created_at))}</span>
-          ${hiddenLabel}
+          <div class="ps-comment-author-line">
+            <strong>@${escapeHtml(username)}</strong>
+            ${renderPostBadges(author)}
+            <span class="ps-comment-date">${dateLabel}</span>
+            ${hiddenLabel}
+          </div>
+          ${actionMenu}
         </div>
         <p>${escapeHtml(comment.body)}</p>
-        ${deleteButton || hideButton ? `<div class="ps-comment-actions">${deleteButton}${hideButton}</div>` : ""}
       </article>
     `;
   }
@@ -808,6 +834,8 @@
 
   async function handleCommentsModalClick(event) {
     const closeButton = event.target.closest("[data-ps-close-comments]");
+    const menuToggle = event.target.closest("[data-ps-comment-menu-toggle]");
+    const commentMenu = event.target.closest("[data-ps-comment-menu]");
     const deleteButton = event.target.closest("[data-ps-delete-comment]");
     const hideButton = event.target.closest("[data-ps-toggle-comment-hidden]");
     const modal = event.target.closest("[data-ps-comments-modal]");
@@ -818,9 +846,28 @@
       return;
     }
 
+    if (menuToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const menu = menuToggle.closest("[data-ps-comment-menu]");
+      if (!menu) return;
+
+      const shouldOpen = menu.dataset.open !== "true";
+      closeCommentActionMenus(menu);
+      menu.dataset.open = shouldOpen ? "true" : "false";
+      menuToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      return;
+    }
+
+    if (modal && !commentMenu) {
+      closeCommentActionMenus();
+    }
+
     if (!modal || (!deleteButton && !hideButton)) return;
 
     event.preventDefault();
+    closeCommentActionMenus();
 
     if (!currentSession || !sessionToken()) {
       closeCommentsModal();

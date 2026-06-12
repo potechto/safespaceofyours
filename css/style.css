@@ -10034,3 +10034,164 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.63B comments modal polish and badge compatibility END */
+
+
+/* V2.0Q.63D comment action menu and badge layout */
+.public-space-body .ps-comment-item {
+  position: relative !important;
+  overflow: visible !important;
+  padding: 1rem 3.15rem 1rem 1rem !important;
+}
+
+.public-space-body .ps-comment-meta {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  flex-wrap: nowrap !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-comment-author-line {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.42rem !important;
+  flex-wrap: wrap !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.public-space-body .ps-comment-author-line strong {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-post-badges {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.28rem !important;
+  flex-wrap: wrap !important;
+  margin-left: 0 !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  max-width: 100% !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-chip.is-mini {
+  width: auto !important;
+  height: 1.35rem !important;
+  min-width: 1.35rem !important;
+  padding: 0 0.42rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.24rem !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-text {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: nowrap !important;
+  font-size: 0.66rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body .ps-comment-author-line .ps-badge-chip[data-ps-badge-label]::after {
+  display: none !important;
+}
+
+.public-space-body .ps-comment-date,
+.public-space-body .ps-comment-hidden-label {
+  flex: 0 0 auto !important;
+}
+
+.public-space-body .ps-comment-menu {
+  position: absolute !important;
+  top: 0.68rem !important;
+  right: 0.68rem !important;
+  z-index: 12 !important;
+}
+
+.public-space-body .ps-comment-menu-toggle {
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 244, 251, 0.78) !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  font-size: 0.9rem !important;
+  letter-spacing: -0.16em !important;
+  cursor: pointer !important;
+}
+
+.public-space-body .ps-comment-menu-toggle:hover,
+.public-space-body .ps-comment-menu[data-open="true"] .ps-comment-menu-toggle {
+  border-color: rgba(255, 142, 209, 0.36) !important;
+  background: rgba(255, 142, 209, 0.12) !important;
+  color: #fff4fb !important;
+}
+
+.public-space-body .ps-comment-menu-popover {
+  display: none !important;
+  position: absolute !important;
+  top: calc(100% + 0.35rem) !important;
+  right: 0 !important;
+  min-width: 9.2rem !important;
+  padding: 0.38rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  border-radius: 14px !important;
+  background: rgba(26, 16, 31, 0.98) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.36) !important;
+  z-index: 20 !important;
+}
+
+.public-space-body .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+  display: grid !important;
+  gap: 0.25rem !important;
+}
+
+.public-space-body .ps-comment-menu-popover button {
+  width: 100% !important;
+  min-height: 2.15rem !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: rgba(255, 244, 251, 0.84) !important;
+  text-align: left !important;
+  padding: 0.45rem 0.58rem !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+}
+
+.public-space-body .ps-comment-menu-popover button:hover {
+  background: rgba(255, 142, 209, 0.12) !important;
+  color: #fff4fb !important;
+}
+
+.public-space-body .ps-comment-actions {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-comment-item {
+    padding-right: 2.75rem !important;
+  }
+
+  .public-space-body .ps-comment-author-line .ps-badge-text {
+    display: none !important;
+  }
+
+  .public-space-body .ps-comment-author-line .ps-badge-chip.is-mini {
+    width: 1.35rem !important;
+    padding: 0 !important;
+  }
+}
+/* V2.0Q.63D comment action menu and badge layout END */
