@@ -10450,3 +10450,69 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.63G public profile back button END */
+
+
+/* V2.0Q.63H global routed back arrow and clean public profile V3 */
+body.ps-route-screen-active .ps-admin-screen-top,
+.public-space-body .ps-admin-screen-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: flex-start !important;
+  gap: 1rem !important;
+}
+
+.public-space-body .ps-route-back {
+  justify-self: end !important;
+  width: 2.45rem !important;
+  height: 2.45rem !important;
+  min-width: 2.45rem !important;
+  min-height: 2.45rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background: rgba(255, 244, 251, 0.075) !important;
+  color: #fff4fb !important;
+  font-size: 1.18rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.public-space-body .ps-route-back:hover,
+.public-space-body .ps-route-back:focus-visible {
+  border-color: rgba(255, 142, 209, 0.42) !important;
+  background: rgba(255, 142, 209, 0.14) !important;
+  transform: translateX(-1px) !important;
+  outline: none !important;
+}
+
+.public-space-body .ps-public-profile-hero {
+  align-items: center !important;
+}
+
+.public-space-body .ps-public-profile-filter {
+  justify-content: flex-start !important;
+}
+
+.public-space-body .ps-public-profile-filter [data-ps-public-profile-post-count],
+.public-space-body .ps-public-profile-back {
+  display: none !important;
+}
+
+.public-space-body .ps-control-screen [data-ps-control-intro]:empty {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-route-back {
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+    min-width: 2.2rem !important;
+    min-height: 2.2rem !important;
+    font-size: 1.05rem !important;
+  }
+}
+/* V2.0Q.63H global routed back arrow and clean public profile V3 END */

@@ -1011,6 +1011,7 @@
             <h2 data-ps-control-title>Controls</h2>
             <p data-ps-control-intro>Manage your Public Space account.</p>
           </div>
+          <button class="ps-route-back" type="button" data-ps-route-back aria-label="Go back">&#8592;</button>
         </div>
         <div class="ps-control-results" data-ps-control-results></div>
       </section>
@@ -1268,7 +1269,12 @@
 
   function rememberPublicProfileBackRoute(route, targetRoute) {
     const cleanRoute = normalizePublicSpaceRoute(route || "home");
-    const cleanTarget = normalizePublicSpaceRoute(targetRoute || "");
+    const cleanTarget = normalizePublicSpaceRoute(targetRoute || "home");
+
+    if (cleanTarget === "home") {
+      publicProfileBackRoute = "home";
+      return publicProfileBackRoute;
+    }
 
     publicProfileBackRoute = cleanRoute && cleanRoute !== cleanTarget ? cleanRoute : "home";
     return publicProfileBackRoute;
@@ -1640,20 +1646,16 @@
             <option value="yesterday"${mode === "yesterday" ? " selected" : ""}>Yesterday</option>
           </select>
         </label>
-        <span data-ps-public-profile-post-count>${visiblePosts}/${totalPosts} visible</span>
       </div>
     `;
   }
 
   function renderPublicUserProfilePosts(userId) {
     const listNode = root.querySelector("[data-ps-public-profile-post-list]");
-    const countNode = root.querySelector("[data-ps-public-profile-post-count]");
     if (!listNode) return;
 
     const allPosts = publicUserPosts(userId, latestPublicSpacePosts);
     const visiblePosts = allPosts.filter(postMatchesFilter);
-
-    if (countNode) countNode.textContent = `${visiblePosts.length}/${allPosts.length} visible`;
 
     if (!allPosts.length) {
       listNode.innerHTML = `
@@ -1687,19 +1689,16 @@
     const initial = String(username || "@").charAt(0).toUpperCase() || "@";
     const allPosts = publicUserPosts(cleanId, latestPublicSpacePosts);
     const visiblePosts = allPosts.filter(postMatchesFilter);
-    const backRoute = publicProfileBackTarget();
 
     openControlScreen(
       `@${username}`,
-      `Viewing @${username}'s Public Space profile.`,
+      "",
       `
         <section class="ps-profile-page ps-public-profile-page" aria-label="@${escapeHtml(username)} Public Space profile" data-ps-public-profile data-user-id="${escapeHtml(cleanId)}">
           <header class="ps-profile-hero ps-public-profile-hero">
-            <button class="ps-public-profile-back" type="button" data-ps-public-profile-back data-back-route="${escapeHtml(backRoute)}" aria-label="Go back">←</button>
             <div class="ps-profile-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
             <div class="ps-profile-heading">
               <strong>@${escapeHtml(username)}</strong>
-              <span>Public Space profile</span>
               ${renderProfileBadges(user)}
             </div>
           </header>
@@ -1728,14 +1727,15 @@
   }
 
   function handlePublicProfileBackClick(event) {
-    const button = event.target.closest("[data-ps-public-profile-back]");
+    const button = event.target.closest("[data-ps-route-back]");
     if (!button) return;
 
     event.preventDefault();
     event.stopPropagation();
 
-    const targetRoute = normalizePublicSpaceRoute(button.dataset.backRoute || publicProfileBackRoute || "home");
-    navigatePublicSpaceRoute(targetRoute && targetRoute !== currentPublicSpaceRoute() ? targetRoute : "home");
+    const targetRoute = publicProfileBackTarget();
+    if (targetRoute === "home") publicProfileBackRoute = "home";
+    navigatePublicSpaceRoute(targetRoute, { preserveBack: true });
   }
 
   function handlePublicUserProfileClick(event) {
@@ -1822,6 +1822,7 @@
             <h2>Public Space controls</h2>
             <p data-ps-admin-message>Manage users and moderate posts after logging in with a Public Space admin account.</p>
           </div>
+          <button class="ps-route-back" type="button" data-ps-route-back aria-label="Go back">&#8592;</button>
         </div>
         <div class="ps-admin-tool-grid">
           <button type="button" data-ps-admin-action="overview">Admin overview</button>
@@ -2003,6 +2004,9 @@
 
   function navigatePublicSpaceRoute(route, options = {}) {
     const cleanRoute = normalizePublicSpaceRoute(route);
+    const currentRoute = currentPublicSpaceRoute();
+    if (!options.preserveBack) rememberPublicProfileBackRoute(currentRoute, cleanRoute);
+
     const baseUrl = `${window.location.pathname}${window.location.search}`;
     const nextUrl = cleanRoute === "home" ? baseUrl : `${baseUrl}#${cleanRoute}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
