@@ -70,6 +70,7 @@
   let currentUser = currentSession ? currentSession.user : null;
   let isAdminMode = Boolean(currentUser && currentUser.is_admin);
   let latestPublicSpacePosts = [];
+  let activePublicProfileUser = null;
   let publicSpacePostFilter = { mode: "all", date: "" };
   let notificationPanelFilter = "all";
   let notificationsMarkedRead = false;
@@ -510,8 +511,12 @@
 
     if (!list.length) {
       renderEmptyFeed();
-      if (currentPublicSpaceRoute() === "profile") {
+      const activeRoute = currentPublicSpaceRoute();
+      if (activeRoute === "profile") {
         renderProfileOwnPosts(list);
+      }
+      if (isPublicUserProfileRoute(activeRoute)) {
+        renderPublicUserProfilePosts(publicUserIdFromRoute(activeRoute));
       }
       return;
     }
@@ -533,7 +538,7 @@
       return `
         <article class="ps-post-card ${post.is_hidden ? "is-hidden-by-admin" : ""}" data-post-id="${escapeHtml(post.id)}">
           <div class="ps-post-meta">
-            <strong>@${escapeHtml(username)}</strong>
+            ${renderPublicSpaceUserButton(author, username)}
             <span>${[premium, badge, hiddenLabel, escapeHtml(formatDate(post.created_at))].filter(Boolean).join(" ")}</span>
           </div>
           <p>${escapeHtml(post.body)}</p>
@@ -549,8 +554,12 @@
 
     enhancePostCards(feed, list);
     polishPostCards(feed, list);
-    if (currentPublicSpaceRoute() === "profile") {
+    const activeRoute = currentPublicSpaceRoute();
+    if (activeRoute === "profile") {
       renderProfileOwnPosts(list);
+    }
+    if (isPublicUserProfileRoute(activeRoute)) {
+      renderPublicUserProfilePosts(publicUserIdFromRoute(activeRoute));
     }
   }
 
@@ -683,7 +692,7 @@
       <article class="ps-comment-item${hiddenClass}" data-comment-id="${escapeHtml(comment.id)}">
         <div class="ps-comment-meta">
           <div class="ps-comment-author-line">
-            <strong>@${escapeHtml(username)}</strong>
+            ${renderPublicSpaceUserButton(author, username)}
             ${renderPostBadges(author)}
             <span class="ps-comment-date">${dateLabel}</span>
             ${hiddenLabel}
@@ -711,7 +720,7 @@
 
     if (preview) {
       preview.innerHTML = post
-        ? `<strong>@${escapeHtml((post.author && post.author.username) || "someone")}</strong><p>${escapeHtml(post.body)}</p>`
+        ? `${renderPublicSpaceUserButton(post.author || {}, (post.author && post.author.username) || "someone")}<p>${escapeHtml(post.body)}</p>`
         : "";
     }
 
@@ -1234,6 +1243,93 @@
       .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   }
 
+  function publicSpaceUserId(user) {
+    return String((user && (user.id || user.user_id)) || "").trim();
+  }
+
+  function publicSpaceUsername(user, fallback) {
+    return String((user && user.username) || fallback || "someone").trim() || "someone";
+  }
+
+  function publicUserProfileRoute(user) {
+    const id = publicSpaceUserId(user);
+    return id ? `user-${id.toLowerCase()}` : "profile";
+  }
+
+  function isPublicUserProfileRoute(route) {
+    return /^user-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(String(route || "").trim().toLowerCase());
+  }
+
+  function publicUserIdFromRoute(route) {
+    const cleanRoute = String(route || "").trim().toLowerCase();
+    return isPublicUserProfileRoute(cleanRoute) ? cleanRoute.replace(/^user-/, "") : "";
+  }
+
+  function renderPublicSpaceUserButton(user, fallbackUsername) {
+    const id = publicSpaceUserId(user);
+    const username = publicSpaceUsername(user, fallbackUsername);
+    const badgeLabel = String((user && user.badge_label) || "").trim();
+
+    if (!id) {
+      return `<strong>@${escapeHtml(username)}</strong>`;
+    }
+
+    return `<button class="ps-user-link" type="button" data-ps-author-anchor data-ps-open-user-profile data-user-id="${escapeHtml(id)}" data-username="${escapeHtml(username)}" data-badge-label="${escapeHtml(badgeLabel)}" aria-label="Open @${escapeHtml(username)} profile">@${escapeHtml(username)}</button>`;
+  }
+
+  function rememberPublicProfileUser(user) {
+    const id = publicSpaceUserId(user);
+    if (!id) return null;
+
+    activePublicProfileUser = {
+      id,
+      username: publicSpaceUsername(user),
+      is_admin: Boolean(user && user.is_admin),
+      is_premium: Boolean(user && user.is_premium),
+      badge_label: String((user && user.badge_label) || "").trim()
+    };
+
+    return activePublicProfileUser;
+  }
+
+  function userFromPublicProfileClick(button) {
+    return rememberPublicProfileUser({
+      id: button ? button.dataset.userId : "",
+      username: button ? button.dataset.username : "",
+      badge_label: button ? button.dataset.badgeLabel : ""
+    });
+  }
+
+  function publicProfileUserFromPosts(userId) {
+    const cleanId = String(userId || "").trim().toLowerCase();
+
+    if (!cleanId) return null;
+
+    if (currentUser && publicSpaceUserId(currentUser).toLowerCase() === cleanId) {
+      return currentUser;
+    }
+
+    const fromPosts = (Array.isArray(latestPublicSpacePosts) ? latestPublicSpacePosts : [])
+      .map(post => post && post.author)
+      .find(author => publicSpaceUserId(author).toLowerCase() === cleanId);
+
+    if (fromPosts) return fromPosts;
+
+    if (activePublicProfileUser && publicSpaceUserId(activePublicProfileUser).toLowerCase() === cleanId) {
+      return activePublicProfileUser;
+    }
+
+    return { id: userId, username: "user" };
+  }
+
+  function publicUserPosts(userId, posts) {
+    const cleanId = String(userId || "").trim().toLowerCase();
+
+    return (Array.isArray(posts) ? posts : [])
+      .filter(post => publicSpaceUserId(post && post.author).toLowerCase() === cleanId)
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  }
+
   function startOfLocalDay(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   }
@@ -1282,7 +1378,7 @@
       const meta = card.querySelector(".ps-post-meta");
       if (!meta) return;
 
-      const authorNode = meta.querySelector("strong");
+      const authorNode = meta.querySelector("[data-ps-author-anchor], strong");
       if (authorNode && !meta.querySelector("[data-ps-post-badges]")) {
         authorNode.insertAdjacentHTML("afterend", renderPostBadges(post.author || post));
       }
@@ -1399,7 +1495,7 @@
       }
 
       const cardMeta = card.querySelector(".ps-post-meta");
-      const authorNode = cardMeta ? cardMeta.querySelector("strong") : null;
+      const authorNode = cardMeta ? cardMeta.querySelector("[data-ps-author-anchor], strong") : null;
       if (authorNode && cardMeta && !cardMeta.querySelector("[data-ps-post-badges]")) {
         authorNode.insertAdjacentHTML("afterend", renderPostBadges(post.author || post));
       }
@@ -1430,7 +1526,7 @@
     return `
       <article class="ps-post-card ps-profile-post-card ${post.is_hidden ? "is-hidden-by-admin" : ""}" data-post-id="${escapeHtml(post.id)}">
         <div class="ps-post-meta">
-          <strong>@${escapeHtml(currentUser.username || "user")}</strong>
+          ${renderPublicSpaceUserButton(post.author || currentUser || {}, currentUser && currentUser.username ? currentUser.username : "user")}
           <span>${[hiddenLabel, escapeHtml(formatDate(post.created_at))].filter(Boolean).join(" ")}</span>
         </div>
         <p>${escapeHtml(post.body)}</p>
@@ -1513,6 +1609,120 @@
     );
 
     renderProfileOwnPosts(latestPublicSpacePosts);
+  }
+
+  function renderPublicUserProfileFilter(userId, totalPosts, visiblePosts) {
+    const mode = publicSpacePostFilter.mode || "all";
+
+    return `
+      <div class="ps-public-profile-filter" data-ps-public-profile-filter data-user-id="${escapeHtml(userId)}">
+        <label>
+          <span>Filter posts</span>
+          <select data-ps-public-profile-filter-mode>
+            <option value="all"${mode === "all" ? " selected" : ""}>View all posts</option>
+            <option value="today"${mode === "today" ? " selected" : ""}>Today</option>
+            <option value="yesterday"${mode === "yesterday" ? " selected" : ""}>Yesterday</option>
+          </select>
+        </label>
+        <span data-ps-public-profile-post-count>${visiblePosts}/${totalPosts} visible</span>
+      </div>
+    `;
+  }
+
+  function renderPublicUserProfilePosts(userId) {
+    const listNode = root.querySelector("[data-ps-public-profile-post-list]");
+    const countNode = root.querySelector("[data-ps-public-profile-post-count]");
+    if (!listNode) return;
+
+    const allPosts = publicUserPosts(userId, latestPublicSpacePosts);
+    const visiblePosts = allPosts.filter(postMatchesFilter);
+
+    if (countNode) countNode.textContent = `${visiblePosts.length}/${allPosts.length} visible`;
+
+    if (!allPosts.length) {
+      listNode.innerHTML = `
+        <div class="ps-public-profile-empty">
+          <strong>No visible posts yet.</strong>
+          <span>This user has no public posts available for you to view right now.</span>
+        </div>
+      `;
+      return;
+    }
+
+    if (!visiblePosts.length) {
+      listNode.innerHTML = `
+        <div class="ps-public-profile-empty">
+          <strong>No posts for this filter.</strong>
+          <span>Try View all posts.</span>
+        </div>
+      `;
+      return;
+    }
+
+    listNode.innerHTML = visiblePosts.map(renderProfilePostCard).join("");
+    enhancePostCards(listNode, visiblePosts);
+    polishPostCards(listNode, visiblePosts);
+  }
+
+  function renderPublicUserProfileScreen(userId) {
+    const cleanId = String(userId || "").trim();
+    const user = publicProfileUserFromPosts(cleanId);
+    const username = publicSpaceUsername(user, "user");
+    const initial = String(username || "@").charAt(0).toUpperCase() || "@";
+    const allPosts = publicUserPosts(cleanId, latestPublicSpacePosts);
+    const visiblePosts = allPosts.filter(postMatchesFilter);
+
+    openControlScreen(
+      `@${username}`,
+      `Viewing @${username}'s Public Space profile.`,
+      `
+        <section class="ps-profile-page ps-public-profile-page" aria-label="@${escapeHtml(username)} Public Space profile" data-ps-public-profile data-user-id="${escapeHtml(cleanId)}">
+          <header class="ps-profile-hero ps-public-profile-hero">
+            <div class="ps-profile-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
+            <div class="ps-profile-heading">
+              <strong>@${escapeHtml(username)}</strong>
+              <span>Public Space profile</span>
+              ${renderProfileBadges(user)}
+            </div>
+          </header>
+
+          ${renderPublicUserProfileFilter(cleanId, allPosts.length, visiblePosts.length)}
+
+          <div class="ps-profile-post-list ps-public-profile-post-list" data-ps-public-profile-post-list></div>
+        </section>
+      `,
+      "Profile"
+    );
+
+    renderPublicUserProfilePosts(cleanId);
+  }
+
+  function handlePublicUserProfileFilterChange(event) {
+    const modeSelect = event.target.closest("[data-ps-public-profile-filter-mode]");
+    if (!modeSelect) return;
+
+    const selectedMode = modeSelect.value || "all";
+    publicSpacePostFilter.mode = ["all", "today", "yesterday"].includes(selectedMode) ? selectedMode : "all";
+    publicSpacePostFilter.date = "";
+
+    const profile = root.querySelector("[data-ps-public-profile]");
+    renderPublicUserProfilePosts(profile ? profile.dataset.userId : publicUserIdFromRoute(currentPublicSpaceRoute()));
+  }
+
+  function handlePublicUserProfileClick(event) {
+    const button = event.target.closest("[data-ps-open-user-profile]");
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const user = userFromPublicProfileClick(button);
+    if (!user || !publicSpaceUserId(user)) return;
+
+    const modal = button.closest("[data-ps-comments-modal]");
+    if (modal) closeCommentsModal();
+
+    navigatePublicSpaceRoute(publicUserProfileRoute(user));
   }
 
   function renderSettingsScreen() {
@@ -1648,6 +1858,8 @@
   function normalizePublicSpaceRoute(route) {
     const cleanRoute = String(route || "home").replace(/^#/, "").trim().toLowerCase();
 
+    if (isPublicUserProfileRoute(cleanRoute)) return cleanRoute;
+
     const allowedRoutes = new Set([
       "home",
       "profile",
@@ -1707,6 +1919,13 @@
       setPublicSpaceRouteMode(cleanRoute);
       closeAdminScreen();
       renderProfileScreen();
+      return;
+    }
+
+    if (isPublicUserProfileRoute(cleanRoute)) {
+      setPublicSpaceRouteMode(cleanRoute);
+      closeAdminScreen();
+      renderPublicUserProfileScreen(publicUserIdFromRoute(cleanRoute));
       return;
     }
 
@@ -2957,7 +3176,9 @@
   root.addEventListener("submit", handleProfileComposerRootSubmit);
   root.addEventListener("input", handleProfileComposerRootInput);
   root.addEventListener("change", handlePostFilterChange);
+  root.addEventListener("change", handlePublicUserProfileFilterChange);
   root.addEventListener("click", handlePostFilterClick);
+  root.addEventListener("click", handlePublicUserProfileClick);
 
 
   if (bellButton) {

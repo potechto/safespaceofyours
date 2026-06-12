@@ -10306,3 +10306,102 @@ body.ps-route-screen-active .ps-feed-card {
   white-space: nowrap !important;
 }
 /* V2.0Q.63E badge tooltip and comment icon consistency V2 END */
+
+
+/* V2.0Q.63F clickable public user profiles */
+.public-space-body .ps-user-link {
+  appearance: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #fff4fb !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  font: inherit !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+
+.public-space-body .ps-user-link:hover,
+.public-space-body .ps-user-link:focus-visible {
+  color: #ffd2e8 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 0.18em !important;
+  outline: none !important;
+}
+
+.public-space-body .ps-public-profile-page {
+  display: grid !important;
+  gap: 1rem !important;
+}
+
+.public-space-body .ps-public-profile-filter {
+  display: flex !important;
+  align-items: end !important;
+  justify-content: space-between !important;
+  gap: 0.85rem !important;
+  flex-wrap: wrap !important;
+  padding: 0.85rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.public-space-body .ps-public-profile-filter label {
+  display: grid !important;
+  gap: 0.35rem !important;
+}
+
+.public-space-body .ps-public-profile-filter label span,
+.public-space-body .ps-public-profile-filter [data-ps-public-profile-post-count] {
+  color: rgba(255, 244, 251, 0.66) !important;
+  font-size: 0.78rem !important;
+  font-weight: 850 !important;
+}
+
+.public-space-body .ps-public-profile-filter select {
+  min-height: 2.65rem !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background: rgba(20, 13, 25, 0.94) !important;
+  color: #fff4fb !important;
+  padding: 0 0.8rem !important;
+  font-weight: 850 !important;
+}
+
+.public-space-body .ps-public-profile-empty {
+  display: grid !important;
+  gap: 0.25rem !important;
+  padding: 1rem !important;
+  border: 1px dashed rgba(255, 244, 251, 0.16) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.public-space-body .ps-public-profile-empty strong {
+  color: #fff4fb !important;
+}
+
+.public-space-body .ps-public-profile-empty span {
+  color: rgba(255, 244, 251, 0.62) !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-public-profile-filter {
+    align-items: stretch !important;
+  }
+
+  .public-space-body .ps-public-profile-filter label,
+  .public-space-body .ps-public-profile-filter select {
+    width: 100% !important;
+  }
+}
+/* V2.0Q.63F clickable public user profiles END */
