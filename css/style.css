@@ -8323,3 +8323,86 @@ body.ps-route-screen-active .ps-feed-card {
   }
 }
 /* V2.0Q.62P feed filter and dot menu polish END */
+
+
+/* V2.0Q.62Q filter tray toggle fix */
+
+.public-space-body .ps-post-filter.ps-post-filter-compact,
+.public-space-body .ps-post-filter {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.public-space-body .ps-post-filter-custom-tray {
+  position: absolute !important;
+  top: calc(100% + 0.38rem) !important;
+  right: 0 !important;
+  left: auto !important;
+  min-width: 12rem !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  gap: 0.38rem !important;
+  padding: 0.45rem !important;
+  border-radius: 14px !important;
+  background: rgba(22, 14, 30, 0.98) !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28) !important;
+  z-index: 70 !important;
+}
+
+.public-space-body .ps-post-filter-custom-tray[hidden] {
+  display: none !important;
+}
+
+.public-space-body .ps-post-filter-date-toggle,
+.public-space-body .ps-post-filter-date-clear {
+  min-height: 2rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #fff4fb !important;
+  font: inherit !important;
+  font-size: 0.78rem !important;
+  font-weight: 740 !important;
+  padding: 0.42rem 0.7rem !important;
+  box-shadow: none !important;
+}
+
+.public-space-body .ps-post-filter-date-toggle {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+.public-space-body .ps-post-filter-date-clear {
+  white-space: nowrap !important;
+}
+
+.public-space-body .ps-post-filter-date-toggle:hover,
+.public-space-body .ps-post-filter-date-toggle:focus-visible,
+.public-space-body .ps-post-filter-date-clear:hover,
+.public-space-body .ps-post-filter-date-clear:focus-visible {
+  background: rgba(255, 244, 251, 0.1) !important;
+  color: #fff !important;
+}
+
+.public-space-body .ps-post-filter-date-input {
+  position: absolute !important;
+  top: calc(100% + 0.38rem) !important;
+  right: 0.55rem !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0.01 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 760px) {
+  .public-space-body .ps-post-filter-custom-tray {
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 0 !important;
+  }
+}
+/* V2.0Q.62Q filter tray toggle fix END */

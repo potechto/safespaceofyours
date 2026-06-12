@@ -363,7 +363,16 @@
           <option value="custom">Custom date</option>
         </select>
       </label>
-      <input class="ps-post-filter-date-input" type="date" data-ps-post-filter-date aria-label="Choose custom post date" />
+
+      <div class="ps-post-filter-custom-tray" data-ps-post-filter-custom-tray hidden>
+        <button type="button" class="ps-post-filter-date-toggle" data-ps-post-filter-date-toggle>
+          <span data-ps-post-filter-date-label>Select date</span>
+        </button>
+        <button type="button" class="ps-post-filter-date-clear" data-ps-post-filter-date-clear aria-label="Clear custom date">
+          Clear
+        </button>
+        <input class="ps-post-filter-date-input" type="date" data-ps-post-filter-date aria-label="Choose custom post date" />
+      </div>
     `;
 
     const headings = Array.from(feedCard.querySelectorAll("h1, h2, h3, strong"));
@@ -408,6 +417,8 @@
     const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
     const dateInput = filter.querySelector("[data-ps-post-filter-date]");
     const customOption = modeSelect ? modeSelect.querySelector("option[value='custom']") : null;
+    const tray = filter.querySelector("[data-ps-post-filter-custom-tray]");
+    const dateLabel = filter.querySelector("[data-ps-post-filter-date-label]");
 
     if (modeSelect) modeSelect.value = publicSpacePostFilter.mode || "all";
     if (dateInput) dateInput.value = publicSpacePostFilter.date || "";
@@ -416,6 +427,18 @@
       customOption.textContent = publicSpacePostFilter.date
         ? `Custom date: ${filterDateDisplayLabel(publicSpacePostFilter.date)}`
         : "Custom date";
+    }
+
+    if (dateLabel) {
+      dateLabel.textContent = publicSpacePostFilter.date
+        ? filterDateDisplayLabel(publicSpacePostFilter.date)
+        : "Select date";
+    }
+
+    if (tray) {
+      const shouldOpen = publicSpacePostFilter.mode === "custom";
+      tray.hidden = !shouldOpen;
+      filter.classList.toggle("is-custom-open", shouldOpen);
     }
   }
 
@@ -439,17 +462,19 @@
 
       if (selectedMode === "custom") {
         publicSpacePostFilter.mode = "custom";
-        if (activeDate && activeDate.value) {
-          publicSpacePostFilter.date = activeDate.value;
-        }
         syncPostFilterControls();
-        refreshPostFilterView();
-        openPostFilterDatePicker(activeDate);
+
+        if (!publicSpacePostFilter.date && activeDate) {
+          window.setTimeout(() => openPostFilterDatePicker(activeDate), 0);
+        } else {
+          refreshPostFilterView();
+        }
         return;
       }
 
       publicSpacePostFilter.mode = selectedMode;
       publicSpacePostFilter.date = "";
+      syncPostFilterControls();
       refreshPostFilterView();
       return;
     }
@@ -463,17 +488,56 @@
         publicSpacePostFilter.date = "";
       }
 
+      syncPostFilterControls();
       refreshPostFilterView();
     }
   }
 
   function handlePostFilterClick(event) {
-    const modeSelect = event.target.closest("[data-ps-post-filter-mode]");
-    if (!modeSelect || modeSelect.value !== "custom") return;
+    const toggleButton = event.target.closest("[data-ps-post-filter-date-toggle]");
+    const clearButton = event.target.closest("[data-ps-post-filter-date-clear]");
+    const filter = root.querySelector("[data-ps-post-filter]");
+    if (!filter) return;
 
-    const filter = modeSelect.closest("[data-ps-post-filter]");
-    const dateInput = filter ? filter.querySelector("[data-ps-post-filter-date]") : null;
-    openPostFilterDatePicker(dateInput);
+    const dateInput = filter.querySelector("[data-ps-post-filter-date]");
+    const tray = filter.querySelector("[data-ps-post-filter-custom-tray]");
+    const modeSelect = filter.querySelector("[data-ps-post-filter-mode]");
+
+    if (clearButton) {
+      event.preventDefault();
+      publicSpacePostFilter.mode = "all";
+      publicSpacePostFilter.date = "";
+      if (modeSelect) modeSelect.value = "all";
+      syncPostFilterControls();
+      refreshPostFilterView();
+      return;
+    }
+
+    if (toggleButton) {
+      event.preventDefault();
+
+      if (publicSpacePostFilter.mode !== "custom") {
+        publicSpacePostFilter.mode = "custom";
+        if (modeSelect) modeSelect.value = "custom";
+        syncPostFilterControls();
+        window.setTimeout(() => openPostFilterDatePicker(dateInput), 0);
+        return;
+      }
+
+      const isOpen = tray && !tray.hidden;
+      if (isOpen) {
+        publicSpacePostFilter.mode = publicSpacePostFilter.date ? "custom" : "all";
+        if (!publicSpacePostFilter.date && modeSelect) {
+          modeSelect.value = "all";
+        }
+        syncPostFilterControls();
+        refreshPostFilterView();
+        return;
+      }
+
+      syncPostFilterControls();
+      window.setTimeout(() => openPostFilterDatePicker(dateInput), 0);
+    }
   }
 
   function renderPosts(posts) {
