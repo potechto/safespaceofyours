@@ -9166,3 +9166,70 @@ body.ps-route-screen-active .ps-feed-card {
   color: #fff4fb !important;
 }
 /* V2.0Q.62Y calendar final visual and filter fix END */
+
+
+/* V2.0Q.62Z calendar date filter finalize */
+
+/* Hard override: no calendar day gets bright fill unless selected/applied. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day:not([data-selected="true"]):not([data-applied="true"]) {
+  background: rgba(255, 244, 251, 0.035) !important;
+  border-color: rgba(255, 244, 251, 0.075) !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Outside-month and past dates: noticeably darker. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-muted="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-past="true"] {
+  background: rgba(255, 244, 251, 0.016) !important;
+  border-color: rgba(255, 244, 251, 0.04) !important;
+  color: rgba(255, 244, 251, 0.28) !important;
+}
+
+/* Today is a gentle outline only. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day.is-today:not([data-selected="true"]):not([data-applied="true"]) {
+  background: rgba(255, 244, 251, 0.055) !important;
+  border-color: rgba(255, 244, 251, 0.26) !important;
+  color: rgba(255, 244, 251, 0.86) !important;
+}
+
+/* Only chosen date becomes active. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"],
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-applied="true"] {
+  background: linear-gradient(135deg, rgba(117, 67, 143, 0.96), rgba(170, 79, 148, 0.96)) !important;
+  border-color: rgba(255, 244, 251, 0.48) !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 142, 209, 0.12),
+    0 10px 22px rgba(0, 0, 0, 0.26) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Absolutely remove old dot pseudo markers from older cache layers. */
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day::before,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day::after,
+.public-space-body .ps-post-calendar-day::before,
+.public-space-body .ps-post-calendar-day::after {
+  content: none !important;
+  display: none !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day:hover,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day:focus-visible {
+  background: rgba(255, 244, 251, 0.08) !important;
+  border-color: rgba(255, 244, 251, 0.18) !important;
+  color: #fff !important;
+}
+
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-selected="true"]:hover,
+.public-space-body .ps-post-calendar-days .ps-post-calendar-day[data-applied="true"]:hover {
+  background: linear-gradient(135deg, rgba(117, 67, 143, 1), rgba(170, 79, 148, 1)) !important;
+  color: #fff !important;
+}
+
+.public-space-body .is-filter-hidden {
+  display: none !important;
+}
+/* V2.0Q.62Z calendar date filter finalize END */

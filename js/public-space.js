@@ -589,12 +589,16 @@
 
   function applyPostFilter() {
     const cards = postCardNodesForFilter();
+    const mode = publicSpacePostFilter.mode || "all";
+    const targetDate = activePostFilterDateKey();
     let visibleCount = 0;
 
     cards.forEach(card => {
       const postId = String(card.dataset.postId || card.getAttribute("data-post-id") || "");
       const post = postById(postId);
-      const shouldShow = !post || postMatchesFilter(post);
+      const cardDate = String(card.dataset.postDateKey || "").trim();
+      const postDate = cardDate || postCreatedDateKey(post);
+      const shouldShow = mode === "all" || !targetDate || postDate === targetDate;
 
       card.hidden = !shouldShow;
       card.style.display = shouldShow ? "" : "none";
@@ -629,8 +633,8 @@
 
     const year = Number(yearInput.value || defaultFilterYear());
     const month = Number(monthInput.value || padDatePart(new Date().getMonth() + 1));
-    const draftDate = filter.dataset.psDraftDate || "";
-    const appliedDate = publicSpacePostFilter.mode === "custom" ? (publicSpacePostFilter.date || "") : "";
+    const draftDate = String(filter.dataset.psDraftDate || "").trim();
+    const appliedDate = publicSpacePostFilter.mode === "custom" ? String(publicSpacePostFilter.date || "").trim() : "";
     const selectedDate = draftDate || appliedDate;
     const todayKey = localDateKey(new Date());
     const firstDay = new Date(year, month - 1, 1).getDay();
@@ -642,37 +646,50 @@
 
     for (let index = firstDay - 1; index >= 0; index -= 1) {
       const day = previousTotalDays - index;
-      const dateKey = calendarDateKey(previousYear, previousMonth, day);
-      cells.push({ day, dateKey, muted: true });
+      cells.push({
+        day,
+        dateKey: calendarDateKey(previousYear, previousMonth, day),
+        muted: true
+      });
     }
 
     for (let day = 1; day <= totalDays; day += 1) {
-      const dateKey = calendarDateKey(year, month, day);
-      cells.push({ day, dateKey, muted: false });
+      cells.push({
+        day,
+        dateKey: calendarDateKey(year, month, day),
+        muted: false
+      });
     }
 
     const nextMonth = month === 12 ? 1 : month + 1;
     const nextYear = month === 12 ? year + 1 : year;
+    let nextDay = 1;
 
     while (cells.length % 7 !== 0 || cells.length < 35) {
-      const day = cells.filter(item => item.muted && item.dateKey.startsWith(`${nextYear}-${padDatePart(nextMonth)}`)).length + 1;
-      const dateKey = calendarDateKey(nextYear, nextMonth, day);
-      cells.push({ day, dateKey, muted: true });
+      cells.push({
+        day: nextDay,
+        dateKey: calendarDateKey(nextYear, nextMonth, nextDay),
+        muted: true
+      });
+      nextDay += 1;
       if (cells.length >= 42) break;
     }
 
     daysNode.innerHTML = cells.map(item => {
-      const isSelected = item.dateKey === selectedDate;
-      const isApplied = item.dateKey === appliedDate;
+      const isSelected = Boolean(selectedDate) && item.dateKey === selectedDate;
+      const isApplied = Boolean(appliedDate) && item.dateKey === appliedDate;
       const isToday = item.dateKey === todayKey;
       const isPast = item.dateKey < todayKey;
-      const selected = isSelected ? " is-selected" : "";
-      const applied = isApplied ? " is-applied" : "";
-      const today = isToday ? " is-today" : "";
-      const muted = item.muted ? " is-muted" : "";
-      const past = isPast ? " is-past" : "";
+      const classes = [
+        "ps-post-calendar-day",
+        isSelected ? "is-selected" : "",
+        isApplied ? "is-applied" : "",
+        isToday ? "is-today" : "",
+        item.muted ? "is-muted" : "",
+        isPast ? "is-past" : ""
+      ].filter(Boolean).join(" ");
 
-      return `<button type="button" class="ps-post-calendar-day${selected}${applied}${today}${muted}${past}" data-ps-calendar-day="${escapeHtml(item.dateKey)}" data-selected="${isSelected ? "true" : "false"}" data-applied="${isApplied ? "true" : "false"}" data-past="${isPast ? "true" : "false"}" aria-pressed="${isSelected ? "true" : "false"}">${item.day}</button>`;
+      return `<button type="button" class="${classes}" data-ps-calendar-day="${escapeHtml(item.dateKey)}" data-selected="${isSelected ? "true" : "false"}" data-applied="${isApplied ? "true" : "false"}" data-past="${isPast ? "true" : "false"}" data-muted="${item.muted ? "true" : "false"}" aria-pressed="${isSelected ? "true" : "false"}">${item.day}</button>`;
     }).join("");
   }
 
@@ -804,6 +821,7 @@
 
     if (dayButton) {
       event.preventDefault();
+      event.stopPropagation();
       filter.dataset.psDraftDate = dayButton.dataset.psCalendarDay || "";
       filter.dataset.psCalendarOpen = "true";
       closeCalendarComboMenus(filter);
@@ -1255,6 +1273,9 @@
       const postId = String(card.dataset.postId || "");
       const post = byId.get(postId) || postById(postId);
       if (!post) return;
+
+      card.dataset.postDateKey = postCreatedDateKey(post);
+      card.dataset.postCreatedAt = post.created_at || post.createdAt || post.posted_at || post.postedAt || post.date || post.timestamp || "";
 
       card.classList.add("ps-post-card-polished");
 
