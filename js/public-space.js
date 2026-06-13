@@ -2796,8 +2796,21 @@
   }
 
   function isLocalCommentComposerActive() {
+    // Q65O: allow passive live refresh when the desktop comment box is merely focused but empty.
     const active = document.activeElement;
-    return Boolean(active && active.closest && active.closest("[data-ps-comments-form]"));
+    if (!active || !active.closest) return false;
+
+    const form = active.closest("[data-ps-comments-form]");
+    if (!form) return false;
+
+    const textarea = form.querySelector("textarea[name='comment']");
+    if (!textarea) return false;
+
+    if (active === textarea) {
+      return textarea.value.trim().length > 0;
+    }
+
+    return false;
   }
 
   async function refreshActiveCommentsLive() {
