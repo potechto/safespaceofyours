@@ -629,62 +629,28 @@
               <span data-ps-comment-label>Add a comment</span>
               <textarea name="comment" maxlength="500" rows="3" placeholder="Write a kind comment..."></textarea>
             </label>
-            <div class="ps-comment-emoji-row">
-              <button class="ps-comment-emoji-toggle" type="button" data-ps-comment-emoji-toggle aria-expanded="false">😊 Emoji</button>
-              <div class="ps-comment-emoji-panel" data-ps-comment-emoji-panel hidden>
-                <div class="ps-comment-emoji-panel-head">Emoji</div>
-                <div class="ps-comment-emoji-section">
-                  <p>Recently Used</p>
-                  <div class="ps-comment-emoji-grid">
-                    <button type="button" data-ps-comment-emoji="😌" aria-label="Insert 😌">😌</button>
-                    <button type="button" data-ps-comment-emoji="😭" aria-label="Insert 😭">😭</button>
-                    <button type="button" data-ps-comment-emoji="😍" aria-label="Insert 😍">😍</button>
-                    <button type="button" data-ps-comment-emoji="🤝" aria-label="Insert 🤝">🤝</button>
-                    <button type="button" data-ps-comment-emoji="😊" aria-label="Insert 😊">😊</button>
-                  </div>
-                </div>
-                <div class="ps-comment-emoji-section">
-                  <p>Smileys & People</p>
-                  <div class="ps-comment-emoji-grid">
-                    <button type="button" data-ps-comment-emoji="😀" aria-label="Insert 😀">😀</button>
-                    <button type="button" data-ps-comment-emoji="😁" aria-label="Insert 😁">😁</button>
-                    <button type="button" data-ps-comment-emoji="😄" aria-label="Insert 😄">😄</button>
-                    <button type="button" data-ps-comment-emoji="🥹" aria-label="Insert 🥹">🥹</button>
-                    <button type="button" data-ps-comment-emoji="😂" aria-label="Insert 😂">😂</button>
-                    <button type="button" data-ps-comment-emoji="🤣" aria-label="Insert 🤣">🤣</button>
-                    <button type="button" data-ps-comment-emoji="😢" aria-label="Insert 😢">😢</button>
-                    <button type="button" data-ps-comment-emoji="😌" aria-label="Insert 😌">😌</button>
-                    <button type="button" data-ps-comment-emoji="🙂" aria-label="Insert 🙂">🙂</button>
-                    <button type="button" data-ps-comment-emoji="😳" aria-label="Insert 😳">😳</button>
-                    <button type="button" data-ps-comment-emoji="😇" aria-label="Insert 😇">😇</button>
-                    <button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button>
-                  </div>
-                </div>
-                <div class="ps-comment-emoji-section">
-                  <p>Hearts & Soft Symbols</p>
-                  <div class="ps-comment-emoji-grid">
-                    <button type="button" data-ps-comment-emoji="❤️" aria-label="Insert ❤️">❤️</button>
-                    <button type="button" data-ps-comment-emoji="💗" aria-label="Insert 💗">💗</button>
-                    <button type="button" data-ps-comment-emoji="✨" aria-label="Insert ✨">✨</button>
-                    <button type="button" data-ps-comment-emoji="🙏" aria-label="Insert 🙏">🙏</button>
-                    <button type="button" data-ps-comment-emoji="🌷" aria-label="Insert 🌷">🌷</button>
-                    <button type="button" data-ps-comment-emoji="🌸" aria-label="Insert 🌸">🌸</button>
-                    <button type="button" data-ps-comment-emoji="🫶" aria-label="Insert 🫶">🫶</button>
-                    <button type="button" data-ps-comment-emoji="☁️" aria-label="Insert ☁️">☁️</button>
-                    <button type="button" data-ps-comment-emoji="🕊️" aria-label="Insert 🕊️">🕊️</button>
-                    <button type="button" data-ps-comment-emoji="💫" aria-label="Insert 💫">💫</button>
-                  </div>
-                </div>
-                <div class="ps-comment-emoji-tabs" aria-hidden="true">
-                  <span>🕘</span><span>🙂</span><span>🐾</span><span>🌷</span><span>⚙️</span><span>💡</span><span>@</span><span>⚑</span>
+            <div class="ps-comment-toolbar">
+              <div class="ps-comment-emoji-row">
+                <button class="ps-comment-emoji-toggle" type="button" data-ps-comment-emoji-toggle aria-expanded="false">😊 Emoji</button>
+                <div class="ps-comment-emoji-panel" data-ps-comment-emoji-panel hidden>
+                  <button type="button" data-ps-comment-emoji="❤️" aria-label="Insert ❤️">❤️</button>
+                  <button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button>
+                  <button type="button" data-ps-comment-emoji="✨" aria-label="Insert ✨">✨</button>
+                  <button type="button" data-ps-comment-emoji="🥹" aria-label="Insert 🥹">🥹</button>
+                  <button type="button" data-ps-comment-emoji="🙏" aria-label="Insert 🙏">🙏</button>
+                  <button type="button" data-ps-comment-emoji="🌷" aria-label="Insert 🌷">🌷</button>
+                  <button type="button" data-ps-comment-emoji="🌸" aria-label="Insert 🌸">🌸</button>
+                  <button type="button" data-ps-comment-emoji="🫶" aria-label="Insert 🫶">🫶</button>
+                  <button type="button" data-ps-comment-emoji="💫" aria-label="Insert 💫">💫</button>
+                  <button type="button" data-ps-comment-emoji="☁️" aria-label="Insert ☁️">☁️</button>
+                  <button type="button" data-ps-comment-emoji="🕊️" aria-label="Insert 🕊️">🕊️</button>
+                  <button type="button" data-ps-comment-emoji="😊" aria-label="Insert 😊">😊</button>
                 </div>
               </div>
-            </div>
-            <p class="ps-comments-edit-note" data-ps-comment-edit-note></p>
-            <div class="ps-comments-form-footer">
               <span data-ps-comment-count>0/500</span>
               <button class="btn primary ps-comment-send-btn" type="submit" data-ps-comment-submit aria-label="Post comment" title="Post comment"><span aria-hidden="true">➤</span></button>
             </div>
+            <p class="ps-comments-edit-note" data-ps-comment-edit-note></p>
             <p class="ps-message" data-ps-comments-message></p>
           </form>
         </div>

@@ -605,3 +605,153 @@
     min-width: 2.25rem !important;
   }
 }
+
+
+/* Q64D clean comment composer final correction */
+.public-space-body [data-ps-comments-form] {
+  overflow: visible !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-toolbar {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  margin-top: 0.72rem !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
+  display: contents !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
+  grid-column: 1 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 2.35rem !important;
+  border-radius: 999px !important;
+  padding: 0.35rem 0.85rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  white-space: nowrap !important;
+}
+
+.public-space-body [data-ps-comments-form] [data-ps-comment-count] {
+  grid-column: 2 !important;
+  justify-self: end !important;
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.58) !important;
+  font-size: 0.9rem !important;
+  font-weight: 850 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn,
+.public-space-body [data-ps-comments-form] button.ps-comment-send-btn,
+.public-space-body [data-ps-comments-form] .btn.primary.ps-comment-send-btn {
+  grid-column: 3 !important;
+  width: 2.9rem !important;
+  min-width: 2.9rem !important;
+  max-width: 2.9rem !important;
+  height: 2.9rem !important;
+  min-height: 2.9rem !important;
+  max-height: 2.9rem !important;
+  flex: 0 0 2.9rem !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  font-size: 1.08rem !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn span {
+  display: inline-block !important;
+  transform: translateX(1px) !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+  grid-column: 1 / -1 !important;
+  position: static !important;
+  z-index: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(2.35rem, 2.35rem)) !important;
+  justify-content: start !important;
+  align-items: center !important;
+  gap: 0.42rem !important;
+  margin: 0.15rem 0 0 !important;
+  padding: 0.72rem !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel[hidden] {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
+  width: 2.35rem !important;
+  height: 2.35rem !important;
+  min-width: 2.35rem !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  font-size: 1.24rem !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel-head,
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-section,
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-tabs {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-edit-note {
+  margin-top: 0.15rem !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-form] .ps-comment-toolbar {
+    grid-template-columns: auto 1fr auto !important;
+    gap: 0.55rem !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
+    padding-inline: 0.68rem !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+    grid-template-columns: repeat(auto-fill, minmax(2.25rem, 2.25rem)) !important;
+    gap: 0.35rem !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-width: 2.25rem !important;
+  }
+}
