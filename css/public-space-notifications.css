@@ -1171,3 +1171,173 @@
     font-size: 1rem !important;
   }
 }
+
+
+/* Q65E profile settings mobile polish */
+.public-space-body .ps-profile-page,
+.public-space-body .ps-public-profile-page {
+  display: grid !important;
+  gap: 1rem !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-profile-hero,
+.public-space-body .ps-public-profile-hero {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.9rem !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-profile-heading {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.public-space-body .ps-profile-heading strong,
+.public-space-body .ps-profile-heading span {
+  overflow-wrap: anywhere !important;
+}
+
+.public-space-body .ps-profile-badges,
+.public-space-body .ps-post-badges {
+  flex-wrap: wrap !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-profile-composer-trigger {
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.public-space-body .ps-profile-post-list,
+.public-space-body .ps-public-profile-post-list {
+  display: grid !important;
+  gap: 0.8rem !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-profile-posts-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.65rem !important;
+  flex-wrap: wrap !important;
+}
+
+.public-space-body .ps-public-profile-filter label {
+  display: grid !important;
+  gap: 0.45rem !important;
+}
+
+.public-space-body .ps-public-profile-filter select {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.public-space-body .ps-public-profile-empty,
+.public-space-body .ps-control-card {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-menu {
+    width: min(18rem, calc(100vw - 1.5rem)) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    right: 0.35rem !important;
+  }
+
+  .public-space-body .ps-menu button,
+  .public-space-body .ps-menu a {
+    min-height: 2.65rem !important;
+    padding: 0.72rem 0.85rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .public-space-body .ps-profile-page,
+  .public-space-body .ps-public-profile-page {
+    gap: 0.85rem !important;
+  }
+
+  .public-space-body .ps-profile-hero,
+  .public-space-body .ps-public-profile-hero {
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    padding: 0.95rem !important;
+    border-radius: 20px !important;
+  }
+
+  .public-space-body .ps-profile-avatar {
+    width: 3.1rem !important;
+    min-width: 3.1rem !important;
+    height: 3.1rem !important;
+    font-size: 1.25rem !important;
+  }
+
+  .public-space-body .ps-profile-heading {
+    gap: 0.25rem !important;
+  }
+
+  .public-space-body .ps-profile-heading strong {
+    font-size: 1.05rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .public-space-body .ps-profile-heading span {
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .public-space-body .ps-profile-badges {
+    gap: 0.35rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .public-space-body .ps-profile-composer-trigger {
+    min-height: 3.25rem !important;
+    padding: 0.85rem 1rem !important;
+    border-radius: 18px !important;
+  }
+
+  .public-space-body .ps-profile-posts-head {
+    padding: 0.1rem 0.05rem !important;
+  }
+
+  .public-space-body .ps-profile-posts-head strong {
+    font-size: 0.95rem !important;
+  }
+
+  .public-space-body .ps-profile-posts-head span {
+    font-size: 0.78rem !important;
+  }
+
+  .public-space-body .ps-public-profile-filter {
+    padding: 0.85rem !important;
+    border-radius: 18px !important;
+  }
+
+  .public-space-body .ps-public-profile-filter span {
+    font-size: 0.78rem !important;
+  }
+
+  .public-space-body .ps-public-profile-empty {
+    padding: 1rem !important;
+    border-radius: 18px !important;
+  }
+
+  .public-space-body .ps-control-screen .ps-control-card {
+    padding: 0.95rem !important;
+    border-radius: 18px !important;
+    gap: 0.35rem !important;
+  }
+
+  .public-space-body .ps-control-screen .ps-control-card strong {
+    font-size: 0.98rem !important;
+  }
+
+  .public-space-body .ps-control-screen .ps-control-card span {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+}
