@@ -1027,3 +1027,147 @@
     max-height: 2.45rem !important;
   }
 }
+
+
+/* Q65D feed post card mobile polish */
+.public-space-body .ps-compose-trigger {
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.public-space-body .ps-feed-card {
+  overflow: hidden !important;
+}
+
+.public-space-body .ps-feed-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  flex-wrap: wrap !important;
+}
+
+.public-space-body .ps-feed-toolbar [data-ps-feed-status] {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.public-space-body .ps-post-card {
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.public-space-body .ps-post-card > p {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  white-space: pre-wrap !important;
+}
+
+.public-space-body .ps-post-meta {
+  min-width: 0 !important;
+  gap: 0.45rem !important;
+  flex-wrap: wrap !important;
+}
+
+.public-space-body .ps-post-meta > span {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.public-space-body .ps-post-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+.public-space-body .ps-post-actions button {
+  min-width: 0 !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-main-space {
+    gap: 0.9rem !important;
+  }
+
+  .public-space-body .ps-space-heading {
+    margin-bottom: 0.15rem !important;
+  }
+
+  .public-space-body .ps-compose-trigger {
+    min-height: 3.35rem !important;
+    padding: 0.9rem 1rem !important;
+    border-radius: 18px !important;
+  }
+
+  .public-space-body .ps-feed-card {
+    border-radius: 20px !important;
+    padding: 0.9rem !important;
+  }
+
+  .public-space-body .ps-feed-toolbar {
+    gap: 0.45rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .public-space-body .ps-feed-toolbar strong {
+    font-size: 0.98rem !important;
+  }
+
+  .public-space-body .ps-feed-toolbar [data-ps-feed-status] {
+    width: 100% !important;
+    font-size: 0.8rem !important;
+  }
+
+  .public-space-body .ps-post-card {
+    border-radius: 18px !important;
+    padding: 0.95rem !important;
+  }
+
+  .public-space-body .ps-post-meta {
+    align-items: flex-start !important;
+    gap: 0.35rem 0.5rem !important;
+  }
+
+  .public-space-body .ps-post-meta > span {
+    font-size: 0.76rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .public-space-body .ps-post-card > p {
+    font-size: 0.96rem !important;
+    line-height: 1.55 !important;
+    margin: 0.75rem 0 !important;
+  }
+
+  .public-space-body .ps-post-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+  }
+
+  .public-space-body .ps-post-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.68rem 0.55rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .public-space-body .ps-post-more {
+    justify-self: stretch !important;
+  }
+
+  .public-space-body .ps-post-more-toggle {
+    width: 100% !important;
+  }
+
+  .public-space-body .ps-empty-state {
+    padding: 1.25rem 0.9rem !important;
+    border-radius: 18px !important;
+  }
+
+  .public-space-body .ps-empty-state h2 {
+    font-size: 1rem !important;
+  }
+}
