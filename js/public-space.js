@@ -755,7 +755,85 @@
     if (toggle) toggle.setAttribute("aria-expanded", "false");
   }
 
-  function insertCommentEmoji(textarea, emoji) {
+
+  // Q65F mobile typing support
+  function isMobileTypingViewport() {
+    return Boolean(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+  }
+
+  function updateMobileViewportState() {
+    if (!document || !document.documentElement || !document.body) return;
+
+    const viewport = window.visualViewport || null;
+    const height = viewport && viewport.height ? viewport.height : window.innerHeight;
+    const baseHeight = window.innerHeight || height;
+    const offsetTop = viewport && viewport.offsetTop ? viewport.offsetTop : 0;
+    const keyboardOffset = Math.max(0, Math.round(baseHeight - height - offsetTop));
+
+    document.documentElement.style.setProperty("--ps-visual-viewport-height", `${Math.max(320, Math.round(height))}px`);
+    document.documentElement.style.setProperty("--ps-keyboard-offset", `${keyboardOffset}px`);
+
+    document.body.classList.toggle("ps-keyboard-visible", isMobileTypingViewport() && keyboardOffset > 80);
+  }
+
+  function activeMobileTypingTarget() {
+    const active = document.activeElement;
+    if (!active || !active.matches) return null;
+
+    const selector = "[data-ps-comments-modal] textarea[name='comment'], [data-ps-compose-modal] textarea[name='post']";
+    return active.matches(selector) ? active : null;
+  }
+
+  function keepMobileTypingTargetVisible(target, delay = 140) {
+    if (!target || !target.closest || !isMobileTypingViewport()) return;
+
+    updateMobileViewportState();
+
+    window.setTimeout(() => {
+      const anchor = target.closest("[data-ps-comments-form], [data-ps-composer], .ps-modal-card") || target;
+
+      try {
+        anchor.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      } catch (error) {
+        anchor.scrollIntoView(false);
+      }
+
+      const card = target.closest(".ps-modal-card");
+      if (card && target.closest("[data-ps-comments-form], [data-ps-composer]")) {
+        card.scrollTop = card.scrollHeight;
+      }
+    }, delay);
+  }
+
+  function handleMobileTypingFocus(event) {
+    const target = event.target;
+    if (!target || !target.matches) return;
+
+    const selector = "[data-ps-comments-modal] textarea[name='comment'], [data-ps-compose-modal] textarea[name='post']";
+    if (!target.matches(selector)) return;
+
+    document.body.classList.add("ps-mobile-typing-active");
+    keepMobileTypingTargetVisible(target, 220);
+  }
+
+  function handleMobileTypingBlur() {
+    window.setTimeout(() => {
+      if (!activeMobileTypingTarget()) {
+        document.body.classList.remove("ps-mobile-typing-active");
+      }
+
+      updateMobileViewportState();
+    }, 120);
+  }
+
+  function handleMobileTypingViewportChange() {
+    updateMobileViewportState();
+
+    const target = activeMobileTypingTarget();
+    if (target) keepMobileTypingTargetVisible(target, 80);
+  }
+
+  function insertCommentEmoji(textarea, emoji, options = {}) {
     if (!textarea || textarea.disabled || !emoji) return;
 
     const start = Number.isFinite(textarea.selectionStart) ? textarea.selectionStart : textarea.value.length;
@@ -766,8 +844,21 @@
 
     textarea.value = next;
     const cursor = Math.min(start + emoji.length, textarea.value.length);
-    textarea.focus();
-    textarea.setSelectionRange(cursor, cursor);
+    const shouldFocus = !options || options.focus !== false;
+
+    if (shouldFocus) {
+      textarea.focus({ preventScroll: true });
+      textarea.setSelectionRange(cursor, cursor);
+      keepMobileTypingTargetVisible(textarea);
+    } else {
+      try {
+        textarea.selectionStart = cursor;
+        textarea.selectionEnd = cursor;
+      } catch (error) {
+        // Some mobile browsers block selection changes when the textarea is blurred.
+      }
+    }
+
     renderCommentsModal();
   }
 
@@ -1103,8 +1194,19 @@
 
     if (emojiButton) {
       event.preventDefault();
-      insertCommentEmoji(commentsModalNode("textarea[name='comment']"), emojiButton.dataset.psCommentEmoji || emojiButton.textContent || "");
+
+      const textarea = commentsModalNode("textarea[name='comment']");
+      if (document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+      }
+
+      insertCommentEmoji(textarea, emojiButton.dataset.psCommentEmoji || emojiButton.textContent || "", { focus: false });
       closeCommentEmojiPanel();
+
+      if (emojiButton && typeof emojiButton.blur === "function") {
+        emojiButton.blur();
+      }
+
       return;
     }
 
@@ -3921,6 +4023,16 @@
   document.addEventListener("submit", handleCommentsSubmit);
   document.addEventListener("input", handleCommentsModalInput);
   document.addEventListener("keydown", handleCommentsModalKeydown);
+  document.addEventListener("focusin", handleMobileTypingFocus);
+  document.addEventListener("focusout", handleMobileTypingBlur);
+  window.addEventListener("resize", handleMobileTypingViewportChange, { passive: true });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", handleMobileTypingViewportChange, { passive: true });
+    window.visualViewport.addEventListener("scroll", handleMobileTypingViewportChange, { passive: true });
+  }
+
+  updateMobileViewportState();
 
   function handleProfileComposerRootSubmit(event) {
     const form = event.target.closest("[data-ps-profile-composer]");

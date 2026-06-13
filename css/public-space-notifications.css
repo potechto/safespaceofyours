@@ -1341,3 +1341,150 @@
     line-height: 1.45 !important;
   }
 }
+
+
+/* Q65F mobile filter keyboard and floating menus */
+:root {
+  --ps-visual-viewport-height: 100dvh;
+  --ps-keyboard-offset: 0px;
+}
+
+.public-space-body .ps-feed-toolbar {
+  overflow: visible !important;
+}
+
+.public-space-body .ps-feed-toolbar .ps-post-filter,
+.public-space-body .ps-feed-toolbar .ps-post-filter-simple {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.public-space-body .ps-post-filter-simple .ps-post-filter-select-label,
+.public-space-body .ps-post-filter .ps-post-filter-select-label {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comments-card,
+.public-space-body [data-ps-compose-modal] .ps-compose-card {
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+}
+
+.public-space-body [data-ps-comments-modal] [data-ps-comment-menu] {
+  z-index: 10030 !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-feed-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    justify-items: stretch !important;
+    gap: 0.55rem !important;
+  }
+
+  .public-space-body .ps-feed-toolbar strong {
+    width: 100% !important;
+  }
+
+  .public-space-body .ps-feed-toolbar [data-ps-feed-status] {
+    width: 100% !important;
+    justify-self: stretch !important;
+  }
+
+  .public-space-body .ps-feed-toolbar .ps-post-filter,
+  .public-space-body .ps-feed-toolbar .ps-post-filter-simple,
+  .public-space-body .ps-post-filter,
+  .public-space-body .ps-post-filter-simple {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: stretch !important;
+    align-items: stretch !important;
+    margin: 0 !important;
+  }
+
+  .public-space-body .ps-post-filter-simple .ps-post-filter-select-label,
+  .public-space-body .ps-post-filter .ps-post-filter-select-label {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0.35rem !important;
+  }
+
+  .public-space-body .ps-post-filter-simple [data-ps-post-filter-mode],
+  .public-space-body .ps-post-filter [data-ps-post-filter-mode],
+  .public-space-body .ps-post-filter select,
+  .public-space-body .ps-post-filter-simple select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 2.85rem !important;
+    border-radius: 16px !important;
+    padding: 0 0.95rem !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    text-align-last: left !important;
+  }
+
+  .public-space-body.ps-keyboard-visible [data-ps-comments-modal],
+  .public-space-body.ps-keyboard-visible [data-ps-compose-modal],
+  .public-space-body.ps-mobile-typing-active [data-ps-comments-modal],
+  .public-space-body.ps-mobile-typing-active [data-ps-compose-modal] {
+    align-items: flex-end !important;
+    padding-top: 0.35rem !important;
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  .public-space-body.ps-keyboard-visible [data-ps-comments-modal] .ps-modal-card,
+  .public-space-body.ps-keyboard-visible [data-ps-compose-modal] .ps-modal-card,
+  .public-space-body.ps-mobile-typing-active [data-ps-comments-modal] .ps-modal-card,
+  .public-space-body.ps-mobile-typing-active [data-ps-compose-modal] .ps-modal-card {
+    max-height: calc(var(--ps-visual-viewport-height, 100dvh) - 0.75rem) !important;
+    overflow-y: auto !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comments-card {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comments-list,
+  .public-space-body [data-ps-comments-modal] [data-ps-comments-list] {
+    flex: 1 1 auto !important;
+    min-height: 7rem !important;
+  }
+
+  .public-space-body [data-ps-comments-form],
+  .public-space-body [data-ps-composer] {
+    scroll-margin-bottom: 8rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] [data-ps-comment-menu] {
+    position: fixed !important;
+    left: auto !important;
+    right: max(0.8rem, env(safe-area-inset-right)) !important;
+    top: auto !important;
+    bottom: max(0.9rem, env(safe-area-inset-bottom)) !important;
+    width: min(13rem, calc(100vw - 1.5rem)) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    max-height: min(14rem, 48dvh) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    z-index: 10030 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.48) !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] [data-ps-comment-menu] button {
+    min-height: 2.65rem !important;
+    width: 100% !important;
+  }
+
+  .public-space-body.ps-keyboard-visible [data-ps-comments-modal] [data-ps-comment-menu] {
+    bottom: max(0.9rem, env(safe-area-inset-bottom)) !important;
+  }
+}
