@@ -747,6 +747,14 @@
     renderCommentsModal();
   }
 
+  function closeCommentEmojiPanel() {
+    const panel = commentsModalNode("[data-ps-comment-emoji-panel]");
+    const toggle = commentsModalNode("[data-ps-comment-emoji-toggle]");
+
+    if (panel) panel.hidden = true;
+    if (toggle) toggle.setAttribute("aria-expanded", "false");
+  }
+
   function insertCommentEmoji(textarea, emoji) {
     if (!textarea || textarea.disabled || !emoji) return;
 
@@ -1069,6 +1077,7 @@
     const cancelEditButton = event.target.closest("[data-ps-cancel-comment-edit]");
     const emojiToggle = event.target.closest("[data-ps-comment-emoji-toggle]");
     const emojiButton = event.target.closest("[data-ps-comment-emoji]");
+    const emojiPanelClick = event.target.closest("[data-ps-comment-emoji-panel]");
     const modal = event.target.closest("[data-ps-comments-modal]");
 
     if (closeButton) {
@@ -1079,6 +1088,7 @@
 
     if (!modal) {
       closeCommentActionMenus();
+      closeCommentEmojiPanel();
       return;
     }
 
@@ -1094,7 +1104,12 @@
     if (emojiButton) {
       event.preventDefault();
       insertCommentEmoji(commentsModalNode("textarea[name='comment']"), emojiButton.dataset.psCommentEmoji || emojiButton.textContent || "");
+      closeCommentEmojiPanel();
       return;
+    }
+
+    if (!emojiPanelClick) {
+      closeCommentEmojiPanel();
     }
 
     if (cancelEditButton) {
