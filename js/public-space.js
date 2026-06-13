@@ -3861,12 +3861,6 @@
                 </div>
               </div>
 
-              <div class="ps-admin-user-actions">
-                <button type="button" data-ps-user-action="disable" data-user-id="${escapeHtml(user.id)}" data-next-disabled="${isDisabled ? "false" : "true"}">
-                  ${isDisabled ? "Enable account" : "Disable account"}
-                </button>
-              </div>
-
               <div class="ps-admin-user-controls">
                 <div class="ps-admin-inline-form ps-admin-badge-form">
                   <label>
@@ -3876,8 +3870,11 @@
                   <button type="button" data-ps-user-action="badge" data-user-id="${escapeHtml(user.id)}">Save badges</button>
                 </div>
 
-                <div class="ps-admin-reset-actions" aria-label="Reset account credentials">
+                <div class="ps-admin-reset-actions" aria-label="Account controls">
                   <button type="button" data-ps-user-action="password" data-user-id="${escapeHtml(user.id)}">Reset password</button>
+                  <button type="button" data-ps-user-action="disable" data-user-id="${escapeHtml(user.id)}" data-next-disabled="${isDisabled ? "false" : "true"}">
+                    ${isDisabled ? "Enable account" : "Disable account"}
+                  </button>
                   <button type="button" data-ps-user-action="pin" data-user-id="${escapeHtml(user.id)}">Reset PIN/key</button>
                 </div>
               </div>
