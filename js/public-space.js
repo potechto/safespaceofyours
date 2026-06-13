@@ -2502,6 +2502,7 @@
           .map(box => box.value);
 
         input.value = values.join(", ");
+        syncAdminUserCardBadgePreview(input.closest("[data-ps-admin-user-card]"), input.value);
 
         const note = picker.querySelector("[data-ps-badge-picker-note]");
         if (note) note.textContent = `${values.length}/${PUBLIC_SPACE_BADGE_LIMIT} selected`;
@@ -3781,6 +3782,41 @@
     ]);
   }
 
+  function adminUserPillsHtml(options) {
+    const settings = options || {};
+    const badges = splitBadgeLabels(settings.badgeLabel || "");
+    const isAdmin = Boolean(settings.isAdmin);
+    const isDisabled = Boolean(settings.isDisabled);
+    const isPremium = Boolean(settings.isPremium) || badges.some(label => normalizeBadgeValue(label) === "premium");
+    const visibleBadgePills = badges.filter(label => normalizeBadgeValue(label) !== "premium");
+
+    return [
+      isAdmin ? '<span class="ps-status-pill" data-ps-admin-pill="admin">Admin</span>' : "",
+      isPremium ? '<span class="ps-status-pill" data-ps-admin-pill="premium">Premium access</span>' : "",
+      isDisabled ? '<span class="ps-status-pill is-danger" data-ps-admin-pill="disabled">Disabled</span>' : '<span class="ps-status-pill is-ok" data-ps-admin-pill="active">Active</span>',
+      ...visibleBadgePills.map(label => `<span class="ps-status-pill" data-ps-admin-pill="badge">${escapeHtml(label)}</span>`)
+    ].join("");
+  }
+
+  function syncAdminUserCardBadgePreview(card, badgeValue) {
+    if (!card) return;
+
+    const pills = card.querySelector("[data-ps-admin-user-pills]");
+    if (!pills) return;
+
+    const badges = splitBadgeLabels(badgeValue || "");
+    const hasPremiumBadge = badges.some(label => normalizeBadgeValue(label) === "premium");
+
+    card.dataset.psAdminBadgePreview = badges.join(", ");
+    card.dataset.psAdminIsPremium = hasPremiumBadge ? "true" : "false";
+    pills.innerHTML = adminUserPillsHtml({
+      isAdmin: card.dataset.psAdminIsAdmin === "true",
+      isDisabled: card.dataset.psAdminIsDisabled === "true",
+      isPremium: hasPremiumBadge,
+      badgeLabel: badges.join(", ")
+    });
+  }
+
   function renderAdminUsers(users) {
     const results = adminResultsNode();
     const messageNode = root.querySelector("[data-ps-admin-message]");
@@ -3814,17 +3850,14 @@
           const visibleBadgePills = userBadges.filter(label => normalizeBadgeValue(label) !== "premium");
 
           return `
-            <article class="ps-admin-user-card ${isDisabled ? "is-disabled" : ""}" data-ps-admin-user-card data-user-id="${escapeHtml(user.id)}">
+            <article class="ps-admin-user-card ${isDisabled ? "is-disabled" : ""}" data-ps-admin-user-card data-user-id="${escapeHtml(user.id)}" data-ps-admin-is-admin="${isAdmin ? "true" : "false"}" data-ps-admin-is-disabled="${isDisabled ? "true" : "false"}" data-ps-admin-is-premium="${isPremium ? "true" : "false"}">
               <div class="ps-admin-user-main">
                 <div>
                   <strong>@${escapeHtml(user.username || "user")}</strong>
                   <span>Joined ${escapeHtml(formatDate(user.created_at) || "recently")}</span>
                 </div>
-                <div class="ps-admin-user-pills">
-                  ${isAdmin ? '<span class="ps-status-pill">Admin</span>' : ""}
-                  ${isPremium ? '<span class="ps-status-pill">Premium access</span>' : ""}
-                  ${isDisabled ? '<span class="ps-status-pill is-danger">Disabled</span>' : '<span class="ps-status-pill is-ok">Active</span>'}
-                  ${visibleBadgePills.map(label => `<span class="ps-status-pill">${escapeHtml(label)}</span>`).join("")}
+                <div class="ps-admin-user-pills" data-ps-admin-user-pills>
+                  ${adminUserPillsHtml({ isAdmin, isDisabled, isPremium, badgeLabel: badge })}
                 </div>
               </div>
 
@@ -3907,7 +3940,7 @@
         </div>
         <label class="ps-admin-reset-field">
           <span>${isPin ? "New PIN/key" : "New password"}</span>
-          <input type="text" maxlength="${isPin ? LIMITS.pinLength : LIMITS.passwordMax}" ${isPin ? "inputmode=\"numeric\" pattern=\"[0-9]*\" data-ps-pin-only" : ""} data-ps-user-reset-value autocomplete="off" placeholder="${isPin ? "4 numbers" : "6 to 8 chars"}" />
+          <input type="text" class="${isPin ? "ps-admin-pin-segmented" : "ps-admin-reset-text"}" maxlength="${isPin ? LIMITS.pinLength : LIMITS.passwordMax}" ${isPin ? "inputmode=\"numeric\" pattern=\"[0-9]*\" data-ps-pin-only" : ""} data-ps-user-reset-value autocomplete="off" placeholder="${isPin ? "0000" : "6 to 8 chars"}" />
         </label>
         <p class="ps-admin-reset-message" data-ps-reset-message></p>
         <div class="ps-admin-reset-buttons">
@@ -4046,6 +4079,7 @@
       const selectedBadges = splitBadgeLabels(badgeInput ? badgeInput.value : "");
       params.input_badge_label = selectedBadges.join(", ");
       params.input_is_premium = selectedBadges.some(label => normalizeBadgeValue(label) === "premium");
+      syncAdminUserCardBadgePreview(card, params.input_badge_label);
     }
 
     if (action === "password") {
