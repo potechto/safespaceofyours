@@ -82,7 +82,10 @@
   let publicSpaceLivePostsSnapshot = "";
   let composeMode = "create";
   let editingPostId = null;
+  const COMMENT_EDIT_WINDOW_MS = 30 * 60 * 1000;
+
   let activeCommentsPostId = "";
+  let activeEditingCommentId = "";
   let activeComments = [];
   let commentsLoading = false;
 
@@ -623,9 +626,16 @@
           <div class="ps-comments-list" data-ps-comments-list></div>
           <form class="ps-comments-form" data-ps-comments-form novalidate>
             <label>
-              <span>Add a comment</span>
+              <span data-ps-comment-label>Add a comment</span>
               <textarea name="comment" maxlength="500" rows="3" placeholder="Write a kind comment..."></textarea>
             </label>
+            <div class="ps-comment-emoji-row">
+              <button class="ps-comment-emoji-toggle" type="button" data-ps-comment-emoji-toggle aria-expanded="false">😊 Emoji</button>
+              <div class="ps-comment-emoji-panel" data-ps-comment-emoji-panel hidden>
+                <button type="button" data-ps-comment-emoji="❤️" aria-label="Insert ❤️">❤️</button><button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button><button type="button" data-ps-comment-emoji="✨" aria-label="Insert ✨">✨</button><button type="button" data-ps-comment-emoji="🥹" aria-label="Insert 🥹">🥹</button><button type="button" data-ps-comment-emoji="🙏" aria-label="Insert 🙏">🙏</button><button type="button" data-ps-comment-emoji="🌷" aria-label="Insert 🌷">🌷</button><button type="button" data-ps-comment-emoji="🌸" aria-label="Insert 🌸">🌸</button><button type="button" data-ps-comment-emoji="🫶" aria-label="Insert 🫶">🫶</button><button type="button" data-ps-comment-emoji="💫" aria-label="Insert 💫">💫</button><button type="button" data-ps-comment-emoji="☁️" aria-label="Insert ☁️">☁️</button><button type="button" data-ps-comment-emoji="🕊️" aria-label="Insert 🕊️">🕊️</button><button type="button" data-ps-comment-emoji="😊" aria-label="Insert 😊">😊</button>
+              </div>
+            </div>
+            <p class="ps-comments-edit-note" data-ps-comment-edit-note></p>
             <div class="ps-comments-form-footer">
               <span data-ps-comment-count>0/500</span>
               <button class="btn primary" type="submit">Comment</button>
@@ -652,6 +662,7 @@
     const modal = document.querySelector("[data-ps-comments-modal]");
     if (modal) closeModal(modal);
     activeCommentsPostId = "";
+    activeEditingCommentId = "";
     activeComments = [];
     commentsLoading = false;
   }
@@ -665,15 +676,100 @@
     });
   }
 
+  function currentUserId() {
+    const sessionUserId = currentSession && currentSession.user && currentSession.user.id
+      ? String(currentSession.user.id)
+      : "";
+
+    if (sessionUserId) return sessionUserId;
+
+    if (typeof currentUser !== "undefined" && currentUser && currentUser.id) {
+      return String(currentUser.id);
+    }
+
+    return "";
+  }
+
+  function isCurrentUserComment(comment) {
+    const ownId = currentUserId();
+    if (!ownId || !comment) return false;
+    const commentUserId = comment.user_id || (comment.author && comment.author.id);
+    return String(commentUserId || "") === ownId;
+  }
+
+  function commentAgeMs(comment) {
+    const created = comment && comment.created_at ? new Date(comment.created_at).getTime() : 0;
+    if (!created || Number.isNaN(created)) return Number.POSITIVE_INFINITY;
+    return Date.now() - created;
+  }
+
+  function canEditComment(comment) {
+    if (!comment || comment.is_hidden || comment.is_deleted) return false;
+    if (!isCurrentUserComment(comment)) return false;
+    if (comment.can_edit === true) return true;
+    return commentAgeMs(comment) <= COMMENT_EDIT_WINDOW_MS;
+  }
+
+  function activeOwnComment() {
+    return activeComments.find(comment => isCurrentUserComment(comment) && !comment.is_deleted) || null;
+  }
+
+  function resetCommentEditMode() {
+    activeEditingCommentId = "";
+  }
+
+  function setCommentEditMode(comment) {
+    if (!comment || !canEditComment(comment)) {
+      setCommentsMessage("This comment can no longer be edited.", "error");
+      return;
+    }
+
+    activeEditingCommentId = String(comment.id || "");
+    const textarea = commentsModalNode("textarea[name='comment']");
+    if (textarea) {
+      textarea.value = comment.body || "";
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    }
+
+    setCommentsMessage("Editing your comment. You can save changes within 30 minutes.", "info");
+    renderCommentsModal();
+  }
+
+  function insertCommentEmoji(textarea, emoji) {
+    if (!textarea || textarea.disabled || !emoji) return;
+
+    const start = Number.isFinite(textarea.selectionStart) ? textarea.selectionStart : textarea.value.length;
+    const end = Number.isFinite(textarea.selectionEnd) ? textarea.selectionEnd : textarea.value.length;
+    const before = textarea.value.slice(0, start);
+    const after = textarea.value.slice(end);
+    const next = `${before}${emoji}${after}`.slice(0, 500);
+
+    textarea.value = next;
+    const cursor = Math.min(start + emoji.length, textarea.value.length);
+    textarea.focus();
+    textarea.setSelectionRange(cursor, cursor);
+    renderCommentsModal();
+  }
+
   function renderCommentItem(comment) {
     const author = comment.author || {};
     const username = author.username || "someone";
     const canDelete = Boolean(comment.can_manage || isAdminMode);
     const canHide = Boolean(comment.can_hide || isAdminMode);
+    const canEdit = canEditComment(comment);
     const hiddenClass = comment.is_hidden ? " is-hidden-by-admin" : "";
     const hiddenLabel = comment.is_hidden ? `<span class="ps-comment-hidden-label">Hidden</span>` : "";
+    const createdAt = comment.created_at ? new Date(comment.created_at).getTime() : 0;
+    const updatedAt = comment.updated_at ? new Date(comment.updated_at).getTime() : 0;
+    const isEdited = createdAt && updatedAt && Math.abs(updatedAt - createdAt) > 1500;
+    const editedLabel = isEdited ? `<span class="ps-comment-date">Edited</span>` : "";
     const dateLabel = escapeHtml(postDateDisplayLabel(comment.created_at) || formatDate(comment.created_at));
     const actions = [];
+
+    if (canEdit) {
+      actions.push(`<button type="button" data-ps-edit-comment="${escapeHtml(comment.id)}">Edit</button>`);
+    }
 
     if (canDelete) {
       actions.push(`<button type="button" data-ps-delete-comment="${escapeHtml(comment.id)}">Delete</button>`);
@@ -685,29 +781,30 @@
 
     const actionMenu = actions.length
       ? `
-        <div class="ps-comment-menu" data-ps-comment-menu data-open="false">
-          <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><span></span><span></span><span></span></span></button>
-          <div class="ps-comment-menu-popover" role="menu">
-            ${actions.join("")}
+          <div class="ps-comment-menu" data-ps-comment-menu data-open="false">
+            <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><span></span><span></span><span></span></span></button>
+            <div class="ps-comment-menu-popover" role="menu">
+              ${actions.join("")}
+            </div>
           </div>
-        </div>
-      `
+        `
       : "";
 
     return `
-      <article class="ps-comment-item${hiddenClass}" data-comment-id="${escapeHtml(comment.id)}">
-        <div class="ps-comment-meta">
-          <div class="ps-comment-author-line">
-            ${renderPublicSpaceUserButton(author, username)}
-            ${renderPostBadges(author)}
-            <span class="ps-comment-date">${dateLabel}</span>
-            ${hiddenLabel}
+        <article class="ps-comment-item${hiddenClass}" data-comment-id="${escapeHtml(comment.id)}">
+          <div class="ps-comment-meta">
+            <div class="ps-comment-author-line">
+              ${renderPublicSpaceUserButton(author, username)}
+              ${renderPostBadges(author)}
+              <span class="ps-comment-date">${dateLabel}</span>
+              ${editedLabel}
+              ${hiddenLabel}
+            </div>
+            ${actionMenu}
           </div>
-          ${actionMenu}
-        </div>
-        <p>${escapeHtml(comment.body)}</p>
-      </article>
-    `;
+          <p>${escapeHtml(comment.body)}</p>
+        </article>
+      `;
   }
 
   function renderCommentsModal() {
@@ -720,6 +817,23 @@
     const textarea = modal.querySelector("textarea[name='comment']");
     const counter = modal.querySelector("[data-ps-comment-count]");
     const submitButton = modal.querySelector("[data-ps-comments-form] button[type='submit']");
+    const label = modal.querySelector("[data-ps-comment-label]");
+    const note = modal.querySelector("[data-ps-comment-edit-note]");
+    const emojiToggle = modal.querySelector("[data-ps-comment-emoji-toggle]");
+
+    const ownComment = activeOwnComment();
+    const editingComment = activeEditingCommentId
+      ? activeComments.find(comment => String(comment.id || "") === String(activeEditingCommentId))
+      : null;
+
+    if (activeEditingCommentId && !editingComment) {
+      activeEditingCommentId = "";
+    }
+
+    const isEditing = Boolean(editingComment);
+    const alreadyCommented = Boolean(ownComment && !isEditing);
+    const canUseForm = Boolean(currentSession && sessionToken() && !commentsLoading && (!alreadyCommented || isEditing));
+    const length = textarea ? textarea.value.length : 0;
 
     if (title) title.textContent = post ? `Comments · ${commentCount(post)}` : "Post comments";
     if (subtitle) subtitle.textContent = post ? `Replies for @${(post.author && post.author.username) || "someone"}'s post.` : "Read and add soft replies.";
@@ -740,9 +854,42 @@
       }
     }
 
-    const length = textarea ? textarea.value.length : 0;
+    if (label) {
+      label.textContent = isEditing ? "Edit your comment" : "Add a comment";
+    }
+
+    if (textarea) {
+      textarea.disabled = !canUseForm;
+      textarea.placeholder = alreadyCommented
+        ? "You already commented on this post."
+        : (isEditing ? "Edit your kind comment..." : "Write a kind comment...");
+    }
+
     if (counter) counter.textContent = `${length}/500`;
-    if (submitButton) submitButton.disabled = !currentSession || !sessionToken() || length < 1 || length > 500 || commentsLoading;
+
+    if (submitButton) {
+      submitButton.textContent = isEditing ? "Save changes" : (alreadyCommented ? "Already commented" : "Comment");
+      submitButton.disabled = !canUseForm || length < 1 || length > 500;
+    }
+
+    if (emojiToggle) {
+      emojiToggle.disabled = !canUseForm;
+      emojiToggle.setAttribute("aria-expanded", "false");
+    }
+
+    if (note) {
+      if (!currentSession || !sessionToken()) {
+        note.innerHTML = "Log in to add a comment.";
+      } else if (isEditing) {
+        note.innerHTML = `<span>Editing mode is active.</span> <button type="button" data-ps-cancel-comment-edit>Cancel edit</button>`;
+      } else if (ownComment && canEditComment(ownComment)) {
+        note.innerHTML = `<span>You already commented. You can edit it for 30 minutes.</span> <button type="button" data-ps-edit-own-comment="${escapeHtml(ownComment.id)}">Edit my comment</button>`;
+      } else if (ownComment) {
+        note.innerHTML = "You already commented on this post. Delete your comment before adding another.";
+      } else {
+        note.innerHTML = "One comment per user per post. You can edit your comment for 30 minutes.";
+      }
+    }
   }
 
   async function loadCommentsForPost(postId, showLoading = true) {
@@ -761,6 +908,11 @@
       });
 
       activeComments = Array.isArray(comments) ? comments : [];
+
+      if (activeEditingCommentId && !activeComments.some(comment => String(comment.id || "") === String(activeEditingCommentId))) {
+        activeEditingCommentId = "";
+      }
+
       syncPostCommentCount(activeCommentsPostId, activeComments.length);
       setCommentsMessage("", "info");
       return activeComments;
@@ -782,6 +934,7 @@
     }
 
     activeCommentsPostId = String(postId || "");
+    activeEditingCommentId = "";
     activeComments = [];
 
     const modal = ensureCommentsModal();
@@ -827,20 +980,61 @@
       return;
     }
 
+    const editingComment = activeEditingCommentId
+      ? activeComments.find(comment => String(comment.id || "") === String(activeEditingCommentId))
+      : null;
+
+    if (activeEditingCommentId && !editingComment) {
+      resetCommentEditMode();
+      setCommentsMessage("That comment is no longer available to edit.", "error");
+      renderCommentsModal();
+      return;
+    }
+
+    if (editingComment && !canEditComment(editingComment)) {
+      resetCommentEditMode();
+      setCommentsMessage("This comment can no longer be edited.", "error");
+      renderCommentsModal();
+      return;
+    }
+
+    if (!editingComment && activeOwnComment()) {
+      setCommentsMessage("You already commented on this post. Delete your comment before adding another.", "error");
+      renderCommentsModal();
+      return;
+    }
+
+    if (button) button.disabled = true;
+
     try {
-      if (button) button.disabled = true;
-      setCommentsMessage("Posting comment...", "info");
+      if (editingComment) {
+        setCommentsMessage("Saving changes...", "info");
 
-      await rpc("create_public_space_comment", {
-        input_session_token: sessionToken(),
-        input_post_id: activeCommentsPostId,
-        input_body: body
-      });
+        await rpc("edit_public_space_comment", {
+          input_session_token: sessionToken(),
+          input_comment_id: activeEditingCommentId,
+          input_body: body
+        });
 
-      if (textarea) textarea.value = "";
+        resetCommentEditMode();
+        if (textarea) textarea.value = "";
 
-      await refreshCommentsAndPosts(activeCommentsPostId);
-      setCommentsMessage("Comment posted.", "success");
+        await refreshCommentsAndPosts(activeCommentsPostId);
+        setCommentsMessage("Comment updated.", "success");
+      } else {
+        setCommentsMessage("Posting comment...", "info");
+
+        await rpc("create_public_space_comment", {
+          input_session_token: sessionToken(),
+          input_post_id: activeCommentsPostId,
+          input_body: body
+        });
+
+        if (textarea) textarea.value = "";
+
+        await refreshCommentsAndPosts(activeCommentsPostId);
+        setCommentsMessage("Comment posted.", "success");
+      }
     } catch (error) {
       setCommentsMessage(getErrorMessage(error), "error");
     } finally {
@@ -854,11 +1048,55 @@
     const commentMenu = event.target.closest("[data-ps-comment-menu]");
     const deleteButton = event.target.closest("[data-ps-delete-comment]");
     const hideButton = event.target.closest("[data-ps-toggle-comment-hidden]");
+    const editButton = event.target.closest("[data-ps-edit-comment]");
+    const ownEditButton = event.target.closest("[data-ps-edit-own-comment]");
+    const cancelEditButton = event.target.closest("[data-ps-cancel-comment-edit]");
+    const emojiToggle = event.target.closest("[data-ps-comment-emoji-toggle]");
+    const emojiButton = event.target.closest("[data-ps-comment-emoji]");
     const modal = event.target.closest("[data-ps-comments-modal]");
 
     if (closeButton) {
       event.preventDefault();
       closeCommentsModal();
+      return;
+    }
+
+    if (!modal) {
+      closeCommentActionMenus();
+      return;
+    }
+
+    if (emojiToggle) {
+      event.preventDefault();
+      const panel = commentsModalNode("[data-ps-comment-emoji-panel]");
+      const shouldOpen = panel ? panel.hidden : false;
+      if (panel) panel.hidden = !shouldOpen;
+      emojiToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      return;
+    }
+
+    if (emojiButton) {
+      event.preventDefault();
+      insertCommentEmoji(commentsModalNode("textarea[name='comment']"), emojiButton.dataset.psCommentEmoji || emojiButton.textContent || "");
+      return;
+    }
+
+    if (cancelEditButton) {
+      event.preventDefault();
+      resetCommentEditMode();
+      const textarea = commentsModalNode("textarea[name='comment']");
+      if (textarea) textarea.value = "";
+      setCommentsMessage("", "info");
+      renderCommentsModal();
+      return;
+    }
+
+    if (editButton || ownEditButton) {
+      event.preventDefault();
+      closeCommentActionMenus();
+      const id = (editButton && editButton.dataset.psEditComment) || (ownEditButton && ownEditButton.dataset.psEditOwnComment) || "";
+      const comment = activeComments.find(item => String(item.id || "") === String(id));
+      setCommentEditMode(comment);
       return;
     }
 
@@ -876,14 +1114,11 @@
       return;
     }
 
-    if (modal && !commentMenu) {
+    if (!commentMenu) {
       closeCommentActionMenus();
     }
 
-    if (!modal || (!deleteButton && !hideButton)) return;
-
-    event.preventDefault();
-    closeCommentActionMenus();
+    if (!deleteButton && !hideButton) return;
 
     if (!currentSession || !sessionToken()) {
       closeCommentsModal();
@@ -895,6 +1130,10 @@
       if (deleteButton) {
         deleteButton.disabled = true;
         setCommentsMessage("Deleting comment...", "info");
+
+        if (String(activeEditingCommentId || "") === String(deleteButton.dataset.psDeleteComment || "")) {
+          resetCommentEditMode();
+        }
 
         await rpc("delete_public_space_comment", {
           input_session_token: sessionToken(),
@@ -1033,6 +1272,8 @@
     const titleNode = screen.querySelector("[data-ps-control-title]");
     const introNode = screen.querySelector("[data-ps-control-intro]");
     const resultsNode = screen.querySelector("[data-ps-control-results]");
+    screen.classList.remove("ps-notifications-screen");
+    screen.querySelectorAll("[data-ps-control-top-actions]").forEach(node => node.remove());
 
     setText(eyebrowNode, eyebrow || "Public Space");
     setText(titleNode, title || "Controls");
@@ -1793,11 +2034,6 @@
       unreadCount ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}.` : "Your notification history.",
       `
         <section class="ps-notifications-history" data-ps-notifications-history>
-          <div class="ps-notifications-history-actions">
-            <button type="button" data-ps-notification-action="mark-read">Mark all as read</button>
-            <button type="button" role="menuitem" data-ps-notification-action="clear">🧹 <span>Clear notifications</span></button>
-            <button type="button" data-ps-notification-refresh>Refresh</button>
-          </div>
           <div class="ps-notification-list ps-notifications-history-list">
             ${allItems.map(item => `
               <article class="ps-notification-item ${item.unread ? "is-unread" : ""}" data-ps-notification-item="${escapeHtml(item.id)}">
@@ -1815,6 +2051,21 @@
       `,
       "Bell"
     );
+
+    const screen = root.querySelector("[data-ps-control-screen]");
+    const top = screen ? screen.querySelector(".ps-admin-screen-top") : null;
+    const backButton = top ? top.querySelector("[data-ps-route-back]") : null;
+
+    if (screen) screen.classList.add("ps-notifications-screen");
+    if (top && backButton && !top.querySelector("[data-ps-control-top-actions]")) {
+      backButton.insertAdjacentHTML("beforebegin", `
+        <div class="ps-notifications-history-actions ps-notifications-history-icon-actions" data-ps-control-top-actions aria-label="Notification actions">
+          <button type="button" data-ps-notification-action="mark-read" aria-label="Mark all as read" title="Mark all as read">✓</button>
+          <button type="button" data-ps-notification-action="clear" aria-label="Clear notifications" title="Clear notifications">🧹</button>
+          <button type="button" data-ps-notification-refresh aria-label="Refresh notifications" title="Refresh notifications">↻</button>
+        </div>
+      `);
+    }
 
     refreshNotificationsScreenAfterLoad();
   }
@@ -2634,7 +2885,7 @@
   }
 
   async function handleNotificationPanelClick(event) {
-    const panel = event.target.closest("[data-ps-notification-panel], [data-ps-notifications-history]");
+    const panel = event.target.closest("[data-ps-notification-panel], [data-ps-notifications-history], [data-ps-control-top-actions]");
     const moreButton = event.target.closest("[data-ps-notification-more]");
     const filterButton = event.target.closest("[data-ps-notification-filter]");
     const actionButton = event.target.closest("[data-ps-notification-action]");
@@ -2670,7 +2921,7 @@
       const action = actionButton.dataset.psNotificationAction;
 
       if (action === "mark-read") {
-        const isHistoryScreen = Boolean(actionButton.closest("[data-ps-notifications-history]"));
+        const isHistoryScreen = Boolean(actionButton.closest("[data-ps-notifications-history], [data-ps-control-top-actions]"));
 
         await markAllPublicSpaceNotificationsRead();
         notificationPanelFilter = "all";
@@ -2685,7 +2936,7 @@
       }
 
       if (action === "clear") {
-        const isHistoryScreen = Boolean(actionButton.closest("[data-ps-notifications-history]"));
+        const isHistoryScreen = Boolean(actionButton.closest("[data-ps-notifications-history], [data-ps-control-top-actions]"));
 
         await clearPublicSpaceNotifications();
         notificationPanelFilter = "all";

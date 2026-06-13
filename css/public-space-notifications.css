@@ -180,3 +180,164 @@
     text-align-last: center !important;
   }
 }
+
+
+/* Q64A-1 notification history icon controls */
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: start;
+  gap: 0.65rem;
+}
+
+.public-space-body .ps-notifications-history-icon-actions {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  margin-left: auto;
+}
+
+.public-space-body .ps-notifications-history-icon-actions button,
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-route-back {
+  min-width: 2.55rem;
+  min-height: 2.55rem;
+}
+
+.public-space-body .ps-notifications-history-icon-actions button {
+  width: auto !important;
+  display: inline-grid !important;
+  place-items: center;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 207, 230, 0.18);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.16), transparent 1.2rem),
+    rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  box-shadow: 0 0.7rem 1.4rem rgba(13, 5, 12, 0.16);
+}
+
+.public-space-body .ps-notifications-history-icon-actions button:hover,
+.public-space-body .ps-notifications-history-icon-actions button:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(255, 207, 230, 0.38);
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
+    grid-template-columns: 1fr;
+  }
+
+  .public-space-body .ps-notifications-history-icon-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    order: 2;
+  }
+
+  .public-space-body .ps-notifications-history-icon-actions button {
+    width: 2.55rem !important;
+    justify-content: center !important;
+  }
+
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-route-back {
+    order: 3;
+    justify-self: start;
+  }
+}
+
+
+/* Q64A-2 comment frontend edit and emoji controls */
+.public-space-body .ps-comment-emoji-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.public-space-body .ps-comment-emoji-toggle,
+.public-space-body .ps-comments-edit-note button {
+  min-height: 2.2rem;
+  border: 1px solid rgba(255, 244, 251, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 244, 251, 0.84);
+  padding: 0.35rem 0.7rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.public-space-body .ps-comment-emoji-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.public-space-body .ps-comment-emoji-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  padding: 0.45rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.public-space-body .ps-comment-emoji-panel[hidden] {
+  display: none !important;
+}
+
+.public-space-body .ps-comment-emoji-panel button {
+  width: 2.15rem;
+  height: 2.15rem;
+  min-width: 2.15rem;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.065);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.public-space-body .ps-comments-edit-note {
+  min-height: 1.2rem;
+  margin: 0;
+  color: rgba(255, 244, 251, 0.62);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.public-space-body .ps-comments-edit-note span {
+  color: rgba(255, 244, 251, 0.72);
+}
+
+.public-space-body .ps-comments-edit-note button {
+  min-height: 1.9rem;
+  margin-left: 0.35rem;
+  padding: 0.22rem 0.58rem;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-comment-emoji-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .public-space-body .ps-comment-emoji-toggle {
+    width: 100%;
+  }
+
+  .public-space-body .ps-comment-emoji-panel {
+    justify-content: center;
+  }
+
+  .public-space-body .ps-comments-edit-note button {
+    width: 100%;
+    margin: 0.45rem 0 0;
+  }
+}
