@@ -1989,3 +1989,62 @@
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Q69E align save button and right control stack */
+.public-space-body .ps-admin-user-controls {
+  align-items: start !important;
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 0.30fr) !important;
+  gap: 0.42rem !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form {
+  align-content: start !important;
+  justify-items: start !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form label {
+  width: 100% !important;
+  display: grid !important;
+  gap: 0.28rem !important;
+  align-content: start !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
+  justify-self: start !important;
+  align-self: start !important;
+  margin-top: 0.12rem !important;
+  margin-left: 0.12rem !important;
+  width: auto !important;
+  min-width: 7.4rem !important;
+}
+
+.public-space-body .ps-admin-reset-actions {
+  align-self: start !important;
+  justify-self: stretch !important;
+  margin-top: 1.52rem !important;
+  gap: 0.28rem !important;
+}
+
+.public-space-body .ps-admin-reset-actions button {
+  width: 100% !important;
+}
+
+.public-space-body .ps-badge-picker-note {
+  margin-bottom: 0.12rem !important;
+}
+
+@media (max-width: 780px) {
+  .public-space-body .ps-admin-user-controls {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0.38rem !important;
+  }
+
+  .public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
+    justify-self: start !important;
+    margin-left: 0 !important;
+  }
+
+  .public-space-body .ps-admin-reset-actions {
+    margin-top: 0.12rem !important;
+  }
+}
