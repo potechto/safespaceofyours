@@ -466,3 +466,142 @@
     grid-template-columns: repeat(5, 2.25rem);
   }
 }
+
+
+/* Q64C comment composer layout correction */
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  margin-top: 0.65rem !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
+  width: auto !important;
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+  position: static !important;
+  z-index: auto !important;
+  left: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  max-width: 38rem !important;
+  max-height: 18rem !important;
+  overflow: auto !important;
+  display: block !important;
+  margin-top: 0.65rem !important;
+  padding: 0.8rem !important;
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel[hidden] {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel-head {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-section + .ps-comment-emoji-section {
+  margin-top: 0.75rem !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-section p {
+  margin: 0 0 0.45rem !important;
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(2.35rem, 2.35rem)) !important;
+  gap: 0.42rem !important;
+  align-items: center !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-grid button {
+  width: 2.35rem !important;
+  height: 2.35rem !important;
+  min-width: 2.35rem !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-tabs {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-form-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.85rem !important;
+  width: 100% !important;
+  margin-top: 0.7rem !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-form-footer [data-ps-comment-count] {
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-form-footer button.ps-comment-send-btn,
+.public-space-body [data-ps-comments-form] .ps-comments-form-footer .btn.primary.ps-comment-send-btn {
+  width: 3.05rem !important;
+  min-width: 3.05rem !important;
+  max-width: 3.05rem !important;
+  height: 3.05rem !important;
+  min-height: 3.05rem !important;
+  max-height: 3.05rem !important;
+  flex: 0 0 3.05rem !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  font-size: 1.2rem !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn span {
+  display: inline-block !important;
+  transform: translateX(1px) !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+    max-width: 100% !important;
+    max-height: 16rem !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-grid {
+    grid-template-columns: repeat(auto-fill, minmax(2.25rem, 2.25rem)) !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-grid button {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-width: 2.25rem !important;
+  }
+}
