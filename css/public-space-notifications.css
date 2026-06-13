@@ -1898,3 +1898,62 @@
     font-size: 0.88rem !important;
   }
 }
+
+
+/* Q65M desktop menu layer and emoji polish */
+@media (min-width: 641px) {
+  .public-space-body [data-ps-comments-modal] .ps-modal-card,
+  .public-space-body [data-ps-comments-modal] .ps-comments-card,
+  .public-space-body [data-ps-comments-modal] .ps-comments-list,
+  .public-space-body [data-ps-comments-modal] [data-ps-comments-list] {
+    overflow: visible !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comments-list,
+  .public-space-body [data-ps-comments-modal] [data-ps-comments-list] {
+    position: relative !important;
+    z-index: 30 !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comments-form,
+  .public-space-body [data-ps-comments-form] {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-item,
+  .public-space-body [data-ps-comments-modal] [data-comment-id],
+  .public-space-body [data-ps-comments-modal] [data-ps-comment-id] {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-item:has(.ps-comment-menu[data-open="true"]),
+  .public-space-body [data-ps-comments-modal] [data-comment-id]:has(.ps-comment-menu[data-open="true"]),
+  .public-space-body [data-ps-comments-modal] [data-ps-comment-id]:has(.ps-comment-menu[data-open="true"]) {
+    z-index: 10080 !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="true"] {
+    z-index: 10090 !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+    z-index: 10100 !important;
+    top: -0.35rem !important;
+    right: calc(100% + 0.55rem) !important;
+    bottom: auto !important;
+    min-width: 10rem !important;
+    max-width: 12rem !important;
+    overflow: visible !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.58) !important;
+  }
+}
+
+.public-space-body [data-ps-comment-emoji-panel] {
+  z-index: 10060 !important;
+}
+
+.public-space-body [data-ps-comment-emoji-panel] button {
+  line-height: 1 !important;
+}

@@ -633,18 +633,7 @@
               <div class="ps-comment-emoji-row">
                 <button class="ps-comment-emoji-toggle" type="button" data-ps-comment-emoji-toggle aria-label="Open emoji picker" title="Emoji" aria-expanded="false">😊</button>
                 <div class="ps-comment-emoji-panel" data-ps-comment-emoji-panel hidden>
-                  <button type="button" data-ps-comment-emoji="❤️" aria-label="Insert ❤️">❤️</button>
-                  <button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button>
-                  <button type="button" data-ps-comment-emoji="✨" aria-label="Insert ✨">✨</button>
-                  <button type="button" data-ps-comment-emoji="🥹" aria-label="Insert 🥹">🥹</button>
-                  <button type="button" data-ps-comment-emoji="🙏" aria-label="Insert 🙏">🙏</button>
-                  <button type="button" data-ps-comment-emoji="🌷" aria-label="Insert 🌷">🌷</button>
-                  <button type="button" data-ps-comment-emoji="🌸" aria-label="Insert 🌸">🌸</button>
-                  <button type="button" data-ps-comment-emoji="🫶" aria-label="Insert 🫶">🫶</button>
-                  <button type="button" data-ps-comment-emoji="💫" aria-label="Insert 💫">💫</button>
-                  <button type="button" data-ps-comment-emoji="☁️" aria-label="Insert ☁️">☁️</button>
-                  <button type="button" data-ps-comment-emoji="🕊️" aria-label="Insert 🕊️">🕊️</button>
-                  <button type="button" data-ps-comment-emoji="😊" aria-label="Insert 😊">😊</button>
+                  <button type="button" data-ps-comment-emoji="✨" aria-label="Insert ✨">✨</button><button type="button" data-ps-comment-emoji="🥹" aria-label="Insert 🥹">🥹</button><button type="button" data-ps-comment-emoji="🙏" aria-label="Insert 🙏">🙏</button><button type="button" data-ps-comment-emoji="🌷" aria-label="Insert 🌷">🌷</button><button type="button" data-ps-comment-emoji="🌸" aria-label="Insert 🌸">🌸</button><button type="button" data-ps-comment-emoji="🫶" aria-label="Insert 🫶">🫶</button><button type="button" data-ps-comment-emoji="💫" aria-label="Insert 💫">💫</button><button type="button" data-ps-comment-emoji="☁️" aria-label="Insert ☁️">☁️</button><button type="button" data-ps-comment-emoji="🕊️" aria-label="Insert 🕊️">🕊️</button><button type="button" data-ps-comment-emoji="😊" aria-label="Insert 😊">😊</button><button type="button" data-ps-comment-emoji="💙" aria-label="Insert 💙">💙</button><button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button><button type="button" data-ps-comment-emoji="🩵" aria-label="Insert 🩵">🩵</button><button type="button" data-ps-comment-emoji="💜" aria-label="Insert 💜">💜</button><button type="button" data-ps-comment-emoji="💗" aria-label="Insert 💗">💗</button><button type="button" data-ps-comment-emoji="💖" aria-label="Insert 💖">💖</button><button type="button" data-ps-comment-emoji="🥰" aria-label="Insert 🥰">🥰</button><button type="button" data-ps-comment-emoji="😭" aria-label="Insert 😭">😭</button><button type="button" data-ps-comment-emoji="🙌" aria-label="Insert 🙌">🙌</button><button type="button" data-ps-comment-emoji="🫂" aria-label="Insert 🫂">🫂</button><button type="button" data-ps-comment-emoji="🌙" aria-label="Insert 🌙">🌙</button><button type="button" data-ps-comment-emoji="⭐" aria-label="Insert ⭐">⭐</button><button type="button" data-ps-comment-emoji="🌻" aria-label="Insert 🌻">🌻</button><button type="button" data-ps-comment-emoji="🍃" aria-label="Insert 🍃">🍃</button>
                 </div>
               </div>
               <span data-ps-comment-count>0/500</span>
@@ -715,9 +704,11 @@
   }
 
   function canEditComment(comment) {
-    if (!comment || comment.is_hidden || comment.is_deleted) return false;
-    if (!isCurrentUserComment(comment)) return false;
+    if (!comment || comment.is_deleted) return false;
     if (comment.can_edit === true) return true;
+    if (comment.can_manage === true || isAdminMode) return true;
+    if (comment.is_hidden) return false;
+    if (!isCurrentUserComment(comment)) return false;
     return commentAgeMs(comment) <= COMMENT_EDIT_WINDOW_MS;
   }
 
@@ -735,15 +726,24 @@
       return;
     }
 
+    const isAdminEditingAnother = !isCurrentUserComment(comment) && Boolean(comment.can_manage || isAdminMode);
+
     activeEditingCommentId = String(comment.id || "");
     const textarea = commentsModalNode("textarea[name='comment']");
     if (textarea) {
       textarea.value = comment.body || "";
-      textarea.focus();
+      textarea.focus({ preventScroll: true });
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      keepMobileTypingTargetVisible(textarea);
     }
 
-    setCommentsMessage("Editing your comment. You can save changes within 30 minutes.", "info");
+    setCommentsMessage(
+      isAdminEditingAnother
+        ? "Editing this comment as admin. Save carefully."
+        : "Editing your comment. You can save changes within 30 minutes.",
+      "info"
+    );
+
     renderCommentsModal();
   }
 
