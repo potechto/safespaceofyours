@@ -2138,3 +2138,158 @@
     margin-top: 0.12rem !important;
   }
 }
+
+/* Q69G compact top-row badges */
+.public-space-body .ps-admin-user-card {
+  gap: 0.38rem !important;
+  padding: 0.62rem 0.72rem !important;
+}
+
+.public-space-body .ps-admin-user-main {
+  gap: 0.45rem !important;
+}
+
+.public-space-body .ps-admin-user-main strong {
+  font-size: 0.92rem !important;
+  line-height: 1.02 !important;
+}
+
+.public-space-body .ps-admin-user-main span {
+  font-size: 0.74rem !important;
+  line-height: 1.08 !important;
+}
+
+.public-space-body .ps-admin-user-controls {
+  align-items: start !important;
+  grid-template-columns: minmax(0, 1fr) minmax(8.2rem, 0.30fr) !important;
+  gap: 0.42rem !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.28rem !important;
+  align-content: start !important;
+  justify-items: start !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form label {
+  width: 100% !important;
+  display: grid !important;
+  gap: 0.18rem !important;
+  align-content: start !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form label > span {
+  font-size: 0.66rem !important;
+  letter-spacing: 0.08em !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-badge-picker {
+  width: 100% !important;
+  min-height: 0 !important;
+  padding: 0.42rem 0.5rem !important;
+  border-radius: 14px !important;
+  display: grid !important;
+  grid-template-areas:
+    "head head"
+    "grid grid"
+    "note note" !important;
+  grid-template-columns: 1fr 1fr !important;
+  align-content: start !important;
+  justify-items: stretch !important;
+  row-gap: 0.26rem !important;
+}
+
+.public-space-body .ps-badge-picker-head {
+  grid-area: head !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 0.35rem !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-badge-picker-head strong {
+  font-size: 0.78rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body .ps-badge-picker-head span {
+  font-size: 0.60rem !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1 !important;
+  text-align: right !important;
+}
+
+.public-space-body .ps-badge-picker-grid {
+  grid-area: grid !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  align-content: flex-start !important;
+  gap: 0.22rem !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-badge-choice {
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-badge-picker-note {
+  grid-area: note !important;
+  justify-self: start !important;
+  margin: 0.08rem 0 0 !important;
+  font-size: 0.66rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
+  justify-self: start !important;
+  align-self: start !important;
+  margin-top: 0.02rem !important;
+  margin-left: 0.1rem !important;
+  min-width: 7rem !important;
+  min-height: 1.78rem !important;
+  padding: 0.3rem 0.58rem !important;
+  font-size: 0.74rem !important;
+  border-radius: 999px !important;
+}
+
+.public-space-body .ps-admin-reset-actions {
+  align-self: start !important;
+  justify-self: stretch !important;
+  margin-top: 0.72rem !important;
+  gap: 0.26rem !important;
+}
+
+.public-space-body .ps-admin-reset-actions button {
+  min-height: 1.84rem !important;
+  padding: 0.3rem 0.46rem !important;
+  font-size: 0.72rem !important;
+  line-height: 1.05 !important;
+  border-radius: 12px !important;
+}
+
+.public-space-body .ps-status-pill {
+  min-height: 1.24rem !important;
+  padding: 0.12rem 0.42rem !important;
+  font-size: 0.66rem !important;
+}
+
+@media (max-width: 780px) {
+  .public-space-body .ps-admin-user-controls {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .public-space-body .ps-admin-reset-actions {
+    margin-top: 0.15rem !important;
+  }
+}
