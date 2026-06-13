@@ -1990,185 +1990,38 @@
   }
 }
 
-/* Q69E align save button and right control stack */
-.public-space-body .ps-admin-user-controls {
-  align-items: start !important;
-  grid-template-columns: minmax(0, 1fr) minmax(8rem, 0.30fr) !important;
-  gap: 0.42rem !important;
-}
-
-.public-space-body .ps-admin-inline-form.ps-admin-badge-form {
-  align-content: start !important;
-  justify-items: start !important;
-}
-
-.public-space-body .ps-admin-inline-form.ps-admin-badge-form label {
-  width: 100% !important;
-  display: grid !important;
-  gap: 0.28rem !important;
-  align-content: start !important;
-}
-
-.public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
-  justify-self: start !important;
-  align-self: start !important;
-  margin-top: 0.12rem !important;
-  margin-left: 0.12rem !important;
-  width: auto !important;
-  min-width: 7.4rem !important;
-}
-
-.public-space-body .ps-admin-reset-actions {
-  align-self: start !important;
-  justify-self: stretch !important;
-  margin-top: 1.52rem !important;
-  gap: 0.28rem !important;
-}
-
-.public-space-body .ps-admin-reset-actions button {
-  width: 100% !important;
-}
-
-.public-space-body .ps-badge-picker-note {
-  margin-bottom: 0.12rem !important;
-}
-
-@media (max-width: 780px) {
-  .public-space-body .ps-admin-user-controls {
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 0.38rem !important;
-  }
-
-  .public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
-    justify-self: start !important;
-    margin-left: 0 !important;
-  }
-
-  .public-space-body .ps-admin-reset-actions {
-    margin-top: 0.12rem !important;
-  }
-}
-
-/* Q69F restore badge row and center controls */
-.public-space-body .ps-admin-user-controls {
-  align-items: stretch !important;
-  grid-template-columns: minmax(0, 1fr) minmax(8rem, 0.30fr) !important;
-  gap: 0.42rem !important;
-}
-
-.public-space-body .ps-admin-inline-form.ps-admin-badge-form {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  align-content: start !important;
-  justify-items: start !important;
-  gap: 0.34rem !important;
-}
-
-.public-space-body .ps-admin-inline-form.ps-admin-badge-form label {
-  width: 100% !important;
-  display: grid !important;
-  align-content: start !important;
-  justify-items: stretch !important;
-  gap: 0.28rem !important;
-}
-
-.public-space-body .ps-badge-picker {
-  width: 100% !important;
-  display: grid !important;
-  grid-template-rows: auto auto auto !important;
-  align-content: start !important;
-  justify-items: stretch !important;
-}
-
-.public-space-body .ps-badge-picker-grid {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: flex-start !important;
-  align-items: center !important;
-  align-content: center !important;
-  gap: 0.24rem !important;
-  width: 100% !important;
-  margin: 0 !important;
-}
-
-.public-space-body .ps-badge-choice {
-  display: inline-grid !important;
-  place-items: center !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  margin: 0 !important;
-  flex: 0 0 auto !important;
-}
-
-.public-space-body .ps-badge-picker-note {
-  justify-self: start !important;
-  margin-top: 0.32rem !important;
-  margin-bottom: 0 !important;
-}
-
-.public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
-  justify-self: start !important;
-  align-self: start !important;
-  margin-top: 0.08rem !important;
-  margin-left: 0.12rem !important;
-  width: auto !important;
-  min-width: 7.4rem !important;
-}
-
-.public-space-body .ps-admin-reset-actions {
-  align-self: center !important;
-  justify-self: stretch !important;
-  margin-top: 0 !important;
-  gap: 0.28rem !important;
-}
-
-.public-space-body .ps-admin-reset-actions button {
-  width: 100% !important;
-}
-
-@media (max-width: 780px) {
-  .public-space-body .ps-admin-user-controls {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  .public-space-body .ps-admin-reset-actions {
-    align-self: start !important;
-    margin-top: 0.12rem !important;
-  }
-}
-
-/* Q69G compact top-row badges */
+/* Q69H final compact horizontal badge layout */
 .public-space-body .ps-admin-user-card {
-  gap: 0.38rem !important;
-  padding: 0.62rem 0.72rem !important;
+  gap: 0.34rem !important;
+  padding: 0.58rem 0.68rem !important;
+  border-radius: 18px !important;
 }
 
 .public-space-body .ps-admin-user-main {
-  gap: 0.45rem !important;
+  gap: 0.42rem !important;
 }
 
 .public-space-body .ps-admin-user-main strong {
-  font-size: 0.92rem !important;
+  font-size: 0.9rem !important;
   line-height: 1.02 !important;
 }
 
 .public-space-body .ps-admin-user-main span {
-  font-size: 0.74rem !important;
+  font-size: 0.72rem !important;
   line-height: 1.08 !important;
 }
 
 .public-space-body .ps-admin-user-controls {
-  align-items: start !important;
-  grid-template-columns: minmax(0, 1fr) minmax(8.2rem, 0.30fr) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(8.25rem, 0.3fr) !important;
   gap: 0.42rem !important;
+  align-items: start !important;
 }
 
 .public-space-body .ps-admin-inline-form.ps-admin-badge-form {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) !important;
-  gap: 0.28rem !important;
+  gap: 0.24rem !important;
   align-content: start !important;
   justify-items: start !important;
 }
@@ -2176,12 +2029,13 @@
 .public-space-body .ps-admin-inline-form.ps-admin-badge-form label {
   width: 100% !important;
   display: grid !important;
-  gap: 0.18rem !important;
+  gap: 0.16rem !important;
   align-content: start !important;
+  justify-items: stretch !important;
 }
 
 .public-space-body .ps-admin-inline-form.ps-admin-badge-form label > span {
-  font-size: 0.66rem !important;
+  font-size: 0.64rem !important;
   letter-spacing: 0.08em !important;
   margin: 0 !important;
 }
@@ -2189,21 +2043,18 @@
 .public-space-body .ps-badge-picker {
   width: 100% !important;
   min-height: 0 !important;
-  padding: 0.42rem 0.5rem !important;
-  border-radius: 14px !important;
+  max-height: 4.9rem !important;
+  padding: 0.38rem 0.46rem !important;
+  border-radius: 13px !important;
   display: grid !important;
-  grid-template-areas:
-    "head head"
-    "grid grid"
-    "note note" !important;
-  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: auto auto auto !important;
   align-content: start !important;
   justify-items: stretch !important;
-  row-gap: 0.26rem !important;
+  row-gap: 0.18rem !important;
+  overflow: hidden !important;
 }
 
 .public-space-body .ps-badge-picker-head {
-  grid-area: head !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: flex-start !important;
@@ -2212,76 +2063,95 @@
 }
 
 .public-space-body .ps-badge-picker-head strong {
-  font-size: 0.78rem !important;
+  font-size: 0.76rem !important;
   line-height: 1 !important;
 }
 
 .public-space-body .ps-badge-picker-head span {
-  font-size: 0.60rem !important;
+  font-size: 0.58rem !important;
   letter-spacing: 0.08em !important;
   line-height: 1 !important;
   text-align: right !important;
 }
 
 .public-space-body .ps-badge-picker-grid {
-  grid-area: grid !important;
   display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
+  flex-flow: row nowrap !important;
   justify-content: flex-start !important;
-  align-items: flex-start !important;
-  align-content: flex-start !important;
+  align-items: center !important;
+  align-content: center !important;
   gap: 0.22rem !important;
   width: 100% !important;
+  min-height: 1.55rem !important;
+  max-height: 1.65rem !important;
   margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
 }
 
+.public-space-body .ps-badge-picker-grid > *,
 .public-space-body .ps-badge-choice {
+  flex: 0 0 auto !important;
   display: inline-grid !important;
   place-items: center !important;
-  flex: 0 0 auto !important;
+  width: 1.48rem !important;
+  min-width: 1.48rem !important;
+  max-width: 1.48rem !important;
+  height: 1.48rem !important;
+  min-height: 1.48rem !important;
+  max-height: 1.48rem !important;
   margin: 0 !important;
+  padding: 0 !important;
+}
+
+.public-space-body .ps-badge-choice img,
+.public-space-body .ps-badge-choice svg,
+.public-space-body .ps-badge-choice span {
+  max-width: 1.28rem !important;
+  max-height: 1.28rem !important;
 }
 
 .public-space-body .ps-badge-picker-note {
-  grid-area: note !important;
   justify-self: start !important;
-  margin: 0.08rem 0 0 !important;
-  font-size: 0.66rem !important;
+  margin: 0.04rem 0 0 !important;
+  font-size: 0.64rem !important;
   line-height: 1 !important;
 }
 
 .public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
   justify-self: start !important;
   align-self: start !important;
-  margin-top: 0.02rem !important;
-  margin-left: 0.1rem !important;
-  min-width: 7rem !important;
-  min-height: 1.78rem !important;
-  padding: 0.3rem 0.58rem !important;
-  font-size: 0.74rem !important;
+  margin-top: 0 !important;
+  margin-left: 0.08rem !important;
+  min-width: 6.85rem !important;
+  width: auto !important;
+  min-height: 1.7rem !important;
+  padding: 0.28rem 0.54rem !important;
   border-radius: 999px !important;
+  font-size: 0.72rem !important;
 }
 
 .public-space-body .ps-admin-reset-actions {
   align-self: start !important;
   justify-self: stretch !important;
-  margin-top: 0.72rem !important;
-  gap: 0.26rem !important;
+  margin-top: 1.02rem !important;
+  gap: 0.24rem !important;
 }
 
 .public-space-body .ps-admin-reset-actions button {
-  min-height: 1.84rem !important;
-  padding: 0.3rem 0.46rem !important;
-  font-size: 0.72rem !important;
+  width: 100% !important;
+  min-height: 1.78rem !important;
+  padding: 0.28rem 0.44rem !important;
+  border-radius: 11px !important;
+  font-size: 0.7rem !important;
   line-height: 1.05 !important;
-  border-radius: 12px !important;
 }
 
 .public-space-body .ps-status-pill {
-  min-height: 1.24rem !important;
-  padding: 0.12rem 0.42rem !important;
-  font-size: 0.66rem !important;
+  min-height: 1.22rem !important;
+  padding: 0.12rem 0.4rem !important;
+  font-size: 0.64rem !important;
 }
 
 @media (max-width: 780px) {
@@ -2290,6 +2160,6 @@
   }
 
   .public-space-body .ps-admin-reset-actions {
-    margin-top: 0.15rem !important;
+    margin-top: 0.12rem !important;
   }
 }
