@@ -2813,14 +2813,70 @@
     return false;
   }
 
+
+  // Q66B live refresh transient UI guard
+  function isCommentTransientUiOpen() {
+    const modal = document.querySelector("[data-ps-comments-modal]");
+    if (!modal || modal.hidden) return false;
+
+    return Boolean(
+      modal.querySelector("[data-ps-comment-menu][data-open='true']") ||
+      modal.querySelector("[data-ps-comment-emoji-panel]:not([hidden])")
+    );
+  }
+
+  function normalizeLiveCommentsResult(value) {
+    if (Array.isArray(value)) return value;
+
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        return normalizeLiveCommentsResult(parsed);
+      } catch (error) {
+        return [];
+      }
+    }
+
+    if (value && Array.isArray(value.comments)) return value.comments;
+    if (value && Array.isArray(value.data)) return value.data;
+    return [];
+  }
+
+  function liveCommentsSignature(items) {
+    return JSON.stringify((items || []).map(item => [
+      item && item.id,
+      item && item.body,
+      item && item.is_hidden,
+      item && item.is_deleted,
+      item && item.updated_at,
+      item && item.created_at,
+      item && item.user_id,
+      item && item.can_edit,
+      item && item.can_manage,
+      item && item.can_hide
+    ]));
+  }
+
   async function refreshActiveCommentsLive() {
     if (!currentSession || !sessionToken()) return;
     if (!activeCommentsPostId || commentsLoading) return;
     if (!isCommentsModalVisible()) return;
     if (activeEditingCommentId) return;
     if (isLocalCommentComposerActive()) return;
+    if (isCommentTransientUiOpen()) return;
 
-    await loadCommentsForPost(activeCommentsPostId, false);
+    const previousSignature = liveCommentsSignature(activeComments);
+    const result = await rpc("list_public_space_comments", {
+      input_session_token: sessionToken(),
+      input_post_id: activeCommentsPostId
+    });
+    const nextComments = normalizeLiveCommentsResult(result);
+    const nextSignature = liveCommentsSignature(nextComments);
+
+    if (previousSignature === nextSignature) return;
+
+    activeComments = nextComments;
+    renderCommentsModal();
   }
 
   function startPublicSpaceLiveRefresh() {

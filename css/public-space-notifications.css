@@ -1825,3 +1825,46 @@
 .public-space-body [data-ps-comment-emoji-panel] button {
   line-height: 1 !important;
 }
+
+
+/* Q66B desktop emoji picker layout fix */
+@media (min-width: 641px) {
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
+    position: relative !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+    position: absolute !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: calc(100% + 0.55rem) !important;
+    top: auto !important;
+    width: 18.75rem !important;
+    min-width: 18.75rem !important;
+    max-width: min(18.75rem, calc(100vw - 3rem)) !important;
+    max-height: 12.5rem !important;
+    overflow-y: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, 2.25rem) !important;
+    justify-content: start !important;
+    align-items: center !important;
+    gap: 0.42rem !important;
+    padding: 0.85rem !important;
+    border-radius: 20px !important;
+    z-index: 10120 !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel[hidden] {
+    display: none !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-width: 2.25rem !important;
+    max-width: 2.25rem !important;
+    font-size: 1.15rem !important;
+    border-radius: 999px !important;
+    line-height: 1 !important;
+  }
+}
