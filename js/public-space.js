@@ -631,7 +631,7 @@
             </label>
             <div class="ps-comment-toolbar">
               <div class="ps-comment-emoji-row">
-                <button class="ps-comment-emoji-toggle" type="button" data-ps-comment-emoji-toggle aria-expanded="false">😊 Emoji</button>
+                <button class="ps-comment-emoji-toggle" type="button" data-ps-comment-emoji-toggle aria-label="Open emoji picker" title="Emoji" aria-expanded="false">😊</button>
                 <div class="ps-comment-emoji-panel" data-ps-comment-emoji-panel hidden>
                   <button type="button" data-ps-comment-emoji="❤️" aria-label="Insert ❤️">❤️</button>
                   <button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button>

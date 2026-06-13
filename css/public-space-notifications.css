@@ -755,3 +755,47 @@
     min-width: 2.25rem !important;
   }
 }
+
+
+/* Q64E emoji icon and compact gallery grid */
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
+  width: 2.65rem !important;
+  min-width: 2.65rem !important;
+  max-width: 2.65rem !important;
+  height: 2.65rem !important;
+  min-height: 2.65rem !important;
+  max-height: 2.65rem !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  font-size: 1.16rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+  width: min(19.25rem, 100%) !important;
+  max-width: 19.25rem !important;
+  grid-template-columns: repeat(6, 2.35rem) !important;
+  justify-content: start !important;
+  align-content: start !important;
+  gap: 0.48rem !important;
+  margin-top: 0.32rem !important;
+  padding: 0.78rem !important;
+  border-radius: 20px !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
+  width: 2.35rem !important;
+  height: 2.35rem !important;
+  min-width: 2.35rem !important;
+  max-width: 2.35rem !important;
+  border-radius: 999px !important;
+  font-size: 1.22rem !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+    width: min(16.75rem, 100%) !important;
+    max-width: 16.75rem !important;
+    grid-template-columns: repeat(5, 2.35rem) !important;
+  }
+}
