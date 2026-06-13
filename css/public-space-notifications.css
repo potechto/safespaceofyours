@@ -1815,3 +1815,86 @@
     top: calc(100% + 0.35rem) !important;
   }
 }
+
+
+/* Q65L final anchored comment menu fix */
+.public-space-body [data-ps-comments-modal] .ps-comment-item,
+.public-space-body [data-ps-comments-modal] [data-comment-id],
+.public-space-body [data-ps-comments-modal] [data-ps-comment-id] {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu {
+  position: absolute !important;
+  top: 0.45rem !important;
+  right: 0.45rem !important;
+  overflow: visible !important;
+  z-index: 40 !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="false"] .ps-comment-menu-popover {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+  display: grid !important;
+  position: absolute !important;
+  left: auto !important;
+  right: calc(100% + 0.4rem) !important;
+  top: 0 !important;
+  bottom: auto !important;
+  width: max-content !important;
+  min-width: 8.25rem !important;
+  max-width: 11rem !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 0.35rem !important;
+  gap: 0.22rem !important;
+  z-index: 10070 !important;
+  border-radius: 16px !important;
+  background: rgba(29, 20, 38, 0.98) !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.46) !important;
+  transform: none !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-popover button,
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-popover [role="menuitem"],
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-popover .ps-comment-menu-item {
+  width: 100% !important;
+  min-height: 2.35rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 0.58rem 0.78rem !important;
+  border-radius: 12px !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  line-height: 1.25 !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu {
+    top: 0.42rem !important;
+    right: 0.42rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+    right: calc(100% + 0.32rem) !important;
+    top: 0 !important;
+    bottom: auto !important;
+    min-width: 7.75rem !important;
+    max-width: min(9.5rem, calc(100vw - 5rem)) !important;
+    padding: 0.32rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-popover button,
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-popover [role="menuitem"],
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-popover .ps-comment-menu-item {
+    min-height: 2.25rem !important;
+    padding: 0.55rem 0.7rem !important;
+    font-size: 0.88rem !important;
+  }
+}

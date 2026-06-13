@@ -1241,9 +1241,13 @@
       if (!menu) return;
 
       const shouldOpen = menu.dataset.open !== "true";
-      closeCommentActionMenus(menu);
-      menu.dataset.open = shouldOpen ? "true" : "false";
-      menuToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      closeCommentActionMenus();
+
+      if (shouldOpen) {
+        menu.dataset.open = "true";
+        menuToggle.setAttribute("aria-expanded", "true");
+      }
+
       return;
     }
 
