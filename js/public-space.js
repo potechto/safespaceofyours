@@ -2788,6 +2788,28 @@
     }
   }
 
+
+  // Q65N live comments refresh
+  function isCommentsModalVisible() {
+    const modal = document.querySelector("[data-ps-comments-modal]");
+    return Boolean(modal && !modal.hidden);
+  }
+
+  function isLocalCommentComposerActive() {
+    const active = document.activeElement;
+    return Boolean(active && active.closest && active.closest("[data-ps-comments-form]"));
+  }
+
+  async function refreshActiveCommentsLive() {
+    if (!currentSession || !sessionToken()) return;
+    if (!activeCommentsPostId || commentsLoading) return;
+    if (!isCommentsModalVisible()) return;
+    if (activeEditingCommentId) return;
+    if (isLocalCommentComposerActive()) return;
+
+    await loadCommentsForPost(activeCommentsPostId, false);
+  }
+
   function startPublicSpaceLiveRefresh() {
     if (publicSpaceLiveRefreshTimer) return;
 
@@ -2796,7 +2818,8 @@
       if (!currentSession || !sessionToken()) return;
 
       refreshPublicSpaceLiveData();
-    }, 3500);
+      refreshActiveCommentsLive().catch(error => console.warn("Live comments refresh failed:", error));
+    }, 1800);
   }
 
   function stopPublicSpaceLiveRefresh() {
