@@ -872,11 +872,15 @@
 
     if (textarea) {
       textarea.disabled = !canUseForm;
-      textarea.placeholder = alreadyCommented
-        ? "You already commented on this post."
-        : (isEditing ? "Edit your kind comment..." : "Write a kind comment...");
-    }
 
+      if (alreadyCommented && ownComment && canEditComment(ownComment)) {
+        textarea.placeholder = "You already commented. Use the 3 dots on your comment to edit within 30 minutes.";
+      } else if (alreadyCommented) {
+        textarea.placeholder = "You already commented. Delete your comment before adding another.";
+      } else {
+        textarea.placeholder = isEditing ? "Edit your kind comment..." : "Write a kind comment...";
+      }
+    }
     if (counter) counter.textContent = `${length}/500`;
 
     if (submitButton) {
@@ -896,16 +900,10 @@
     }
 
     if (note) {
-      if (!currentSession || !sessionToken()) {
-        note.innerHTML = "Log in to add a comment.";
-      } else if (isEditing) {
-        note.innerHTML = `<span>Editing mode is active.</span> <button type="button" data-ps-cancel-comment-edit>Cancel edit</button>`;
-      } else if (ownComment && canEditComment(ownComment)) {
-        note.innerHTML = `<span>You already commented. You can edit it for 30 minutes.</span> <button type="button" data-ps-edit-own-comment="${escapeHtml(ownComment.id)}">Edit my comment</button>`;
-      } else if (ownComment) {
-        note.innerHTML = "You already commented on this post. Delete your comment before adding another.";
+      if (isEditing) {
+        note.innerHTML = `<button type="button" data-ps-cancel-comment-edit>Cancel edit</button>`;
       } else {
-        note.innerHTML = "One comment per user per post. You can edit your comment for 30 minutes.";
+        note.innerHTML = "";
       }
     }
   }

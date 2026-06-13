@@ -886,3 +886,18 @@
     font-size: 1rem !important;
   }
 }
+
+
+/* Q64G inline comment note cleanup */
+.public-space-body [data-ps-comments-form] .ps-comments-edit-note:empty {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-edit-note {
+  min-height: 0 !important;
+  margin: 0.35rem 0 0 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-edit-note button {
+  margin-left: 0 !important;
+}
