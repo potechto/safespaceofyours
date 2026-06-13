@@ -1619,3 +1619,64 @@
     font-size: 1.34rem !important;
   }
 }
+
+
+/* Q65I comment dots corner hotfix */
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-toggle {
+  position: relative !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-toggle > * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-toggle::before {
+  content: "⋮";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-block;
+  color: rgba(255, 244, 251, 0.92);
+  font-size: 1.34rem;
+  line-height: 1;
+  font-weight: 900;
+  text-indent: 0;
+  letter-spacing: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-list] [data-ps-comment-id] .ps-comment-menu,
+  .public-space-body .ps-comments-list [data-ps-comment-id] .ps-comment-menu {
+    position: absolute !important;
+    top: 0.45rem !important;
+    right: 0.35rem !important;
+    margin: 0 !important;
+    z-index: 6 !important;
+  }
+
+  .public-space-body [data-ps-comments-list] [data-ps-comment-id] .ps-comment-menu-toggle,
+  .public-space-body .ps-comments-list [data-ps-comment-id] .ps-comment-menu-toggle {
+    width: 2.3rem !important;
+    min-width: 2.3rem !important;
+    max-width: 2.3rem !important;
+    height: 2.3rem !important;
+    min-height: 2.3rem !important;
+    max-height: 2.3rem !important;
+    border-radius: 999px !important;
+    padding: 0 !important;
+  }
+
+  .public-space-body [data-ps-comments-list] [data-ps-comment-id] .ps-comment-menu-toggle::before,
+  .public-space-body .ps-comments-list [data-ps-comment-id] .ps-comment-menu-toggle::before {
+    font-size: 1.3rem !important;
+  }
+}
