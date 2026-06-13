@@ -632,13 +632,58 @@
             <div class="ps-comment-emoji-row">
               <button class="ps-comment-emoji-toggle" type="button" data-ps-comment-emoji-toggle aria-expanded="false">😊 Emoji</button>
               <div class="ps-comment-emoji-panel" data-ps-comment-emoji-panel hidden>
-                <button type="button" data-ps-comment-emoji="❤️" aria-label="Insert ❤️">❤️</button><button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button><button type="button" data-ps-comment-emoji="✨" aria-label="Insert ✨">✨</button><button type="button" data-ps-comment-emoji="🥹" aria-label="Insert 🥹">🥹</button><button type="button" data-ps-comment-emoji="🙏" aria-label="Insert 🙏">🙏</button><button type="button" data-ps-comment-emoji="🌷" aria-label="Insert 🌷">🌷</button><button type="button" data-ps-comment-emoji="🌸" aria-label="Insert 🌸">🌸</button><button type="button" data-ps-comment-emoji="🫶" aria-label="Insert 🫶">🫶</button><button type="button" data-ps-comment-emoji="💫" aria-label="Insert 💫">💫</button><button type="button" data-ps-comment-emoji="☁️" aria-label="Insert ☁️">☁️</button><button type="button" data-ps-comment-emoji="🕊️" aria-label="Insert 🕊️">🕊️</button><button type="button" data-ps-comment-emoji="😊" aria-label="Insert 😊">😊</button>
+                <div class="ps-comment-emoji-panel-head">Emoji</div>
+                <div class="ps-comment-emoji-section">
+                  <p>Recently Used</p>
+                  <div class="ps-comment-emoji-grid">
+                    <button type="button" data-ps-comment-emoji="😌" aria-label="Insert 😌">😌</button>
+                    <button type="button" data-ps-comment-emoji="😭" aria-label="Insert 😭">😭</button>
+                    <button type="button" data-ps-comment-emoji="😍" aria-label="Insert 😍">😍</button>
+                    <button type="button" data-ps-comment-emoji="🤝" aria-label="Insert 🤝">🤝</button>
+                    <button type="button" data-ps-comment-emoji="😊" aria-label="Insert 😊">😊</button>
+                  </div>
+                </div>
+                <div class="ps-comment-emoji-section">
+                  <p>Smileys & People</p>
+                  <div class="ps-comment-emoji-grid">
+                    <button type="button" data-ps-comment-emoji="😀" aria-label="Insert 😀">😀</button>
+                    <button type="button" data-ps-comment-emoji="😁" aria-label="Insert 😁">😁</button>
+                    <button type="button" data-ps-comment-emoji="😄" aria-label="Insert 😄">😄</button>
+                    <button type="button" data-ps-comment-emoji="🥹" aria-label="Insert 🥹">🥹</button>
+                    <button type="button" data-ps-comment-emoji="😂" aria-label="Insert 😂">😂</button>
+                    <button type="button" data-ps-comment-emoji="🤣" aria-label="Insert 🤣">🤣</button>
+                    <button type="button" data-ps-comment-emoji="😢" aria-label="Insert 😢">😢</button>
+                    <button type="button" data-ps-comment-emoji="😌" aria-label="Insert 😌">😌</button>
+                    <button type="button" data-ps-comment-emoji="🙂" aria-label="Insert 🙂">🙂</button>
+                    <button type="button" data-ps-comment-emoji="😳" aria-label="Insert 😳">😳</button>
+                    <button type="button" data-ps-comment-emoji="😇" aria-label="Insert 😇">😇</button>
+                    <button type="button" data-ps-comment-emoji="🤍" aria-label="Insert 🤍">🤍</button>
+                  </div>
+                </div>
+                <div class="ps-comment-emoji-section">
+                  <p>Hearts & Soft Symbols</p>
+                  <div class="ps-comment-emoji-grid">
+                    <button type="button" data-ps-comment-emoji="❤️" aria-label="Insert ❤️">❤️</button>
+                    <button type="button" data-ps-comment-emoji="💗" aria-label="Insert 💗">💗</button>
+                    <button type="button" data-ps-comment-emoji="✨" aria-label="Insert ✨">✨</button>
+                    <button type="button" data-ps-comment-emoji="🙏" aria-label="Insert 🙏">🙏</button>
+                    <button type="button" data-ps-comment-emoji="🌷" aria-label="Insert 🌷">🌷</button>
+                    <button type="button" data-ps-comment-emoji="🌸" aria-label="Insert 🌸">🌸</button>
+                    <button type="button" data-ps-comment-emoji="🫶" aria-label="Insert 🫶">🫶</button>
+                    <button type="button" data-ps-comment-emoji="☁️" aria-label="Insert ☁️">☁️</button>
+                    <button type="button" data-ps-comment-emoji="🕊️" aria-label="Insert 🕊️">🕊️</button>
+                    <button type="button" data-ps-comment-emoji="💫" aria-label="Insert 💫">💫</button>
+                  </div>
+                </div>
+                <div class="ps-comment-emoji-tabs" aria-hidden="true">
+                  <span>🕘</span><span>🙂</span><span>🐾</span><span>🌷</span><span>⚙️</span><span>💡</span><span>@</span><span>⚑</span>
+                </div>
               </div>
             </div>
             <p class="ps-comments-edit-note" data-ps-comment-edit-note></p>
             <div class="ps-comments-form-footer">
               <span data-ps-comment-count>0/500</span>
-              <button class="btn primary" type="submit">Comment</button>
+              <button class="btn primary ps-comment-send-btn" type="submit" data-ps-comment-submit aria-label="Post comment" title="Post comment"><span aria-hidden="true">➤</span></button>
             </div>
             <p class="ps-message" data-ps-comments-message></p>
           </form>
@@ -820,6 +865,7 @@
     const label = modal.querySelector("[data-ps-comment-label]");
     const note = modal.querySelector("[data-ps-comment-edit-note]");
     const emojiToggle = modal.querySelector("[data-ps-comment-emoji-toggle]");
+    const emojiPanel = modal.querySelector("[data-ps-comment-emoji-panel]");
 
     const ownComment = activeOwnComment();
     const editingComment = activeEditingCommentId
@@ -868,13 +914,19 @@
     if (counter) counter.textContent = `${length}/500`;
 
     if (submitButton) {
-      submitButton.textContent = isEditing ? "Save changes" : (alreadyCommented ? "Already commented" : "Comment");
+      const submitLabel = isEditing ? "Save changes" : (alreadyCommented ? "Already commented" : "Post comment");
+      submitButton.innerHTML = `<span aria-hidden="true">${isEditing ? "✓" : "➤"}</span>`;
+      submitButton.setAttribute("aria-label", submitLabel);
+      submitButton.setAttribute("title", submitLabel);
       submitButton.disabled = !canUseForm || length < 1 || length > 500;
     }
-
     if (emojiToggle) {
       emojiToggle.disabled = !canUseForm;
-      emojiToggle.setAttribute("aria-expanded", "false");
+      emojiToggle.setAttribute("aria-expanded", emojiPanel && !emojiPanel.hidden ? "true" : "false");
+    }
+
+    if (emojiPanel && !canUseForm) {
+      emojiPanel.hidden = true;
     }
 
     if (note) {
@@ -1273,7 +1325,14 @@
     const introNode = screen.querySelector("[data-ps-control-intro]");
     const resultsNode = screen.querySelector("[data-ps-control-results]");
     screen.classList.remove("ps-notifications-screen");
-    screen.querySelectorAll("[data-ps-control-top-actions]").forEach(node => node.remove());
+    const screenTop = screen.querySelector(".ps-admin-screen-top");
+    screen.querySelectorAll("[data-ps-control-top-actions]").forEach(node => {
+      const movedBackButton = node.querySelector("[data-ps-route-back]");
+      if (movedBackButton && screenTop) {
+        screenTop.appendChild(movedBackButton);
+      }
+      node.remove();
+    });
 
     setText(eyebrowNode, eyebrow || "Public Space");
     setText(titleNode, title || "Controls");
@@ -2057,14 +2116,23 @@
     const backButton = top ? top.querySelector("[data-ps-route-back]") : null;
 
     if (screen) screen.classList.add("ps-notifications-screen");
-    if (top && backButton && !top.querySelector("[data-ps-control-top-actions]")) {
-      backButton.insertAdjacentHTML("beforebegin", `
-        <div class="ps-notifications-history-actions ps-notifications-history-icon-actions" data-ps-control-top-actions aria-label="Notification actions">
-          <button type="button" data-ps-notification-action="mark-read" aria-label="Mark all as read" title="Mark all as read">✓</button>
-          <button type="button" data-ps-notification-action="clear" aria-label="Clear notifications" title="Clear notifications">🧹</button>
-          <button type="button" data-ps-notification-refresh aria-label="Refresh notifications" title="Refresh notifications">↻</button>
-        </div>
-      `);
+    if (top && backButton) {
+      let topActions = top.querySelector("[data-ps-control-top-actions]");
+
+      if (!topActions) {
+        backButton.insertAdjacentHTML("beforebegin", `
+          <div class="ps-notifications-history-actions ps-notifications-history-icon-actions" data-ps-control-top-actions aria-label="Notification actions">
+            <button type="button" data-ps-notification-action="mark-read" aria-label="Mark all as read" title="Mark all as read">✓</button>
+            <button type="button" data-ps-notification-action="clear" aria-label="Clear notifications" title="Clear notifications">🧹</button>
+            <button type="button" data-ps-notification-refresh aria-label="Refresh notifications" title="Refresh notifications">↻</button>
+          </div>
+        `);
+        topActions = top.querySelector("[data-ps-control-top-actions]");
+      }
+
+      if (topActions && !topActions.querySelector("[data-ps-route-back]")) {
+        topActions.appendChild(backButton);
+      }
     }
 
     refreshNotificationsScreenAfterLoad();
@@ -2885,6 +2953,9 @@
   }
 
   async function handleNotificationPanelClick(event) {
+    const routeBackButton = event.target.closest("[data-ps-route-back]");
+    if (routeBackButton) return;
+
     const panel = event.target.closest("[data-ps-notification-panel], [data-ps-notifications-history], [data-ps-control-top-actions]");
     const moreButton = event.target.closest("[data-ps-notification-more]");
     const filterButton = event.target.closest("[data-ps-notification-filter]");

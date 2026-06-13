@@ -341,3 +341,128 @@
     margin: 0.45rem 0 0;
   }
 }
+
+
+/* Q64B comment and notification UI polish */
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: start !important;
+}
+
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: start !important;
+}
+
+.public-space-body .ps-notifications-history-icon-actions [data-ps-route-back] {
+  position: static !important;
+  transform: none !important;
+  margin: 0 !important;
+  order: 4;
+}
+
+.public-space-body .ps-comment-emoji-row {
+  position: relative;
+}
+
+.public-space-body .ps-comment-emoji-panel {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  bottom: calc(100% + 0.65rem);
+  width: min(27rem, calc(100vw - 2rem));
+  max-height: 23rem;
+  overflow: auto;
+  display: block;
+  padding: 0.75rem;
+  box-shadow: 0 22px 45px rgba(0, 0, 0, 0.42);
+}
+
+.public-space-body .ps-comment-emoji-panel-head {
+  border: 1px solid rgba(255, 244, 251, 0.18);
+  border-radius: 10px;
+  padding: 0.35rem 0.55rem;
+  color: rgba(255, 244, 251, 0.78);
+  font-weight: 850;
+  margin-bottom: 0.7rem;
+}
+
+.public-space-body .ps-comment-emoji-section + .ps-comment-emoji-section {
+  margin-top: 0.8rem;
+}
+
+.public-space-body .ps-comment-emoji-section p {
+  margin: 0 0 0.45rem;
+  color: rgba(255, 244, 251, 0.6);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.public-space-body .ps-comment-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 2.25rem);
+  gap: 0.28rem;
+}
+
+.public-space-body .ps-comment-emoji-grid button {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-width: 2.25rem !important;
+  padding: 0 !important;
+  font-size: 1.28rem;
+}
+
+.public-space-body .ps-comment-emoji-tabs {
+  position: sticky;
+  bottom: -0.75rem;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.2rem;
+  margin: 0.75rem -0.75rem -0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid rgba(255, 244, 251, 0.1);
+  background: rgba(22, 19, 25, 0.96);
+  color: rgba(255, 244, 251, 0.66);
+  text-align: center;
+}
+
+.public-space-body .ps-comment-send-btn {
+  width: 3.35rem !important;
+  height: 3.35rem !important;
+  min-width: 3.35rem !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center;
+  font-size: 1.3rem;
+}
+
+.public-space-body .ps-comments-form-footer {
+  align-items: center;
+}
+
+.public-space-body .ps-comments-form-footer [data-ps-comment-count] {
+  margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .public-space-body .ps-comment-emoji-panel {
+    width: min(23rem, calc(100vw - 2rem));
+  }
+
+  .public-space-body .ps-comment-emoji-grid {
+    grid-template-columns: repeat(5, 2.25rem);
+  }
+}
