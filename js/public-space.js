@@ -3836,12 +3836,12 @@
                 </button>
               </div>
 
-              <div class="ps-admin-inline-form">
+              <div class="ps-admin-inline-form ps-admin-badge-form">
                 <label>
-                  <span>Badge label</span>
-                  <input type="text" value="${escapeHtml(badge)}" maxlength="24" data-ps-user-badge placeholder="Example: Founder" />
+                  <span>Badge presets</span>
+                  <input type="hidden" value="${escapeHtml(badge)}" data-ps-user-badge data-ps-badge-input />
                 </label>
-                <button type="button" data-ps-user-action="badge" data-user-id="${escapeHtml(user.id)}">Save badge</button>
+                <button type="button" data-ps-user-action="badge" data-user-id="${escapeHtml(user.id)}">Save badges</button>
               </div>
 
               <div class="ps-admin-inline-form">
@@ -3865,6 +3865,7 @@
     `;
 
     enforceNumericPinFields();
+    enhanceAdminBadgeSelectors();
     setMessage(messageNode, `Registered users: ${list.length}`, "success");
   }
 
@@ -3894,6 +3895,7 @@
     const card = button.closest("[data-ps-admin-user-card]");
     const userId = button.dataset.userId;
     const action = button.dataset.psUserAction;
+    const userLabel = card ? (card.querySelector(".ps-admin-user-main strong")?.textContent || "this user") : "this user";
 
     if (!userId || !action) return;
 
@@ -3908,11 +3910,31 @@
     };
 
     if (action === "premium") {
-      params.input_is_premium = button.dataset.nextPremium === "true";
+      const nextPremium = button.dataset.nextPremium === "true";
+      params.input_is_premium = nextPremium;
+
+      const badgeInput = card ? card.querySelector("[data-ps-user-badge]") : null;
+      if (badgeInput) {
+        const currentBadges = splitBadgeLabels(badgeInput.value);
+        const withoutPremium = currentBadges.filter(value => normalizeBadgeValue(value) !== "premium");
+        const nextBadges = nextPremium
+          ? ["Premium", ...withoutPremium].slice(0, PUBLIC_SPACE_BADGE_LIMIT)
+          : withoutPremium;
+
+        params.input_badge_label = nextBadges.join(", ");
+        badgeInput.value = params.input_badge_label;
+      }
     }
 
     if (action === "disable") {
-      params.input_is_disabled = button.dataset.nextDisabled === "true";
+      const nextDisabled = button.dataset.nextDisabled === "true";
+      const confirmText = nextDisabled
+        ? `Disable ${userLabel}? This will block login until the account is enabled again.`
+        : `Enable ${userLabel}? This will allow the account to login again.`;
+
+      if (!window.confirm(confirmText)) return;
+
+      params.input_is_disabled = nextDisabled;
     }
 
     if (action === "badge") {
@@ -3930,6 +3952,8 @@
         return;
       }
 
+      if (!window.confirm(`Reset password for ${userLabel}? The user will need the new password on next login.`)) return;
+
       params.input_new_password = newPassword;
     }
 
@@ -3942,6 +3966,8 @@
         setMessage(messageNode, pinError, "error");
         return;
       }
+
+      if (!window.confirm(`Reset PIN/key for ${userLabel}? The user will need the new PIN/key for recovery.`)) return;
 
       params.input_new_pin = newPin;
     }
