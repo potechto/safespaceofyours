@@ -757,151 +757,9 @@
 }
 
 
-/* Q64E emoji icon and compact gallery grid */
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
-  width: 2.65rem !important;
-  min-width: 2.65rem !important;
-  max-width: 2.65rem !important;
-  height: 2.65rem !important;
-  min-height: 2.65rem !important;
-  max-height: 2.65rem !important;
-  padding: 0 !important;
-  border-radius: 999px !important;
-  font-size: 1.16rem !important;
-  line-height: 1 !important;
-}
+/* Q66C: removed legacy Q64E emoji grid overrides. Final emoji layout is defined in Q66C below. */
 
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
-  width: min(19.25rem, 100%) !important;
-  max-width: 19.25rem !important;
-  grid-template-columns: repeat(6, 2.35rem) !important;
-  justify-content: start !important;
-  align-content: start !important;
-  gap: 0.48rem !important;
-  margin-top: 0.32rem !important;
-  padding: 0.78rem !important;
-  border-radius: 20px !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
-  width: 2.35rem !important;
-  height: 2.35rem !important;
-  min-width: 2.35rem !important;
-  max-width: 2.35rem !important;
-  border-radius: 999px !important;
-  font-size: 1.22rem !important;
-}
-
-@media (max-width: 640px) {
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
-    width: min(16.75rem, 100%) !important;
-    max-width: 16.75rem !important;
-    grid-template-columns: repeat(5, 2.35rem) !important;
-  }
-}
-
-
-/* Q64F emoji popover top position */
-.public-space-body [data-ps-comments-form] .ps-comment-toolbar {
-  position: relative !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
-  grid-column: 1 !important;
-  display: inline-block !important;
-  position: relative !important;
-  width: auto !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
-  width: 2.6rem !important;
-  min-width: 2.6rem !important;
-  max-width: 2.6rem !important;
-  height: 2.6rem !important;
-  min-height: 2.6rem !important;
-  max-height: 2.6rem !important;
-  padding: 0 !important;
-  font-size: 1.1rem !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
-  position: absolute !important;
-  left: 0 !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: calc(100% + 0.55rem) !important;
-  width: 12.9rem !important;
-  max-width: 12.9rem !important;
-  min-width: 12.9rem !important;
-  margin: 0 !important;
-  padding: 0.62rem !important;
-  display: grid !important;
-  grid-template-columns: repeat(4, 2.15rem) !important;
-  justify-content: start !important;
-  align-content: start !important;
-  gap: 0.38rem !important;
-  border-radius: 16px !important;
-  background: rgba(28, 21, 35, 0.98) !important;
-  border: 1px solid rgba(255, 244, 251, 0.14) !important;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34) !important;
-  z-index: 40 !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel[hidden] {
-  display: none !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
-  width: 2.15rem !important;
-  height: 2.15rem !important;
-  min-width: 2.15rem !important;
-  max-width: 2.15rem !important;
-  min-height: 2.15rem !important;
-  max-height: 2.15rem !important;
-  border-radius: 999px !important;
-  padding: 0 !important;
-  font-size: 1.08rem !important;
-  line-height: 1 !important;
-  display: inline-grid !important;
-  place-items: center !important;
-}
-
-@media (max-width: 640px) {
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
-    width: 11.6rem !important;
-    min-width: 11.6rem !important;
-    max-width: 11.6rem !important;
-    grid-template-columns: repeat(4, 2rem) !important;
-    gap: 0.32rem !important;
-    padding: 0.55rem !important;
-  }
-
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
-    width: 2rem !important;
-    height: 2rem !important;
-    min-width: 2rem !important;
-    max-width: 2rem !important;
-    min-height: 2rem !important;
-    max-height: 2rem !important;
-    font-size: 1rem !important;
-  }
-}
-
-
-/* Q64G inline comment note cleanup */
-.public-space-body [data-ps-comments-form] .ps-comments-edit-note:empty {
-  display: none !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comments-edit-note {
-  min-height: 0 !important;
-  margin: 0.35rem 0 0 !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comments-edit-note button {
-  margin-left: 0 !important;
-}
-
+/* Q66C: removed legacy Q64F emoji popover overrides. Final emoji layout is defined in Q66C below. */
 
 /* Q65B mobile notification header polish */
 .public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
@@ -1827,44 +1685,131 @@
 }
 
 
-/* Q66B desktop emoji picker layout fix */
-@media (min-width: 641px) {
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
-    position: relative !important;
+/* Q66C final canonical emoji picker layout */
+.public-space-body [data-ps-comments-form] .ps-comment-toolbar {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
+  grid-column: 1 !important;
+  position: relative !important;
+  display: inline-grid !important;
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
+  width: 2.65rem !important;
+  min-width: 2.65rem !important;
+  max-width: 2.65rem !important;
+  height: 2.65rem !important;
+  min-height: 2.65rem !important;
+  max-height: 2.65rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  font-size: 1.1rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body [data-ps-comments-form] [data-ps-comment-count] {
+  grid-column: 2 !important;
+  justify-self: start !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn {
+  grid-column: 3 !important;
+  justify-self: end !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
+  position: absolute !important;
+  left: 0 !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: calc(100% + 0.55rem) !important;
+  display: grid !important;
+  width: 18.75rem !important;
+  min-width: 18.75rem !important;
+  max-width: min(18.75rem, calc(100vw - 3rem)) !important;
+  max-height: 12.25rem !important;
+  overflow-y: auto !important;
+  grid-template-columns: repeat(6, 2.25rem) !important;
+  justify-content: start !important;
+  align-content: start !important;
+  align-items: center !important;
+  gap: 0.42rem !important;
+  padding: 0.85rem !important;
+  border-radius: 20px !important;
+  z-index: 10120 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel[hidden] {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-width: 2.25rem !important;
+  max-width: 2.25rem !important;
+  min-height: 2.25rem !important;
+  max-height: 2.25rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel-head,
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-section,
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-grid,
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-tabs {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-form] .ps-comment-toolbar {
+    grid-template-columns: auto 1fr auto !important;
+    gap: 0.5rem !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle,
+  .public-space-body [data-ps-comments-form] .ps-comment-send-btn {
+    width: 2.45rem !important;
+    min-width: 2.45rem !important;
+    max-width: 2.45rem !important;
+    height: 2.45rem !important;
+    min-height: 2.45rem !important;
+    max-height: 2.45rem !important;
   }
 
   .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
-    position: absolute !important;
-    left: 0 !important;
-    right: auto !important;
-    bottom: calc(100% + 0.55rem) !important;
-    top: auto !important;
-    width: 18.75rem !important;
-    min-width: 18.75rem !important;
-    max-width: min(18.75rem, calc(100vw - 3rem)) !important;
-    max-height: 12.5rem !important;
-    overflow-y: auto !important;
-    display: grid !important;
-    grid-template-columns: repeat(6, 2.25rem) !important;
-    justify-content: start !important;
-    align-items: center !important;
-    gap: 0.42rem !important;
-    padding: 0.85rem !important;
-    border-radius: 20px !important;
-    z-index: 10120 !important;
-  }
-
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel[hidden] {
-    display: none !important;
+    width: 11.6rem !important;
+    min-width: 11.6rem !important;
+    max-width: 11.6rem !important;
+    max-height: 10.5rem !important;
+    grid-template-columns: repeat(4, 2rem) !important;
+    gap: 0.32rem !important;
+    padding: 0.55rem !important;
+    border-radius: 17px !important;
   }
 
   .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel button {
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-    min-width: 2.25rem !important;
-    max-width: 2.25rem !important;
-    font-size: 1.15rem !important;
-    border-radius: 999px !important;
-    line-height: 1 !important;
+    width: 2rem !important;
+    height: 2rem !important;
+    min-width: 2rem !important;
+    max-width: 2rem !important;
+    min-height: 2rem !important;
+    max-height: 2rem !important;
+    font-size: 1.05rem !important;
   }
 }
