@@ -1488,3 +1488,86 @@
     bottom: max(0.9rem, env(safe-area-inset-bottom)) !important;
   }
 }
+
+
+/* Q65G comment menu layout hotfix */
+.public-space-body [data-ps-comments-modal] .ps-comment-menu {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+  z-index: 30 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-toggle {
+  position: relative !important;
+  inset: auto !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-popover {
+  z-index: 10040 !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-toggle {
+    width: 2.35rem !important;
+    min-width: 2.35rem !important;
+    max-width: 2.35rem !important;
+    height: 2.35rem !important;
+    min-height: 2.35rem !important;
+    max-height: 2.35rem !important;
+    border-radius: 999px !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="false"] .ps-comment-menu-popover {
+    display: none !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+    display: grid !important;
+    position: fixed !important;
+    left: auto !important;
+    right: max(0.8rem, env(safe-area-inset-right)) !important;
+    top: auto !important;
+    bottom: max(0.9rem, env(safe-area-inset-bottom)) !important;
+    width: min(13rem, calc(100vw - 1.5rem)) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    max-height: min(14rem, 48dvh) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    z-index: 10040 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.48) !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-popover button {
+    min-height: 2.65rem !important;
+    width: 100% !important;
+  }
+
+  .public-space-body.ps-keyboard-visible [data-ps-comments-modal] .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+    bottom: max(0.9rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  .public-space-body [data-ps-comments-form] .ps-comment-toolbar {
+    grid-template-columns: auto 1fr auto !important;
+  }
+}
