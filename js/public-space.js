@@ -3807,9 +3807,11 @@
       <div class="ps-admin-user-list">
         ${list.map(user => {
           const isDisabled = Boolean(user.is_disabled);
-          const isPremium = Boolean(user.is_premium);
           const isAdmin = Boolean(user.is_admin);
           const badge = user.badge_label || "";
+          const userBadges = splitBadgeLabels(badge);
+          const isPremium = Boolean(user.is_premium) || userBadges.some(label => normalizeBadgeValue(label) === "premium");
+          const visibleBadgePills = userBadges.filter(label => normalizeBadgeValue(label) !== "premium");
 
           return `
             <article class="ps-admin-user-card ${isDisabled ? "is-disabled" : ""}" data-ps-admin-user-card data-user-id="${escapeHtml(user.id)}">
@@ -3820,43 +3822,31 @@
                 </div>
                 <div class="ps-admin-user-pills">
                   ${isAdmin ? '<span class="ps-status-pill">Admin</span>' : ""}
-                  ${isPremium ? '<span class="ps-status-pill">Premium</span>' : ""}
+                  ${isPremium ? '<span class="ps-status-pill">Premium access</span>' : ""}
                   ${isDisabled ? '<span class="ps-status-pill is-danger">Disabled</span>' : '<span class="ps-status-pill is-ok">Active</span>'}
-                  ${badge ? `<span class="ps-status-pill">${escapeHtml(badge)}</span>` : ""}
+                  ${visibleBadgePills.map(label => `<span class="ps-status-pill">${escapeHtml(label)}</span>`).join("")}
                 </div>
               </div>
 
               <div class="ps-admin-user-actions">
-                <button type="button" data-ps-user-action="premium" data-user-id="${escapeHtml(user.id)}" data-next-premium="${isPremium ? "false" : "true"}">
-                  ${isPremium ? "Remove premium" : "Make premium"}
-                </button>
-
                 <button type="button" data-ps-user-action="disable" data-user-id="${escapeHtml(user.id)}" data-next-disabled="${isDisabled ? "false" : "true"}">
                   ${isDisabled ? "Enable account" : "Disable account"}
                 </button>
               </div>
 
-              <div class="ps-admin-inline-form ps-admin-badge-form">
-                <label>
-                  <span>Badge presets</span>
-                  <input type="hidden" value="${escapeHtml(badge)}" data-ps-user-badge data-ps-badge-input />
-                </label>
-                <button type="button" data-ps-user-action="badge" data-user-id="${escapeHtml(user.id)}">Save badges</button>
-              </div>
+              <div class="ps-admin-user-controls">
+                <div class="ps-admin-inline-form ps-admin-badge-form">
+                  <label>
+                    <span>Badge presets</span>
+                    <input type="hidden" value="${escapeHtml(badge)}" data-ps-user-badge data-ps-badge-input />
+                  </label>
+                  <button type="button" data-ps-user-action="badge" data-user-id="${escapeHtml(user.id)}">Save badges</button>
+                </div>
 
-              <div class="ps-admin-inline-form">
-                <label>
-                  <span>Reset password</span>
-                  <input type="text" maxlength="8" data-ps-user-password placeholder="6 to 8 chars" />
-                </label>
-                <button type="button" data-ps-user-action="password" data-user-id="${escapeHtml(user.id)}">Reset password</button>
-              </div>
-              <div class="ps-admin-inline-form">
-                <label>
-                  <span>Reset PIN/key</span>
-                  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" data-ps-user-pin data-ps-pin-only placeholder="4 numbers" />
-                </label>
-                <button type="button" data-ps-user-action="pin" data-user-id="${escapeHtml(user.id)}">Reset PIN</button>
+                <div class="ps-admin-reset-actions" aria-label="Reset account credentials">
+                  <button type="button" data-ps-user-action="password" data-user-id="${escapeHtml(user.id)}">Reset password</button>
+                  <button type="button" data-ps-user-action="pin" data-user-id="${escapeHtml(user.id)}">Reset PIN/key</button>
+                </div>
               </div>
             </article>
           `;
@@ -3890,6 +3880,115 @@
     renderAdminUsers(users);
   }
 
+  function closeAdminUserResetModal(modal) {
+    const target = modal || root.querySelector("[data-ps-user-reset-modal]");
+    if (target) target.remove();
+  }
+
+  function openAdminUserResetModal(button, action) {
+    const card = button.closest("[data-ps-admin-user-card]");
+    if (!card) return;
+
+    closeAdminUserResetModal();
+
+    const isPin = action === "pin";
+    const userLabel = card.querySelector(".ps-admin-user-main strong")?.textContent || "this user";
+    const modal = document.createElement("div");
+
+    modal.className = "ps-admin-reset-modal";
+    modal.setAttribute("data-ps-user-reset-modal", "");
+    modal.dataset.resetAction = action;
+    modal.innerHTML = `
+      <div class="ps-admin-reset-dialog" role="dialog" aria-modal="true" aria-label="${isPin ? "Reset PIN/key" : "Reset password"}">
+        <div class="ps-admin-reset-head">
+          <span>${isPin ? "Security PIN/key" : "Account password"}</span>
+          <strong>${isPin ? "Reset PIN/key" : "Reset password"}</strong>
+          <p>Enter the new ${isPin ? "4-digit PIN/key" : "6 to 8 character password"} for ${escapeHtml(userLabel)}.</p>
+        </div>
+        <label class="ps-admin-reset-field">
+          <span>${isPin ? "New PIN/key" : "New password"}</span>
+          <input type="text" maxlength="${isPin ? LIMITS.pinLength : LIMITS.passwordMax}" ${isPin ? "inputmode=\"numeric\" pattern=\"[0-9]*\" data-ps-pin-only" : ""} data-ps-user-reset-value autocomplete="off" placeholder="${isPin ? "4 numbers" : "6 to 8 chars"}" />
+        </label>
+        <p class="ps-admin-reset-message" data-ps-reset-message></p>
+        <div class="ps-admin-reset-buttons">
+          <button type="button" data-ps-user-reset-cancel>Cancel</button>
+          <button type="button" data-ps-user-reset-confirm>Confirm reset</button>
+        </div>
+      </div>
+    `;
+
+    card.appendChild(modal);
+    if (isPin) enforceNumericPinFields();
+
+    const input = modal.querySelector("[data-ps-user-reset-value]");
+    if (input) window.setTimeout(() => input.focus(), 0);
+  }
+
+  async function handleAdminUserResetConfirm(button) {
+    const modal = button.closest("[data-ps-user-reset-modal]");
+    const card = modal ? modal.closest("[data-ps-admin-user-card]") : null;
+    const userId = card ? card.dataset.userId : "";
+    const action = modal ? modal.dataset.resetAction : "";
+    const input = modal ? modal.querySelector("[data-ps-user-reset-value]") : null;
+    const modalMessage = modal ? modal.querySelector("[data-ps-reset-message]") : null;
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const value = input ? input.value.trim() : "";
+    const isPin = action === "pin";
+    const error = isPin ? validatePin(value) : validatePassword(value);
+
+    if (!userId || (action !== "password" && action !== "pin")) return;
+
+    if (error) {
+      setMessage(modalMessage, error, "error");
+      return;
+    }
+
+    const params = {
+      input_session_token: sessionToken(),
+      input_user_id: userId,
+      input_is_premium: null,
+      input_badge_label: null,
+      input_is_disabled: null,
+      input_new_password: isPin ? null : value,
+      input_new_pin: isPin ? value : null
+    };
+
+    try {
+      button.disabled = true;
+      setMessage(modalMessage, isPin ? "Resetting PIN/key..." : "Resetting password...", "info");
+      await rpc("admin_update_public_space_user", params);
+      closeAdminUserResetModal(modal);
+      await refreshAdminUsers("User updated.");
+    } catch (error) {
+      setMessage(modalMessage, getErrorMessage(error), "error");
+      setMessage(messageNode, getErrorMessage(error), "error");
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function handleAdminUserResetClick(event) {
+    const modalBackdrop = event.target.matches && event.target.matches("[data-ps-user-reset-modal]") ? event.target : null;
+    const cancelButton = event.target.closest("[data-ps-user-reset-cancel]");
+    const confirmButton = event.target.closest("[data-ps-user-reset-confirm]");
+
+    if (modalBackdrop) {
+      closeAdminUserResetModal(modalBackdrop);
+      return;
+    }
+
+    if (cancelButton) {
+      event.preventDefault();
+      closeAdminUserResetModal(cancelButton.closest("[data-ps-user-reset-modal]"));
+      return;
+    }
+
+    if (confirmButton) {
+      event.preventDefault();
+      handleAdminUserResetConfirm(confirmButton);
+    }
+  }
+
   async function handleAdminUserAction(button) {
     const messageNode = root.querySelector("[data-ps-admin-message]");
     const card = button.closest("[data-ps-admin-user-card]");
@@ -3898,6 +3997,11 @@
     const userLabel = card ? (card.querySelector(".ps-admin-user-main strong")?.textContent || "this user") : "this user";
 
     if (!userId || !action) return;
+
+    if (action === "password" || action === "pin") {
+      openAdminUserResetModal(button, action);
+      return;
+    }
 
     const params = {
       input_session_token: sessionToken(),
@@ -3939,7 +4043,9 @@
 
     if (action === "badge") {
       const badgeInput = card ? card.querySelector("[data-ps-user-badge]") : null;
-      params.input_badge_label = badgeInput ? badgeInput.value.trim() : "";
+      const selectedBadges = splitBadgeLabels(badgeInput ? badgeInput.value : "");
+      params.input_badge_label = selectedBadges.join(", ");
+      params.input_is_premium = selectedBadges.some(label => normalizeBadgeValue(label) === "premium");
     }
 
     if (action === "password") {
@@ -4269,6 +4375,7 @@
   // Use the panel "Open Notifications" action for the full notification history.
 
   root.addEventListener("click", handleAdminAction);
+  root.addEventListener("click", handleAdminUserResetClick);
   root.addEventListener("click", handleBadgeLabelToggle);
 
   if (scrollTopButton) {
@@ -4295,6 +4402,7 @@
     closeModal(forgotModal);
     closeModal(composeModal);
     closeCommentsModal();
+    closeAdminUserResetModal();
     closeAdminScreen();
     closeControlScreen();
     setMenuOpen(false);
