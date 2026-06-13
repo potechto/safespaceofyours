@@ -901,3 +901,56 @@
 .public-space-body [data-ps-comments-form] .ps-comments-edit-note button {
   margin-left: 0 !important;
 }
+
+
+/* Q65B mobile notification header polish */
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
+  gap: 0.85rem !important;
+}
+
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions {
+  align-items: center !important;
+  gap: 0.42rem !important;
+  flex-wrap: nowrap !important;
+}
+
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions button,
+.public-space-body .ps-control-screen.ps-notifications-screen .ps-route-back {
+  width: 2.55rem !important;
+  min-width: 2.55rem !important;
+  max-width: 2.55rem !important;
+  height: 2.55rem !important;
+  min-height: 2.55rem !important;
+  max-height: 2.55rem !important;
+  line-height: 1 !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
+    gap: 0.7rem !important;
+  }
+
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions {
+    width: auto !important;
+    max-width: 100% !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    padding-bottom: 0.05rem !important;
+  }
+
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions button,
+  .public-space-body .ps-control-screen.ps-notifications-screen .ps-route-back {
+    width: 2.45rem !important;
+    min-width: 2.45rem !important;
+    max-width: 2.45rem !important;
+    height: 2.45rem !important;
+    min-height: 2.45rem !important;
+    max-height: 2.45rem !important;
+    font-size: 0.98rem !important;
+  }
+}
