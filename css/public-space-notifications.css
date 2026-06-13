@@ -250,98 +250,7 @@
 }
 
 
-/* Q64A-2 comment frontend edit and emoji controls */
-.public-space-body .ps-comment-emoji-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-}
-
-.public-space-body .ps-comment-emoji-toggle,
-.public-space-body .ps-comments-edit-note button {
-  min-height: 2.2rem;
-  border: 1px solid rgba(255, 244, 251, 0.14);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.055);
-  color: rgba(255, 244, 251, 0.84);
-  padding: 0.35rem 0.7rem;
-  font-weight: 850;
-  cursor: pointer;
-}
-
-.public-space-body .ps-comment-emoji-toggle:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.public-space-body .ps-comment-emoji-panel {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-  padding: 0.45rem;
-  border: 1px solid rgba(255, 244, 251, 0.12);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.045);
-}
-
-.public-space-body .ps-comment-emoji-panel[hidden] {
-  display: none !important;
-}
-
-.public-space-body .ps-comment-emoji-panel button {
-  width: 2.15rem;
-  height: 2.15rem;
-  min-width: 2.15rem;
-  border: 1px solid rgba(255, 244, 251, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.065);
-  display: inline-grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.public-space-body .ps-comments-edit-note {
-  min-height: 1.2rem;
-  margin: 0;
-  color: rgba(255, 244, 251, 0.62);
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.public-space-body .ps-comments-edit-note span {
-  color: rgba(255, 244, 251, 0.72);
-}
-
-.public-space-body .ps-comments-edit-note button {
-  min-height: 1.9rem;
-  margin-left: 0.35rem;
-  padding: 0.22rem 0.58rem;
-  font-size: 0.78rem;
-}
-
-@media (max-width: 640px) {
-  .public-space-body .ps-comment-emoji-row {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .public-space-body .ps-comment-emoji-toggle {
-    width: 100%;
-  }
-
-  .public-space-body .ps-comment-emoji-panel {
-    justify-content: center;
-  }
-
-  .public-space-body .ps-comments-edit-note button {
-    width: 100%;
-    margin: 0.45rem 0 0;
-  }
-}
-
+/* Q67A: removed legacy Q64A-2 comment emoji/edit overrides. Canonical comment composer styling is now Q66C/Q67A. */
 
 /* Q64B comment and notification UI polish */
 .public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
@@ -362,250 +271,9 @@
   order: 4;
 }
 
-.public-space-body .ps-comment-emoji-row {
-  position: relative;
-}
+/* Q67A: removed legacy Q64B comment composer overrides. Q64B notification polish retained above. */
 
-.public-space-body .ps-comment-emoji-panel {
-  position: absolute;
-  z-index: 20;
-  left: 0;
-  bottom: calc(100% + 0.65rem);
-  width: min(27rem, calc(100vw - 2rem));
-  max-height: 23rem;
-  overflow: auto;
-  display: block;
-  padding: 0.75rem;
-  box-shadow: 0 22px 45px rgba(0, 0, 0, 0.42);
-}
-
-.public-space-body .ps-comment-emoji-panel-head {
-  border: 1px solid rgba(255, 244, 251, 0.18);
-  border-radius: 10px;
-  padding: 0.35rem 0.55rem;
-  color: rgba(255, 244, 251, 0.78);
-  font-weight: 850;
-  margin-bottom: 0.7rem;
-}
-
-.public-space-body .ps-comment-emoji-section + .ps-comment-emoji-section {
-  margin-top: 0.8rem;
-}
-
-.public-space-body .ps-comment-emoji-section p {
-  margin: 0 0 0.45rem;
-  color: rgba(255, 244, 251, 0.6);
-  font-size: 0.78rem;
-  font-weight: 850;
-}
-
-.public-space-body .ps-comment-emoji-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 2.25rem);
-  gap: 0.28rem;
-}
-
-.public-space-body .ps-comment-emoji-grid button {
-  width: 2.25rem !important;
-  height: 2.25rem !important;
-  min-width: 2.25rem !important;
-  padding: 0 !important;
-  font-size: 1.28rem;
-}
-
-.public-space-body .ps-comment-emoji-tabs {
-  position: sticky;
-  bottom: -0.75rem;
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 0.2rem;
-  margin: 0.75rem -0.75rem -0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-top: 1px solid rgba(255, 244, 251, 0.1);
-  background: rgba(22, 19, 25, 0.96);
-  color: rgba(255, 244, 251, 0.66);
-  text-align: center;
-}
-
-.public-space-body .ps-comment-send-btn {
-  width: 3.35rem !important;
-  height: 3.35rem !important;
-  min-width: 3.35rem !important;
-  border-radius: 999px !important;
-  padding: 0 !important;
-  display: inline-grid !important;
-  place-items: center;
-  font-size: 1.3rem;
-}
-
-.public-space-body .ps-comments-form-footer {
-  align-items: center;
-}
-
-.public-space-body .ps-comments-form-footer [data-ps-comment-count] {
-  margin-right: auto;
-}
-
-@media (max-width: 640px) {
-  .public-space-body .ps-control-screen.ps-notifications-screen .ps-admin-screen-top {
-    grid-template-columns: 1fr !important;
-  }
-
-  .public-space-body .ps-control-screen.ps-notifications-screen .ps-notifications-history-icon-actions {
-    grid-column: 1 !important;
-    grid-row: 2 !important;
-    width: 100% !important;
-    justify-content: flex-start !important;
-  }
-
-  .public-space-body .ps-comment-emoji-panel {
-    width: min(23rem, calc(100vw - 2rem));
-  }
-
-  .public-space-body .ps-comment-emoji-grid {
-    grid-template-columns: repeat(5, 2.25rem);
-  }
-}
-
-
-/* Q64C comment composer layout correction */
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
-  display: block !important;
-  position: relative !important;
-  width: 100% !important;
-  margin-top: 0.65rem !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-toggle {
-  width: auto !important;
-  min-width: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 0.35rem !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
-  position: static !important;
-  z-index: auto !important;
-  left: auto !important;
-  bottom: auto !important;
-  width: 100% !important;
-  max-width: 38rem !important;
-  max-height: 18rem !important;
-  overflow: auto !important;
-  display: block !important;
-  margin-top: 0.65rem !important;
-  padding: 0.8rem !important;
-  border-radius: 20px !important;
-  background: rgba(255, 255, 255, 0.055) !important;
-  box-shadow: none !important;
-  pointer-events: auto !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel[hidden] {
-  display: none !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-panel-head {
-  display: none !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-section + .ps-comment-emoji-section {
-  margin-top: 0.75rem !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-section p {
-  margin: 0 0 0.45rem !important;
-  color: rgba(255, 244, 251, 0.62) !important;
-  font-size: 0.82rem !important;
-  font-weight: 900 !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(2.35rem, 2.35rem)) !important;
-  gap: 0.42rem !important;
-  align-items: center !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-grid button {
-  width: 2.35rem !important;
-  height: 2.35rem !important;
-  min-width: 2.35rem !important;
-  border-radius: 999px !important;
-  padding: 0 !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  font-size: 1.25rem !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-emoji-tabs {
-  display: none !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comments-form-footer {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 0.85rem !important;
-  width: 100% !important;
-  margin-top: 0.7rem !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comments-form-footer [data-ps-comment-count] {
-  flex: 1 1 auto !important;
-  margin: 0 !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comments-form-footer button.ps-comment-send-btn,
-.public-space-body [data-ps-comments-form] .ps-comments-form-footer .btn.primary.ps-comment-send-btn {
-  width: 3.05rem !important;
-  min-width: 3.05rem !important;
-  max-width: 3.05rem !important;
-  height: 3.05rem !important;
-  min-height: 3.05rem !important;
-  max-height: 3.05rem !important;
-  flex: 0 0 3.05rem !important;
-  border-radius: 999px !important;
-  padding: 0 !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  font-size: 1.2rem !important;
-  line-height: 1 !important;
-  text-align: center !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-send-btn span {
-  display: inline-block !important;
-  transform: translateX(1px) !important;
-}
-
-.public-space-body [data-ps-comments-form] .ps-comment-send-btn:disabled {
-  opacity: 0.42 !important;
-  cursor: not-allowed !important;
-}
-
-@media (max-width: 640px) {
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-panel {
-    max-width: 100% !important;
-    max-height: 16rem !important;
-  }
-
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-grid {
-    grid-template-columns: repeat(auto-fill, minmax(2.25rem, 2.25rem)) !important;
-  }
-
-  .public-space-body [data-ps-comments-form] .ps-comment-emoji-grid button {
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-    min-width: 2.25rem !important;
-  }
-}
-
+/* Q67A: removed legacy Q64C comment composer correction. Canonical comment composer styling is now Q66C/Q67A. */
 
 /* Q64D clean comment composer final correction */
 .public-space-body [data-ps-comments-form] {
@@ -1811,5 +1479,64 @@
     min-height: 2rem !important;
     max-height: 2rem !important;
     font-size: 1.05rem !important;
+  }
+}
+
+
+/* Q67A final comment composer support baseline */
+.public-space-body [data-ps-comments-form],
+.public-space-body [data-ps-comments-form] .ps-comment-toolbar,
+.public-space-body [data-ps-comments-form] .ps-comment-emoji-row {
+  overflow: visible !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-edit-note {
+  min-height: 1.2rem !important;
+  margin: 0.15rem 0 0 !important;
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comments-edit-note:empty {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn,
+.public-space-body [data-ps-comments-form] button.ps-comment-send-btn,
+.public-space-body [data-ps-comments-form] .btn.primary.ps-comment-send-btn {
+  width: 2.65rem !important;
+  min-width: 2.65rem !important;
+  max-width: 2.65rem !important;
+  height: 2.65rem !important;
+  min-height: 2.65rem !important;
+  max-height: 2.65rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  line-height: 1 !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn span {
+  display: inline-block !important;
+  transform: translateX(1px) !important;
+}
+
+.public-space-body [data-ps-comments-form] .ps-comment-send-btn:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-form] .ps-comment-send-btn,
+  .public-space-body [data-ps-comments-form] button.ps-comment-send-btn,
+  .public-space-body [data-ps-comments-form] .btn.primary.ps-comment-send-btn {
+    width: 2.45rem !important;
+    min-width: 2.45rem !important;
+    max-width: 2.45rem !important;
+    height: 2.45rem !important;
+    min-height: 2.45rem !important;
+    max-height: 2.45rem !important;
   }
 }
