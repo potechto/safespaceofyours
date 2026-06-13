@@ -2048,3 +2048,93 @@
     margin-top: 0.12rem !important;
   }
 }
+
+/* Q69F restore badge row and center controls */
+.public-space-body .ps-admin-user-controls {
+  align-items: stretch !important;
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 0.30fr) !important;
+  gap: 0.42rem !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-content: start !important;
+  justify-items: start !important;
+  gap: 0.34rem !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form label {
+  width: 100% !important;
+  display: grid !important;
+  align-content: start !important;
+  justify-items: stretch !important;
+  gap: 0.28rem !important;
+}
+
+.public-space-body .ps-badge-picker {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  align-content: start !important;
+  justify-items: stretch !important;
+}
+
+.public-space-body .ps-badge-picker-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  align-content: center !important;
+  gap: 0.24rem !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-badge-choice {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.public-space-body .ps-badge-picker-note {
+  justify-self: start !important;
+  margin-top: 0.32rem !important;
+  margin-bottom: 0 !important;
+}
+
+.public-space-body .ps-admin-inline-form.ps-admin-badge-form > button {
+  justify-self: start !important;
+  align-self: start !important;
+  margin-top: 0.08rem !important;
+  margin-left: 0.12rem !important;
+  width: auto !important;
+  min-width: 7.4rem !important;
+}
+
+.public-space-body .ps-admin-reset-actions {
+  align-self: center !important;
+  justify-self: stretch !important;
+  margin-top: 0 !important;
+  gap: 0.28rem !important;
+}
+
+.public-space-body .ps-admin-reset-actions button {
+  width: 100% !important;
+}
+
+@media (max-width: 780px) {
+  .public-space-body .ps-admin-user-controls {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .public-space-body .ps-admin-reset-actions {
+    align-self: start !important;
+    margin-top: 0.12rem !important;
+  }
+}
