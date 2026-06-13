@@ -1571,3 +1571,51 @@
     grid-template-columns: auto 1fr auto !important;
   }
 }
+
+
+/* Q65H vertical comment dots position */
+.public-space-body [data-ps-comments-list] [data-ps-comment-id],
+.public-space-body .ps-comments-list [data-ps-comment-id] {
+  position: relative !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-toggle {
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-toggle::before {
+  content: "⋮";
+  display: inline-block;
+  font-size: 1.3rem;
+  line-height: 1;
+  font-weight: 900;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-list] [data-ps-comment-id] .ps-comment-menu,
+  .public-space-body .ps-comments-list [data-ps-comment-id] .ps-comment-menu {
+    position: absolute !important;
+    top: 0.9rem !important;
+    right: 0.75rem !important;
+    margin: 0 !important;
+    z-index: 5 !important;
+  }
+
+  .public-space-body [data-ps-comments-list] [data-ps-comment-id] .ps-comment-menu-toggle,
+  .public-space-body .ps-comments-list [data-ps-comment-id] .ps-comment-menu-toggle {
+    width: 2.45rem !important;
+    min-width: 2.45rem !important;
+    max-width: 2.45rem !important;
+    height: 2.45rem !important;
+    min-height: 2.45rem !important;
+    max-height: 2.45rem !important;
+    border-radius: 999px !important;
+  }
+
+  .public-space-body [data-ps-comments-list] [data-ps-comment-id] .ps-comment-menu-toggle::before,
+  .public-space-body .ps-comments-list [data-ps-comment-id] .ps-comment-menu-toggle::before {
+    font-size: 1.34rem !important;
+  }
+}
