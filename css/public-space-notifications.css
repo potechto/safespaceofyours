@@ -1760,3 +1760,58 @@
     font-size: 0.92rem !important;
   }
 }
+
+
+/* Q65K anchor comment menu dropdown */
+.public-space-body [data-ps-comments-list] [data-ps-comment-id],
+.public-space-body .ps-comments-list [data-ps-comment-id] {
+  overflow: visible !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu {
+  overflow: visible !important;
+}
+
+.public-space-body [data-ps-comments-modal] .ps-comment-menu-popover {
+  transform: none !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+    position: absolute !important;
+    display: grid !important;
+    left: auto !important;
+    right: 0 !important;
+    top: calc(100% + 0.35rem) !important;
+    bottom: auto !important;
+    width: min(9.75rem, calc(100vw - 3rem)) !important;
+    min-width: min(9.75rem, calc(100vw - 3rem)) !important;
+    max-width: calc(100vw - 3rem) !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0.35rem !important;
+    gap: 0.22rem !important;
+    z-index: 10050 !important;
+    border-radius: 16px !important;
+    background: rgba(29, 20, 38, 0.98) !important;
+    border: 1px solid rgba(255, 244, 251, 0.14) !important;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.45) !important;
+  }
+
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-popover button,
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-popover [role="menuitem"],
+  .public-space-body [data-ps-comments-modal] .ps-comment-menu-popover .ps-comment-menu-item {
+    min-height: 2.45rem !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 0.62rem 0.78rem !important;
+    border-radius: 12px !important;
+    font-size: 0.9rem !important;
+    text-align: left !important;
+  }
+
+  .public-space-body.ps-keyboard-visible [data-ps-comments-modal] .ps-comment-menu[data-open="true"] .ps-comment-menu-popover {
+    bottom: auto !important;
+    top: calc(100% + 0.35rem) !important;
+  }
+}
