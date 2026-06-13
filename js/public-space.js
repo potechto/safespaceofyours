@@ -874,7 +874,7 @@
       textarea.disabled = !canUseForm;
 
       if (alreadyCommented && ownComment && canEditComment(ownComment)) {
-        textarea.placeholder = "You already commented. Use the 3 dots on your comment to edit within 30 minutes.";
+        textarea.placeholder = "You already commented. you can edit your comment within 30minutes";
       } else if (alreadyCommented) {
         textarea.placeholder = "You already commented. Delete your comment before adding another.";
       } else {
