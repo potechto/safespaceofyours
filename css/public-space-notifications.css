@@ -2728,7 +2728,6 @@
   white-space: nowrap !important;
 }
 
-.public-space-body .ps-comment-menu button > *,
 .public-space-body .ps-comment-menu-toggle > *,
 .public-space-body button[data-ps-comment-menu-toggle] > *,
 .public-space-body button[data-ps-comment-more] > *,
@@ -2739,7 +2738,6 @@
   opacity: 0 !important;
 }
 
-.public-space-body .ps-comment-menu button::before,
 .public-space-body .ps-comment-menu-toggle::before,
 .public-space-body button[data-ps-comment-menu-toggle]::before,
 .public-space-body button[data-ps-comment-more]::before,
@@ -2765,7 +2763,6 @@
   text-indent: 0 !important;
 }
 
-.public-space-body .ps-comment-menu button::after,
 .public-space-body .ps-comment-menu-toggle::after,
 .public-space-body button[data-ps-comment-menu-toggle]::after,
 .public-space-body button[data-ps-comment-more]::after,
@@ -2790,3 +2787,39 @@
   }
 }
 /* Q75Q2 final CSS-only comment dots fix END */
+
+
+/* Q75Q3 keep dropdown action buttons clean */
+.public-space-body .ps-comment-menu-popover button,
+.public-space-body .ps-comment-menu [role="menu"] button {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 2.2rem !important;
+  max-height: none !important;
+  padding: 0.48rem 0.72rem !important;
+  border-radius: 14px !important;
+  overflow: visible !important;
+  font-size: 0.95rem !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0 !important;
+  text-indent: 0 !important;
+  color: rgba(255, 244, 251, 0.95) !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+}
+
+.public-space-body .ps-comment-menu-popover button::before,
+.public-space-body .ps-comment-menu-popover button::after,
+.public-space-body .ps-comment-menu [role="menu"] button::before,
+.public-space-body .ps-comment-menu [role="menu"] button::after {
+  content: none !important;
+  display: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+/* Q75Q3 keep dropdown action buttons clean END */
