@@ -793,16 +793,24 @@
     activeEditingCommentId = "";
     activeReplyParentCommentId = String(comment.id || "");
 
-    const textarea = commentsModalNode("textarea[name='comment']");
-    if (textarea) {
-      textarea.value = "";
-      textarea.focus({ preventScroll: true });
-      keepMobileTypingTargetVisible(textarea);
-    }
-
     closeCommentActionMenus();
     clearCommentsMessage();
     renderCommentsModal();
+
+    setTimeout(() => {
+      const form = commentsModalNode(`[data-ps-reply-parent-comment-id="${activeReplyParentCommentId}"]`);
+      const textarea = form ? form.querySelector("textarea[name='comment']") : null;
+
+      if (form && typeof form.scrollIntoView === "function") {
+        form.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+
+      if (textarea) {
+        textarea.value = "";
+        textarea.focus({ preventScroll: true });
+        keepMobileTypingTargetVisible(textarea);
+      }
+    }, 0);
   }
 
   function setCommentEditMode(comment) {
@@ -999,6 +1007,23 @@
       ? `<div class="ps-comment-replies">${replies.map(renderCommentItem).join("")}</div>`
       : "";
 
+    const inlineReplyComposer = (!isReply && String(activeReplyParentCommentId || "") === String(comment.id || ""))
+      ? `
+          <form class="ps-inline-reply-form" data-ps-comments-form data-ps-reply-parent-comment-id="${escapeHtml(comment.id)}">
+            <div class="ps-inline-reply-head">
+              <span>Reply to @${escapeHtml(username)}</span>
+              <button class="ps-comment-mode-cancel" type="button" data-ps-cancel-comment-reply>Cancel reply</button>
+            </div>
+            <div class="ps-inline-reply-row">
+              <textarea name="comment" maxlength="500" placeholder="Write a kind reply..."></textarea>
+              <button class="ps-inline-reply-send" type="submit" aria-label="Post reply" title="Post reply">
+                <span aria-hidden="true">➤</span>
+              </button>
+            </div>
+          </form>
+        `
+      : "";
+
     return `
         <article class="ps-comment-item${hiddenClass}${replyClass}" data-comment-id="${escapeHtml(comment.id)}" data-parent-comment-id="${escapeHtml(commentParentId(comment))}">
           <div class="ps-comment-meta">
@@ -1013,6 +1038,7 @@
           </div>
           <p>${escapeHtml(comment.body)}</p>
           ${inlineReplyAction}
+          ${inlineReplyComposer}
           ${repliesHtml}
         </article>
       `;
@@ -1053,8 +1079,8 @@
 
     const isEditing = Boolean(editingComment);
     const isEditingReply = Boolean(editingComment && !isTopLevelComment(editingComment));
-    const isReplying = Boolean(replyParent && !isEditing);
-    const ownComment = isReplying ? activeOwnReply(replyParent.id) : activeOwnComment();
+    const isReplying = false;
+    const ownComment = activeOwnComment();
     const alreadyCommented = Boolean(ownComment && !isEditing);
     const canUseForm = Boolean(currentSession && sessionToken() && !commentsLoading && (!alreadyCommented || isEditing));
     const length = textarea ? textarea.value.length : 0;
@@ -1238,8 +1264,9 @@
       ? activeComments.find(comment => String(comment.id || "") === String(activeEditingCommentId))
       : null;
 
-    const replyParent = activeReplyParentCommentId && !editingComment
-      ? activeComments.find(comment => String(comment.id || "") === String(activeReplyParentCommentId))
+    const formReplyParentId = form.dataset.psReplyParentCommentId || "";
+    const replyParent = formReplyParentId && !editingComment
+      ? activeComments.find(comment => String(comment.id || "") === String(formReplyParentId))
       : null;
 
     if (activeEditingCommentId && !editingComment) {
@@ -1256,7 +1283,7 @@
       return;
     }
 
-    if (!editingComment && activeReplyParentCommentId && !replyParent) {
+    if (!editingComment && formReplyParentId && !replyParent) {
       resetCommentReplyMode();
       setCommentsMessage("That comment is no longer available to reply to.", "error");
       renderCommentsModal();

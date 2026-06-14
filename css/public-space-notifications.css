@@ -2919,3 +2919,102 @@
   }
 }
 /* Q75G comment composer mode + desktop scroll END */
+
+
+/* Q75H FB-style inline reply composer */
+.public-space-body .ps-inline-reply-form {
+  margin-top: 0.75rem !important;
+  padding: 0.75rem !important;
+  border: 1px solid rgba(255, 142, 209, 0.22) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.public-space-body .ps-inline-reply-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  flex-wrap: wrap !important;
+  margin-bottom: 0.55rem !important;
+  color: #fff4fb !important;
+  font-size: 0.9rem !important;
+  font-weight: 900 !important;
+}
+
+.public-space-body .ps-inline-reply-row {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  align-items: end !important;
+  gap: 0.65rem !important;
+}
+
+.public-space-body .ps-inline-reply-row textarea[name="comment"] {
+  width: 100% !important;
+  min-height: 3.3rem !important;
+  max-height: 6.5rem !important;
+  margin: 0 !important;
+  resize: vertical !important;
+}
+
+.public-space-body .ps-inline-reply-send {
+  width: 3.1rem !important;
+  height: 3.1rem !important;
+  min-width: 3.1rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  background: rgba(255, 244, 251, 0.18) !important;
+  color: #170b1b !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.public-space-body .ps-inline-reply-send:hover,
+.public-space-body .ps-inline-reply-send:focus-visible {
+  background: rgba(255, 142, 209, 0.78) !important;
+}
+
+.public-space-body .ps-comments-form [data-ps-cancel-comment-reply],
+.public-space-body .ps-comments-edit-note [data-ps-cancel-comment-reply],
+.public-space-body .ps-comments-edit-note .ps-replying-to {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  .public-space-body .ps-comments-card {
+    height: min(90dvh, 900px) !important;
+    max-height: min(90dvh, 900px) !important;
+    overflow: hidden !important;
+  }
+
+  .public-space-body .ps-comments-list {
+    height: clamp(18rem, 42vh, 33rem) !important;
+    max-height: clamp(18rem, 42vh, 33rem) !important;
+    min-height: 16rem !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 1.15rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .public-space-body .ps-comments-form {
+    position: relative !important;
+    z-index: 5 !important;
+    margin-top: 0 !important;
+    padding-top: 0.75rem !important;
+    border-top: 1px solid rgba(255, 244, 251, 0.12) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .public-space-body .ps-inline-reply-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-space-body .ps-inline-reply-send {
+    justify-self: end !important;
+  }
+}
+/* Q75H FB-style inline reply composer END */
