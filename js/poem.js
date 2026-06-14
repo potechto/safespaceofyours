@@ -4,6 +4,7 @@ const readerCategory = document.querySelector("#readerCategory");
 const readerTitle = document.querySelector("#readerTitle");
 const readerExcerpt = document.querySelector("#readerExcerpt");
 let readerStats = document.querySelector("#readerStats");
+let readerRatingPanel = document.querySelector("#readerRatingPanel");
 const poemText = document.querySelector("#poemText");
 
 const prevPoem = document.querySelector("#prevPoem");
@@ -191,6 +192,195 @@ async function waitForProtectedReaderClient(maxWaitMs = 3000) {
 
   return null;
 }
+
+function formatReaderRatingAverage(value) {
+  const rating = Math.max(0, Math.min(5, Number(value) || 0));
+  return rating.toFixed(1);
+}
+
+function getOrCreateReaderRatingPanel() {
+  if (readerRatingPanel) return readerRatingPanel;
+
+  readerRatingPanel = document.createElement("section");
+  readerRatingPanel.id = "readerRatingPanel";
+  readerRatingPanel.className = "reader-rating-panel";
+  readerRatingPanel.setAttribute("data-reader-rating-panel", "");
+  readerRatingPanel.hidden = true;
+
+  if (poemText && poemText.parentElement) {
+    poemText.insertAdjacentElement("afterend", readerRatingPanel);
+  }
+
+  return readerRatingPanel;
+}
+
+function resetReaderRatingPanel() {
+  const target = getOrCreateReaderRatingPanel();
+  if (!target) return;
+
+  target.hidden = true;
+  target.innerHTML = "";
+  delete target.dataset.pieceSlug;
+}
+
+function buildReaderRatingStars(userRating = 0, disabled = false) {
+  const activeRating = Math.max(0, Math.min(5, Number(userRating) || 0));
+
+  return Array.from({ length: 5 }, (_, index) => {
+    const leftValue = index + 0.5;
+    const rightValue = index + 1;
+
+    return [
+      '<span class="reader-rating-star">',
+      '  <button class="reader-rating-half left' + (activeRating >= leftValue ? " is-filled" : "") + '" type="button" data-reader-rate="' + leftValue.toFixed(1) + '" aria-label="Rate ' + leftValue.toFixed(1) + ' stars"' + (disabled ? " disabled" : "") + '></button>',
+      '  <button class="reader-rating-half right' + (activeRating >= rightValue ? " is-filled" : "") + '" type="button" data-reader-rate="' + rightValue.toFixed(1) + '" aria-label="Rate ' + rightValue.toFixed(1) + ' stars"' + (disabled ? " disabled" : "") + '></button>',
+      '</span>'
+    ].join("");
+  }).join("");
+}
+
+function renderReaderRatingPanel(poem, stats = {}, options = {}) {
+  const target = getOrCreateReaderRatingPanel();
+  if (!target || !poem || !poem.slug || !stats || stats.show_ratings === false) {
+    resetReaderRatingPanel();
+    return;
+  }
+
+  const average = formatReaderRatingAverage(stats.rating_average ?? stats.ratingAverage ?? 0);
+  const count = Math.max(0, Number(stats.rating_count ?? stats.ratingCount ?? 0) || 0);
+  const userRating = Number(stats.user_rating ?? stats.userRating ?? 0) || 0;
+  const ratingWord = count === 1 ? "rating" : "ratings";
+  const message = String(options.message || stats.message || "").trim();
+  const isSaving = options.saving === true;
+
+  target.hidden = false;
+  target.dataset.pieceSlug = poem.slug;
+  target.innerHTML = [
+    '<div class="reader-rating-copy">',
+    '  <p class="eyebrow">Reader rating</p>',
+    '  <h3>How did this piece feel?</h3>',
+    '  <p>Tap the stars to rate this piece. Half-star ratings are allowed.</p>',
+    '</div>',
+    '<div class="reader-rating-stars" role="group" aria-label="Rate this piece from 0.5 to 5 stars">',
+    buildReaderRatingStars(userRating, isSaving),
+    '</div>',
+    '<p class="reader-rating-meta">',
+    '  <span aria-hidden="true">⭐</span> ' + escapeHTML(average) + ' average',
+    '  <span aria-hidden="true">·</span> ' + escapeHTML(formatPieceStatsNumber(count)) + ' ' + escapeHTML(ratingWord),
+    userRating ? '  <span aria-hidden="true">·</span> Your rating: ' + escapeHTML(formatReaderRatingAverage(userRating)) : '',
+    '</p>',
+    message ? '<p class="reader-rating-message">' + escapeHTML(message) + '</p>' : ''
+  ].join("");
+}
+
+function getReaderRatingUnlockCode(poem) {
+  if (!poem || getPoemAccess(poem) !== "paid") return "";
+  return getSavedUnlockCode(poem.slug) || "";
+}
+
+async function loadReaderPieceRatingStats(poem, unlockCode = "") {
+  if (!poem || !poem.slug) {
+    resetReaderRatingPanel();
+    return;
+  }
+
+  const client = window.safeAdminClient;
+  if (!client || typeof client.rpc !== "function") {
+    resetReaderRatingPanel();
+    return;
+  }
+
+  try {
+    const { data, error } = await client.rpc("get_public_piece_rating_stats", {
+      input_piece_slug: poem.slug,
+      input_visitor_key: getPieceAnalyticsVisitorKey(),
+      input_unlock_code: unlockCode || getReaderRatingUnlockCode(poem) || null
+    });
+
+    if (error) throw error;
+
+    if (!data || data.show_ratings === false) {
+      resetReaderRatingPanel();
+      return;
+    }
+
+    renderReaderRatingPanel(poem, data);
+  } catch (error) {
+    console.warn("Reader rating stats could not be loaded:", error);
+    resetReaderRatingPanel();
+  }
+}
+
+async function saveReaderPieceRating(poem, ratingValue) {
+  if (!poem || !poem.slug) return;
+
+  const client = window.safeAdminClient;
+  const cleanRating = Number(ratingValue);
+
+  if (!client || typeof client.rpc !== "function") {
+    renderReaderRatingPanel(poem, {
+      show_ratings: true,
+      rating_average: 0,
+      rating_count: 0,
+      user_rating: 0
+    }, { message: "Rating service is still loading. Please refresh and try again." });
+    return;
+  }
+
+  renderReaderRatingPanel(poem, {
+    show_ratings: true,
+    rating_average: 0,
+    rating_count: 0,
+    user_rating: cleanRating
+  }, { saving: true, message: "Saving your rating..." });
+
+  try {
+    const { data, error } = await client.rpc("rate_public_piece", {
+      input_piece_slug: poem.slug,
+      input_visitor_key: getPieceAnalyticsVisitorKey(),
+      input_rating_value: cleanRating,
+      input_unlock_code: getReaderRatingUnlockCode(poem) || null
+    });
+
+    if (error) throw error;
+
+    if (!data || data.ok === false || data.show_ratings === false) {
+      renderReaderRatingPanel(poem, {
+        show_ratings: true,
+        rating_average: 0,
+        rating_count: 0,
+        user_rating: cleanRating
+      }, { message: (data && data.message) || "Rating could not be saved." });
+      return;
+    }
+
+    renderReaderRatingPanel(poem, data, { message: "Rating saved. Thank you for reading." });
+  } catch (error) {
+    console.warn("Reader rating could not be saved:", error);
+    await loadReaderPieceRatingStats(poem);
+  }
+}
+
+if (!window.__safeReaderRatingsBound) {
+  window.__safeReaderRatingsBound = true;
+
+  document.addEventListener("click", event => {
+    const rateButton = event.target.closest("[data-reader-rate]");
+    if (!rateButton) return;
+
+    const panel = rateButton.closest("[data-reader-rating-panel]");
+    const pieceSlug = panel?.dataset?.pieceSlug;
+    const targetPoem = (window.__safeCurrentReaderPoem && window.__safeCurrentReaderPoem.slug === pieceSlug)
+      ? window.__safeCurrentReaderPoem
+      : (Array.isArray(window.POEMS) ? window.POEMS : []).find(item => item.slug === pieceSlug);
+
+    if (!targetPoem) return;
+
+    event.preventDefault();
+    saveReaderPieceRating(targetPoem, rateButton.dataset.readerRate);
+  });
+}
+
 
 async function fetchPublicPieceTextForPreview(poem) {
   const file = String(poem?.file || "").trim();
@@ -408,6 +598,7 @@ function setupUnlockForm(poem) {
     });
         scheduleReaderPieceStatsRefresh(poem, 1200);
 poemText.innerHTML = buildUnlockedNotice() + formatPoem(protectedResult.full_text);
+    loadReaderPieceRatingStats(poem, code);
     window.scrollTo({ top: poemText.offsetTop - 120, behavior: "smooth" });
   });
 }
@@ -578,6 +769,8 @@ async function loadPoem() {
     readerCategory.textContent = poem.category;
     readerTitle.textContent = poem.title;
     readerExcerpt.textContent = "This piece is currently unavailable.";
+    window.__safeCurrentReaderPoem = null;
+    resetReaderRatingPanel();
 
     poemText.innerHTML = `
       <p class="reserved-piece">
@@ -601,6 +794,8 @@ async function loadPoem() {
   readerCategory.textContent = poem.category;
   readerTitle.textContent = poem.title;
   readerExcerpt.textContent = poem.excerpt;
+  window.__safeCurrentReaderPoem = poem;
+  resetReaderRatingPanel();
 
   setupReaderNavigation(Math.max(currentIndex, 0), enabledPoems);
 
@@ -616,6 +811,7 @@ try {
 
       if (protectedResult.ok && protectedResult.unlocked && protectedResult.full_text) {
         poemText.innerHTML = buildUnlockedNotice() + formatPoem(protectedResult.full_text);
+        loadReaderPieceRatingStats(poem, savedCode);
         return;
       }
 
@@ -640,6 +836,7 @@ try {
 
     const text = await response.text();
     poemText.innerHTML = formatPoem(text);
+    loadReaderPieceRatingStats(poem);
   } catch (error) {
     poemText.innerHTML = `
       <p class="reserved-piece">

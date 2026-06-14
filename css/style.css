@@ -10728,3 +10728,151 @@ body.ps-route-screen-active .ps-admin-screen-top,
   margin-top: 0.8rem;
 }
 /* Q74B public rating summary END */
+
+
+/* Q74C reader rating widget */
+.reader-rating-panel {
+  margin: clamp(1.4rem, 3vw, 2rem) 0 0;
+  padding: clamp(1rem, 2.5vw, 1.35rem);
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: clamp(20px, 3vw, 28px);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 215, 233, 0.10), transparent 15rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.reader-rating-panel[hidden] {
+  display: none !important;
+}
+
+.reader-rating-copy h3 {
+  margin: 0.1rem 0 0;
+  font-size: clamp(1.2rem, 2.5vw, 1.75rem);
+}
+
+.reader-rating-copy p:not(.eyebrow) {
+  max-width: 34rem;
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.reader-rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-top: 0.9rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(255, 244, 251, 0.10);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.13);
+}
+
+.reader-rating-star {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+}
+
+.reader-rating-star::before {
+  content: "☆";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 244, 251, 0.45);
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
+.reader-rating-half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 50%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+}
+
+.reader-rating-half.left {
+  left: 0;
+}
+
+.reader-rating-half.right {
+  right: 0;
+}
+
+.reader-rating-half::before {
+  content: "★";
+  position: absolute;
+  top: 0;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  color: transparent;
+  font-size: 1.85rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.reader-rating-half.left::before {
+  left: 0;
+  clip-path: inset(0 50% 0 0);
+}
+
+.reader-rating-half.right::before {
+  right: 0;
+  clip-path: inset(0 0 0 50%);
+}
+
+.reader-rating-half.is-filled::before,
+.reader-rating-half:hover::before,
+.reader-rating-half:focus-visible::before {
+  color: var(--accent-strong);
+}
+
+.reader-rating-half:focus-visible {
+  outline: 2px solid rgba(255, 244, 251, 0.55);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+.reader-rating-half:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.reader-rating-meta,
+.reader-rating-message {
+  margin: 0.65rem 0 0;
+  color: rgba(255, 244, 251, 0.72);
+  font-family: Arial, sans-serif;
+  font-size: 0.88rem;
+}
+
+.reader-rating-message {
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .reader-rating-star {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
+  .reader-rating-star::before,
+  .reader-rating-half::before {
+    font-size: 1.65rem;
+  }
+
+  .reader-rating-half::before {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+}
+/* Q74C reader rating widget END */
