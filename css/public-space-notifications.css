@@ -2665,3 +2665,37 @@
   }
 }
 /* Q72C Admin post moderation filters END */
+
+
+/* Q75J restore public space comment menu dots */
+.public-space-body [data-ps-comment-more] {
+  position: relative !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-indent: -9999px !important;
+}
+
+.public-space-body [data-ps-comment-more] > * {
+  display: none !important;
+}
+
+.public-space-body [data-ps-comment-more]::before {
+  content: "•••" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  text-indent: 0 !important;
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
+  letter-spacing: -0.08em !important;
+  color: rgba(255, 244, 251, 0.94) !important;
+  transform: rotate(90deg) !important;
+}
+
+.public-space-body [data-ps-comment-more]:hover::before,
+.public-space-body [data-ps-comment-more]:focus-visible::before {
+  color: #fff4fb !important;
+}
+/* Q75J restore public space comment menu dots END */
