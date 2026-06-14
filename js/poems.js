@@ -42,7 +42,7 @@ window.POEMS = [
     category: "Faith",
     cover: "Resources/genesis2214.png",
     file: "Resources/genesis2214.txt",
-    excerpt: "A reserved faith-based piece. Full text can be added later."
+    excerpt: "Have you ever noticed? Every time we say, \"God will provide,\" He always shows up in ways we didn't expect. And when we look back, we see it was never..."
   },
   {
     slug: "hindikanamantalaganagiisa",
