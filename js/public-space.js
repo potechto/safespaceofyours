@@ -15,7 +15,8 @@
   };
 
   const POST_EDIT_WINDOW_MS = 30 * 60 * 1000;
-  const PUBLIC_SPACE_ACTIVE_WINDOW_MS = 2 * 60 * 1000;
+  const PUBLIC_SPACE_ACTIVE_WINDOW_MS = 3 * 60 * 1000;
+  const PUBLIC_SPACE_IDLE_WINDOW_MS = 3 * 60 * 1000;
   const PUBLIC_SPACE_PRESENCE_TOUCH_MS = 25 * 1000;
 
   const PUBLIC_SPACE_BADGE_LIMIT = 3;
@@ -83,6 +84,8 @@
   let publicSpaceLiveRefreshInFlight = false;
   let publicSpaceLivePostsSnapshot = "";
   let lastPublicSpacePresenceTouch = 0;
+  let lastPublicSpaceUserActivityAt = Date.now();
+  let publicSpaceActivityListenersReady = false;
   let composeMode = "create";
   let editingPostId = null;
   const COMMENT_EDIT_WINDOW_MS = 30 * 60 * 1000;
@@ -1653,16 +1656,29 @@
 
   function isPublicSpaceUserActive(user) {
     if (!user || user.is_disabled) return false;
-    if (user.is_active === true) return true;
 
     const lastSeenAt = user.last_seen_at ? new Date(user.last_seen_at).getTime() : 0;
-    return Boolean(lastSeenAt && Date.now() - lastSeenAt <= PUBLIC_SPACE_ACTIVE_WINDOW_MS);
+    if (lastSeenAt) {
+      return Date.now() - lastSeenAt <= PUBLIC_SPACE_ACTIVE_WINDOW_MS;
+    }
+
+    return user.is_active === true;
+  }
+
+  function hasPublicSpacePresence(user) {
+    if (!user || user.is_disabled) return false;
+
+    return Boolean(user.last_seen_at || typeof user.is_active === "boolean");
   }
 
   function renderPublicSpaceActiveDot(user) {
-    if (!isPublicSpaceUserActive(user)) return "";
+    if (!hasPublicSpacePresence(user)) return "";
 
-    return '<span class="ps-active-dot" title="Active now" aria-label="Active now"></span>';
+    const isActive = isPublicSpaceUserActive(user);
+    const className = isActive ? "is-active" : "is-idle";
+    const label = isActive ? "Active now" : "Idle";
+
+    return `<span class="ps-presence-dot ${className}" title="${label}" aria-label="${label}"></span>`;
   }
 
   function renderPublicSpaceUsernameStrong(user, fallbackUsername) {
@@ -2785,10 +2801,45 @@
     return Boolean(root.querySelector("[data-ps-notifications-history]"));
   }
 
+  function markPublicSpaceUserActivity() {
+    const now = Date.now();
+    const wasIdle = now - lastPublicSpaceUserActivityAt > PUBLIC_SPACE_IDLE_WINDOW_MS;
+
+    lastPublicSpaceUserActivityAt = now;
+
+    if (wasIdle) {
+      lastPublicSpacePresenceTouch = 0;
+    }
+  }
+
+  function hasRecentPublicSpaceActivity() {
+    return Date.now() - lastPublicSpaceUserActivityAt <= PUBLIC_SPACE_IDLE_WINDOW_MS;
+  }
+
+  function bindPublicSpaceActivityListeners() {
+    if (publicSpaceActivityListenersReady || !document || !window) return;
+
+    publicSpaceActivityListenersReady = true;
+
+    ["pointerdown", "keydown", "input", "submit", "wheel", "touchstart"].forEach(eventName => {
+      document.addEventListener(eventName, markPublicSpaceUserActivity, { passive: true, capture: true });
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) markPublicSpaceUserActivity();
+    });
+  }
+
   async function touchPublicSpacePresence(options = {}) {
     if (!currentSession || !sessionToken()) return null;
 
+    bindPublicSpaceActivityListeners();
+
     const now = Date.now();
+    if (!options.force && !hasRecentPublicSpaceActivity()) {
+      return currentUser;
+    }
+
     if (!options.force && now - lastPublicSpacePresenceTouch < PUBLIC_SPACE_PRESENCE_TOUCH_MS) {
       return currentUser;
     }
