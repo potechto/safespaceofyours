@@ -2922,3 +2922,98 @@
   }
 }
 /* Q75L desktop reply layout and smaller vertical comment dots END */
+
+
+/* Q75M reply typing focus and comment viewport fix */
+.public-space-body [data-ps-comments-modal].is-replying .ps-modal-card,
+.public-space-body [data-ps-comments-modal].is-replying .ps-comments-card {
+  width: min(52rem, calc(100vw - 2rem)) !important;
+}
+
+.public-space-body [data-ps-comments-modal].is-replying .ps-comments-list,
+.public-space-body [data-ps-comments-modal].is-replying [data-ps-comments-list] {
+  scroll-behavior: auto !important;
+  scrollbar-gutter: stable !important;
+}
+
+.public-space-body .ps-inline-reply-form,
+.public-space-body .ps-inline-reply-form * {
+  touch-action: manipulation !important;
+}
+
+.public-space-body .ps-inline-reply-row textarea,
+.public-space-body [data-ps-comments-form] textarea[name="comment"] {
+  font-size: 1rem !important;
+  line-height: 1.35 !important;
+  caret-color: #fff4fb !important;
+}
+
+.public-space-body .ps-inline-reply-row textarea:focus,
+.public-space-body [data-ps-comments-form] textarea[name="comment"]:focus {
+  scroll-margin: 8rem !important;
+}
+
+@media (min-width: 641px) {
+  .public-space-body [data-ps-comments-modal].is-replying .ps-modal-card,
+  .public-space-body [data-ps-comments-modal].is-replying .ps-comments-card {
+    max-height: min(92vh, 56rem) !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying .ps-comments-list,
+  .public-space-body [data-ps-comments-modal].is-replying [data-ps-comments-list] {
+    max-height: clamp(18rem, 52vh, 34rem) !important;
+    min-height: 16rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying [data-ps-comments-form]:not(.ps-inline-reply-form) textarea[name="comment"] {
+    min-height: 4.35rem !important;
+    max-height: 7rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying .ps-inline-reply-form {
+    margin-right: 0.35rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying .ps-inline-reply-row textarea {
+    min-height: 4.25rem !important;
+    max-height: 8rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .public-space-body [data-ps-comments-modal].is-replying {
+    align-items: stretch !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying .ps-modal-card,
+  .public-space-body [data-ps-comments-modal].is-replying .ps-comments-card {
+    width: min(100%, calc(100vw - 0.55rem)) !important;
+    max-width: min(100%, calc(100vw - 0.55rem)) !important;
+    max-height: calc(100dvh - 0.6rem) !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying .ps-comments-list,
+  .public-space-body [data-ps-comments-modal].is-replying [data-ps-comments-list] {
+    max-height: 54dvh !important;
+    min-height: 16rem !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying [data-ps-comments-form]:not(.ps-inline-reply-form) textarea[name="comment"] {
+    min-height: 3.9rem !important;
+    max-height: 5.5rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying .ps-inline-reply-form {
+    margin-right: 0 !important;
+    padding: 0.62rem !important;
+  }
+
+  .public-space-body [data-ps-comments-modal].is-replying .ps-inline-reply-row textarea {
+    min-height: 4rem !important;
+    max-height: 7.5rem !important;
+  }
+}
+/* Q75M reply typing focus and comment viewport fix END */

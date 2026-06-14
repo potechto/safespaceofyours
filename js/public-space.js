@@ -803,15 +803,17 @@
     window.setTimeout(() => {
       const form = commentsModalNode(`[data-ps-reply-parent-comment-id="${activeReplyParentCommentId}"]`);
       const textarea = form ? form.querySelector("textarea[name='comment']") : null;
+      const shouldAutoFocus = window.matchMedia && window.matchMedia("(min-width: 781px)").matches;
 
       if (form && typeof form.scrollIntoView === "function") {
-        form.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        form.scrollIntoView({ block: "center", behavior: "smooth" });
       }
 
       if (textarea) {
         textarea.value = "";
-        textarea.focus({ preventScroll: true });
-        keepMobileTypingTargetVisible(textarea);
+        if (shouldAutoFocus) {
+          textarea.focus({ preventScroll: true });
+        }
       }
     }, 0);
   }
@@ -1049,6 +1051,7 @@
 
   function renderCommentsModal() {
     const modal = ensureCommentsModal();
+    modal.classList.toggle("is-replying", Boolean(activeReplyParentCommentId));
     const post = currentCommentsPost();
     const title = modal.querySelector("[data-ps-comments-title]");
     const subtitle = modal.querySelector("[data-ps-comments-subtitle]");
@@ -1344,6 +1347,11 @@
     if (!modal) {
       closeCommentActionMenus();
       closeCommentEmojiPanel();
+      return;
+    }
+
+    if (event.target.closest("textarea, input, select")) {
+      closeCommentActionMenus();
       return;
     }
 
