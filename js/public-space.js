@@ -1487,8 +1487,22 @@
   }
 
   function handleCommentsModalInput(event) {
-    if (!event.target.closest("[data-ps-comments-form]")) return;
-    renderCommentsModal();
+    const form = event.target.closest("[data-ps-comments-form]");
+    if (!form) return;
+
+    const textarea = event.target.matches && event.target.matches("textarea[name='comment']")
+      ? event.target
+      : form.querySelector("textarea[name='comment']");
+
+    if (!textarea) return;
+
+    const counter = form.querySelector("[data-ps-comment-count]")
+      || (!form.dataset.psReplyParentCommentId ? commentsModalNode("[data-ps-comment-count]") : null);
+
+    if (counter) counter.textContent = `${textarea.value.length}/500`;
+
+    // Never re-render the comments modal while typing.
+    // Re-rendering replaces the textarea node and drops focus/keyboard.
   }
 
   function handleCommentsModalKeydown(event) {
@@ -3165,6 +3179,8 @@
     if (!activeCommentsPostId || commentsLoading) return;
     if (!isCommentsModalVisible()) return;
     if (activeEditingCommentId) return;
+    if (activeReplyParentCommentId) return;
+    if (activeMobileTypingTarget()) return;
     if (isLocalCommentComposerActive()) return;
     if (isCommentTransientUiOpen()) return;
 
