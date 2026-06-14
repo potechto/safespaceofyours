@@ -1674,6 +1674,10 @@
   function renderPublicSpaceActiveDot(user) {
     if (!hasPublicSpacePresence(user)) return "";
 
+    const id = publicSpaceUserId(user);
+    const ownId = publicSpaceUserId(currentUser);
+    if (id && ownId && id === ownId) return "";
+
     const isActive = isPublicSpaceUserActive(user);
     const className = isActive ? "is-active" : "is-idle";
     const label = isActive ? "Active now" : "Idle";

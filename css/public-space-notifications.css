@@ -2229,3 +2229,37 @@
   flex-basis: 0.38rem !important;
 }
 /* V37 Public Space idle presence indicator END */
+
+/* V38 Public Space compact own-hidden presence indicator */
+.public-space-body .ps-user-link,
+.public-space-body .ps-user-name {
+  gap: 0.12rem !important;
+}
+
+.public-space-body .ps-presence-dot,
+.public-space-body .ps-active-dot {
+  width: 0.24rem !important;
+  height: 0.24rem !important;
+  flex: 0 0 0.24rem !important;
+  transform: translateY(0) !important;
+}
+
+.public-space-body .ps-presence-dot.is-active,
+.public-space-body .ps-active-dot {
+  box-shadow: 0 0 0 1px rgba(40, 255, 145, 0.13), 0 0 5px rgba(40, 255, 145, 0.5) !important;
+}
+
+.public-space-body .ps-presence-dot.is-idle {
+  box-shadow: 0 0 0 1px rgba(172, 166, 183, 0.1), 0 0 3px rgba(172, 166, 183, 0.2) !important;
+  opacity: 0.72 !important;
+}
+
+.public-space-body .ps-profile-heading .ps-presence-dot,
+.public-space-body .ps-profile-heading .ps-active-dot,
+.public-space-body .ps-admin-user-main .ps-presence-dot,
+.public-space-body .ps-admin-user-main .ps-active-dot {
+  width: 0.28rem !important;
+  height: 0.28rem !important;
+  flex-basis: 0.28rem !important;
+}
+/* V38 Public Space compact own-hidden presence indicator END */
