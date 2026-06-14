@@ -259,10 +259,8 @@ function renderTrendingPieces() {
   trendingPieces.innerHTML = [
     '<div class="trending-heading">',
     '  <div>',
-    '    <p class="eyebrow">Reader pulse</p>',
     '    <h2>Trending pieces</h2>',
     '  </div>',
-    '  <p>Real reads and unlocks from the archive. No fake boosts, just actual reader activity.</p>',
     '</div>',
     '<div class="trending-grid">',
     buildTrendingColumn("Trending Now", "Hot overall", trending),

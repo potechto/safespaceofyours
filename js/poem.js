@@ -5,6 +5,8 @@ const readerTitle = document.querySelector("#readerTitle");
 const readerExcerpt = document.querySelector("#readerExcerpt");
 let readerStats = document.querySelector("#readerStats");
 let readerRatingPanel = document.querySelector("#readerRatingPanel");
+let readerRatingDrafts = new Map();
+let readerRatingSnapshots = new Map();
 const poemText = document.querySelector("#poemText");
 
 const prevPoem = document.querySelector("#prevPoem");
@@ -218,6 +220,12 @@ function resetReaderRatingPanel() {
   const target = getOrCreateReaderRatingPanel();
   if (!target) return;
 
+  const slug = target.dataset.pieceSlug || "";
+  if (slug) {
+    readerRatingDrafts.delete(slug);
+    readerRatingSnapshots.delete(slug);
+  }
+
   target.hidden = true;
   target.innerHTML = "";
   delete target.dataset.pieceSlug;
@@ -246,28 +254,47 @@ function renderReaderRatingPanel(poem, stats = {}, options = {}) {
     return;
   }
 
-  const average = formatReaderRatingAverage(stats.rating_average ?? stats.ratingAverage ?? 0);
-  const count = Math.max(0, Number(stats.rating_count ?? stats.ratingCount ?? 0) || 0);
-  const userRating = Number(stats.user_rating ?? stats.userRating ?? 0) || 0;
+  const slug = poem.slug;
+  const previousSnapshot = readerRatingSnapshots.get(slug) || {};
+  const mergedStats = {
+    ...previousSnapshot,
+    ...stats
+  };
+
+  const average = formatReaderRatingAverage(mergedStats.rating_average ?? mergedStats.ratingAverage ?? 0);
+  const count = Math.max(0, Number(mergedStats.rating_count ?? mergedStats.ratingCount ?? 0) || 0);
+  const savedRating = Number(mergedStats.user_rating ?? mergedStats.userRating ?? 0) || 0;
+  const draftRating = Number(options.draftRating ?? readerRatingDrafts.get(slug) ?? 0) || 0;
+  const displayRating = savedRating || draftRating;
   const ratingWord = count === 1 ? "rating" : "ratings";
-  const message = String(options.message || stats.message || "").trim();
+  const message = String(options.message || mergedStats.message || "").trim();
   const isSaving = options.saving === true;
+  const isSaved = savedRating > 0;
+  const canSave = !isSaving && !isSaved && draftRating > 0;
+
+  readerRatingSnapshots.set(slug, mergedStats);
 
   target.hidden = false;
-  target.dataset.pieceSlug = poem.slug;
+  target.dataset.pieceSlug = slug;
   target.innerHTML = [
     '<div class="reader-rating-copy">',
     '  <p class="eyebrow">Reader rating</p>',
     '  <h3>How did this piece feel?</h3>',
-    '  <p>Tap the stars to rate this piece. Half-star ratings are allowed.</p>',
+    '  <p>Tap a star first, then press the check to save. Once saved, your rating is permanent.</p>',
     '</div>',
-    '<div class="reader-rating-stars" role="group" aria-label="Rate this piece from 0.5 to 5 stars">',
-    buildReaderRatingStars(userRating, isSaving),
+    '<div class="reader-rating-actions">',
+    '  <div class="reader-rating-stars" role="group" aria-label="Choose a rating from 0.5 to 5 stars">',
+    buildReaderRatingStars(displayRating, isSaving || isSaved),
+    '  </div>',
+    '  <button class="reader-rating-confirm' + (isSaved ? " is-saved" : "") + '" type="button" data-reader-rating-save aria-label="' + (isSaved ? "Rating saved" : "Save selected rating") + '"' + (canSave ? "" : " disabled") + '>',
+    '    <span aria-hidden="true">' + (isSaved ? "✓" : "✔") + '</span>',
+    '  </button>',
     '</div>',
     '<p class="reader-rating-meta">',
     '  <span aria-hidden="true">⭐</span> ' + escapeHTML(average) + ' average',
     '  <span aria-hidden="true">·</span> ' + escapeHTML(formatPieceStatsNumber(count)) + ' ' + escapeHTML(ratingWord),
-    userRating ? '  <span aria-hidden="true">·</span> Your rating: ' + escapeHTML(formatReaderRatingAverage(userRating)) : '',
+    isSaved ? '  <span aria-hidden="true">·</span> Your saved rating: ' + escapeHTML(formatReaderRatingAverage(savedRating)) : '',
+    !isSaved && draftRating ? '  <span aria-hidden="true">·</span> Selected: ' + escapeHTML(formatReaderRatingAverage(draftRating)) : '',
     '</p>',
     message ? '<p class="reader-rating-message">' + escapeHTML(message) + '</p>' : ''
   ].join("");
@@ -276,6 +303,28 @@ function renderReaderRatingPanel(poem, stats = {}, options = {}) {
 function getReaderRatingUnlockCode(poem) {
   if (!poem || getPoemAccess(poem) !== "paid") return "";
   return getSavedUnlockCode(poem.slug) || "";
+}
+
+function selectReaderPieceRating(poem, ratingValue) {
+  if (!poem || !poem.slug) return;
+
+  const cleanRating = Number(ratingValue);
+  if (!Number.isFinite(cleanRating) || cleanRating < 0.5 || cleanRating > 5) return;
+
+  const snapshot = readerRatingSnapshots.get(poem.slug) || {
+    show_ratings: true,
+    rating_average: 0,
+    rating_count: 0,
+    user_rating: 0
+  };
+
+  if (Number(snapshot.user_rating ?? snapshot.userRating ?? 0) > 0) return;
+
+  readerRatingDrafts.set(poem.slug, cleanRating);
+  renderReaderRatingPanel(poem, snapshot, {
+    draftRating: cleanRating,
+    message: "Press the check to save this rating permanently."
+  });
 }
 
 async function loadReaderPieceRatingStats(poem, unlockCode = "") {
@@ -315,49 +364,72 @@ async function saveReaderPieceRating(poem, ratingValue) {
   if (!poem || !poem.slug) return;
 
   const client = window.safeAdminClient;
-  const cleanRating = Number(ratingValue);
-
-  if (!client || typeof client.rpc !== "function") {
-    renderReaderRatingPanel(poem, {
-      show_ratings: true,
-      rating_average: 0,
-      rating_count: 0,
-      user_rating: 0
-    }, { message: "Rating service is still loading. Please refresh and try again." });
-    return;
-  }
-
-  renderReaderRatingPanel(poem, {
+  const draftRating = Number(ratingValue ?? readerRatingDrafts.get(poem.slug) ?? 0);
+  const snapshot = readerRatingSnapshots.get(poem.slug) || {
     show_ratings: true,
     rating_average: 0,
     rating_count: 0,
-    user_rating: cleanRating
-  }, { saving: true, message: "Saving your rating..." });
+    user_rating: 0
+  };
+
+  if (Number(snapshot.user_rating ?? snapshot.userRating ?? 0) > 0) {
+    renderReaderRatingPanel(poem, snapshot, {
+      message: "Your rating is already saved permanently."
+    });
+    return;
+  }
+
+  if (!Number.isFinite(draftRating) || draftRating < 0.5 || draftRating > 5) {
+    renderReaderRatingPanel(poem, snapshot, {
+      message: "Choose a star rating first, then press the check."
+    });
+    return;
+  }
+
+  if (!client || typeof client.rpc !== "function") {
+    renderReaderRatingPanel(poem, snapshot, {
+      draftRating,
+      message: "Rating service is still loading. Please refresh and try again."
+    });
+    return;
+  }
+
+  renderReaderRatingPanel(poem, snapshot, {
+    draftRating,
+    saving: true,
+    message: "Saving your rating permanently..."
+  });
 
   try {
     const { data, error } = await client.rpc("rate_public_piece", {
       input_piece_slug: poem.slug,
       input_visitor_key: getPieceAnalyticsVisitorKey(),
-      input_rating_value: cleanRating,
+      input_rating_value: draftRating,
       input_unlock_code: getReaderRatingUnlockCode(poem) || null
     });
 
     if (error) throw error;
 
     if (!data || data.ok === false || data.show_ratings === false) {
-      renderReaderRatingPanel(poem, {
-        show_ratings: true,
-        rating_average: 0,
-        rating_count: 0,
-        user_rating: cleanRating
-      }, { message: (data && data.message) || "Rating could not be saved." });
+      renderReaderRatingPanel(poem, snapshot, {
+        draftRating,
+        message: (data && data.message) || "Rating could not be saved."
+      });
       return;
     }
 
-    renderReaderRatingPanel(poem, data, { message: "Rating saved. Thank you for reading." });
+    readerRatingDrafts.delete(poem.slug);
+    readerRatingSnapshots.set(poem.slug, data);
+
+    renderReaderRatingPanel(poem, data, {
+      message: data.message || "Rating saved permanently. Thank you for reading."
+    });
   } catch (error) {
     console.warn("Reader rating could not be saved:", error);
-    await loadReaderPieceRatingStats(poem);
+    renderReaderRatingPanel(poem, snapshot, {
+      draftRating,
+      message: "Rating could not be saved. Please try again."
+    });
   }
 }
 
@@ -377,7 +449,23 @@ if (!window.__safeReaderRatingsBound) {
     if (!targetPoem) return;
 
     event.preventDefault();
-    saveReaderPieceRating(targetPoem, rateButton.dataset.readerRate);
+    selectReaderPieceRating(targetPoem, rateButton.dataset.readerRate);
+  });
+
+  document.addEventListener("click", event => {
+    const saveButton = event.target.closest("[data-reader-rating-save]");
+    if (!saveButton) return;
+
+    const panel = saveButton.closest("[data-reader-rating-panel]");
+    const pieceSlug = panel?.dataset?.pieceSlug;
+    const targetPoem = (window.__safeCurrentReaderPoem && window.__safeCurrentReaderPoem.slug === pieceSlug)
+      ? window.__safeCurrentReaderPoem
+      : (Array.isArray(window.POEMS) ? window.POEMS : []).find(item => item.slug === pieceSlug);
+
+    if (!targetPoem) return;
+
+    event.preventDefault();
+    saveReaderPieceRating(targetPoem);
   });
 }
 
