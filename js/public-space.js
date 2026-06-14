@@ -100,7 +100,6 @@
 
   let activeCommentsPostId = "";
   let activeEditingCommentId = "";
-  let activeReplyParentCommentId = "";
   let activeComments = [];
   let commentsLoading = false;
 
@@ -678,7 +677,6 @@
     if (modal) closeModal(modal);
     activeCommentsPostId = "";
     activeEditingCommentId = "";
-    activeReplyParentCommentId = "";
     activeComments = [];
     commentsLoading = false;
   }
@@ -728,94 +726,12 @@
     return commentAgeMs(comment) <= COMMENT_EDIT_WINDOW_MS;
   }
 
-  function commentParentId(comment) {
-    return String((comment && (comment.parent_comment_id || comment.parentCommentId)) || "");
-  }
-
-  function isTopLevelComment(comment) {
-    return !commentParentId(comment);
-  }
-
-  function topLevelComments() {
-    return activeComments
-      .filter(comment => isTopLevelComment(comment))
-      .sort((left, right) => new Date(left.created_at || 0) - new Date(right.created_at || 0));
-  }
-
-  function repliesForComment(commentId) {
-    const cleanId = String(commentId || "");
-    if (!cleanId) return [];
-
-    return activeComments
-      .filter(comment => String(commentParentId(comment)) === cleanId)
-      .sort((left, right) => new Date(left.created_at || 0) - new Date(right.created_at || 0));
-  }
-
   function activeOwnComment() {
-    return activeComments.find(comment => (
-      isTopLevelComment(comment) &&
-      isCurrentUserComment(comment) &&
-      !comment.is_deleted
-    )) || null;
-  }
-
-  function activeOwnReply(parentCommentId) {
-    const cleanId = String(parentCommentId || "");
-    if (!cleanId) return null;
-
-    return activeComments.find(comment => (
-      String(commentParentId(comment)) === cleanId &&
-      isCurrentUserComment(comment) &&
-      !comment.is_deleted
-    )) || null;
-  }
-
-  function canReplyToComment(comment) {
-    if (!comment || !isTopLevelComment(comment) || comment.is_deleted || comment.is_hidden) return false;
-    if (!currentSession || !sessionToken()) return false;
-    if (isCurrentUserComment(comment)) return false;
-    if (activeOwnReply(comment.id)) return false;
-    return comment.can_reply !== false;
-  }
-
-  function resetCommentReplyMode() {
-    activeReplyParentCommentId = "";
+    return activeComments.find(comment => isCurrentUserComment(comment) && !comment.is_deleted) || null;
   }
 
   function resetCommentEditMode() {
     activeEditingCommentId = "";
-  }
-
-  function setCommentReplyMode(comment) {
-    if (!comment || !canReplyToComment(comment)) {
-      setCommentsMessage("You already replied to this comment or cannot reply to it.", "error");
-      return;
-    }
-
-    activeEditingCommentId = "";
-    activeReplyParentCommentId = String(comment.id || "");
-
-    closeCommentActionMenus();
-    closeCommentEmojiPanel();
-    setCommentsMessage("", "info");
-    renderCommentsModal();
-
-    window.setTimeout(() => {
-      const form = commentsModalNode(`[data-ps-reply-parent-comment-id="${activeReplyParentCommentId}"]`);
-      const textarea = form ? form.querySelector("textarea[name='comment']") : null;
-      const shouldAutoFocus = window.matchMedia && window.matchMedia("(min-width: 781px)").matches;
-
-      if (form && typeof form.scrollIntoView === "function") {
-        form.scrollIntoView({ block: "center", behavior: "smooth" });
-      }
-
-      if (textarea) {
-        textarea.value = "";
-        if (shouldAutoFocus) {
-          textarea.focus({ preventScroll: true });
-        }
-      }
-    }, 0);
   }
 
   function setCommentEditMode(comment) {
@@ -826,7 +742,6 @@
 
     const isAdminEditingAnother = !isCurrentUserComment(comment) && Boolean(comment.can_manage || isAdminMode);
 
-    activeReplyParentCommentId = "";
     activeEditingCommentId = String(comment.id || "");
     const textarea = commentsModalNode("textarea[name='comment']");
     if (textarea) {
@@ -964,13 +879,10 @@
   function renderCommentItem(comment) {
     const author = comment.author || {};
     const username = author.username || "someone";
-    const isReply = !isTopLevelComment(comment);
     const canDelete = Boolean(comment.can_manage || isAdminMode);
     const canHide = Boolean(comment.can_hide || isAdminMode);
     const canEdit = canEditComment(comment);
-    const canReply = !isReply && canReplyToComment(comment);
     const hiddenClass = comment.is_hidden ? " is-hidden-by-admin" : "";
-    const replyClass = isReply ? " is-reply" : "";
     const hiddenLabel = comment.is_hidden ? `<span class="ps-comment-hidden-label">Hidden</span>` : "";
     const createdAt = comment.created_at ? new Date(comment.created_at).getTime() : 0;
     const updatedAt = comment.updated_at ? new Date(comment.updated_at).getTime() : 0;
@@ -994,7 +906,7 @@
     const actionMenu = actions.length
       ? `
           <div class="ps-comment-menu" data-ps-comment-menu data-open="false">
-            <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle data-ps-comment-more aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><span></span><span></span><span></span></span></button>
+            <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><span></span><span></span><span></span></span></button>
             <div class="ps-comment-menu-popover" role="menu">
               ${actions.join("")}
             </div>
@@ -1002,34 +914,8 @@
         `
       : "";
 
-    const replyButton = canReply
-      ? `<button class="ps-comment-reply-button" type="button" data-ps-reply-comment="${escapeHtml(comment.id)}">Reply</button>`
-      : "";
-
-    const inlineReplyComposer = (!isReply && String(activeReplyParentCommentId || "") === String(comment.id || ""))
-      ? `
-          <form class="ps-inline-reply-form" data-ps-comments-form data-ps-reply-parent-comment-id="${escapeHtml(comment.id)}" novalidate>
-            <div class="ps-inline-reply-head">
-              <span>Reply to @${escapeHtml(username)}</span>
-              <button type="button" data-ps-cancel-comment-reply>Cancel reply</button>
-            </div>
-            <div class="ps-inline-reply-row">
-              <textarea name="comment" maxlength="500" rows="2" placeholder="Write a kind reply..."></textarea>
-              <button class="ps-inline-reply-send" type="submit" aria-label="Post reply" title="Post reply">
-                <span aria-hidden="true">➤</span>
-              </button>
-            </div>
-          </form>
-        `
-      : "";
-
-    const replies = isReply ? [] : repliesForComment(comment.id);
-    const repliesHtml = replies.length
-      ? `<div class="ps-comment-replies">${replies.map(renderCommentItem).join("")}</div>`
-      : "";
-
     return `
-        <article class="ps-comment-item${hiddenClass}${replyClass}" data-comment-id="${escapeHtml(comment.id)}">
+        <article class="ps-comment-item${hiddenClass}" data-comment-id="${escapeHtml(comment.id)}">
           <div class="ps-comment-meta">
             <div class="ps-comment-author-line">
               ${renderPublicSpaceUserButton(author, username)}
@@ -1041,17 +927,12 @@
             ${actionMenu}
           </div>
           <p>${escapeHtml(comment.body)}</p>
-          ${replyButton ? `<div class="ps-comment-action-row">${replyButton}</div>` : ""}
-          ${inlineReplyComposer}
-          ${repliesHtml}
         </article>
       `;
   }
 
-
   function renderCommentsModal() {
     const modal = ensureCommentsModal();
-    modal.classList.toggle("is-replying", Boolean(activeReplyParentCommentId));
     const post = currentCommentsPost();
     const title = modal.querySelector("[data-ps-comments-title]");
     const subtitle = modal.querySelector("[data-ps-comments-subtitle]");
@@ -1094,7 +975,7 @@
       } else if (!activeComments.length) {
         listNode.innerHTML = `<div class="ps-comments-empty">No comments yet.</div>`;
       } else {
-        listNode.innerHTML = topLevelComments().map(renderCommentItem).join("");
+        listNode.innerHTML = activeComments.map(renderCommentItem).join("");
       }
     }
 
@@ -1183,7 +1064,6 @@
 
     activeCommentsPostId = String(postId || "");
     activeEditingCommentId = "";
-    activeReplyParentCommentId = "";
     activeComments = [];
 
     const modal = ensureCommentsModal();
@@ -1218,7 +1098,6 @@
     const textarea = form.querySelector("textarea[name='comment']");
     const body = textarea ? textarea.value.trim() : "";
     const button = form.querySelector("button[type='submit']");
-    const formReplyParentId = form.dataset.psReplyParentCommentId || "";
 
     if (!activeCommentsPostId) {
       setCommentsMessage("Choose a post first.", "error");
@@ -1232,10 +1111,6 @@
 
     const editingComment = activeEditingCommentId
       ? activeComments.find(comment => String(comment.id || "") === String(activeEditingCommentId))
-      : null;
-
-    const replyParent = formReplyParentId && !editingComment
-      ? activeComments.find(comment => String(comment.id || "") === String(formReplyParentId))
       : null;
 
     if (activeEditingCommentId && !editingComment) {
@@ -1252,26 +1127,7 @@
       return;
     }
 
-    if (!editingComment && formReplyParentId && !replyParent) {
-      resetCommentReplyMode();
-      setCommentsMessage("That comment is no longer available to reply to.", "error");
-      renderCommentsModal();
-      return;
-    }
-
-    if (!editingComment && replyParent && activeOwnReply(replyParent.id)) {
-      setCommentsMessage("You already replied to this comment. Delete your reply before adding another.", "error");
-      renderCommentsModal();
-      return;
-    }
-
-    if (!editingComment && replyParent && !canReplyToComment(replyParent)) {
-      setCommentsMessage("You cannot reply to this comment.", "error");
-      renderCommentsModal();
-      return;
-    }
-
-    if (!editingComment && !replyParent && activeOwnComment()) {
+    if (!editingComment && activeOwnComment()) {
       setCommentsMessage("You already commented on this post. Delete your comment before adding another.", "error");
       renderCommentsModal();
       return;
@@ -1293,26 +1149,20 @@
         if (textarea) textarea.value = "";
 
         await refreshCommentsAndPosts(activeCommentsPostId);
-        setCommentsMessage(commentParentId(editingComment) ? "Reply updated." : "Comment updated.", "success");
+        setCommentsMessage("Comment updated.", "success");
       } else {
-        setCommentsMessage(replyParent ? "Posting reply..." : "Posting comment...", "info");
+        setCommentsMessage("Posting comment...", "info");
 
         await rpc("create_public_space_comment", {
           input_session_token: sessionToken(),
           input_post_id: activeCommentsPostId,
-          input_body: body,
-          input_parent_comment_id: replyParent ? replyParent.id : null
+          input_body: body
         });
 
-        resetCommentReplyMode();
         if (textarea) textarea.value = "";
 
         await refreshCommentsAndPosts(activeCommentsPostId);
-        setCommentsMessage(replyParent ? "Reply posted." : "Comment posted.", "success");
-
-        if (replyParent) {
-          await loadPublicSpaceNotifications({ silent: true });
-        }
+        setCommentsMessage("Comment posted.", "success");
       }
     } catch (error) {
       setCommentsMessage(getErrorMessage(error), "error");
@@ -1320,7 +1170,6 @@
       renderCommentsModal();
     }
   }
-
 
   async function handleCommentsModalClick(event) {
     const closeButton = event.target.closest("[data-ps-close-comments]");
@@ -1331,8 +1180,6 @@
     const editButton = event.target.closest("[data-ps-edit-comment]");
     const ownEditButton = event.target.closest("[data-ps-edit-own-comment]");
     const cancelEditButton = event.target.closest("[data-ps-cancel-comment-edit]");
-    const replyButton = event.target.closest("[data-ps-reply-comment]");
-    const cancelReplyButton = event.target.closest("[data-ps-cancel-comment-reply]");
     const emojiToggle = event.target.closest("[data-ps-comment-emoji-toggle]");
     const emojiButton = event.target.closest("[data-ps-comment-emoji]");
     const emojiPanelClick = event.target.closest("[data-ps-comment-emoji-panel]");
@@ -1347,26 +1194,6 @@
     if (!modal) {
       closeCommentActionMenus();
       closeCommentEmojiPanel();
-      return;
-    }
-
-    if (event.target.closest("textarea, input, select")) {
-      closeCommentActionMenus();
-      return;
-    }
-
-    if (cancelReplyButton) {
-      event.preventDefault();
-      resetCommentReplyMode();
-      setCommentsMessage("", "info");
-      renderCommentsModal();
-      return;
-    }
-
-    if (replyButton) {
-      event.preventDefault();
-      const targetComment = activeComments.find(comment => String(comment.id || "") === String(replyButton.dataset.psReplyComment || ""));
-      setCommentReplyMode(targetComment);
       return;
     }
 
@@ -1487,22 +1314,8 @@
   }
 
   function handleCommentsModalInput(event) {
-    const form = event.target.closest("[data-ps-comments-form]");
-    if (!form) return;
-
-    const textarea = event.target.matches && event.target.matches("textarea[name='comment']")
-      ? event.target
-      : form.querySelector("textarea[name='comment']");
-
-    if (!textarea) return;
-
-    const counter = form.querySelector("[data-ps-comment-count]")
-      || (!form.dataset.psReplyParentCommentId ? commentsModalNode("[data-ps-comment-count]") : null);
-
-    if (counter) counter.textContent = `${textarea.value.length}/500`;
-
-    // Never re-render the comments modal while typing.
-    // Re-rendering replaces the textarea node and drops focus/keyboard.
+    if (!event.target.closest("[data-ps-comments-form]")) return;
+    renderCommentsModal();
   }
 
   function handleCommentsModalKeydown(event) {
@@ -3179,8 +2992,6 @@
     if (!activeCommentsPostId || commentsLoading) return;
     if (!isCommentsModalVisible()) return;
     if (activeEditingCommentId) return;
-    if (activeReplyParentCommentId) return;
-    if (activeMobileTypingTarget()) return;
     if (isLocalCommentComposerActive()) return;
     if (isCommentTransientUiOpen()) return;
 
