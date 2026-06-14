@@ -100,6 +100,7 @@
 
   let activeCommentsPostId = "";
   let activeEditingCommentId = "";
+  let activeReplyParentCommentId = "";
   let activeComments = [];
   let commentsLoading = false;
 
@@ -677,6 +678,7 @@
     if (modal) closeModal(modal);
     activeCommentsPostId = "";
     activeEditingCommentId = "";
+    activeReplyParentCommentId = "";
     activeComments = [];
     commentsLoading = false;
   }
@@ -726,12 +728,81 @@
     return commentAgeMs(comment) <= COMMENT_EDIT_WINDOW_MS;
   }
 
+  function commentParentId(comment) {
+    return String((comment && (comment.parent_comment_id || comment.parentCommentId)) || "");
+  }
+
+  function isTopLevelComment(comment) {
+    return !commentParentId(comment);
+  }
+
+  function topLevelComments() {
+    return activeComments.filter(comment => isTopLevelComment(comment));
+  }
+
+  function repliesForComment(commentId) {
+    const cleanId = String(commentId || "");
+    if (!cleanId) return [];
+
+    return activeComments
+      .filter(comment => String(commentParentId(comment)) === cleanId)
+      .sort((left, right) => new Date(left.created_at || 0) - new Date(right.created_at || 0));
+  }
+
   function activeOwnComment() {
-    return activeComments.find(comment => isCurrentUserComment(comment) && !comment.is_deleted) || null;
+    return activeComments.find(comment => (
+      isTopLevelComment(comment) &&
+      isCurrentUserComment(comment) &&
+      !comment.is_deleted
+    )) || null;
+  }
+
+  function activeOwnReply(parentCommentId) {
+    const cleanId = String(parentCommentId || "");
+    if (!cleanId) return null;
+
+    return activeComments.find(comment => (
+      String(commentParentId(comment)) === cleanId &&
+      isCurrentUserComment(comment) &&
+      !comment.is_deleted
+    )) || null;
+  }
+
+  function canReplyToComment(comment) {
+    if (!comment || !isTopLevelComment(comment) || comment.is_deleted || comment.is_hidden) return false;
+    if (!currentSession || !sessionToken()) return false;
+    if (isCurrentUserComment(comment)) return false;
+    if (activeOwnReply(comment.id)) return false;
+    return comment.can_reply !== false;
+  }
+
+  function resetCommentReplyMode() {
+    activeReplyParentCommentId = "";
   }
 
   function resetCommentEditMode() {
     activeEditingCommentId = "";
+  }
+
+  function setCommentReplyMode(comment) {
+    if (!comment || !canReplyToComment(comment)) {
+      setCommentsMessage("You already replied to this comment or cannot reply to it.", "error");
+      return;
+    }
+
+    activeEditingCommentId = "";
+    activeReplyParentCommentId = String(comment.id || "");
+
+    const textarea = commentsModalNode("textarea[name='comment']");
+    if (textarea) {
+      textarea.value = "";
+      textarea.focus({ preventScroll: true });
+      keepMobileTypingTargetVisible(textarea);
+    }
+
+    closeCommentActionMenus();
+    setCommentsMessage(`Replying to @${(comment.author && comment.author.username) || "someone"}.`, "info");
+    renderCommentsModal();
   }
 
   function setCommentEditMode(comment) {
@@ -742,6 +813,7 @@
 
     const isAdminEditingAnother = !isCurrentUserComment(comment) && Boolean(comment.can_manage || isAdminMode);
 
+    activeReplyParentCommentId = "";
     activeEditingCommentId = String(comment.id || "");
     const textarea = commentsModalNode("textarea[name='comment']");
     if (textarea) {
@@ -760,6 +832,7 @@
 
     renderCommentsModal();
   }
+
 
   function closeCommentEmojiPanel() {
     const panel = commentsModalNode("[data-ps-comment-emoji-panel]");
@@ -879,10 +952,13 @@
   function renderCommentItem(comment) {
     const author = comment.author || {};
     const username = author.username || "someone";
+    const isReply = !isTopLevelComment(comment);
     const canDelete = Boolean(comment.can_manage || isAdminMode);
     const canHide = Boolean(comment.can_hide || isAdminMode);
     const canEdit = canEditComment(comment);
+    const canReply = !isReply && canReplyToComment(comment);
     const hiddenClass = comment.is_hidden ? " is-hidden-by-admin" : "";
+    const replyClass = isReply ? " is-reply" : "";
     const hiddenLabel = comment.is_hidden ? `<span class="ps-comment-hidden-label">Hidden</span>` : "";
     const createdAt = comment.created_at ? new Date(comment.created_at).getTime() : 0;
     const updatedAt = comment.updated_at ? new Date(comment.updated_at).getTime() : 0;
@@ -890,6 +966,10 @@
     const editedLabel = isEdited ? `<span class="ps-comment-date">Edited</span>` : "";
     const dateLabel = escapeHtml(postDateDisplayLabel(comment.created_at) || formatDate(comment.created_at));
     const actions = [];
+
+    if (canReply) {
+      actions.push(`<button type="button" data-ps-reply-comment="${escapeHtml(comment.id)}">Reply</button>`);
+    }
 
     if (canEdit) {
       actions.push(`<button type="button" data-ps-edit-comment="${escapeHtml(comment.id)}">Edit</button>`);
@@ -906,7 +986,7 @@
     const actionMenu = actions.length
       ? `
           <div class="ps-comment-menu" data-ps-comment-menu data-open="false">
-            <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><span></span><span></span><span></span></span></button>
+            <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><i></i><i></i><i></i></span></button>
             <div class="ps-comment-menu-popover" role="menu">
               ${actions.join("")}
             </div>
@@ -914,8 +994,13 @@
         `
       : "";
 
+    const replies = isReply ? [] : repliesForComment(comment.id);
+    const repliesHtml = replies.length
+      ? `<div class="ps-comment-replies">${replies.map(renderCommentItem).join("")}</div>`
+      : "";
+
     return `
-        <article class="ps-comment-item${hiddenClass}" data-comment-id="${escapeHtml(comment.id)}">
+        <article class="ps-comment-item${hiddenClass}${replyClass}" data-comment-id="${escapeHtml(comment.id)}" data-parent-comment-id="${escapeHtml(commentParentId(comment))}">
           <div class="ps-comment-meta">
             <div class="ps-comment-author-line">
               ${renderPublicSpaceUserButton(author, username)}
@@ -927,9 +1012,11 @@
             ${actionMenu}
           </div>
           <p>${escapeHtml(comment.body)}</p>
+          ${repliesHtml}
         </article>
       `;
   }
+
 
   function renderCommentsModal() {
     const modal = ensureCommentsModal();
@@ -946,7 +1033,15 @@
     const emojiToggle = modal.querySelector("[data-ps-comment-emoji-toggle]");
     const emojiPanel = modal.querySelector("[data-ps-comment-emoji-panel]");
 
-    const ownComment = activeOwnComment();
+    let replyParent = activeReplyParentCommentId
+      ? activeComments.find(comment => String(comment.id || "") === String(activeReplyParentCommentId))
+      : null;
+
+    if (activeReplyParentCommentId && !replyParent) {
+      activeReplyParentCommentId = "";
+      replyParent = null;
+    }
+
     const editingComment = activeEditingCommentId
       ? activeComments.find(comment => String(comment.id || "") === String(activeEditingCommentId))
       : null;
@@ -956,6 +1051,9 @@
     }
 
     const isEditing = Boolean(editingComment);
+    const isEditingReply = Boolean(editingComment && !isTopLevelComment(editingComment));
+    const isReplying = Boolean(replyParent && !isEditing);
+    const ownComment = isReplying ? activeOwnReply(replyParent.id) : activeOwnComment();
     const alreadyCommented = Boolean(ownComment && !isEditing);
     const canUseForm = Boolean(currentSession && sessionToken() && !commentsLoading && (!alreadyCommented || isEditing));
     const length = textarea ? textarea.value.length : 0;
@@ -970,39 +1068,58 @@
     }
 
     if (listNode) {
+      const roots = topLevelComments();
+
       if (commentsLoading) {
         listNode.innerHTML = `<div class="ps-comments-empty">Loading comments...</div>`;
-      } else if (!activeComments.length) {
+      } else if (!roots.length) {
         listNode.innerHTML = `<div class="ps-comments-empty">No comments yet.</div>`;
       } else {
-        listNode.innerHTML = activeComments.map(renderCommentItem).join("");
+        listNode.innerHTML = roots.map(renderCommentItem).join("");
       }
     }
 
     if (label) {
-      label.textContent = isEditing ? "Edit your comment" : "Add a comment";
+      if (isEditing) {
+        label.textContent = isEditingReply ? "Edit your reply" : "Edit your comment";
+      } else if (isReplying) {
+        label.textContent = `Reply to @${(replyParent.author && replyParent.author.username) || "someone"}`;
+      } else {
+        label.textContent = "Add a comment";
+      }
     }
 
     if (textarea) {
       textarea.disabled = !canUseForm;
 
       if (alreadyCommented && ownComment && canEditComment(ownComment)) {
-        textarea.placeholder = "You already commented. you can edit your comment within 30minutes";
+        textarea.placeholder = isReplying
+          ? "You already replied. You can edit your reply within 30 minutes."
+          : "You already commented. You can edit your comment within 30 minutes.";
       } else if (alreadyCommented) {
-        textarea.placeholder = "You already commented. Delete your comment before adding another.";
+        textarea.placeholder = isReplying
+          ? "You already replied to this comment. Delete your reply before adding another."
+          : "You already commented. Delete your comment before adding another.";
+      } else if (isReplying) {
+        textarea.placeholder = "Write a kind reply...";
       } else {
         textarea.placeholder = isEditing ? "Edit your kind comment..." : "Write a kind comment...";
       }
     }
+
     if (counter) counter.textContent = `${length}/500`;
 
     if (submitButton) {
-      const submitLabel = isEditing ? "Save changes" : (alreadyCommented ? "Already commented" : "Post comment");
+      const submitLabel = isEditing
+        ? "Save changes"
+        : (alreadyCommented ? (isReplying ? "Already replied" : "Already commented") : (isReplying ? "Post reply" : "Post comment"));
+
       submitButton.innerHTML = `<span aria-hidden="true">${isEditing ? "✓" : "➤"}</span>`;
       submitButton.setAttribute("aria-label", submitLabel);
       submitButton.setAttribute("title", submitLabel);
       submitButton.disabled = !canUseForm || length < 1 || length > 500;
     }
+
     if (emojiToggle) {
       emojiToggle.disabled = !canUseForm;
       emojiToggle.setAttribute("aria-expanded", emojiPanel && !emojiPanel.hidden ? "true" : "false");
@@ -1015,11 +1132,14 @@
     if (note) {
       if (isEditing) {
         note.innerHTML = `<button type="button" data-ps-cancel-comment-edit>Cancel edit</button>`;
+      } else if (isReplying) {
+        note.innerHTML = `<span class="ps-replying-to">Replying to @${escapeHtml((replyParent.author && replyParent.author.username) || "someone")}</span> <button type="button" data-ps-cancel-comment-reply>Cancel reply</button>`;
       } else {
         note.innerHTML = "";
       }
     }
   }
+
 
   async function loadCommentsForPost(postId, showLoading = true) {
     activeCommentsPostId = String(postId || "");
@@ -1064,6 +1184,7 @@
 
     activeCommentsPostId = String(postId || "");
     activeEditingCommentId = "";
+    activeReplyParentCommentId = "";
     activeComments = [];
 
     const modal = ensureCommentsModal();
@@ -1113,6 +1234,10 @@
       ? activeComments.find(comment => String(comment.id || "") === String(activeEditingCommentId))
       : null;
 
+    const replyParent = activeReplyParentCommentId && !editingComment
+      ? activeComments.find(comment => String(comment.id || "") === String(activeReplyParentCommentId))
+      : null;
+
     if (activeEditingCommentId && !editingComment) {
       resetCommentEditMode();
       setCommentsMessage("That comment is no longer available to edit.", "error");
@@ -1127,7 +1252,26 @@
       return;
     }
 
-    if (!editingComment && activeOwnComment()) {
+    if (!editingComment && activeReplyParentCommentId && !replyParent) {
+      resetCommentReplyMode();
+      setCommentsMessage("That comment is no longer available to reply to.", "error");
+      renderCommentsModal();
+      return;
+    }
+
+    if (!editingComment && replyParent && activeOwnReply(replyParent.id)) {
+      setCommentsMessage("You already replied to this comment. Delete your reply before adding another.", "error");
+      renderCommentsModal();
+      return;
+    }
+
+    if (!editingComment && replyParent && !canReplyToComment(replyParent)) {
+      setCommentsMessage("You cannot reply to this comment.", "error");
+      renderCommentsModal();
+      return;
+    }
+
+    if (!editingComment && !replyParent && activeOwnComment()) {
       setCommentsMessage("You already commented on this post. Delete your comment before adding another.", "error");
       renderCommentsModal();
       return;
@@ -1149,20 +1293,22 @@
         if (textarea) textarea.value = "";
 
         await refreshCommentsAndPosts(activeCommentsPostId);
-        setCommentsMessage("Comment updated.", "success");
+        setCommentsMessage(commentParentId(editingComment) ? "Reply updated." : "Comment updated.", "success");
       } else {
-        setCommentsMessage("Posting comment...", "info");
+        setCommentsMessage(replyParent ? "Posting reply..." : "Posting comment...", "info");
 
         await rpc("create_public_space_comment", {
           input_session_token: sessionToken(),
           input_post_id: activeCommentsPostId,
-          input_body: body
+          input_body: body,
+          input_parent_comment_id: replyParent ? replyParent.id : null
         });
 
+        resetCommentReplyMode();
         if (textarea) textarea.value = "";
 
         await refreshCommentsAndPosts(activeCommentsPostId);
-        setCommentsMessage("Comment posted.", "success");
+        setCommentsMessage(replyParent ? "Reply posted." : "Comment posted.", "success");
       }
     } catch (error) {
       setCommentsMessage(getErrorMessage(error), "error");
@@ -1171,6 +1317,7 @@
     }
   }
 
+
   async function handleCommentsModalClick(event) {
     const closeButton = event.target.closest("[data-ps-close-comments]");
     const menuToggle = event.target.closest("[data-ps-comment-menu-toggle]");
@@ -1178,8 +1325,10 @@
     const deleteButton = event.target.closest("[data-ps-delete-comment]");
     const hideButton = event.target.closest("[data-ps-toggle-comment-hidden]");
     const editButton = event.target.closest("[data-ps-edit-comment]");
+    const replyButton = event.target.closest("[data-ps-reply-comment]");
     const ownEditButton = event.target.closest("[data-ps-edit-own-comment]");
     const cancelEditButton = event.target.closest("[data-ps-cancel-comment-edit]");
+    const cancelReplyButton = event.target.closest("[data-ps-cancel-comment-reply]");
     const emojiToggle = event.target.closest("[data-ps-comment-emoji-toggle]");
     const emojiButton = event.target.closest("[data-ps-comment-emoji]");
     const emojiPanelClick = event.target.closest("[data-ps-comment-emoji-panel]");
@@ -1194,6 +1343,23 @@
     if (!modal) {
       closeCommentActionMenus();
       closeCommentEmojiPanel();
+      return;
+    }
+
+    if (cancelReplyButton) {
+      event.preventDefault();
+      resetCommentReplyMode();
+      const textarea = commentsModalNode("textarea[name='comment']");
+      if (textarea) textarea.value = "";
+      setCommentsMessage("Reply cancelled.", "info");
+      renderCommentsModal();
+      return;
+    }
+
+    if (replyButton) {
+      event.preventDefault();
+      const comment = activeComments.find(item => String(item.id || "") === String(replyButton.dataset.psReplyComment || ""));
+      setCommentReplyMode(comment);
       return;
     }
 
