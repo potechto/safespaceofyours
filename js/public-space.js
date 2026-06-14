@@ -876,6 +876,83 @@
     renderCommentsModal();
   }
 
+  const COMMENT_REACTION_EMOJIS = ["❤️", "😂", "😮", "😢", "🙏", "🔥", "✨", "🌻"];
+
+  function normalizeCommentReactions(comment) {
+    const raw = Array.isArray(comment && comment.reactions) ? comment.reactions : [];
+
+    return raw
+      .map(reaction => ({
+        emoji: String(reaction.emoji || ""),
+        count: Number(reaction.count || 0),
+        reactedByMe: Boolean(reaction.reacted_by_me || reaction.reactedByMe)
+      }))
+      .filter(reaction => reaction.emoji && reaction.count > 0);
+  }
+
+  function renderCommentReactions(comment) {
+    const commentId = escapeHtml(comment.id || "");
+    const reactions = normalizeCommentReactions(comment);
+    const used = new Set(reactions.map(reaction => reaction.emoji));
+    const reactionChips = reactions.map(reaction => `
+      <button class="ps-comment-reaction-chip${reaction.reactedByMe ? " is-reacted-by-me" : ""}" type="button" data-ps-toggle-comment-reaction="${commentId}" data-emoji="${escapeHtml(reaction.emoji)}" aria-label="React ${escapeHtml(reaction.emoji)}">
+        <span aria-hidden="true">${escapeHtml(reaction.emoji)}</span>
+        <strong>${reaction.count}</strong>
+      </button>
+    `).join("");
+
+    const quickButtons = COMMENT_REACTION_EMOJIS
+      .filter(emoji => !used.has(emoji))
+      .map(emoji => `
+        <button type="button" data-ps-toggle-comment-reaction="${commentId}" data-emoji="${escapeHtml(emoji)}" aria-label="React ${escapeHtml(emoji)}">${escapeHtml(emoji)}</button>
+      `)
+      .join("");
+
+    return `
+      <div class="ps-comment-reaction-row" data-ps-comment-reaction-row="${commentId}">
+        <div class="ps-comment-reaction-stack">${reactionChips}</div>
+        <details class="ps-comment-reaction-picker">
+          <summary aria-label="Add reaction">😊</summary>
+          <div class="ps-comment-reaction-palette" role="group" aria-label="Comment reactions">
+            ${quickButtons || COMMENT_REACTION_EMOJIS.map(emoji => `<button type="button" data-ps-toggle-comment-reaction="${commentId}" data-emoji="${escapeHtml(emoji)}" aria-label="React ${escapeHtml(emoji)}">${escapeHtml(emoji)}</button>`).join("")}
+          </div>
+        </details>
+      </div>
+    `;
+  }
+
+  async function handleCommentReactionClick(button) {
+    if (!button) return;
+
+    if (!currentSession || !sessionToken()) {
+      closeCommentsModal();
+      showAuth("login");
+      return;
+    }
+
+    const commentId = String(button.dataset.psToggleCommentReaction || "");
+    const emoji = String(button.dataset.emoji || "");
+
+    if (!commentId || !emoji) return;
+
+    button.disabled = true;
+
+    try {
+      await rpc("toggle_public_space_comment_reaction", {
+        input_session_token: sessionToken(),
+        input_comment_id: commentId,
+        input_emoji: emoji
+      });
+
+      await refreshCommentsAndPosts(activeCommentsPostId);
+      setCommentsMessage("", "info");
+    } catch (error) {
+      setCommentsMessage(getErrorMessage(error), "error");
+    } finally {
+      renderCommentsModal();
+    }
+  }
+
   function renderCommentItem(comment) {
     const author = comment.author || {};
     const username = author.username || "someone";
@@ -927,6 +1004,7 @@
             ${actionMenu}
           </div>
           <p>${escapeHtml(comment.body)}</p>
+          ${renderCommentReactions(comment)}
         </article>
       `;
   }
@@ -1180,6 +1258,7 @@
     const editButton = event.target.closest("[data-ps-edit-comment]");
     const ownEditButton = event.target.closest("[data-ps-edit-own-comment]");
     const cancelEditButton = event.target.closest("[data-ps-cancel-comment-edit]");
+    const reactionButton = event.target.closest("[data-ps-toggle-comment-reaction]");
     const emojiToggle = event.target.closest("[data-ps-comment-emoji-toggle]");
     const emojiButton = event.target.closest("[data-ps-comment-emoji]");
     const emojiPanelClick = event.target.closest("[data-ps-comment-emoji-panel]");
@@ -1194,6 +1273,12 @@
     if (!modal) {
       closeCommentActionMenus();
       closeCommentEmojiPanel();
+      return;
+    }
+
+    if (reactionButton) {
+      event.preventDefault();
+      await handleCommentReactionClick(reactionButton);
       return;
     }
 
