@@ -2163,3 +2163,31 @@
     margin-top: 0.12rem !important;
   }
 }
+
+/* V36 Public Space active presence indicator */
+.public-space-body .ps-user-link,
+.public-space-body .ps-user-name {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.22rem !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-active-dot {
+  display: inline-block !important;
+  width: 0.44rem !important;
+  height: 0.44rem !important;
+  flex: 0 0 0.44rem !important;
+  border-radius: 999px !important;
+  background: #28ff91 !important;
+  box-shadow: 0 0 0 2px rgba(40, 255, 145, 0.16), 0 0 12px rgba(40, 255, 145, 0.75) !important;
+  transform: translateY(0.02rem) !important;
+}
+
+.public-space-body .ps-profile-heading .ps-active-dot,
+.public-space-body .ps-admin-user-main .ps-active-dot {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+  flex-basis: 0.5rem !important;
+}
+/* V36 Public Space active presence indicator END */

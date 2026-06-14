@@ -15,12 +15,14 @@
   };
 
   const POST_EDIT_WINDOW_MS = 30 * 60 * 1000;
+  const PUBLIC_SPACE_ACTIVE_WINDOW_MS = 2 * 60 * 1000;
+  const PUBLIC_SPACE_PRESENCE_TOUCH_MS = 25 * 1000;
 
   const PUBLIC_SPACE_BADGE_LIMIT = 3;
   const PUBLIC_SPACE_BADGE_OPTIONS = [
     { value: "Moderator", label: "Moderator", image: "Resources/moderator.png" },
     { value: "Admin", label: "Admin", image: "Resources/admin.png" },
-    { value: "Beta Tester", label: "Beta Tester", image: "Resources/betatester.png" },
+    { value: "tester", label: "tester", image: "Resources/betatester.png", aliases: ["Beta Tester"] },
     { value: "Premium", label: "Premium", image: "Resources/premiumacc.png" }
   ];
 
@@ -80,6 +82,7 @@
   let publicSpaceLiveRefreshTimer = null;
   let publicSpaceLiveRefreshInFlight = false;
   let publicSpaceLivePostsSnapshot = "";
+  let lastPublicSpacePresenceTouch = 0;
   let composeMode = "create";
   let editingPostId = null;
   const COMMENT_EDIT_WINDOW_MS = 30 * 60 * 1000;
@@ -1559,7 +1562,12 @@
 
   function badgeOptionFor(label) {
     const clean = normalizeBadgeValue(label);
-    return PUBLIC_SPACE_BADGE_OPTIONS.find(option => normalizeBadgeValue(option.value) === clean || normalizeBadgeValue(option.label) === clean) || null;
+    return PUBLIC_SPACE_BADGE_OPTIONS.find(option => {
+      const aliases = Array.isArray(option.aliases) ? option.aliases : [];
+      return normalizeBadgeValue(option.value) === clean
+        || normalizeBadgeValue(option.label) === clean
+        || aliases.some(alias => normalizeBadgeValue(alias) === clean);
+    }) || null;
   }
 
   function profileBadgeItems(user) {
@@ -1643,6 +1651,25 @@
     return String((user && user.username) || fallback || "someone").trim() || "someone";
   }
 
+  function isPublicSpaceUserActive(user) {
+    if (!user || user.is_disabled) return false;
+    if (user.is_active === true) return true;
+
+    const lastSeenAt = user.last_seen_at ? new Date(user.last_seen_at).getTime() : 0;
+    return Boolean(lastSeenAt && Date.now() - lastSeenAt <= PUBLIC_SPACE_ACTIVE_WINDOW_MS);
+  }
+
+  function renderPublicSpaceActiveDot(user) {
+    if (!isPublicSpaceUserActive(user)) return "";
+
+    return '<span class="ps-active-dot" title="Active now" aria-label="Active now"></span>';
+  }
+
+  function renderPublicSpaceUsernameStrong(user, fallbackUsername) {
+    const username = publicSpaceUsername(user, fallbackUsername);
+    return `<strong class="ps-user-name">@${escapeHtml(username)}${renderPublicSpaceActiveDot(user)}</strong>`;
+  }
+
   function publicUserProfileRoute(user) {
     const id = publicSpaceUserId(user);
     return id ? `user-${id.toLowerCase()}` : "profile";
@@ -1681,12 +1708,14 @@
     const id = publicSpaceUserId(user);
     const username = publicSpaceUsername(user, fallbackUsername);
     const badgeLabel = String((user && user.badge_label) || "").trim();
+    const lastSeenAt = String((user && user.last_seen_at) || "").trim();
+    const isActive = isPublicSpaceUserActive(user);
 
     if (!id) {
-      return `<strong>@${escapeHtml(username)}</strong>`;
+      return renderPublicSpaceUsernameStrong(user, username);
     }
 
-    return `<button class="ps-user-link" type="button" data-ps-author-anchor data-ps-open-user-profile data-user-id="${escapeHtml(id)}" data-username="${escapeHtml(username)}" data-badge-label="${escapeHtml(badgeLabel)}" aria-label="Open @${escapeHtml(username)} profile">@${escapeHtml(username)}</button>`;
+    return `<button class="ps-user-link" type="button" data-ps-author-anchor data-ps-open-user-profile data-user-id="${escapeHtml(id)}" data-username="${escapeHtml(username)}" data-badge-label="${escapeHtml(badgeLabel)}" data-last-seen-at="${escapeHtml(lastSeenAt)}" data-is-active="${isActive ? "true" : "false"}" aria-label="Open @${escapeHtml(username)} profile">@${escapeHtml(username)}${renderPublicSpaceActiveDot(user)}</button>`;
   }
 
   function rememberPublicProfileUser(user) {
@@ -1698,7 +1727,9 @@
       username: publicSpaceUsername(user),
       is_admin: Boolean(user && user.is_admin),
       is_premium: Boolean(user && user.is_premium),
-      badge_label: String((user && user.badge_label) || "").trim()
+      badge_label: String((user && user.badge_label) || "").trim(),
+      last_seen_at: String((user && user.last_seen_at) || "").trim(),
+      is_active: isPublicSpaceUserActive(user)
     };
 
     return activePublicProfileUser;
@@ -1708,7 +1739,9 @@
     return rememberPublicProfileUser({
       id: button ? button.dataset.userId : "",
       username: button ? button.dataset.username : "",
-      badge_label: button ? button.dataset.badgeLabel : ""
+      badge_label: button ? button.dataset.badgeLabel : "",
+      last_seen_at: button ? button.dataset.lastSeenAt : "",
+      is_active: button ? button.dataset.isActive === "true" : false
     });
   }
 
@@ -2002,7 +2035,7 @@
           <header class="ps-profile-hero">
             <div class="ps-profile-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
             <div class="ps-profile-heading">
-              <strong>@${escapeHtml(username)}</strong>
+              ${renderPublicSpaceUsernameStrong(user, username)}
               <span>Public Space profile</span>
               ${renderProfileBadges(user)}
             </div>
@@ -2088,7 +2121,7 @@
           <header class="ps-profile-hero ps-public-profile-hero">
             <div class="ps-profile-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
             <div class="ps-profile-heading">
-              <strong>@${escapeHtml(username)}</strong>
+              ${renderPublicSpaceUsernameStrong(user, username)}
               ${renderProfileBadges(user)}
             </div>
           </header>
@@ -2463,7 +2496,10 @@
       input.type = "hidden";
       input.hidden = true;
 
-      const selectedValues = splitBadgeLabels(input.value).map(normalizeBadgeValue);
+      const selectedValues = splitBadgeLabels(input.value).map(label => {
+        const option = badgeOptionFor(label);
+        return normalizeBadgeValue(option ? option.value : label);
+      });
 
       const picker = document.createElement("div");
       picker.className = "ps-badge-picker";
@@ -2749,12 +2785,42 @@
     return Boolean(root.querySelector("[data-ps-notifications-history]"));
   }
 
+  async function touchPublicSpacePresence(options = {}) {
+    if (!currentSession || !sessionToken()) return null;
+
+    const now = Date.now();
+    if (!options.force && now - lastPublicSpacePresenceTouch < PUBLIC_SPACE_PRESENCE_TOUCH_MS) {
+      return currentUser;
+    }
+
+    lastPublicSpacePresenceTouch = now;
+
+    try {
+      const result = await rpc("touch_public_space_presence", {
+        input_session_token: sessionToken()
+      });
+
+      if (result && result.ok && result.user) {
+        currentUser = result.user;
+        currentSession.user = result.user;
+        saveSession(currentSession);
+      }
+
+      return result;
+    } catch (error) {
+      if (!options.silent) throw error;
+      console.warn("Public Space presence update failed:", error);
+      return null;
+    }
+  }
+
   async function refreshPublicSpaceLiveData() {
     if (!currentSession || !sessionToken() || publicSpaceLiveRefreshInFlight) return [];
 
     publicSpaceLiveRefreshInFlight = true;
 
     try {
+      await touchPublicSpacePresence({ silent: true });
       const result = await rpc("list_public_space_posts", {
         input_session_token: sessionToken()
       });
@@ -3311,6 +3377,8 @@
       currentSession.user = data.user;
       saveSession(currentSession);
 
+      await touchPublicSpacePresence({ force: true, silent: true });
+
       await showMainSpace(`Welcome back, @${data.user.username}.`);
       await renderCurrentPublicSpaceRoute();
     } catch (error) {
@@ -3853,7 +3921,8 @@
             <article class="ps-admin-user-card ${isDisabled ? "is-disabled" : ""}" data-ps-admin-user-card data-user-id="${escapeHtml(user.id)}" data-ps-admin-is-admin="${isAdmin ? "true" : "false"}" data-ps-admin-is-disabled="${isDisabled ? "true" : "false"}" data-ps-admin-is-premium="${isPremium ? "true" : "false"}">
               <div class="ps-admin-user-main">
                 <div>
-                  <strong>@${escapeHtml(user.username || "user")}</strong>
+                  ${renderPublicSpaceUsernameStrong(user, user.username || "user")}
+                  <span>${isPublicSpaceUserActive(user) ? "Active now" : "Last seen " + escapeHtml(formatDate(user.last_seen_at) || "not yet")}</span>
                   <span>Joined ${escapeHtml(formatDate(user.created_at) || "recently")}</span>
                 </div>
                 <div class="ps-admin-user-pills" data-ps-admin-user-pills>
