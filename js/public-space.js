@@ -3841,25 +3841,74 @@
     setMessage(messageNode, status || "Admin controls ready.", "info");
   }
 
-  function renderAdminOverview() {
-    renderAdminInfoCards("Admin overview ready.", [
+  async function renderAdminOverview() {
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+
+    renderAdminInfoCards("Loading admin overview stats...", [
       {
-        title: "Registered users",
-        body: "View accounts, toggle premium, assign badges, disable or enable accounts, and reset passwords and PIN/key codes."
-      },
-      {
-        title: "Post moderation",
-        body: "Refresh the feed and use admin-only hide/delete controls directly on posts while in admin mode."
-      },
-      {
-        title: "Reports",
-        body: "Report queue UI is reserved here. Database-backed report creation will be connected after viewer flow is stable."
-      },
-      {
-        title: "Space settings",
-        body: "Current locked mode: text-only posts, 1,000-character composer limit, DB-backed accounts, admin-only controls."
+        title: "Loading overview",
+        body: "Please wait while Public Space stats are loaded."
       }
     ]);
+
+    try {
+      const users = await rpc("list_public_space_users", {
+        input_session_token: sessionToken()
+      });
+
+      const list = Array.isArray(users) ? users : [];
+      const stats = list.reduce((total, user) => {
+        const disabled = Boolean(user && user.is_disabled);
+        const admin = Boolean(user && user.is_admin);
+        const badges = splitBadgeLabels((user && user.badge_label) || "");
+        const premium = Boolean(user && user.is_premium) || badges.some(label => normalizeBadgeValue(label) === "premium");
+        const active = !disabled && isPublicSpaceUserActive(user);
+
+        total.users += 1;
+        if (active) total.active += 1;
+        if (!disabled && !active) total.idle += 1;
+        if (admin) total.admins += 1;
+        if (premium) total.premium += 1;
+        if (disabled) total.disabled += 1;
+
+        return total;
+      }, {
+        users: 0,
+        active: 0,
+        idle: 0,
+        admins: 0,
+        premium: 0,
+        disabled: 0
+      });
+
+      const accountLabel = stats.users === 1 ? "registered account" : "registered accounts";
+      const activeLabel = stats.active === 1 ? "user active now" : "users active now";
+      const idleLabel = stats.idle === 1 ? "enabled user idle" : "enabled users idle";
+      const adminLabel = stats.admins === 1 ? "admin account" : "admin accounts";
+      const premiumLabel = stats.premium === 1 ? "premium account" : "premium accounts";
+      const disabledLabel = stats.disabled === 1 ? "disabled account" : "disabled accounts";
+
+      renderAdminInfoCards("Admin overview stats ready.", [
+        { title: "Total users", body: String(stats.users) + " " + accountLabel },
+        { title: "Active now", body: String(stats.active) + " " + activeLabel },
+        { title: "Idle", body: String(stats.idle) + " " + idleLabel },
+        { title: "Admins", body: String(stats.admins) + " " + adminLabel },
+        { title: "Premium", body: String(stats.premium) + " " + premiumLabel },
+        { title: "Disabled", body: String(stats.disabled) + " " + disabledLabel },
+        {
+          title: "Manage accounts",
+          body: "Open Registered users to search, filter, assign badges, toggle access, or reset passwords and PIN/key codes."
+        }
+      ]);
+    } catch (error) {
+      renderAdminInfoCards("Admin overview failed to load.", [
+        {
+          title: "Stats unavailable",
+          body: "Open Registered users to manage accounts directly, then try Admin overview again."
+        }
+      ]);
+      setMessage(messageNode, getErrorMessage(error), "error");
+    }
   }
 
   function renderPostModerationAdmin() {
@@ -4467,7 +4516,7 @@
 
     try {
       if (action === "overview") {
-        renderAdminOverview();
+        await renderAdminOverview();
         return;
       }
 
