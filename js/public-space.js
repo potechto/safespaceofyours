@@ -801,7 +801,7 @@
     }
 
     closeCommentActionMenus();
-    setCommentsMessage(`Replying to @${(comment.author && comment.author.username) || "someone"}.`, "info");
+    clearCommentsMessage();
     renderCommentsModal();
   }
 
