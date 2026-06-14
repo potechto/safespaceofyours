@@ -2573,3 +2573,19 @@
   }
 }
 /* Q72A Admin post moderation list END */
+
+/* Q72B Safer post moderation actions */
+.public-space-body [data-ps-delete-post].is-processing,
+.public-space-body [data-ps-toggle-hidden].is-processing,
+.public-space-body [data-ps-heart-post].is-processing {
+  opacity: 0.72 !important;
+  cursor: wait !important;
+  transform: none !important;
+}
+
+.public-space-body [data-ps-delete-post]:disabled,
+.public-space-body [data-ps-toggle-hidden]:disabled,
+.public-space-body [data-ps-heart-post]:disabled {
+  pointer-events: none !important;
+}
+/* Q72B Safer post moderation actions END */

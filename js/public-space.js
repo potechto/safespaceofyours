@@ -3764,6 +3764,34 @@
     }
   }
 
+  function postDeleteConfirmText(postId) {
+    const post = postById(postId) || {};
+    const author = post.author || {};
+    const username = author.username || post.username || "this user";
+    const preview = adminModerationPostPreview(post.body || "");
+    const previewLine = preview ? `\n\nPreview: ${preview}` : "";
+
+    return `Delete this post by @${username}? This action cannot be undone.${previewLine}`;
+  }
+
+  function setPostActionLoading(button, label) {
+    if (!button) return "";
+    const previous = button.textContent || "";
+    button.disabled = true;
+    button.classList.add("is-processing");
+    button.setAttribute("aria-busy", "true");
+    if (label) button.textContent = label;
+    return previous;
+  }
+
+  function restorePostActionButton(button, previousLabel) {
+    if (!button) return;
+    button.disabled = false;
+    button.classList.remove("is-processing");
+    button.removeAttribute("aria-busy");
+    if (previousLabel) button.textContent = previousLabel;
+  }
+
   async function handleFeedClick(event) {
     const heartButton = event.target.closest("[data-ps-heart-post]");
     const deleteButton = event.target.closest("[data-ps-delete-post]");
@@ -3778,14 +3806,27 @@
     }
     if (!heartButton && !deleteButton && !hideButton) return;
 
+    event.preventDefault();
+
     if (!currentSession || !currentSession.session_token) {
       showAuth("login");
       return;
     }
 
+    if (deleteButton) {
+      const postId = deleteButton.dataset.psDeletePost || "";
+      if (!window.confirm(postDeleteConfirmText(postId))) {
+        setFeedStatus("Post delete cancelled.");
+        return;
+      }
+    }
+
+    let activeButton = heartButton || deleteButton || hideButton;
+    let previousLabel = "";
+
     try {
       if (heartButton) {
-        heartButton.disabled = true;
+        previousLabel = setPostActionLoading(heartButton, "Saving...");
         await rpc("toggle_public_space_heart", {
           input_session_token: sessionToken(),
           input_post_id: heartButton.dataset.psHeartPost
@@ -3793,7 +3834,8 @@
       }
 
       if (deleteButton) {
-        deleteButton.disabled = true;
+        previousLabel = setPostActionLoading(deleteButton, "Deleting...");
+        setFeedStatus("Deleting post...");
         await rpc("delete_public_space_post", {
           input_session_token: sessionToken(),
           input_post_id: deleteButton.dataset.psDeletePost
@@ -3801,8 +3843,9 @@
       }
 
       if (hideButton) {
-        hideButton.disabled = true;
         const isHidden = hideButton.dataset.hidden === "true";
+        previousLabel = setPostActionLoading(hideButton, isHidden ? "Unhiding..." : "Hiding...");
+        setFeedStatus(isHidden ? "Unhiding post..." : "Hiding post...");
         await rpc("admin_set_public_space_post_hidden", {
           input_session_token: sessionToken(),
           input_post_id: hideButton.dataset.psToggleHidden,
@@ -3811,7 +3854,11 @@
       }
 
       await refreshPublicSpaceLiveData();
+
+      if (deleteButton) setFeedStatus("Post deleted.");
+      if (hideButton) setFeedStatus(hideButton.dataset.hidden === "true" ? "Post unhidden." : "Post hidden.");
     } catch (error) {
+      restorePostActionButton(activeButton, previousLabel);
       setFeedStatus(getErrorMessage(error));
     }
   }
