@@ -10516,3 +10516,47 @@ body.ps-route-screen-active .ps-admin-screen-top,
   }
 }
 /* V2.0Q.63H global routed back arrow and clean public profile V3 END */
+
+
+/* Q73B public piece analytics stats UI */
+.piece-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  flex-wrap: wrap;
+  margin: 0.85rem 0 0;
+  color: rgba(255, 244, 251, 0.72);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.piece-stats-divider {
+  color: rgba(255, 244, 251, 0.38);
+  margin: 0 0.06rem;
+}
+
+.poem-info .piece-stats {
+  margin-top: 0.7rem;
+}
+
+.reader-piece-stats {
+  justify-content: center;
+  margin: 1rem auto 0;
+  padding: 0.52rem 0.78rem;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid rgba(255, 244, 251, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+@media (max-width: 560px) {
+  .reader-piece-stats {
+    justify-content: flex-start;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 18px;
+  }
+}
+/* Q73B public piece analytics stats UI END */

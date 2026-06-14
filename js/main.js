@@ -11,6 +11,8 @@ let activeCategory = "All";
 let visiblePoems = sortPoemsNewestFirst(Array.isArray(window.POEMS) ? window.POEMS : []);
 let visiblePieceCount = getInitialPieceLimit();
 
+
+let publicPieceAnalyticsStats = new Map();
 if (year) {
   year.textContent = new Date().getFullYear();
 }
@@ -120,6 +122,61 @@ function formatPeso(amount) {
   return `PHP ${numericAmount.toLocaleString("en-PH")}`;
 }
 
+function normalizePublicPieceStats(row = {}) {
+  return {
+    pieceSlug: String(row.piece_slug || row.slug || "").trim().toLowerCase(),
+    readCount: Math.max(0, Number(row.read_count ?? row.view_count ?? 0) || 0),
+    unlockCount: Math.max(0, Number(row.unlock_count ?? 0) || 0)
+  };
+}
+
+function getPublicPieceStats(slug) {
+  const key = String(slug || "").trim().toLowerCase();
+  return key ? publicPieceAnalyticsStats.get(key) || null : null;
+}
+
+function formatPieceStatsNumber(value) {
+  const count = Math.max(0, Number(value) || 0);
+  if (count >= 1000000) return `${(count / 1000000).toFixed(count >= 10000000 ? 0 : 1).replace(/\.0$/, "")}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1).replace(/\.0$/, "")}k`;
+  return count.toLocaleString("en-PH");
+}
+
+function buildPublicPieceStatsMarkup(stats) {
+  if (!stats) return "";
+
+  const reads = formatPieceStatsNumber(stats.readCount);
+  const unlocks = formatPieceStatsNumber(stats.unlockCount);
+
+  return `
+            <p class="piece-stats" aria-label="${escapeHTML(reads)} reads and ${escapeHTML(unlocks)} unlocks">
+              <span aria-hidden="true">👁</span> ${escapeHTML(reads)} reads
+              <span class="piece-stats-divider" aria-hidden="true">·</span>
+              <span aria-hidden="true">🔓</span> ${escapeHTML(unlocks)} unlocks
+            </p>`;
+}
+
+async function loadPublicPieceAnalyticsStats() {
+  if (!window.safeAdminClient || typeof window.safeAdminClient.rpc !== "function") return;
+
+  try {
+    const { data, error } = await window.safeAdminClient.rpc("list_public_piece_analytics_stats");
+    if (error) throw error;
+
+    const nextStats = new Map();
+
+    (Array.isArray(data) ? data : []).forEach(row => {
+      const stats = normalizePublicPieceStats(row);
+      if (stats.pieceSlug) nextStats.set(stats.pieceSlug, stats);
+    });
+
+    publicPieceAnalyticsStats = nextStats;
+    renderPoems();
+  } catch (error) {
+    console.warn("Public piece analytics stats could not be loaded:", error);
+  }
+}
+
 function renderPoems() {
   if (!poemGrid || !searchInput || !emptyState) return;
 
@@ -166,7 +223,9 @@ function renderPoems() {
             </div>
             <h3>${escapeHTML(poem.title)}</h3>
             <p>${escapeHTML(poem.excerpt)}</p>
-            <span class="read-more">${readText}</span>
+
+${buildPublicPieceStatsMarkup(getPublicPieceStats(poem.slug))}
+<span class="read-more">${readText}</span>
           </div>
         </a>
       </article>
@@ -1510,6 +1569,8 @@ repairVisibleSymbols();
 syncPublicPieceSettings();
 
 
+
+loadPublicPieceAnalyticsStats();
 /* V18T copy button feedback */
 (function setupSafeCopyButtonFeedback() {
   if (window.__safeCopyButtonFeedbackBound) return;

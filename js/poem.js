@@ -3,6 +3,7 @@ const readerCover = document.querySelector("#readerCover");
 const readerCategory = document.querySelector("#readerCategory");
 const readerTitle = document.querySelector("#readerTitle");
 const readerExcerpt = document.querySelector("#readerExcerpt");
+let readerStats = document.querySelector("#readerStats");
 const poemText = document.querySelector("#poemText");
 
 const prevPoem = document.querySelector("#prevPoem");
@@ -51,6 +52,71 @@ function formatPeso(amount) {
   if (!Number.isFinite(numericAmount) || numericAmount <= 0) return "";
   if (window.SafePieceSettings) return window.SafePieceSettings.formatPeso(numericAmount);
   return `PHP ${numericAmount.toLocaleString("en-PH")}`;
+}
+
+function formatPieceStatsNumber(value) {
+  const count = Math.max(0, Number(value) || 0);
+  if (count >= 1000000) return `${(count / 1000000).toFixed(count >= 10000000 ? 0 : 1).replace(/\.0$/, "")}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1).replace(/\.0$/, "")}k`;
+  return count.toLocaleString("en-PH");
+}
+
+function getOrCreateReaderStats() {
+  if (readerStats) return readerStats;
+
+  readerStats = document.createElement("p");
+  readerStats.id = "readerStats";
+  readerStats.className = "piece-stats reader-piece-stats";
+  readerStats.hidden = true;
+
+  if (readerExcerpt && readerExcerpt.parentElement) {
+    readerExcerpt.insertAdjacentElement("afterend", readerStats);
+  } else if (readerTitle && readerTitle.parentElement) {
+    readerTitle.insertAdjacentElement("afterend", readerStats);
+  }
+
+  return readerStats;
+}
+
+function renderReaderPieceStats(stats) {
+  const target = getOrCreateReaderStats();
+  if (!target || !stats) return;
+
+  const reads = formatPieceStatsNumber(stats.read_count ?? stats.view_count ?? 0);
+  const unlocks = formatPieceStatsNumber(stats.unlock_count ?? 0);
+
+  target.hidden = false;
+  target.innerHTML = `
+    <span aria-hidden="true">👁</span> ${escapeHTML(reads)} reads
+    <span class="piece-stats-divider" aria-hidden="true">·</span>
+    <span aria-hidden="true">🔓</span> ${escapeHTML(unlocks)} unlocks
+  `;
+  target.setAttribute("aria-label", `${reads} reads and ${unlocks} unlocks`);
+}
+
+async function loadReaderPieceAnalyticsStats(poem) {
+  if (!poem || !poem.slug) return;
+
+  try {
+    const client = await waitForProtectedReaderClient(1800);
+    if (!client || typeof client.rpc !== "function") return;
+
+    const { data, error } = await client.rpc("get_public_piece_analytics_stats", {
+      input_piece_slug: poem.slug
+    });
+
+    if (error || !data || data.ok === false) return;
+
+    renderReaderPieceStats(data);
+  } catch (error) {
+    console.warn("Reader piece analytics stats could not be loaded:", error);
+  }
+}
+
+function scheduleReaderPieceStatsRefresh(poem, delay = 0) {
+  window.setTimeout(() => {
+    loadReaderPieceAnalyticsStats(poem);
+  }, Math.max(0, Number(delay) || 0));
 }
 
 function getPoemAccess(poem) {
@@ -336,7 +402,8 @@ function setupUnlockForm(poem) {
     queuePieceAnalyticsEvent(poem, "unlock", {
       unlockCodeSnapshot: code
     });
-    poemText.innerHTML = buildUnlockedNotice() + formatPoem(protectedResult.full_text);
+        scheduleReaderPieceStatsRefresh(poem, 1200);
+poemText.innerHTML = buildUnlockedNotice() + formatPoem(protectedResult.full_text);
     window.scrollTo({ top: poemText.offsetTop - 120, behavior: "smooth" });
   });
 }
@@ -536,7 +603,9 @@ async function loadPoem() {
   const access = getPoemAccess(poem);
   queuePieceAnalyticsEvent(poem, "view");
 
-  try {
+    scheduleReaderPieceStatsRefresh(poem);
+  scheduleReaderPieceStatsRefresh(poem, 1200);
+try {
     if (access === "paid") {
       const savedCode = getSavedUnlockCode(poem.slug);
       const protectedResult = await fetchProtectedPieceText(poem, savedCode);
