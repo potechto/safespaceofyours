@@ -2699,3 +2699,114 @@
   color: #fff4fb !important;
 }
 /* Q75J restore public space comment menu dots END */
+
+
+/* Q75K FB-style inline public space comment replies */
+.public-space-body .ps-comment-item.is-reply {
+  margin-left: 1.15rem !important;
+  padding-top: 0.72rem !important;
+  padding-bottom: 0.72rem !important;
+  border-left: 2px solid rgba(255, 244, 251, 0.12) !important;
+}
+
+.public-space-body .ps-comment-replies {
+  display: grid !important;
+  gap: 0.55rem !important;
+  margin-top: 0.68rem !important;
+  padding-left: 0.7rem !important;
+}
+
+.public-space-body .ps-comment-action-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  margin-top: 0.48rem !important;
+}
+
+.public-space-body .ps-comment-reply-button,
+.public-space-body .ps-inline-reply-head button {
+  appearance: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  padding: 0 !important;
+  font: inherit !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+}
+
+.public-space-body .ps-comment-reply-button:hover,
+.public-space-body .ps-comment-reply-button:focus-visible,
+.public-space-body .ps-inline-reply-head button:hover,
+.public-space-body .ps-inline-reply-head button:focus-visible {
+  color: #fff4fb !important;
+  text-decoration: underline !important;
+}
+
+.public-space-body .ps-inline-reply-form {
+  display: grid !important;
+  gap: 0.52rem !important;
+  margin-top: 0.72rem !important;
+  padding: 0.72rem !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  background: rgba(255, 244, 251, 0.045) !important;
+}
+
+.public-space-body .ps-inline-reply-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.65rem !important;
+  flex-wrap: wrap !important;
+  color: rgba(255, 244, 251, 0.8) !important;
+  font-size: 0.83rem !important;
+  font-weight: 900 !important;
+}
+
+.public-space-body .ps-inline-reply-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: end !important;
+  gap: 0.55rem !important;
+}
+
+.public-space-body .ps-inline-reply-row textarea {
+  width: 100% !important;
+  min-height: 3.1rem !important;
+  max-height: 7rem !important;
+  margin: 0 !important;
+  resize: vertical !important;
+}
+
+.public-space-body .ps-inline-reply-send {
+  width: 2.65rem !important;
+  min-width: 2.65rem !important;
+  height: 2.65rem !important;
+  min-height: 2.65rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+}
+
+.public-space-body .ps-inline-reply-send span {
+  display: inline-block !important;
+  transform: translateX(1px) !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-comment-item.is-reply {
+    margin-left: 0.65rem !important;
+  }
+
+  .public-space-body .ps-comment-replies {
+    padding-left: 0.35rem !important;
+  }
+
+  .public-space-body .ps-inline-reply-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+  }
+}
+/* Q75K FB-style inline public space comment replies END */
