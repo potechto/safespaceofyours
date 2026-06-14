@@ -2433,3 +2433,143 @@
   }
 }
 /* Q71C Admin overview quick action buttons END */
+
+/* Q72A Admin post moderation list */
+.public-space-body .ps-admin-post-head {
+  margin-bottom: 0.62rem !important;
+}
+
+.public-space-body .ps-admin-post-summary {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0.5rem !important;
+  margin: 0 0 0.7rem !important;
+}
+
+.public-space-body .ps-admin-post-summary article {
+  display: grid !important;
+  gap: 0.15rem !important;
+  padding: 0.62rem 0.68rem !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 244, 251, 0.08), transparent 38%),
+    linear-gradient(145deg, rgba(34, 24, 44, 0.86), rgba(14, 8, 22, 0.9)) !important;
+}
+
+.public-space-body .ps-admin-post-summary strong {
+  font-size: 1.1rem !important;
+  line-height: 1 !important;
+}
+
+.public-space-body .ps-admin-post-summary span {
+  font-size: 0.68rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 220, 238, 0.7) !important;
+}
+
+.public-space-body .ps-admin-post-list {
+  display: grid !important;
+  gap: 0.58rem !important;
+}
+
+.public-space-body .ps-admin-post-card {
+  display: grid !important;
+  gap: 0.48rem !important;
+  padding: 0.72rem 0.78rem !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 244, 251, 0.08), transparent 36%),
+    linear-gradient(145deg, rgba(34, 24, 44, 0.9), rgba(13, 8, 22, 0.94)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 251, 0.08),
+    0 14px 36px rgba(0, 0, 0, 0.28) !important;
+}
+
+.public-space-body .ps-admin-post-card.is-hidden-by-admin {
+  border-color: rgba(255, 181, 118, 0.22) !important;
+}
+
+.public-space-body .ps-admin-post-card.is-deleted {
+  opacity: 0.62 !important;
+}
+
+.public-space-body .ps-admin-post-top,
+.public-space-body .ps-admin-post-foot {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: start !important;
+  gap: 0.55rem !important;
+}
+
+.public-space-body .ps-admin-post-top > div:first-child {
+  display: grid !important;
+  gap: 0.08rem !important;
+  min-width: 0 !important;
+}
+
+.public-space-body .ps-admin-post-top strong {
+  font-size: 0.9rem !important;
+  line-height: 1.05 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.public-space-body .ps-admin-post-top span,
+.public-space-body .ps-admin-post-foot > span {
+  font-size: 0.72rem !important;
+  color: rgba(255, 244, 251, 0.58) !important;
+}
+
+.public-space-body .ps-admin-post-card p {
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.9) !important;
+  line-height: 1.28 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.public-space-body .ps-admin-post-pills {
+  display: flex !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 0.22rem !important;
+}
+
+.public-space-body .ps-admin-post-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 0.34rem !important;
+}
+
+.public-space-body .ps-admin-post-actions button {
+  min-height: 1.8rem !important;
+  padding: 0.26rem 0.62rem !important;
+  border-radius: 999px !important;
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+}
+
+@media (max-width: 780px) {
+  .public-space-body .ps-admin-post-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .public-space-body .ps-admin-post-top,
+  .public-space-body .ps-admin-post-foot {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .public-space-body .ps-admin-post-pills,
+  .public-space-body .ps-admin-post-actions {
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-space-body .ps-admin-post-summary {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+/* Q72A Admin post moderation list END */

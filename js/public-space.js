@@ -3939,17 +3939,122 @@
     }
   }
 
+  function adminModerationPostPreview(body) {
+    const normalized = String(body || "").replace(/\s+/g, " ").trim();
+    if (!normalized) return "(empty post)";
+    return normalized.length > 190 ? normalized.slice(0, 187) + "..." : normalized;
+  }
+
+  function adminModerationPostStatusPills(post) {
+    const hidden = Boolean(post && post.is_hidden);
+    const deleted = Boolean(post && post.is_deleted);
+    const canManage = Boolean(post && post.can_manage) || isAdminMode;
+    const parts = [];
+
+    parts.push({ key: hidden ? "hidden" : "visible", label: hidden ? "Hidden" : "Visible", className: hidden ? "is-danger" : "is-ok" });
+    if (deleted) parts.push({ key: "deleted", label: "Deleted", className: "is-danger" });
+    if (canManage) parts.push({ key: "manageable", label: "Manageable", className: "" });
+
+    return parts.map(part => `<span class="ps-status-pill ${part.className || ""}" data-ps-admin-pill="${escapeHtml(part.key)}">${escapeHtml(part.label)}</span>`).join("");
+  }
+
+  function adminModerationPostActions(post) {
+    if (!post || !post.id || post.is_deleted) return "";
+
+    const postId = escapeHtml(post.id);
+    const isHidden = Boolean(post.is_hidden);
+    const hideLabel = isHidden ? "Unhide" : "Hide";
+
+    const hideButton = '<button type="button" data-ps-post-menu-action="hide" data-ps-toggle-hidden="' + postId + '" data-hidden="' + (isHidden ? 'true' : 'false') + '">' + hideLabel + '</button>';
+    const deleteButton = '<button type="button" data-ps-post-menu-action="delete" data-ps-delete-post="' + postId + '">Delete</button>';
+
+    return hideButton + deleteButton;
+  }
+
   function renderPostModerationAdmin() {
-    renderAdminInfoCards("Post moderation ready.", [
-      {
-        title: "Feed refreshed",
-        body: "Posts were reloaded. Admin-only hide/delete actions are available directly on each post card in the main feed."
-      },
-      {
-        title: "Next moderation upgrade",
-        body: "A dedicated moderation queue can be added after viewer posting, comments, and reports are stable."
-      }
-    ]);
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const results = adminResultsNode();
+    const sourcePosts = Array.isArray(latestPublicSpacePosts) ? latestPublicSpacePosts : [];
+    const list = sourcePosts.filter(post => post && post.id);
+
+    if (!results) return;
+
+    if (!list.length) {
+      renderAdminInfoCards("Post moderation ready.", [
+        {
+          title: "No posts found",
+          body: "There are no public posts to moderate yet."
+        },
+        {
+          title: "Moderation actions",
+          body: "Once posts exist, admins can hide, unhide, or delete them here using existing post moderation RPCs."
+        }
+      ]);
+      return;
+    }
+
+    const hiddenCount = list.filter(post => post && post.is_hidden).length;
+    const deletedCount = list.filter(post => post && post.is_deleted).length;
+    const visibleCount = list.length - hiddenCount - deletedCount;
+
+    results.innerHTML = `
+      <div class="ps-admin-results-head ps-admin-post-head">
+        <strong>Post moderation</strong>
+        <span>${list.length} total · ${visibleCount} visible · ${hiddenCount} hidden</span>
+      </div>
+      <div class="ps-admin-post-summary">
+        <article>
+          <strong>${list.length}</strong>
+          <span>Total posts</span>
+        </article>
+        <article>
+          <strong>${visibleCount}</strong>
+          <span>Visible</span>
+        </article>
+        <article>
+          <strong>${hiddenCount}</strong>
+          <span>Hidden</span>
+        </article>
+        <article>
+          <strong>${deletedCount}</strong>
+          <span>Deleted</span>
+        </article>
+      </div>
+      <div class="ps-admin-post-list" data-ps-admin-post-list>
+        ${list.map(post => {
+          const author = post.author || {};
+          const username = author.username || post.username || "unknown";
+          const postId = escapeHtml(post.id);
+          const created = post.created_at ? formatDate(post.created_at) : "Unknown date";
+          const updated = post.updated_at && post.updated_at !== post.created_at ? ` · updated ${formatDate(post.updated_at)}` : "";
+          const hiddenClass = post.is_hidden ? " is-hidden-by-admin" : "";
+          const deletedClass = post.is_deleted ? " is-deleted" : "";
+
+          return `
+            <article class="ps-admin-post-card${hiddenClass}${deletedClass}" data-ps-admin-post-card data-post-id="${postId}">
+              <div class="ps-admin-post-top">
+                <div>
+                  <strong>@${escapeHtml(username)}</strong>
+                  <span>${escapeHtml(created + updated)}</span>
+                </div>
+                <div class="ps-admin-post-pills">
+                  ${adminModerationPostStatusPills(post)}
+                </div>
+              </div>
+              <p>${escapeHtml(adminModerationPostPreview(post.body))}</p>
+              <div class="ps-admin-post-foot">
+                <span>${Number(post.heart_count || 0)} hearts · ${Number(post.comment_count || 0)} comments</span>
+                <div class="ps-admin-post-actions">
+                  ${adminModerationPostActions(post)}
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    setMessage(messageNode, `Post moderation: ${list.length} loaded`, "success");
   }
 
   function renderAdminReports() {
@@ -4497,8 +4602,15 @@
       }
 
       if (postMenuAction.dataset.psPostMenuAction === "delete" || postMenuAction.dataset.psPostMenuAction === "hide") {
+        const isAdminModerationAction = Boolean(postMenuAction.closest("[data-ps-admin-post-list]"));
         closePostMenus();
         await handleFeedClick(event);
+
+        if (isAdminModerationAction) {
+          await loadPosts();
+          renderPostModerationAdmin();
+        }
+
         return;
       }
     }
