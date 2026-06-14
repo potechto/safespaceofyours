@@ -3,6 +3,7 @@ const searchInput = document.querySelector("#searchInput");
 const filterButtons = document.querySelector("#filterButtons");
 const emptyState = document.querySelector("#emptyState");
 const loadMorePiecesBtn = document.querySelector("#loadMorePieces");
+const trendingPieces = document.querySelector("#trendingPieces");
 const year = document.querySelector("#year");
 
 const PIECES_LOAD_MORE_STEP = 8;
@@ -142,6 +143,10 @@ function formatPieceStatsNumber(value) {
   return count.toLocaleString("en-PH");
 }
 
+function getUnlockStatsIcon(unlockCount) {
+  return Number(unlockCount) > 0 ? "🔓" : "🔒";
+}
+
 function buildPublicPieceStatsMarkup(stats) {
   if (!stats) return "";
 
@@ -152,8 +157,118 @@ function buildPublicPieceStatsMarkup(stats) {
             <p class="piece-stats" aria-label="${escapeHTML(reads)} reads and ${escapeHTML(unlocks)} unlocks">
               <span aria-hidden="true">👁</span> ${escapeHTML(reads)} reads
               <span class="piece-stats-divider" aria-hidden="true">·</span>
-              <span aria-hidden="true">🔓</span> ${escapeHTML(unlocks)} unlocks
+              <span aria-hidden="true">${getUnlockStatsIcon(stats.unlockCount)}</span> ${escapeHTML(unlocks)} unlocks
             </p>`;
+}
+
+function getPiecesWithAnalytics() {
+  return (Array.isArray(visiblePoems) ? visiblePoems : [])
+    .map(piece => {
+      const stats = getPublicPieceStats(piece.slug) || { readCount: 0, unlockCount: 0 };
+      return {
+        piece,
+        stats,
+        score: Number(stats.readCount || 0) + (Number(stats.unlockCount || 0) * 5)
+      };
+    })
+    .filter(item => item.piece && item.piece.slug && (item.stats.readCount > 0 || item.stats.unlockCount > 0));
+}
+
+function sortTrendingPieces(items = []) {
+  return [...items].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.stats.readCount !== a.stats.readCount) return b.stats.readCount - a.stats.readCount;
+    return piecePublishedTime(b.piece) - piecePublishedTime(a.piece);
+  });
+}
+
+function sortMostReadPieces(items = []) {
+  return [...items].sort((a, b) => {
+    if (b.stats.readCount !== a.stats.readCount) return b.stats.readCount - a.stats.readCount;
+    if (b.stats.unlockCount !== a.stats.unlockCount) return b.stats.unlockCount - a.stats.unlockCount;
+    return piecePublishedTime(b.piece) - piecePublishedTime(a.piece);
+  });
+}
+
+function sortMostUnlockedPieces(items = []) {
+  return [...items].sort((a, b) => {
+    if (b.stats.unlockCount !== a.stats.unlockCount) return b.stats.unlockCount - a.stats.unlockCount;
+    if (b.stats.readCount !== a.stats.readCount) return b.stats.readCount - a.stats.readCount;
+    return piecePublishedTime(b.piece) - piecePublishedTime(a.piece);
+  });
+}
+
+function buildTrendingPieceCard(item, rank) {
+  const piece = item.piece;
+  const stats = item.stats;
+  const access = getPoemAccess(piece);
+  const reads = formatPieceStatsNumber(stats.readCount);
+  const unlocks = formatPieceStatsNumber(stats.unlockCount);
+
+  return [
+    '<a class="trending-piece-card" href="poem.html?slug=' + encodeURIComponent(piece.slug) + '">',
+    '  <span class="trending-rank" aria-hidden="true">' + escapeHTML(String(rank)) + '</span>',
+    '  <span class="trending-piece-copy">',
+    '    <span class="trending-piece-meta">' + escapeHTML(piece.category || "Piece") + " · " + (access === "paid" ? "Premium" : "Free") + '</span>',
+    '    <strong>' + escapeHTML(piece.title || "Untitled piece") + '</strong>',
+    '    <span class="trending-piece-stats">',
+    '      <span aria-hidden="true">👁</span> ' + escapeHTML(reads),
+    '      <span aria-hidden="true">·</span>',
+    '      <span aria-hidden="true">' + getUnlockStatsIcon(stats.unlockCount) + '</span> ' + escapeHTML(unlocks),
+    '    </span>',
+    '  </span>',
+    '</a>'
+  ].join("");
+}
+
+function buildTrendingColumn(title, subtitle, items) {
+  const cards = items.length
+    ? items.map((item, index) => buildTrendingPieceCard(item, index + 1)).join("")
+    : '<p class="trending-empty">Stats are still warming up.</p>';
+
+  return [
+    '<article class="trending-column">',
+    '  <div class="trending-column-heading">',
+    '    <p class="eyebrow">' + escapeHTML(subtitle) + '</p>',
+    '    <h3>' + escapeHTML(title) + '</h3>',
+    '  </div>',
+    '  <div class="trending-list">',
+    cards,
+    '  </div>',
+    '</article>'
+  ].join("");
+}
+
+function renderTrendingPieces() {
+  if (!trendingPieces) return;
+
+  const piecesWithStats = getPiecesWithAnalytics();
+
+  if (!piecesWithStats.length) {
+    trendingPieces.hidden = true;
+    trendingPieces.innerHTML = "";
+    return;
+  }
+
+  const trending = sortTrendingPieces(piecesWithStats).slice(0, 3);
+  const mostRead = sortMostReadPieces(piecesWithStats).slice(0, 3);
+  const mostUnlocked = sortMostUnlockedPieces(piecesWithStats).slice(0, 3);
+
+  trendingPieces.hidden = false;
+  trendingPieces.innerHTML = [
+    '<div class="trending-heading">',
+    '  <div>',
+    '    <p class="eyebrow">Reader pulse</p>',
+    '    <h2>Trending pieces</h2>',
+    '  </div>',
+    '  <p>Real reads and unlocks from the archive. No fake boosts, just actual reader activity.</p>',
+    '</div>',
+    '<div class="trending-grid">',
+    buildTrendingColumn("Trending Now", "Hot overall", trending),
+    buildTrendingColumn("Most Read", "Readers return here", mostRead),
+    buildTrendingColumn("Most Unlocked", "Premium pull", mostUnlocked),
+    '</div>'
+  ].join("");
 }
 
 async function loadPublicPieceAnalyticsStats() {
@@ -231,6 +346,8 @@ ${buildPublicPieceStatsMarkup(getPublicPieceStats(poem.slug))}
       </article>
     `;
   }).join("");
+
+  renderTrendingPieces();
 }
 
 function redirectOldArchiveHash() {

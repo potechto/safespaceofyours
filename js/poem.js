@@ -61,6 +61,10 @@ function formatPieceStatsNumber(value) {
   return count.toLocaleString("en-PH");
 }
 
+function getUnlockStatsIcon(unlockCount) {
+  return Number(unlockCount) > 0 ? "🔓" : "🔒";
+}
+
 function getOrCreateReaderStats() {
   if (readerStats) return readerStats;
 
@@ -89,7 +93,7 @@ function renderReaderPieceStats(stats) {
   target.innerHTML = `
     <span aria-hidden="true">👁</span> ${escapeHTML(reads)} reads
     <span class="piece-stats-divider" aria-hidden="true">·</span>
-    <span aria-hidden="true">🔓</span> ${escapeHTML(unlocks)} unlocks
+    <span aria-hidden="true">${getUnlockStatsIcon(stats.unlock_count ?? stats.unlockCount ?? 0)}</span> ${escapeHTML(unlocks)} unlocks
   `;
   target.setAttribute("aria-label", `${reads} reads and ${unlocks} unlocks`);
 }
