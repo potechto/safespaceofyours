@@ -86,6 +86,10 @@
   let lastPublicSpacePresenceTouch = 0;
   let lastPublicSpaceUserActivityAt = Date.now();
   let publicSpaceActivityListenersReady = false;
+  let adminUserFilterState = {
+    query: "",
+    status: "all"
+  };
   let composeMode = "create";
   let editingPostId = null;
   const COMMENT_EDIT_WINDOW_MS = 30 * 60 * 1000;
@@ -3940,6 +3944,117 @@
     });
   }
 
+  function adminUserFilterStatusOptionsHtml() {
+    const options = [
+      ["all", "All users"],
+      ["online", "Active now"],
+      ["idle", "Idle / last seen"],
+      ["admin", "Admins"],
+      ["premium", "Premium"],
+      ["disabled", "Disabled"],
+      ["enabled", "Enabled"]
+    ];
+
+    return options.map(([value, label]) => {
+      const selected = adminUserFilterState.status === value ? " selected" : "";
+      return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(label)}</option>`;
+    }).join("");
+  }
+
+  function adminUserFilterText(user, badgeLabel, isAdmin, isDisabled, isPremium) {
+    const source = user || {};
+    const labels = [
+      source.username || "",
+      badgeLabel || "",
+      isAdmin ? "admin" : "",
+      isPremium ? "premium" : "",
+      isDisabled ? "disabled" : "enabled active",
+      isPublicSpaceUserActive(source) ? "online active now" : "idle last seen offline",
+      ...splitBadgeLabels(badgeLabel || "")
+    ];
+
+    return labels.join(" ").toLowerCase();
+  }
+
+  function adminUserMatchesStatus(card, status) {
+    if (!card || !status || status === "all") return true;
+
+    if (status === "online") return card.dataset.psAdminFilterActive === "true";
+    if (status === "idle") return card.dataset.psAdminFilterActive !== "true" && card.dataset.psAdminIsDisabled !== "true";
+    if (status === "admin") return card.dataset.psAdminIsAdmin === "true";
+    if (status === "premium") return card.dataset.psAdminIsPremium === "true";
+    if (status === "disabled") return card.dataset.psAdminIsDisabled === "true";
+    if (status === "enabled") return card.dataset.psAdminIsDisabled !== "true";
+
+    return true;
+  }
+
+  function applyAdminUserFilters() {
+    const results = adminResultsNode();
+    if (!results) return;
+
+    const cards = Array.from(results.querySelectorAll("[data-ps-admin-user-card]"));
+    const count = results.querySelector("[data-ps-admin-users-count]");
+    const empty = results.querySelector("[data-ps-admin-user-filter-empty]");
+    const query = String(adminUserFilterState.query || "").trim().toLowerCase();
+    const status = String(adminUserFilterState.status || "all");
+    let visible = 0;
+
+    cards.forEach(card => {
+      const searchText = String(card.dataset.psAdminSearch || "").toLowerCase();
+      const matchesQuery = !query || searchText.includes(query);
+      const matchesStatus = adminUserMatchesStatus(card, status);
+      const shouldShow = matchesQuery && matchesStatus;
+
+      card.hidden = !shouldShow;
+      card.classList.toggle("is-filtered-out", !shouldShow);
+
+      if (shouldShow) visible += 1;
+    });
+
+    if (count) {
+      count.textContent = cards.length === visible ? `${cards.length} total` : `${visible} of ${cards.length} shown`;
+    }
+
+    if (empty) {
+      empty.hidden = visible > 0 || cards.length === 0;
+    }
+  }
+
+  function bindAdminUserFilters() {
+    const filter = root.querySelector("[data-ps-admin-user-filter]");
+    if (!filter) return;
+
+    const searchInput = filter.querySelector("[data-ps-admin-user-search]");
+    const statusSelect = filter.querySelector("[data-ps-admin-user-status]");
+    const resetButton = filter.querySelector("[data-ps-admin-user-filter-reset]");
+
+    if (searchInput) {
+      searchInput.value = adminUserFilterState.query || "";
+      searchInput.addEventListener("input", () => {
+        adminUserFilterState.query = searchInput.value || "";
+        applyAdminUserFilters();
+      });
+    }
+
+    if (statusSelect) {
+      statusSelect.value = adminUserFilterState.status || "all";
+      statusSelect.addEventListener("change", () => {
+        adminUserFilterState.status = statusSelect.value || "all";
+        applyAdminUserFilters();
+      });
+    }
+
+    if (resetButton) {
+      resetButton.addEventListener("click", () => {
+        adminUserFilterState = { query: "", status: "all" };
+        if (searchInput) searchInput.value = "";
+        if (statusSelect) statusSelect.value = "all";
+        applyAdminUserFilters();
+      });
+    }
+  }
+
   function renderAdminUsers(users) {
     const results = adminResultsNode();
     const messageNode = root.querySelector("[data-ps-admin-message]");
@@ -3961,7 +4076,20 @@
     results.innerHTML = `
       <div class="ps-admin-results-head">
         <strong>Registered users</strong>
-        <span>${list.length} total</span>
+        <span data-ps-admin-users-count>${list.length} total</span>
+      </div>
+      <div class="ps-admin-user-filter" data-ps-admin-user-filter>
+        <label>
+          <span>Search users</span>
+          <input type="search" value="${escapeHtml(adminUserFilterState.query || "")}" placeholder="Username, badge, admin..." autocomplete="off" data-ps-admin-user-search />
+        </label>
+        <label>
+          <span>Filter status</span>
+          <select data-ps-admin-user-status>
+            ${adminUserFilterStatusOptionsHtml()}
+          </select>
+        </label>
+        <button type="button" data-ps-admin-user-filter-reset>Reset</button>
       </div>
       <div class="ps-admin-user-list">
         ${list.map(user => {
@@ -3973,7 +4101,7 @@
           const visibleBadgePills = userBadges.filter(label => normalizeBadgeValue(label) !== "premium");
 
           return `
-            <article class="ps-admin-user-card ${isDisabled ? "is-disabled" : ""}" data-ps-admin-user-card data-user-id="${escapeHtml(user.id)}" data-ps-admin-is-admin="${isAdmin ? "true" : "false"}" data-ps-admin-is-disabled="${isDisabled ? "true" : "false"}" data-ps-admin-is-premium="${isPremium ? "true" : "false"}">
+            <article class="ps-admin-user-card ${isDisabled ? "is-disabled" : ""}" data-ps-admin-user-card data-user-id="${escapeHtml(user.id)}" data-ps-admin-is-admin="${isAdmin ? "true" : "false"}" data-ps-admin-is-disabled="${isDisabled ? "true" : "false"}" data-ps-admin-is-premium="${isPremium ? "true" : "false"}" data-ps-admin-filter-active="${isPublicSpaceUserActive(user) ? "true" : "false"}" data-ps-admin-search="${escapeHtml(adminUserFilterText(user, badge, isAdmin, isDisabled, isPremium))}">
               <div class="ps-admin-user-main">
                 <div>
                   ${renderPublicSpaceUsernameStrong(user, user.username || "user")}
@@ -4006,10 +4134,16 @@
           `;
         }).join("")}
       </div>
+      <article class="ps-admin-empty ps-admin-user-filter-empty" data-ps-admin-user-filter-empty hidden>
+        <strong>No users match this filter.</strong>
+        <span>Try a different username, badge, or status.</span>
+      </article>
     `;
 
     enforceNumericPinFields();
     enhanceAdminBadgeSelectors();
+    bindAdminUserFilters();
+    applyAdminUserFilters();
     setMessage(messageNode, `Registered users: ${list.length}`, "success");
   }
 
