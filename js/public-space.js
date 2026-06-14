@@ -967,9 +967,9 @@
     const dateLabel = escapeHtml(postDateDisplayLabel(comment.created_at) || formatDate(comment.created_at));
     const actions = [];
 
-    if (canReply) {
-      actions.push(`<button type="button" data-ps-reply-comment="${escapeHtml(comment.id)}">Reply</button>`);
-    }
+    const inlineReplyAction = canReply
+      ? `<div class="ps-comment-inline-actions"><button class="ps-comment-reply-btn" type="button" data-ps-reply-comment="${escapeHtml(comment.id)}">Reply</button></div>`
+      : "";
 
     if (canEdit) {
       actions.push(`<button type="button" data-ps-edit-comment="${escapeHtml(comment.id)}">Edit</button>`);
@@ -986,7 +986,7 @@
     const actionMenu = actions.length
       ? `
           <div class="ps-comment-menu" data-ps-comment-menu data-open="false">
-            <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <button class="ps-comment-menu-toggle" type="button" data-ps-comment-menu-toggle aria-label="Comment options" aria-expanded="false"><span class="ps-comment-menu-dots" aria-hidden="true"></span></button>
             <div class="ps-comment-menu-popover" role="menu">
               ${actions.join("")}
             </div>
@@ -1012,6 +1012,7 @@
             ${actionMenu}
           </div>
           <p>${escapeHtml(comment.body)}</p>
+          ${inlineReplyAction}
           ${repliesHtml}
         </article>
       `;
@@ -1308,7 +1309,8 @@
         if (textarea) textarea.value = "";
 
         await refreshCommentsAndPosts(activeCommentsPostId);
-        setCommentsMessage(replyParent ? "Reply posted." : "Comment posted.", "success");
+        loadPublicSpaceNotifications({ silent: true }).catch(() => {});
+        setCommentsMessage(replyParent ? "Reply posted. Notification sent." : "Comment posted. Notification sent.", "success");
       }
     } catch (error) {
       setCommentsMessage(getErrorMessage(error), "error");
