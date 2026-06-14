@@ -3829,12 +3829,18 @@
 
     results.innerHTML = `
       <div class="ps-admin-info-grid">
-        ${safeCards.map(card => `
-          <article class="ps-admin-info-card">
-            <strong>${escapeHtml(card.title || "Admin tool")}</strong>
-            <span>${escapeHtml(card.body || "")}</span>
-          </article>
-        `).join("")}
+        ${safeCards.map(card => {
+          const action = String(card.action || "").trim();
+          const actionLabel = card.actionLabel || "Open";
+
+          return `
+            <article class="ps-admin-info-card ${action ? "has-action" : ""}">
+              <strong>${escapeHtml(card.title || "Admin tool")}</strong>
+              <span>${escapeHtml(card.body || "")}</span>
+              ${action ? `<button type="button" class="ps-admin-info-action" data-ps-admin-action="${escapeHtml(action)}">${escapeHtml(actionLabel)}</button>` : ""}
+            </article>
+          `;
+        }).join("")}
       </div>
     `;
 
@@ -3896,15 +3902,37 @@
         { title: "Premium", body: String(stats.premium) + " " + premiumLabel },
         { title: "Disabled", body: String(stats.disabled) + " " + disabledLabel },
         {
-          title: "Manage accounts",
-          body: "Open Registered users to search, filter, assign badges, toggle access, or reset passwords and PIN/key codes."
+          title: "Manage users",
+          body: "Search, filter, assign badges, toggle premium/access, or reset passwords and PIN/key codes.",
+          action: "users",
+          actionLabel: "Open users"
+        },
+        {
+          title: "Moderate posts",
+          body: "Reload the feed and use admin-only hide/delete controls on public posts.",
+          action: "posts",
+          actionLabel: "Open moderation"
+        },
+        {
+          title: "Reports",
+          body: "Review the reserved report queue area and planned moderation workflow.",
+          action: "reports",
+          actionLabel: "Open reports"
+        },
+        {
+          title: "Space settings",
+          body: "Review locked posting rules, account controls, security notes, and upcoming upgrades.",
+          action: "settings",
+          actionLabel: "Open settings"
         }
       ]);
     } catch (error) {
       renderAdminInfoCards("Admin overview failed to load.", [
         {
           title: "Stats unavailable",
-          body: "Open Registered users to manage accounts directly, then try Admin overview again."
+          body: "Open Registered users to manage accounts directly, then try Admin overview again.",
+          action: "users",
+          actionLabel: "Open users"
         }
       ]);
       setMessage(messageNode, getErrorMessage(error), "error");
