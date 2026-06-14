@@ -2665,3 +2665,50 @@
   }
 }
 /* Q72C Admin post moderation filters END */
+
+
+/* Q75D hard reset comment menu dots */
+.public-space-body .ps-comment-menu-toggle {
+  position: relative !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  min-height: 2rem !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-indent: -9999px !important;
+  white-space: nowrap !important;
+}
+
+.public-space-body .ps-comment-menu-toggle::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: 0.24rem !important;
+  height: 0.24rem !important;
+  border-radius: 999px !important;
+  background: #fff4fb !important;
+  transform: translate(-50%, -50%) !important;
+  box-shadow:
+    0 -0.42rem 0 #fff4fb,
+    0 0.42rem 0 #fff4fb !important;
+}
+
+.public-space-body .ps-comment-menu-toggle::after,
+.public-space-body .ps-comment-menu-toggle > *,
+.public-space-body .ps-comment-menu-dots,
+.public-space-body .ps-comment-menu-dots span,
+.public-space-body .ps-comment-menu-dots i {
+  display: none !important;
+  content: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+/* Q75D hard reset comment menu dots END */
