@@ -2847,3 +2847,75 @@
   }
 }
 /* Q75F desktop comments modal hard layout END */
+
+
+/* Q75G comment composer mode + desktop scroll */
+.public-space-body .ps-comments-form label[data-ps-comment-label],
+.public-space-body [data-ps-comment-label] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  flex-wrap: wrap !important;
+}
+
+.public-space-body .ps-comment-mode-cancel {
+  min-height: 1.9rem !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 244, 251, 0.88) !important;
+  padding: 0.28rem 0.72rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+}
+
+.public-space-body .ps-comment-mode-cancel:hover,
+.public-space-body .ps-comment-mode-cancel:focus-visible {
+  border-color: rgba(255, 142, 209, 0.34) !important;
+  background: rgba(255, 142, 209, 0.12) !important;
+  color: #fff4fb !important;
+}
+
+.public-space-body .ps-comments-edit-note:empty,
+.public-space-body .ps-comments-message:empty {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  .public-space-body .ps-comments-card {
+    height: min(90dvh, 900px) !important;
+    max-height: min(90dvh, 900px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .public-space-body .ps-comments-list {
+    flex: 0 1 auto !important;
+    height: clamp(16rem, 36vh, 28rem) !important;
+    max-height: clamp(16rem, 36vh, 28rem) !important;
+    min-height: 14rem !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 1rem !important;
+    margin-bottom: 0.85rem !important;
+    border-bottom: 1px solid rgba(255, 244, 251, 0.12) !important;
+  }
+
+  .public-space-body .ps-comments-form {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .public-space-body .ps-comments-form textarea[name="comment"] {
+    min-height: 5rem !important;
+    max-height: 6.5rem !important;
+  }
+}
+/* Q75G comment composer mode + desktop scroll END */

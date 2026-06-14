@@ -1084,7 +1084,10 @@
       if (isEditing) {
         label.textContent = isEditingReply ? "Edit your reply" : "Edit your comment";
       } else if (isReplying) {
-        label.textContent = `Reply to @${(replyParent.author && replyParent.author.username) || "someone"}`;
+        label.innerHTML = `
+          <span>Reply to @${escapeHtml((replyParent.author && replyParent.author.username) || "someone")}</span>
+          <button class="ps-comment-mode-cancel" type="button" data-ps-cancel-comment-reply>Cancel reply</button>
+        `;
       } else {
         label.textContent = "Add a comment";
       }
@@ -1134,7 +1137,7 @@
       if (isEditing) {
         note.innerHTML = `<button type="button" data-ps-cancel-comment-edit>Cancel edit</button>`;
       } else if (isReplying) {
-        note.innerHTML = `<span class="ps-replying-to">Replying to @${escapeHtml((replyParent.author && replyParent.author.username) || "someone")}</span> <button type="button" data-ps-cancel-comment-reply>Cancel reply</button>`;
+        note.innerHTML = "";
       } else {
         note.innerHTML = "";
       }
