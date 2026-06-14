@@ -2699,3 +2699,94 @@
   color: #fff4fb !important;
 }
 /* Q75J restore public space comment menu dots END */
+
+
+/* Q75Q2 final CSS-only comment dots fix */
+.public-space-body .ps-comment-menu-toggle,
+.public-space-body button[data-ps-comment-menu-toggle],
+.public-space-body button[data-ps-comment-more],
+.public-space-body [data-ps-comment-more],
+.public-space-body button[aria-label="Comment options"] {
+  position: relative !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 2.05rem !important;
+  min-width: 2.05rem !important;
+  max-width: 2.05rem !important;
+  height: 2.05rem !important;
+  min-height: 2.05rem !important;
+  max-height: 2.05rem !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  letter-spacing: 0 !important;
+  text-indent: 0 !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+}
+
+.public-space-body .ps-comment-menu button > *,
+.public-space-body .ps-comment-menu-toggle > *,
+.public-space-body button[data-ps-comment-menu-toggle] > *,
+.public-space-body button[data-ps-comment-more] > *,
+.public-space-body [data-ps-comment-more] > *,
+.public-space-body button[aria-label="Comment options"] > * {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.public-space-body .ps-comment-menu button::before,
+.public-space-body .ps-comment-menu-toggle::before,
+.public-space-body button[data-ps-comment-menu-toggle]::before,
+.public-space-body button[data-ps-comment-more]::before,
+.public-space-body [data-ps-comment-more]::before,
+.public-space-body button[aria-label="Comment options"]::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  inset: auto !important;
+  display: block !important;
+  width: 0.22rem !important;
+  height: 0.22rem !important;
+  border-radius: 999px !important;
+  background: rgba(255, 244, 251, 0.94) !important;
+  box-shadow:
+    0 -0.41rem 0 rgba(255, 244, 251, 0.94),
+    0 0.41rem 0 rgba(255, 244, 251, 0.94) !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  letter-spacing: 0 !important;
+  text-indent: 0 !important;
+}
+
+.public-space-body .ps-comment-menu button::after,
+.public-space-body .ps-comment-menu-toggle::after,
+.public-space-body button[data-ps-comment-menu-toggle]::after,
+.public-space-body button[data-ps-comment-more]::after,
+.public-space-body [data-ps-comment-more]::after,
+.public-space-body button[aria-label="Comment options"]::after {
+  content: none !important;
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+    .public-space-body .ps-comment-menu-toggle,
+  .public-space-body button[data-ps-comment-menu-toggle],
+  .public-space-body button[data-ps-comment-more],
+  .public-space-body [data-ps-comment-more],
+  .public-space-body button[aria-label="Comment options"] {
+    width: 1.9rem !important;
+    min-width: 1.9rem !important;
+    max-width: 1.9rem !important;
+    height: 1.9rem !important;
+    min-height: 1.9rem !important;
+    max-height: 1.9rem !important;
+  }
+}
+/* Q75Q2 final CSS-only comment dots fix END */
