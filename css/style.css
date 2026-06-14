@@ -10705,3 +10705,26 @@ body.ps-route-screen-active .ps-admin-screen-top,
   }
 }
 /* Q73C real trending pieces END */
+
+
+/* Q74B public rating summary */
+.piece-rating-summary {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  margin: 0.45rem 0 0;
+  color: rgba(255, 244, 251, 0.78);
+  font-family: Arial, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.poem-info .piece-rating-summary {
+  margin-top: 0.35rem;
+}
+
+.piece-rating-summary + .read-more {
+  margin-top: 0.8rem;
+}
+/* Q74B public rating summary END */

@@ -14,6 +14,7 @@ let visiblePieceCount = getInitialPieceLimit();
 
 
 let publicPieceAnalyticsStats = new Map();
+let publicPieceRatingStats = new Map();
 if (year) {
   year.textContent = new Date().getFullYear();
 }
@@ -271,6 +272,66 @@ function renderTrendingPieces() {
   ].join("");
 }
 
+
+function normalizePublicPieceRatingStats(row = {}) {
+  const ratingCount = Math.max(0, Number(row.rating_count ?? row.ratingCount ?? 0) || 0);
+  const ratingAverage = Math.max(0, Number(row.rating_average ?? row.ratingAverage ?? 0) || 0);
+
+  return {
+    pieceSlug: String(row.piece_slug || row.pieceSlug || "").trim().toLowerCase(),
+    ratingAverage,
+    ratingCount,
+    lastRatedAt: row.last_rated_at || row.lastRatedAt || null
+  };
+}
+
+function getPublicPieceRatingStats(slug) {
+  const key = String(slug || "").trim().toLowerCase();
+  return key ? publicPieceRatingStats.get(key) || null : null;
+}
+
+function formatPieceRatingAverage(value) {
+  const rating = Math.max(0, Math.min(5, Number(value) || 0));
+  return rating.toFixed(1);
+}
+
+function buildPublicPieceRatingMarkup(stats) {
+  if (!stats || Number(stats.ratingCount) <= 0) return "";
+
+  const average = formatPieceRatingAverage(stats.ratingAverage);
+  const count = Math.max(0, Number(stats.ratingCount) || 0);
+  const ratingWord = count === 1 ? "rating" : "ratings";
+
+  return [
+    '<p class="piece-rating-summary" aria-label="' + escapeHTML(average) + ' average rating from ' + escapeHTML(String(count)) + ' ' + ratingWord + '">',
+    '  <span aria-hidden="true">⭐</span> ' + escapeHTML(average),
+    '  <span class="piece-stats-divider" aria-hidden="true">·</span>',
+    '  ' + escapeHTML(formatPieceStatsNumber(count)) + ' ' + escapeHTML(ratingWord),
+    '</p>'
+  ].join("");
+}
+
+async function loadPublicPieceRatingStats() {
+  if (!window.safeAdminClient || typeof window.safeAdminClient.rpc !== "function") return;
+
+  try {
+    const { data, error } = await window.safeAdminClient.rpc("list_public_piece_rating_stats");
+    if (error) throw error;
+
+    const nextStats = new Map();
+
+    (Array.isArray(data) ? data : []).forEach(row => {
+      const stats = normalizePublicPieceRatingStats(row);
+      if (stats.pieceSlug) nextStats.set(stats.pieceSlug, stats);
+    });
+
+    publicPieceRatingStats = nextStats;
+    renderPoems();
+  } catch (error) {
+    console.warn("Public piece rating stats could not be loaded:", error);
+  }
+}
+
 async function loadPublicPieceAnalyticsStats() {
   if (!window.safeAdminClient || typeof window.safeAdminClient.rpc !== "function") return;
 
@@ -340,6 +401,7 @@ function renderPoems() {
             <p>${escapeHTML(poem.excerpt)}</p>
 
 ${buildPublicPieceStatsMarkup(getPublicPieceStats(poem.slug))}
+${buildPublicPieceRatingMarkup(getPublicPieceRatingStats(poem.slug))}
 <span class="read-more">${readText}</span>
           </div>
         </a>
@@ -1688,6 +1750,7 @@ syncPublicPieceSettings();
 
 
 loadPublicPieceAnalyticsStats();
+loadPublicPieceRatingStats();
 /* V18T copy button feedback */
 (function setupSafeCopyButtonFeedback() {
   if (window.__safeCopyButtonFeedbackBound) return;
