@@ -90,6 +90,10 @@
     query: "",
     status: "all"
   };
+  let adminPostFilterState = {
+    query: "",
+    status: "all"
+  };
   let composeMode = "create";
   let editingPostId = null;
   const COMMENT_EDIT_WINDOW_MS = 30 * 60 * 1000;
@@ -4018,6 +4022,109 @@
     return hideButton + deleteButton;
   }
 
+  function adminPostFilterStatusOptionsHtml() {
+    const options = [
+      ["all", "All posts"],
+      ["visible", "Visible"],
+      ["hidden", "Hidden"],
+      ["deleted", "Deleted"]
+    ];
+
+    return options.map(([value, label]) => {
+      const selected = adminPostFilterState.status === value ? " selected" : "";
+      return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(label)}</option>`;
+    }).join("");
+  }
+
+  function adminModerationPostSearchText(post, username) {
+    const source = post || {};
+    const author = source.author || {};
+    return [
+      username || "",
+      author.username || "",
+      source.username || "",
+      source.body || "",
+      source.is_hidden ? "hidden" : "visible",
+      source.is_deleted ? "deleted" : "",
+      source.created_at || "",
+      source.updated_at || ""
+    ].join(" ").toLowerCase();
+  }
+
+  function adminModerationPostMatchesStatus(card, status) {
+    if (!card || !status || status === "all") return true;
+    if (status === "visible") return card.dataset.psAdminPostHidden !== "true" && card.dataset.psAdminPostDeleted !== "true";
+    if (status === "hidden") return card.dataset.psAdminPostHidden === "true";
+    if (status === "deleted") return card.dataset.psAdminPostDeleted === "true";
+    return true;
+  }
+
+  function applyAdminPostFilters() {
+    const results = adminResultsNode();
+    if (!results) return;
+
+    const cards = Array.from(results.querySelectorAll("[data-ps-admin-post-card]"));
+    const count = results.querySelector("[data-ps-admin-post-count]");
+    const empty = results.querySelector("[data-ps-admin-post-filter-empty]");
+    const query = String(adminPostFilterState.query || "").trim().toLowerCase();
+    const status = String(adminPostFilterState.status || "all");
+    let visible = 0;
+
+    cards.forEach(card => {
+      const searchText = String(card.dataset.psAdminPostSearch || "").toLowerCase();
+      const matchesQuery = !query || searchText.includes(query);
+      const matchesStatus = adminModerationPostMatchesStatus(card, status);
+      const shouldShow = matchesQuery && matchesStatus;
+
+      card.hidden = !shouldShow;
+      card.classList.toggle("is-filtered-out", !shouldShow);
+
+      if (shouldShow) visible += 1;
+    });
+
+    if (count) {
+      count.textContent = cards.length === visible ? `${cards.length} total` : `${visible} of ${cards.length} shown`;
+    }
+
+    if (empty) {
+      empty.hidden = visible > 0 || cards.length === 0;
+    }
+  }
+
+  function bindAdminPostFilters() {
+    const filter = root.querySelector("[data-ps-admin-post-filter]");
+    if (!filter) return;
+
+    const searchInput = filter.querySelector("[data-ps-admin-post-search]");
+    const statusSelect = filter.querySelector("[data-ps-admin-post-status]");
+    const resetButton = filter.querySelector("[data-ps-admin-post-filter-reset]");
+
+    if (searchInput) {
+      searchInput.value = adminPostFilterState.query || "";
+      searchInput.addEventListener("input", () => {
+        adminPostFilterState.query = searchInput.value || "";
+        applyAdminPostFilters();
+      });
+    }
+
+    if (statusSelect) {
+      statusSelect.value = adminPostFilterState.status || "all";
+      statusSelect.addEventListener("change", () => {
+        adminPostFilterState.status = statusSelect.value || "all";
+        applyAdminPostFilters();
+      });
+    }
+
+    if (resetButton) {
+      resetButton.addEventListener("click", () => {
+        adminPostFilterState = { query: "", status: "all" };
+        if (searchInput) searchInput.value = "";
+        if (statusSelect) statusSelect.value = "all";
+        applyAdminPostFilters();
+      });
+    }
+  }
+
   function renderPostModerationAdmin() {
     const messageNode = root.querySelector("[data-ps-admin-message]");
     const results = adminResultsNode();
@@ -4047,7 +4154,7 @@
     results.innerHTML = `
       <div class="ps-admin-results-head ps-admin-post-head">
         <strong>Post moderation</strong>
-        <span>${list.length} total · ${visibleCount} visible · ${hiddenCount} hidden</span>
+        <span data-ps-admin-post-count>${list.length} total</span>
       </div>
       <div class="ps-admin-post-summary">
         <article>
@@ -4067,6 +4174,19 @@
           <span>Deleted</span>
         </article>
       </div>
+      <div class="ps-admin-post-filter" data-ps-admin-post-filter>
+        <label>
+          <span>Search posts</span>
+          <input type="search" value="${escapeHtml(adminPostFilterState.query || "")}" placeholder="Author or post text..." autocomplete="off" data-ps-admin-post-search />
+        </label>
+        <label>
+          <span>Filter status</span>
+          <select data-ps-admin-post-status>
+            ${adminPostFilterStatusOptionsHtml()}
+          </select>
+        </label>
+        <button type="button" data-ps-admin-post-filter-reset>Reset</button>
+      </div>
       <div class="ps-admin-post-list" data-ps-admin-post-list>
         ${list.map(post => {
           const author = post.author || {};
@@ -4076,9 +4196,10 @@
           const updated = post.updated_at && post.updated_at !== post.created_at ? ` · updated ${formatDate(post.updated_at)}` : "";
           const hiddenClass = post.is_hidden ? " is-hidden-by-admin" : "";
           const deletedClass = post.is_deleted ? " is-deleted" : "";
+          const searchText = adminModerationPostSearchText(post, username);
 
           return `
-            <article class="ps-admin-post-card${hiddenClass}${deletedClass}" data-ps-admin-post-card data-post-id="${postId}">
+            <article class="ps-admin-post-card${hiddenClass}${deletedClass}" data-ps-admin-post-card data-post-id="${postId}" data-ps-admin-post-hidden="${post.is_hidden ? "true" : "false"}" data-ps-admin-post-deleted="${post.is_deleted ? "true" : "false"}" data-ps-admin-post-search="${escapeHtml(searchText)}">
               <div class="ps-admin-post-top">
                 <div>
                   <strong>@${escapeHtml(username)}</strong>
@@ -4099,8 +4220,14 @@
           `;
         }).join("")}
       </div>
+      <article class="ps-admin-empty ps-admin-post-filter-empty" data-ps-admin-post-filter-empty hidden>
+        <strong>No posts match this filter.</strong>
+        <span>Try a different author, post text, or status.</span>
+      </article>
     `;
 
+    bindAdminPostFilters();
+    applyAdminPostFilters();
     setMessage(messageNode, `Post moderation: ${list.length} loaded`, "success");
   }
 

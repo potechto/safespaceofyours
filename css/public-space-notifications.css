@@ -2589,3 +2589,79 @@
   pointer-events: none !important;
 }
 /* Q72B Safer post moderation actions END */
+
+/* Q72C Admin post moderation filters */
+.public-space-body .ps-admin-post-filter {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(9.5rem, 0.34fr) auto !important;
+  align-items: end !important;
+  gap: 0.5rem !important;
+  margin: 0 0 0.7rem !important;
+  padding: 0.58rem !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 244, 251, 0.08), transparent 34%),
+    linear-gradient(145deg, rgba(31, 22, 40, 0.86), rgba(15, 9, 23, 0.9)) !important;
+}
+
+.public-space-body .ps-admin-post-filter label {
+  display: grid !important;
+  gap: 0.24rem !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+.public-space-body .ps-admin-post-filter label > span {
+  font-size: 0.62rem !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 220, 238, 0.72) !important;
+}
+
+.public-space-body .ps-admin-post-filter input,
+.public-space-body .ps-admin-post-filter select {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 2rem !important;
+  padding: 0 0.7rem !important;
+  border-radius: 999px !important;
+  color: rgba(255, 244, 251, 0.96) !important;
+  background: rgba(12, 7, 18, 0.78) !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+.public-space-body .ps-admin-post-filter input::placeholder {
+  color: rgba(255, 244, 251, 0.36) !important;
+}
+
+.public-space-body .ps-admin-post-filter button {
+  min-height: 2rem !important;
+  padding: 0.32rem 0.66rem !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+  font-size: 0.72rem !important;
+}
+
+.public-space-body .ps-admin-post-card[hidden],
+.public-space-body .ps-admin-post-filter-empty[hidden] {
+  display: none !important;
+}
+
+.public-space-body .ps-admin-post-filter-empty {
+  margin-top: 0.65rem !important;
+}
+
+@media (max-width: 780px) {
+  .public-space-body .ps-admin-post-filter {
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+  }
+
+  .public-space-body .ps-admin-post-filter button {
+    width: 100% !important;
+  }
+}
+/* Q72C Admin post moderation filters END */
