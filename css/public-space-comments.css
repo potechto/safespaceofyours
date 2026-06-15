@@ -14,49 +14,29 @@ body.public-space-body .ps-comment-inline-actions {
   pointer-events: none !important;
 }
 
-/* Q75AC mobile comment reactions front layer fix */
+/* Q75AC2 mobile comment reaction palette-only overlay fix
+   Only the opened reaction palette floats above the mobile scroll area.
+   Do not change comments modal/list/card layout.
+*/
 @media (max-width: 700px) {
-  body.public-space-body [data-ps-comments-modal],
-  body.public-space-body .ps-comments-modal,
-  body.public-space-body .ps-comments-card,
-  body.public-space-body [data-ps-comments-list],
-  body.public-space-body .ps-comments-list,
-  body.public-space-body .ps-comment-item,
-  body.public-space-body .ps-comment-reactions,
-  body.public-space-body .ps-comment-reaction-wrap,
-  body.public-space-body .ps-comment-reaction-menu {
-    overflow: visible !important;
-  }
-
-  body.public-space-body .ps-comment-item {
+  body.public-space-body .ps-comment-reaction-picker {
     position: relative !important;
-    z-index: 1 !important;
+    z-index: 2 !important;
   }
 
-  body.public-space-body .ps-comment-item:has([aria-expanded="true"]),
-  body.public-space-body .ps-comment-item:has([data-open="true"]),
-  body.public-space-body .ps-comment-item:has([data-ps-comment-emoji-panel]:not([hidden])),
-  body.public-space-body .ps-comment-item:has([data-ps-comment-reaction-panel]:not([hidden])) {
+  body.public-space-body .ps-comment-reaction-picker[open] {
     z-index: 2147482000 !important;
   }
 
-  body.public-space-body [data-ps-comment-emoji-panel],
-  body.public-space-body [data-ps-comment-reaction-panel],
-  body.public-space-body [data-ps-comment-reactions-panel],
-  body.public-space-body .ps-comment-emoji-panel,
-  body.public-space-body .ps-comment-reaction-panel,
-  body.public-space-body .ps-comment-reactions-panel,
-  body.public-space-body .ps-comment-reaction-picker,
-  body.public-space-body .ps-comment-reaction-popover {
+  body.public-space-body .ps-comment-reaction-picker[open] .ps-comment-reaction-palette {
     position: fixed !important;
     left: 50% !important;
     right: auto !important;
     top: auto !important;
-    bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+    bottom: max(0.85rem, env(safe-area-inset-bottom)) !important;
     transform: translateX(-50%) translateZ(0) !important;
-    width: min(calc(100vw - 2rem), 24rem) !important;
-    max-width: calc(100vw - 2rem) !important;
+    width: max-content !important;
+    max-width: calc(100vw - 1.5rem) !important;
     z-index: 2147483000 !important;
-    isolation: isolate !important;
   }
 }
