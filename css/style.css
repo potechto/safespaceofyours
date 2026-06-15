@@ -11217,3 +11217,111 @@ body.ps-route-screen-active .ps-admin-screen-top,
   }
 }
 /* Q75R Discord-style comment emoji reactions END */
+
+
+/* Q75Z public space comment reply layout fix */
+[data-ps-comments-modal] .ps-modal-card {
+  max-height: min(92dvh, 980px);
+  overflow-y: auto;
+}
+
+[data-ps-comments-list] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ps-comment-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.ps-comment-thread > .ps-comment-item {
+  width: 100%;
+}
+
+.ps-comment-replies {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-left: clamp(1rem, 3vw, 2.5rem);
+  padding-left: 0.85rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ps-comment-reply-thread {
+  width: 100%;
+}
+
+.ps-comment-item.is-reply {
+  padding: 1rem 1.05rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.ps-comment-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin-top: 0.8rem;
+  line-height: 1.2;
+}
+
+.ps-comment-reply-btn,
+.ps-comment-reply-count {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  max-width: max-content;
+  white-space: nowrap;
+}
+
+.ps-comment-reply-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: rgba(255, 255, 255, 0.055);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ps-comment-reply-btn.is-active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ps-comment-reply-count {
+  opacity: 0.72;
+}
+
+.ps-comment-reply-prefix {
+  opacity: 0.72;
+}
+
+[data-ps-comments-form] {
+  position: sticky;
+  bottom: -1px;
+  z-index: 5;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  background: linear-gradient(180deg, rgba(24, 14, 28, 0), rgba(24, 14, 28, 0.96) 28%, rgba(24, 14, 28, 1));
+}
+
+@media (max-width: 700px) {
+  .ps-comment-replies {
+    margin-left: 0.75rem;
+    padding-left: 0.65rem;
+  }
+
+  .ps-comment-item.is-reply {
+    padding: 0.9rem;
+  }
+
+  [data-ps-comments-form] {
+    position: static;
+    background: transparent;
+  }
+}
