@@ -11325,3 +11325,76 @@ body.ps-route-screen-active .ps-admin-screen-top,
     background: transparent;
   }
 }
+
+
+/* Q75Z2 scrollable comments panel desktop fix */
+[data-ps-comments-modal] .ps-modal-card {
+  display: flex;
+  flex-direction: column;
+  max-height: min(92dvh, 900px);
+  overflow: hidden;
+}
+
+[data-ps-comments-modal] [data-ps-comments-list] {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: clamp(14rem, 42dvh, 34rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+[data-ps-comments-modal] [data-ps-comments-list]::-webkit-scrollbar {
+  width: 0.45rem;
+}
+
+[data-ps-comments-modal] [data-ps-comments-list]::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+[data-ps-comments-modal] [data-ps-comments-form] {
+  position: static !important;
+  bottom: auto !important;
+  z-index: auto !important;
+  flex: 0 0 auto;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  background: transparent !important;
+}
+
+[data-ps-comments-modal] .ps-comment-inline-actions {
+  gap: 0.65rem 1rem;
+}
+
+[data-ps-comments-modal] .ps-comment-reply-count + .ps-comment-reply-count {
+  margin-left: 0.45rem;
+}
+
+[data-ps-comments-modal] .ps-comment-replies {
+  margin-top: 0.3rem;
+  margin-bottom: 0.55rem;
+}
+
+@media (min-width: 701px) {
+  [data-ps-comments-modal] .ps-modal-card {
+    padding-bottom: 1.25rem;
+  }
+
+  [data-ps-comments-modal] [data-ps-comments-list] {
+    max-height: min(42dvh, 33rem);
+  }
+}
+
+@media (max-width: 700px) {
+  [data-ps-comments-modal] .ps-modal-card {
+    max-height: 94dvh;
+    overflow-y: auto;
+  }
+
+  [data-ps-comments-modal] [data-ps-comments-list] {
+    max-height: none;
+    overflow: visible;
+  }
+}
