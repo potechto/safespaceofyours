@@ -3015,6 +3015,31 @@
     }
   }
 
+  function isPublicSpaceTransientUiOpen() {
+    const selectors = [
+      "[data-ps-post-menu]:not([hidden])",
+      "[data-ps-comment-menu][data-open='true']",
+      "[data-ps-comment-emoji-panel]:not([hidden])",
+      "[data-ps-comments-modal]:not([hidden]) [aria-expanded='true']",
+      "[data-ps-notification-panel]:not([hidden])",
+      "[data-ps-notifications-panel]:not([hidden])",
+      "[data-ps-notification-menu]:not([hidden])",
+      "[data-ps-bell-menu]:not([hidden])",
+      "[data-ps-bell-panel]:not([hidden])",
+      "[aria-expanded='true'][data-ps-post-more]",
+      "[aria-expanded='true'][data-ps-bell]",
+      "[aria-expanded='true'][data-ps-notifications-toggle]"
+    ];
+
+    return selectors.some(selector => {
+      try {
+        return Boolean(document.querySelector(selector));
+      } catch (error) {
+        return false;
+      }
+    });
+  }
+
   async function refreshPublicSpaceLiveData() {
     if (!currentSession || !sessionToken() || publicSpaceLiveRefreshInFlight) return [];
 
@@ -3968,10 +3993,15 @@
 
     try {
       if (heartButton) {
-        previousLabel = setPostActionLoading(heartButton, "Saving...");
+        const postId = heartButton.dataset.psHeartPost || "";
+        optimisticHeart = optimisticTogglePostHeart(postId);
+        heartButton.disabled = true;
+        heartButton.classList.add("is-processing");
+        heartButton.setAttribute("aria-busy", "true");
+
         await rpc("toggle_public_space_heart", {
           input_session_token: sessionToken(),
-          input_post_id: heartButton.dataset.psHeartPost
+          input_post_id: postId
         });
       }
 
