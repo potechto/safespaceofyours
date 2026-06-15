@@ -688,7 +688,7 @@
           <div class="ps-panel-heading ps-comments-heading">
             <p class="eyebrow">Comments</p>
             <h2 id="psCommentsTitle" data-ps-comments-title>Post comments</h2>
-            <p data-ps-comments-subtitle>Read and add soft replies.</p>
+            <p data-ps-comments-subtitle>Read and add kind comments.</p>
           </div>
           <div class="ps-comments-post-preview" data-ps-comments-post-preview></div>
           <div class="ps-comments-list" data-ps-comments-list></div>
@@ -1258,7 +1258,7 @@
     const length = textarea ? textarea.value.length : 0;
 
     if (title) title.textContent = post ? `Comments · ${commentCount(post)}` : "Post comments";
-    if (subtitle) subtitle.textContent = post ? `Replies for @${(post.author && post.author.username) || "someone"}'s post.` : "Read and add soft replies.";
+    if (subtitle) subtitle.textContent = post ? `Replies for @${(post.author && post.author.username) || "someone"}'s post.` : "Read and add kind comments.";
 
     if (preview) {
       preview.innerHTML = post
@@ -2984,6 +2984,7 @@
 
   function notificationTypeIcon(type, details = {}) {
     if (details.kind === "new_piece") return "📖";
+    if (details.kind === "comment_reaction" || type === "comment_reaction") return details.emoji || "😊";
     if (type === "heart") return "💗";
     if (type === "comment") return "💬";
     if (type === "admin") return "✨";
@@ -3019,12 +3020,14 @@
       || (details.kind === "new_piece" ? "New piece uploaded" : "")
       || (type === "heart" ? "New heart" : "")
       || (type === "comment" ? "New comment" : "")
+      || (details.kind === "comment_reaction" || type === "comment_reaction" ? "New comment reaction" : "")
       || "Notification";
 
     const detail = details.message
       || (details.kind === "new_piece" && details.piece_title ? `Admin uploaded “${details.piece_title}”. Check it out.` : "")
       || (type === "heart" ? `${actorName} hearted your post.` : "")
       || (type === "comment" ? `${actorName} commented on your post.` : "")
+      || (details.kind === "comment_reaction" || type === "comment_reaction" ? `${actorName} reacted to your comment${details.emoji ? ` with ${details.emoji}` : ""}.` : "")
       || "You have a new Public Space notification.";
 
     return {
