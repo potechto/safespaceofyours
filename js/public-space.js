@@ -3192,7 +3192,27 @@
     publicSpaceLiveRefreshInFlight = false;
   }
 
+  function isNotificationMenuOpen() {
+
+
+    const panel = document.querySelector("[data-ps-notification-panel]");
+
+
+    const menuNode = panel ? panel.querySelector("[data-ps-notification-menu]") : null;
+
+
+    return Boolean(menuNode && !menuNode.hidden);
+
+
+  }
+
+
+
   async function loadPublicSpaceNotifications(options = {}) {
+    if (isNotificationMenuOpen() && options && (options.background || options.silent)) {
+      return publicSpaceNotifications || [];
+    }
+
     if (!currentSession || !sessionToken()) {
       publicSpaceNotifications = [];
       updateNotificationBell();
@@ -3357,9 +3377,28 @@
       summaryNode.textContent = unreadCount ? `${unreadCount} unread` : "No unread notifications";
     }
 
-    if (menuNode && moreButton) {
+    const keepNotificationMenuOpen = Boolean(menuNode && moreButton && !menuNode.hidden);
+
+
+
+    if (menuNode && moreButton && !keepNotificationMenuOpen) {
+
+
       menuNode.hidden = true;
+
+
       moreButton.setAttribute("aria-expanded", "false");
+
+
+    } else if (menuNode && moreButton && keepNotificationMenuOpen) {
+
+
+      menuNode.hidden = false;
+
+
+      moreButton.setAttribute("aria-expanded", "true");
+
+
     }
 
     if (!listNode) return;
