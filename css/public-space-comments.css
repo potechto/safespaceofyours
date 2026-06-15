@@ -14,41 +14,40 @@ body.public-space-body .ps-comment-inline-actions {
   pointer-events: none !important;
 }
 
-/* Q75AC3 anchored mobile comment reaction picker
-   Keep the emoji palette near the exact comment reaction picker.
-   Do not float it to the comment field/bottom composer.
-   Do not change the comments modal/card layout.
+/* Q75AC4 comment-card mobile reaction popover
+   Keep the opened emoji palette inside the comment card area,
+   above/near the exact smile reaction button.
 */
 @media (max-width: 700px) {
-  body.public-space-body .ps-comment-item,
-  body.public-space-body .ps-comment-reactions,
-  body.public-space-body .ps-comment-reaction-wrap,
-  body.public-space-body .ps-comment-reaction-picker {
+  body.public-space-body .ps-comment-item {
+    position: relative !important;
     overflow: visible !important;
   }
 
-  body.public-space-body .ps-comment-item {
+  body.public-space-body .ps-comment-reactions,
+  body.public-space-body .ps-comment-reaction-wrap,
+  body.public-space-body .ps-comment-reaction-picker {
     position: relative !important;
+    overflow: visible !important;
   }
 
   body.public-space-body .ps-comment-reaction-picker {
-    position: relative !important;
-    z-index: 20 !important;
+    z-index: 10 !important;
   }
 
   body.public-space-body .ps-comment-reaction-picker[open] {
-    z-index: 9999 !important;
+    z-index: 5000 !important;
   }
 
   body.public-space-body .ps-comment-reaction-picker[open] .ps-comment-reaction-palette {
     position: absolute !important;
-    top: calc(100% + 0.35rem) !important;
-    right: 0 !important;
-    bottom: auto !important;
-    left: auto !important;
+    left: 0 !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: calc(100% + 0.45rem) !important;
     transform: none !important;
     width: max-content !important;
-    max-width: min(18rem, calc(100vw - 2rem)) !important;
-    z-index: 10000 !important;
+    max-width: min(16rem, calc(100vw - 5rem)) !important;
+    z-index: 5001 !important;
   }
 }
