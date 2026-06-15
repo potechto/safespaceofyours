@@ -14,29 +14,41 @@ body.public-space-body .ps-comment-inline-actions {
   pointer-events: none !important;
 }
 
-/* Q75AC2 mobile comment reaction palette-only overlay fix
-   Only the opened reaction palette floats above the mobile scroll area.
-   Do not change comments modal/list/card layout.
+/* Q75AC3 anchored mobile comment reaction picker
+   Keep the emoji palette near the exact comment reaction picker.
+   Do not float it to the comment field/bottom composer.
+   Do not change the comments modal/card layout.
 */
 @media (max-width: 700px) {
+  body.public-space-body .ps-comment-item,
+  body.public-space-body .ps-comment-reactions,
+  body.public-space-body .ps-comment-reaction-wrap,
+  body.public-space-body .ps-comment-reaction-picker {
+    overflow: visible !important;
+  }
+
+  body.public-space-body .ps-comment-item {
+    position: relative !important;
+  }
+
   body.public-space-body .ps-comment-reaction-picker {
     position: relative !important;
-    z-index: 2 !important;
+    z-index: 20 !important;
   }
 
   body.public-space-body .ps-comment-reaction-picker[open] {
-    z-index: 2147482000 !important;
+    z-index: 9999 !important;
   }
 
   body.public-space-body .ps-comment-reaction-picker[open] .ps-comment-reaction-palette {
-    position: fixed !important;
-    left: 50% !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: max(0.85rem, env(safe-area-inset-bottom)) !important;
-    transform: translateX(-50%) translateZ(0) !important;
+    position: absolute !important;
+    top: calc(100% + 0.35rem) !important;
+    right: 0 !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
     width: max-content !important;
-    max-width: calc(100vw - 1.5rem) !important;
-    z-index: 2147483000 !important;
+    max-width: min(18rem, calc(100vw - 2rem)) !important;
+    z-index: 10000 !important;
   }
 }
