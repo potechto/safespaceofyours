@@ -595,6 +595,59 @@
     return count > 0 ? `💬 · ${count}` : "💬";
   }
 
+  function heartButtonText(hearted, count) {
+    return `${hearted ? "❤️" : "🤍"} · ${Number(count || 0)}`;
+  }
+
+  function currentPostHeartState(postId) {
+    const cleanId = String(postId || "");
+    const post = postById(cleanId) || {};
+    return {
+      id: cleanId,
+      hearted: Boolean(post.hearted_by_me),
+      count: Number(post.heart_count || 0)
+    };
+  }
+
+  function syncPostHeartState(postId, hearted, count) {
+    const cleanId = String(postId || "");
+    const nextHearted = Boolean(hearted);
+    const nextCount = Math.max(0, Number(count || 0));
+
+    if (!cleanId) return;
+
+    if (Array.isArray(latestPublicSpacePosts)) {
+      latestPublicSpacePosts.forEach(post => {
+        if (String(post.id || "") === cleanId) {
+          post.hearted_by_me = nextHearted;
+          post.heart_count = nextCount;
+        }
+      });
+    }
+
+    document.querySelectorAll("[data-ps-heart-post]").forEach(button => {
+      if (String(button.dataset.psHeartPost || "") !== cleanId) return;
+      button.textContent = heartButtonText(nextHearted, nextCount);
+      button.setAttribute("aria-label", nextHearted ? "Remove heart" : "Heart this post");
+    });
+  }
+
+  function optimisticTogglePostHeart(postId) {
+    const previous = currentPostHeartState(postId);
+    const nextHearted = !previous.hearted;
+    const nextCount = Math.max(0, previous.count + (nextHearted ? 1 : -1));
+
+    syncPostHeartState(previous.id, nextHearted, nextCount);
+
+    return {
+      id: previous.id,
+      previousHearted: previous.hearted,
+      previousCount: previous.count,
+      nextHearted,
+      nextCount
+    };
+  }
+
   function syncPostCommentCount(postId, count) {
     const cleanId = String(postId || "");
     const nextCount = Number(count || 0);
