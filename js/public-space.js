@@ -1473,12 +1473,9 @@
         const createPayload = {
           input_session_token: sessionToken(),
           input_post_id: activeCommentsPostId,
-          input_body: body
+          input_body: body,
+          input_parent_comment_id: isReplying ? activeReplyParentCommentId : null
         };
-
-        if (isReplying) {
-          createPayload.input_parent_comment_id = activeReplyParentCommentId;
-        }
 
         await rpc("create_public_space_comment", createPayload);
 
