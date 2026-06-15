@@ -1,16 +1,14 @@
-/* Q75AA2 Public Space comments removed from UI
-   Existing database comments are not deleted.
-   Public Space reactions/hearts remain available.
+/* Q75AB Public Space replies disabled only
+   Post comments remain available.
+   Comment emoji reactions remain available.
+   Existing database replies are not deleted, only hidden from UI.
 */
 
-body.public-space-body [data-ps-comments-post],
-body.public-space-body [data-ps-comments-modal],
-body.public-space-body .ps-comments-modal,
-body.public-space-body .ps-comments-card,
-body.public-space-body [data-ps-comments-list],
-body.public-space-body [data-ps-comments-form],
 body.public-space-body [data-ps-reply-comment],
 body.public-space-body .ps-comment-replies,
+body.public-space-body .ps-comment-reply-thread,
+body.public-space-body .ps-comment-reply-count,
+body.public-space-body .ps-comment-reply-prefix,
 body.public-space-body .ps-comment-inline-actions {
   display: none !important;
   pointer-events: none !important;

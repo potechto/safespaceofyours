@@ -568,6 +568,7 @@
           <p>${escapeHtml(post.body)}</p>
           <div class="ps-post-actions">
             <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} � ${Number(post.heart_count || 0)}</button>
+            <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">${commentCountText(post)}</button>
             ${manageButtons}
             ${adminButtons}
           </div>
@@ -1187,21 +1188,13 @@
     const hasOwnReply = !isReply && Boolean(activeOwnReplyToParent(commentId));
     const isReplyTarget = !isReply && String(activeReplyParentCommentId || "") === commentId;
     const canReply = !isReply && Boolean(currentSession && sessionToken() && commentId && !comment.is_deleted && !comment.is_hidden);
-    const replyAction = canReply && !hasOwnReply
-      ? `<button class="ps-comment-reply-btn${isReplyTarget ? " is-active" : ""}" type="button" data-ps-reply-comment="${escapeHtml(commentId)}">${isReplyTarget ? "Cancel reply" : "Reply"}</button>`
-      : "";
-    const replyCountLabel = !isReply && replyCount
-      ? `<span class="ps-comment-reply-count">${replyCount} ${replyCount === 1 ? "reply" : "replies"}</span>`
-      : "";
-    const ownReplyLabel = !isReply && hasOwnReply
-      ? `<span class="ps-comment-reply-count">Replied</span>`
-      : "";
+    const replyAction = "";
+    const replyCountLabel = "";
+    const ownReplyLabel = "";
     const inlineActions = !isReply && (replyAction || replyCountLabel || ownReplyLabel)
       ? `<div class="ps-comment-inline-actions">${replyAction}${replyCountLabel}${ownReplyLabel}</div>`
       : "";
-    const repliesHtml = !isReply && replies.length
-      ? `<div class="ps-comment-replies">${replies.map(reply => renderCommentItem(reply, true)).join("")}</div>`
-      : "";
+    const repliesHtml = "";
     const reactionsHtml = isReply ? "" : renderCommentReactions(comment);
     const replyPrefix = isReply ? `<span class="ps-comment-reply-prefix">↳ Reply</span> ` : "";
 
@@ -2312,7 +2305,16 @@
       const commentButton = card.querySelector("[data-ps-comments-post]");
 
 
-      if (commentButton) commentButton.remove();
+      if (commentButton) {
+
+
+        commentButton.textContent = commentCountText(post);
+
+
+        commentButton.setAttribute("aria-label", "View comments");
+
+
+      }
 
       const cardMeta = card.querySelector(".ps-post-meta");
       const authorNode = cardMeta ? cardMeta.querySelector("[data-ps-author-anchor], strong") : null;
@@ -2352,6 +2354,7 @@
         <p>${escapeHtml(post.body)}</p>
         <div class="ps-post-actions">
           <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} · ${Number(post.heart_count || 0)}</button>
+          <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">${commentCountText(post)}</button>
           ${manageButtons}
           ${adminButtons}
         </div>
@@ -4221,6 +4224,9 @@
       event.stopPropagation();
 
 
+      await openCommentsPanel(commentButton.dataset.psCommentsPost);
+
+
       return;
 
 
@@ -5224,7 +5230,7 @@
 
     const profilePostList = event.target.closest("[data-ps-profile-post-list]");
     const profilePostAction = profilePostList
-      ? event.target.closest("[data-ps-heart-post], [data-ps-delete-post], [data-ps-toggle-hidden]")
+      ? event.target.closest("[data-ps-heart-post], [data-ps-delete-post], [data-ps-toggle-hidden], [data-ps-comments-post]")
       : null;
 
     if (profilePostAction) {
