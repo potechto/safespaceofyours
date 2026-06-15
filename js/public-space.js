@@ -568,7 +568,6 @@
           <p>${escapeHtml(post.body)}</p>
           <div class="ps-post-actions">
             <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} � ${Number(post.heart_count || 0)}</button>
-            <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">${commentCountText(post)}</button>
             ${manageButtons}
             ${adminButtons}
           </div>
@@ -2311,10 +2310,9 @@
       }
 
       const commentButton = card.querySelector("[data-ps-comments-post]");
-      if (commentButton) {
-        commentButton.textContent = commentCountText(post);
-        commentButton.setAttribute("aria-label", "View comments");
-      }
+
+
+      if (commentButton) commentButton.remove();
 
       const cardMeta = card.querySelector(".ps-post-meta");
       const authorNode = cardMeta ? cardMeta.querySelector("[data-ps-author-anchor], strong") : null;
@@ -2354,7 +2352,6 @@
         <p>${escapeHtml(post.body)}</p>
         <div class="ps-post-actions">
           <button type="button" data-ps-heart-post="${escapeHtml(post.id)}">${heartLabel} · ${Number(post.heart_count || 0)}</button>
-          <button type="button" data-ps-comments-post="${escapeHtml(post.id)}">${commentCountText(post)}</button>
           ${manageButtons}
           ${adminButtons}
         </div>
@@ -4216,10 +4213,17 @@
     const commentButton = event.target.closest("[data-ps-comments-post]");
 
     if (commentButton) {
+
+
       event.preventDefault();
+
+
       event.stopPropagation();
-      await openCommentsPanel(commentButton.dataset.psCommentsPost);
+
+
       return;
+
+
     }
     if (!heartButton && !deleteButton && !hideButton) return;
 
@@ -5220,7 +5224,7 @@
 
     const profilePostList = event.target.closest("[data-ps-profile-post-list]");
     const profilePostAction = profilePostList
-      ? event.target.closest("[data-ps-heart-post], [data-ps-delete-post], [data-ps-toggle-hidden], [data-ps-comments-post]")
+      ? event.target.closest("[data-ps-heart-post], [data-ps-delete-post], [data-ps-toggle-hidden]")
       : null;
 
     if (profilePostAction) {
