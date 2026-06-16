@@ -2957,3 +2957,293 @@
   }
 }
 /* Q75R Discord-style comment emoji reactions END */
+
+
+/* Q75AJ report modal choices and cooldown toast */
+body.public-space-body .ps-report-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 15000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 1rem !important;
+  background: rgba(8, 5, 12, 0.72) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+body.public-space-body .ps-report-modal[hidden] {
+  display: none !important;
+}
+
+body.public-space-body .ps-report-dialog {
+  width: min(94vw, 31rem) !important;
+  border-radius: 26px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 142, 209, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(38, 26, 48, 0.98), rgba(18, 12, 26, 0.98)) !important;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.62) !important;
+  color: #fff4fb !important;
+}
+
+body.public-space-body .ps-report-form {
+  display: grid !important;
+  gap: 0.9rem !important;
+  padding: 1rem !important;
+}
+
+body.public-space-body .ps-report-head {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 0.8rem !important;
+}
+
+body.public-space-body .ps-report-head strong {
+  display: block !important;
+  font-size: 1.08rem !important;
+  font-weight: 900 !important;
+}
+
+body.public-space-body .ps-report-head span,
+body.public-space-body .ps-report-note-field small {
+  display: block !important;
+  margin-top: 0.18rem !important;
+  color: rgba(255, 244, 251, 0.62) !important;
+  font-size: 0.82rem !important;
+}
+
+body.public-space-body .ps-report-close {
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+body.public-space-body .ps-report-options {
+  display: grid !important;
+  gap: 0.45rem !important;
+}
+
+body.public-space-body .ps-report-option {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  padding: 0.68rem 0.75rem !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 244, 251, 0.13) !important;
+  background: rgba(255, 244, 251, 0.055) !important;
+  cursor: pointer !important;
+  font-weight: 780 !important;
+}
+
+body.public-space-body .ps-report-option:has(input:checked) {
+  border-color: rgba(255, 142, 209, 0.5) !important;
+  background: rgba(255, 142, 209, 0.13) !important;
+}
+
+body.public-space-body .ps-report-option input {
+  width: 1rem !important;
+  height: 1rem !important;
+  accent-color: #ff8ed1 !important;
+}
+
+body.public-space-body .ps-report-note-field {
+  display: grid !important;
+  gap: 0.38rem !important;
+  font-weight: 850 !important;
+}
+
+body.public-space-body .ps-report-note-field textarea {
+  width: 100% !important;
+  min-height: 6.1rem !important;
+  resize: vertical !important;
+  box-sizing: border-box !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  padding: 0.78rem 0.85rem !important;
+  outline: none !important;
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.06) !important;
+}
+
+body.public-space-body .ps-report-note-field textarea:focus {
+  border-color: rgba(255, 142, 209, 0.55) !important;
+  box-shadow: 0 0 0 4px rgba(255, 142, 209, 0.12) !important;
+}
+
+body.public-space-body .ps-report-message {
+  margin: 0 !important;
+  padding: 0.68rem 0.75rem !important;
+  border-radius: 14px !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  color: #ffd6e8 !important;
+  background: rgba(255, 89, 137, 0.12) !important;
+  border: 1px solid rgba(255, 89, 137, 0.22) !important;
+}
+
+body.public-space-body .ps-report-message[hidden] {
+  display: none !important;
+}
+
+body.public-space-body .ps-report-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 0.55rem !important;
+  flex-wrap: wrap !important;
+}
+
+body.public-space-body .ps-report-actions button {
+  min-width: 7.5rem !important;
+}
+
+body.public-space-body .ps-toast-stack {
+  position: fixed !important;
+  right: 1rem !important;
+  bottom: 1rem !important;
+  z-index: 16000 !important;
+  display: grid !important;
+  gap: 0.55rem !important;
+  pointer-events: none !important;
+}
+
+body.public-space-body .ps-toast {
+  width: min(22rem, calc(100vw - 2rem)) !important;
+  padding: 0.78rem 0.9rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 244, 251, 0.15) !important;
+  background: rgba(24, 18, 32, 0.96) !important;
+  color: #fff4fb !important;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45) !important;
+  font-size: 0.88rem !important;
+  font-weight: 880 !important;
+  text-align: center !important;
+  transition: opacity 0.24s ease, transform 0.24s ease !important;
+}
+
+body.public-space-body .ps-toast.is-success {
+  border-color: rgba(139, 255, 197, 0.28) !important;
+}
+
+body.public-space-body .ps-toast.is-error {
+  border-color: rgba(255, 89, 137, 0.32) !important;
+}
+
+body.public-space-body .ps-toast.is-leaving {
+  opacity: 0 !important;
+  transform: translateY(0.35rem) !important;
+}
+
+@media (max-width: 640px) {
+  body.public-space-body .ps-report-modal {
+    padding: 0.75rem !important;
+  }
+
+  body.public-space-body .ps-report-form {
+    padding: 0.9rem !important;
+  }
+
+  body.public-space-body .ps-report-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  body.public-space-body .ps-report-actions button {
+    width: 100% !important;
+  }
+
+  body.public-space-body .ps-toast-stack {
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    bottom: 0.75rem !important;
+  }
+
+  body.public-space-body .ps-toast {
+    width: 100% !important;
+  }
+}
+/* Q75AJ report modal choices and cooldown toast END */
+
+
+/* Q75AK admin report history statuses */
+body.public-space-body .ps-admin-report-filters {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.45rem !important;
+  margin: 0.75rem 0 0.9rem !important;
+}
+
+body.public-space-body .ps-admin-report-filter {
+  border-radius: 999px !important;
+  padding: 0.48rem 0.72rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 850 !important;
+}
+
+body.public-space-body .ps-admin-report-filter span {
+  opacity: 0.7 !important;
+  margin-left: 0.22rem !important;
+}
+
+body.public-space-body .ps-admin-report-filter.is-active {
+  background: rgba(255, 142, 209, 0.18) !important;
+  border-color: rgba(255, 142, 209, 0.46) !important;
+}
+
+body.public-space-body .ps-admin-report-marked {
+  padding: 0.56rem 0.68rem !important;
+  border-radius: 14px !important;
+  background: rgba(139, 255, 197, 0.09) !important;
+  border: 1px solid rgba(139, 255, 197, 0.18) !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel {
+  display: grid !important;
+  gap: 0.55rem !important;
+  margin-top: 0.75rem !important;
+  padding: 0.72rem !important;
+  border-radius: 18px !important;
+  background: rgba(255, 244, 251, 0.055) !important;
+  border: 1px solid rgba(255, 244, 251, 0.14) !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel[hidden] {
+  display: none !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel label {
+  display: grid !important;
+  gap: 0.36rem !important;
+  font-weight: 850 !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel textarea {
+  width: 100% !important;
+  min-height: 4.8rem !important;
+  resize: vertical !important;
+  box-sizing: border-box !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  padding: 0.68rem 0.75rem !important;
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.06) !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel p {
+  margin: 0 !important;
+  color: #ffd6e8 !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+}
+
+body.public-space-body .ps-admin-report-other-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 0.45rem !important;
+  flex-wrap: wrap !important;
+}
+/* Q75AK admin report history statuses END */

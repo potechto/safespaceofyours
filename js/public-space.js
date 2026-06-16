@@ -2252,10 +2252,295 @@
       button.setAttribute("aria-expanded", "false");
     });
   }
+  const REPORT_COOLDOWN_MS = 60 * 60 * 1000;
+  const REPORT_REASON_OPTIONS = [
+    "Harassment or bullying",
+    "Hate or harmful content",
+    "Spam or misleading content",
+    "Privacy or personal information",
+    "Inappropriate or unsafe content",
+    "Others"
+  ];
+
+  let activeReportPostId = "";
+
   function canReportPost(post) {
     if (!post || !post.id || post.is_deleted) return false;
     if (post.is_hidden && !isAdminMode) return false;
     return !isCurrentUserPost(post);
+  }
+
+  function reportCooldownKey() {
+    const userKey = currentUser && currentUser.id
+      ? String(currentUser.id)
+      : currentUser && currentUser.username
+        ? normalizeUsername(currentUser.username)
+        : "guest";
+
+    return "publicSpace.reportCooldown." + userKey;
+  }
+
+  function reportCooldownStartedAt() {
+    try {
+      return Number(window.localStorage.getItem(reportCooldownKey()) || 0) || 0;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  function setReportCooldown() {
+    try {
+      window.localStorage.setItem(reportCooldownKey(), String(Date.now()));
+    } catch (error) {
+      // Ignore storage errors. Backend duplicate report protection still applies.
+    }
+  }
+
+  function reportCooldownRemainingMs() {
+    const startedAt = reportCooldownStartedAt();
+    if (!startedAt) return 0;
+
+    return Math.max(0, startedAt + REPORT_COOLDOWN_MS - Date.now());
+  }
+
+  function formatReportCooldown(ms) {
+    const minutes = Math.max(1, Math.ceil(Number(ms || 0) / 60000));
+    if (minutes >= 60) return "1 hour";
+    return String(minutes) + " minute" + (minutes === 1 ? "" : "s");
+  }
+
+  function reportReasonOptionsHtml() {
+    return REPORT_REASON_OPTIONS.map(function(reason, index) {
+      const id = "ps-report-reason-" + String(index);
+      return [
+        '<label class="ps-report-option" for="' + id + '">',
+          '<input id="' + id + '" type="radio" name="ps-report-reason" value="' + escapeHtml(reason) + '">',
+          '<span>' + escapeHtml(reason) + '</span>',
+        '</label>'
+      ].join("");
+    }).join("");
+  }
+
+  function showPublicSpaceToast(message, tone = "success") {
+    const cleanMessage = String(message || "").trim();
+    if (!cleanMessage) return;
+
+    let stack = document.querySelector("[data-ps-toast-stack]");
+    if (!stack) {
+      stack = document.createElement("div");
+      stack.className = "ps-toast-stack";
+      stack.setAttribute("data-ps-toast-stack", "");
+      document.body.appendChild(stack);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "ps-toast " + (tone === "error" ? "is-error" : "is-success");
+    toast.setAttribute("role", "status");
+    toast.textContent = cleanMessage;
+
+    stack.appendChild(toast);
+
+    window.setTimeout(function() {
+      toast.classList.add("is-leaving");
+      window.setTimeout(function() {
+        toast.remove();
+      }, 260);
+    }, 2800);
+  }
+
+  function setReportModalMessage(modal, message, tone = "error") {
+    const node = modal ? modal.querySelector("[data-ps-report-message]") : null;
+    if (!node) return;
+
+    const cleanMessage = String(message || "").trim();
+    node.textContent = cleanMessage;
+    node.dataset.tone = tone;
+    node.hidden = !cleanMessage;
+  }
+
+  function selectedReportReason(modal) {
+    const checked = modal ? modal.querySelector('input[name="ps-report-reason"]:checked') : null;
+    return checked ? String(checked.value || "").trim() : "";
+  }
+
+  function updateReportNoteRequirement(modal) {
+    if (!modal) return;
+
+    const reason = selectedReportReason(modal);
+    const textarea = modal.querySelector("[data-ps-report-note]");
+    const hint = modal.querySelector("[data-ps-report-note-hint]");
+
+    if (!textarea) return;
+
+    const isOthers = reason === "Others";
+    textarea.required = isOthers;
+    textarea.placeholder = isOthers
+      ? "Please specify the reason..."
+      : "Add more details if needed...";
+
+    if (hint) {
+      hint.textContent = isOthers
+        ? "Required when Others is selected."
+        : "Optional, but helpful for admin review.";
+    }
+
+    setReportModalMessage(modal, "");
+  }
+
+  function ensureReportPostModal() {
+    let modal = document.querySelector("[data-ps-report-modal]");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.className = "ps-report-modal";
+    modal.setAttribute("data-ps-report-modal", "");
+    modal.hidden = true;
+
+    modal.innerHTML = [
+      '<section class="ps-report-dialog" role="dialog" aria-modal="true" aria-labelledby="ps-report-title">',
+        '<form class="ps-report-form" data-ps-report-form>',
+          '<header class="ps-report-head">',
+            '<div>',
+              '<strong id="ps-report-title">Report post</strong>',
+              '<span>Choose a reason so admins can review it properly.</span>',
+            '</div>',
+            '<button type="button" class="ps-report-close" data-ps-report-cancel aria-label="Close report form">×</button>',
+          '</header>',
+          '<div class="ps-report-options" role="radiogroup" aria-label="Report reason">',
+            reportReasonOptionsHtml(),
+          '</div>',
+          '<label class="ps-report-note-field">',
+            '<span>Note</span>',
+            '<textarea data-ps-report-note maxlength="600"></textarea>',
+            '<small data-ps-report-note-hint>Optional, but helpful for admin review.</small>',
+          '</label>',
+          '<p class="ps-report-message" data-ps-report-message hidden></p>',
+          '<footer class="ps-report-actions">',
+            '<button type="button" data-ps-report-cancel>Cancel</button>',
+            '<button type="submit" data-ps-report-submit>Submit report</button>',
+          '</footer>',
+        '</form>',
+      '</section>'
+    ].join("");
+
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", function(event) {
+      if (event.target === modal || event.target.closest("[data-ps-report-cancel]")) {
+        event.preventDefault();
+        closeReportPostModal();
+      }
+    });
+
+    modal.querySelectorAll('input[name="ps-report-reason"]').forEach(function(input) {
+      input.addEventListener("change", function() {
+        updateReportNoteRequirement(modal);
+      });
+    });
+
+    const form = modal.querySelector("[data-ps-report-form]");
+    if (form) {
+      form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        submitReportPost();
+      });
+    }
+
+    return modal;
+  }
+
+  function closeReportPostModal() {
+    const modal = document.querySelector("[data-ps-report-modal]");
+    activeReportPostId = "";
+
+    if (!modal) return;
+
+    modal.hidden = true;
+    setReportModalMessage(modal, "");
+  }
+
+  function openReportPostModal(postId) {
+    activeReportPostId = String(postId || "").trim();
+
+    const modal = ensureReportPostModal();
+    const form = modal.querySelector("[data-ps-report-form]");
+    const note = modal.querySelector("[data-ps-report-note]");
+
+    if (form) form.reset();
+    if (note) note.value = "";
+
+    updateReportNoteRequirement(modal);
+    setReportModalMessage(modal, "");
+    modal.hidden = false;
+
+    const firstReason = modal.querySelector('input[name="ps-report-reason"]');
+    if (firstReason) {
+      window.setTimeout(function() {
+        firstReason.focus({ preventScroll: true });
+      }, 0);
+    }
+  }
+
+  function setReportSubmitting(modal, isSubmitting) {
+    const submit = modal ? modal.querySelector("[data-ps-report-submit]") : null;
+    if (!submit) return;
+
+    submit.disabled = Boolean(isSubmitting);
+    submit.textContent = isSubmitting ? "Submitting..." : "Submit report";
+  }
+
+  async function submitReportPost() {
+    const modal = ensureReportPostModal();
+    const reason = selectedReportReason(modal);
+    const noteNode = modal.querySelector("[data-ps-report-note]");
+    const note = String((noteNode && noteNode.value) || "").trim();
+    const remainingMs = reportCooldownRemainingMs();
+
+    if (remainingMs > 0) {
+      setReportModalMessage(modal, "Please wait " + formatReportCooldown(remainingMs) + " before reporting again.");
+      return;
+    }
+
+    if (!reason) {
+      setReportModalMessage(modal, "Choose a report reason first.");
+      return;
+    }
+
+    if (reason === "Others" && !note) {
+      setReportModalMessage(modal, "Please specify the reason when choosing Others.");
+      return;
+    }
+
+    const finalReason = reason === "Others"
+      ? "Others: " + note
+      : note
+        ? reason + ": " + note
+        : reason;
+
+    if (finalReason.length > 600) {
+      setReportModalMessage(modal, "Report note must be 600 characters or less.");
+      return;
+    }
+
+    try {
+      setReportSubmitting(modal, true);
+      setReportModalMessage(modal, "");
+
+      await rpc("report_public_space_post", {
+        input_session_token: sessionToken(),
+        input_post_id: activeReportPostId,
+        input_reason: finalReason
+      });
+
+      setReportCooldown();
+      closeReportPostModal();
+      setFeedStatus("");
+      showPublicSpaceToast("Post reported successfully", "success");
+    } catch (error) {
+      setReportModalMessage(modal, getErrorMessage(error));
+    } finally {
+      setReportSubmitting(modal, false);
+    }
   }
 
   async function handleReportPost(postId) {
@@ -2275,34 +2560,14 @@
       return;
     }
 
-    const reasonInput = window.prompt(
-      "Why are you reporting this post? Optional, max 600 characters.",
-      ""
-    );
-
-    if (reasonInput === null) return;
-
-    const reason = String(reasonInput || "").trim();
-
-    if (reason.length > 600) {
-      setFeedStatus("Report note must be 600 characters or less.");
+    const remainingMs = reportCooldownRemainingMs();
+    if (remainingMs > 0) {
+      showPublicSpaceToast("Please wait " + formatReportCooldown(remainingMs) + " before reporting again.", "error");
       return;
     }
 
-    try {
-      setFeedStatus("Sending report...");
-      const result = await rpc("report_public_space_post", {
-        input_session_token: sessionToken(),
-        input_post_id: cleanPostId,
-        input_reason: reason || null
-      });
-
-      setFeedStatus((result && result.message) || "Report sent to admin review.");
-    } catch (error) {
-      setFeedStatus(getErrorMessage(error));
-    }
+    openReportPostModal(cleanPostId);
   }
-
 
 
   function postMenuHtml(post) {
@@ -4745,10 +5010,31 @@
 
     return parts.map(part => '<span class="ps-status-pill ' + (part.className || "") + '" data-ps-admin-pill="' + escapeHtml(part.key) + '">' + escapeHtml(part.label) + '</span>').join("");
   }
+  let adminReportStatusFilter = "all";
+
+  function adminReportStatus(report) {
+    return String((report && report.status) || "pending").toLowerCase();
+  }
+
+  function adminReportResolutionNote(report) {
+    if (!report) return "";
+
+    const candidates = [
+      report.admin_note,
+      report.admin_notes,
+      report.resolution_note,
+      report.resolution,
+      report.note,
+      report.adminNote
+    ];
+
+    const found = candidates.find(value => String(value || "").trim());
+    return String(found || "").trim();
+  }
 
   function adminReportActionButtons(report) {
     if (!report || !report.id) return "";
-    const status = String(report.status || "pending").toLowerCase();
+    const status = adminReportStatus(report);
     if (status !== "pending") return "";
 
     const reportId = escapeHtml(report.id);
@@ -4757,8 +5043,142 @@
       '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="resolve">Resolve</button>',
       '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="dismiss">Dismiss</button>',
       '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="hide_resolve">Hide post + resolve</button>',
-      '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="delete_resolve">Delete post + resolve</button>'
+      '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="delete_resolve">Delete post + resolve</button>',
+      '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="other">Other outcome</button>'
     ].join("");
+  }
+
+  function adminReportFilterButton(value, label, count) {
+    const active = adminReportStatusFilter === value ? " is-active" : "";
+    return '<button type="button" class="ps-admin-report-filter' + active + '" data-ps-admin-report-filter="' + escapeHtml(value) + '">' + escapeHtml(label) + ' <span>' + Number(count || 0) + '</span></button>';
+  }
+
+  function adminReportFiltersHtml(counts) {
+    return [
+      adminReportFilterButton("all", "All", counts.all),
+      adminReportFilterButton("pending", "Pending", counts.pending),
+      adminReportFilterButton("resolved", "Resolved", counts.resolved),
+      adminReportFilterButton("dismissed", "Dismissed", counts.dismissed)
+    ].join("");
+  }
+
+  async function loadAdminReportsByStatus(status) {
+    try {
+      const reports = await rpc("list_public_space_reports", {
+        input_session_token: sessionToken(),
+        input_status: status
+      });
+
+      return Array.isArray(reports) ? reports : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async function loadAdminReportHistory() {
+    const chunks = await Promise.all([
+      loadAdminReportsByStatus("pending"),
+      loadAdminReportsByStatus("resolved"),
+      loadAdminReportsByStatus("dismissed")
+    ]);
+
+    const byId = new Map();
+
+    chunks.flat().forEach(report => {
+      if (!report || !report.id) return;
+      byId.set(String(report.id), report);
+    });
+
+    return Array.from(byId.values()).sort((a, b) => {
+      const aTime = new Date(a.updated_at || a.created_at || 0).getTime();
+      const bTime = new Date(b.updated_at || b.created_at || 0).getTime();
+      return bTime - aTime;
+    });
+  }
+
+  function ensureAdminReportOtherPanel(button, reportId) {
+    const card = button ? button.closest("[data-ps-admin-report-card]") : null;
+    if (!card) return null;
+
+    let panel = card.querySelector("[data-ps-admin-report-other-panel]");
+    if (panel) {
+      panel.hidden = !panel.hidden;
+      return panel;
+    }
+
+    panel = document.createElement("div");
+    panel.className = "ps-admin-report-other-panel";
+    panel.setAttribute("data-ps-admin-report-other-panel", "");
+    panel.innerHTML = [
+      '<label>',
+        '<span>Other outcome</span>',
+        '<textarea data-ps-admin-report-other-note maxlength="240" placeholder="Example: post was edited, user was warned, duplicate report, already handled..."></textarea>',
+      '</label>',
+      '<p data-ps-admin-report-other-message hidden></p>',
+      '<div class="ps-admin-report-other-actions">',
+        '<button type="button" data-ps-admin-report-other-cancel>Cancel</button>',
+        '<button type="button" data-ps-admin-report-other-submit="' + escapeHtml(reportId) + '">Proceed →</button>',
+      '</div>'
+    ].join("");
+
+    card.appendChild(panel);
+
+    const note = panel.querySelector("[data-ps-admin-report-other-note]");
+    if (note) {
+      window.setTimeout(() => note.focus({ preventScroll: true }), 0);
+    }
+
+    return panel;
+  }
+
+  function setAdminReportOtherMessage(panel, message) {
+    const node = panel ? panel.querySelector("[data-ps-admin-report-other-message]") : null;
+    if (!node) return;
+
+    const cleanMessage = String(message || "").trim();
+    node.textContent = cleanMessage;
+    node.hidden = !cleanMessage;
+  }
+
+  async function handleAdminReportOtherSubmit(button) {
+    if (!button || button.disabled) return;
+
+    const reportId = String(button.dataset.psAdminReportOtherSubmit || "").trim();
+    const panel = button.closest("[data-ps-admin-report-other-panel]");
+    const noteNode = panel ? panel.querySelector("[data-ps-admin-report-other-note]") : null;
+    const note = String((noteNode && noteNode.value) || "").trim();
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+
+    if (!reportId) return;
+
+    if (!note) {
+      setAdminReportOtherMessage(panel, "Please specify the outcome first.");
+      return;
+    }
+
+    const previousText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Working...";
+
+    try {
+      await rpc("admin_update_public_space_report", {
+        input_session_token: sessionToken(),
+        input_report_id: reportId,
+        input_status: "resolved",
+        input_admin_note: "Other: " + note,
+        input_hide_post: false,
+        input_delete_post: false
+      });
+
+      adminReportStatusFilter = "all";
+      await loadPosts();
+      await renderAdminReports();
+      setMessage(messageNode, "Report marked as: Other: " + note, "success");
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = previousText;
+      setAdminReportOtherMessage(panel, getErrorMessage(error));
+    }
   }
 
   async function handleAdminReportActionButton(button) {
@@ -4770,11 +5190,16 @@
 
     if (!reportId || !action) return;
 
+    if (action === "other") {
+      ensureAdminReportOtherPanel(button, reportId);
+      return;
+    }
+
     const config = {
-      resolve: { status: "resolved", note: "Resolved from admin reports queue.", hide: false, deletePost: false },
-      dismiss: { status: "dismissed", note: "Dismissed from admin reports queue.", hide: false, deletePost: false },
-      hide_resolve: { status: "resolved", note: "Post hidden and report resolved from admin reports queue.", hide: true, deletePost: false },
-      delete_resolve: { status: "resolved", note: "Post deleted and report resolved from admin reports queue.", hide: false, deletePost: true }
+      resolve: { status: "resolved", note: "Resolved from admin reports queue.", hide: false, deletePost: false, markedAs: "Resolved" },
+      dismiss: { status: "dismissed", note: "Dismissed from admin reports queue.", hide: false, deletePost: false, markedAs: "Dismissed" },
+      hide_resolve: { status: "resolved", note: "Post hidden and report resolved from admin reports queue.", hide: true, deletePost: false, markedAs: "Post hidden + resolved" },
+      delete_resolve: { status: "resolved", note: "Post deleted and report resolved from admin reports queue.", hide: false, deletePost: true, markedAs: "Post deleted + resolved" }
     }[action];
 
     if (!config) return;
@@ -4798,9 +5223,10 @@
         input_delete_post: config.deletePost
       });
 
+      adminReportStatusFilter = "all";
       await loadPosts();
       await renderAdminReports();
-      setMessage(messageNode, "Report updated.", "success");
+      setMessage(messageNode, "Report marked as: " + config.markedAs, "success");
     } catch (error) {
       button.disabled = false;
       button.classList.remove("is-processing");
@@ -4808,39 +5234,48 @@
       setMessage(messageNode, getErrorMessage(error), "error");
     }
   }
-
   async function renderAdminReports() {
     const messageNode = root.querySelector("[data-ps-admin-message]");
     const results = adminResultsNode();
 
     if (!results) return;
 
-    renderAdminInfoCards("Loading pending reports...", [
+    renderAdminInfoCards("Loading reports...", [
       {
-        title: "Loading report queue",
+        title: "Loading report history",
         body: "Please wait while Public Space reports are loaded."
       }
     ]);
 
     try {
-      const reports = await rpc("list_public_space_reports", {
-        input_session_token: sessionToken(),
-        input_status: "pending"
-      });
+      const allReports = await loadAdminReportHistory();
+      const counts = {
+        all: allReports.length,
+        pending: allReports.filter(report => adminReportStatus(report) === "pending").length,
+        resolved: allReports.filter(report => adminReportStatus(report) === "resolved").length,
+        dismissed: allReports.filter(report => adminReportStatus(report) === "dismissed").length
+      };
 
-      const list = Array.isArray(reports) ? reports : [];
+      const list = adminReportStatusFilter === "all"
+        ? allReports
+        : allReports.filter(report => adminReportStatus(report) === adminReportStatusFilter);
 
-      if (!list.length) {
-        renderAdminInfoCards("Reports ready.", [
-          {
-            title: "No pending reports",
-            body: "There are no reports waiting for review."
-          },
-          {
-            title: "Report actions ready",
-            body: "When reports exist, admins can resolve, dismiss, hide the post, or delete the post from this queue."
-          }
-        ]);
+      const filtersHtml = '<div class="ps-admin-report-filters" data-ps-admin-report-filters>' + adminReportFiltersHtml(counts) + '</div>';
+
+      if (!allReports.length) {
+        results.innerHTML = [
+          '<div class="ps-admin-results-head ps-admin-post-head ps-admin-report-head">',
+            '<strong>Report history</strong>',
+            '<span>0 total</span>',
+          '</div>',
+          filtersHtml,
+          '<article class="ps-admin-empty ps-admin-report-empty">',
+            '<strong>No reports yet</strong>',
+            '<span>Reports submitted from Public Space will appear here and stay visible after action.</span>',
+          '</article>'
+        ].join("");
+
+        setMessage(messageNode, "Reports ready: 0 total", "success");
         return;
       }
 
@@ -4848,9 +5283,15 @@
         const reporter = report.reporter || {};
         const reported = report.reported_user || {};
         const post = report.post || {};
+        const status = adminReportStatus(report);
         const created = report.created_at ? formatDate(report.created_at) : "Unknown date";
         const reason = String(report.reason || "No reason provided.").trim();
         const postState = post.is_deleted ? "Post deleted" : post.is_hidden ? "Post hidden" : "Post visible";
+        const note = adminReportResolutionNote(report);
+        const markedAs = note || (status === "dismissed" ? "Dismissed" : status === "resolved" ? "Resolved" : "");
+        const markedHtml = markedAs
+          ? '<p class="ps-admin-report-marked"><strong>Marked as:</strong> ' + escapeHtml(markedAs) + '</p>'
+          : "";
 
         return [
           '<article class="ps-admin-post-card ps-admin-report-card" data-ps-admin-report-card data-report-id="' + escapeHtml(report.id || "") + '">',
@@ -4862,6 +5303,7 @@
               '<div class="ps-admin-post-pills">' + adminReportStatusPills(report) + '</div>',
             '</div>',
             '<p><strong>Reason:</strong> ' + escapeHtml(reason) + '</p>',
+            markedHtml,
             '<p><strong>Reported post:</strong> ' + escapeHtml(adminReportPreview(post.body)) + '</p>',
             '<div class="ps-admin-post-foot">',
               '<span>' + escapeHtml(postState) + '</span>',
@@ -4873,15 +5315,16 @@
 
       results.innerHTML = [
         '<div class="ps-admin-results-head ps-admin-post-head ps-admin-report-head">',
-          '<strong>Pending reports</strong>',
-          '<span>' + String(list.length) + ' total</span>',
+          '<strong>Report history</strong>',
+          '<span>' + String(list.length) + ' shown · ' + String(allReports.length) + ' total</span>',
         '</div>',
-        '<div class="ps-admin-post-list ps-admin-report-list" data-ps-admin-report-list>',
-          cardsHtml,
-        '</div>'
+        filtersHtml,
+        list.length
+          ? '<div class="ps-admin-post-list ps-admin-report-list" data-ps-admin-report-list>' + cardsHtml + '</div>'
+          : '<article class="ps-admin-empty ps-admin-report-empty"><strong>No reports match this filter.</strong><span>Try All reports to see resolved and dismissed reports.</span></article>'
       ].join("");
 
-      setMessage(messageNode, "Reports ready: " + String(list.length) + " pending", "success");
+      setMessage(messageNode, "Reports ready: " + String(list.length) + " shown", "success");
     } catch (error) {
       renderAdminInfoCards("Reports failed to load.", [
         {
@@ -5479,10 +5922,72 @@
       return;
     }
 
-    const reportActionButton = event.target.closest("[data-ps-admin-report-action]");
-    if (reportActionButton) {
-      await handleAdminReportActionButton(reportActionButton);
+    const reportFilterButton = event.target.closest("[data-ps-admin-report-filter]");
+
+
+    if (reportFilterButton) {
+
+
+      adminReportStatusFilter = String(reportFilterButton.dataset.psAdminReportFilter || "all").toLowerCase();
+
+
+      await renderAdminReports();
+
+
       return;
+
+
+    }
+
+
+
+    const reportOtherCancelButton = event.target.closest("[data-ps-admin-report-other-cancel]");
+
+
+    if (reportOtherCancelButton) {
+
+
+      const panel = reportOtherCancelButton.closest("[data-ps-admin-report-other-panel]");
+
+
+      if (panel) panel.hidden = true;
+
+
+      return;
+
+
+    }
+
+
+
+    const reportOtherSubmitButton = event.target.closest("[data-ps-admin-report-other-submit]");
+
+
+    if (reportOtherSubmitButton) {
+
+
+      await handleAdminReportOtherSubmit(reportOtherSubmitButton);
+
+
+      return;
+
+
+    }
+
+
+
+    const reportActionButton = event.target.closest("[data-ps-admin-report-action]");
+
+
+    if (reportActionButton) {
+
+
+      await handleAdminReportActionButton(reportActionButton);
+
+
+      return;
+
+
     }
 
     const button = event.target.closest("[data-ps-admin-action]");
