@@ -4659,17 +4659,180 @@
     setMessage(messageNode, `Post moderation: ${list.length} loaded`, "success");
   }
 
-  function renderAdminReports() {
-    renderAdminInfoCards("Reports section ready.", [
+  function adminReportPreview(body) {
+    const normalized = String(body || "").replace(/\s+/g, " ").trim();
+    if (!normalized) return "(empty post)";
+    return normalized.length > 210 ? normalized.slice(0, 207) + "..." : normalized;
+  }
+
+  function adminReportStatusPills(report) {
+    const status = String((report && report.status) || "pending").toLowerCase();
+    const post = (report && report.post) || {};
+    const parts = [];
+
+    parts.push({
+      key: status,
+      label: status === "resolved" ? "Resolved" : status === "dismissed" ? "Dismissed" : "Pending",
+      className: status === "pending" ? "is-danger" : "is-ok"
+    });
+
+    if (post.is_hidden) parts.push({ key: "hidden", label: "Post hidden", className: "is-danger" });
+    if (post.is_deleted) parts.push({ key: "deleted", label: "Post deleted", className: "is-danger" });
+
+    return parts.map(part => '<span class="ps-status-pill ' + (part.className || "") + '" data-ps-admin-pill="' + escapeHtml(part.key) + '">' + escapeHtml(part.label) + '</span>').join("");
+  }
+
+  function adminReportActionButtons(report) {
+    if (!report || !report.id) return "";
+    const status = String(report.status || "pending").toLowerCase();
+    if (status !== "pending") return "";
+
+    const reportId = escapeHtml(report.id);
+
+    return [
+      '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="resolve">Resolve</button>',
+      '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="dismiss">Dismiss</button>',
+      '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="hide_resolve">Hide post + resolve</button>',
+      '<button type="button" data-ps-admin-report-action="' + reportId + '" data-action="delete_resolve">Delete post + resolve</button>'
+    ].join("");
+  }
+
+  async function handleAdminReportActionButton(button) {
+    if (!button || button.disabled) return;
+
+    const reportId = String(button.dataset.psAdminReportAction || "");
+    const action = String(button.dataset.action || "").toLowerCase();
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+
+    if (!reportId || !action) return;
+
+    const config = {
+      resolve: { status: "resolved", note: "Resolved from admin reports queue.", hide: false, deletePost: false },
+      dismiss: { status: "dismissed", note: "Dismissed from admin reports queue.", hide: false, deletePost: false },
+      hide_resolve: { status: "resolved", note: "Post hidden and report resolved from admin reports queue.", hide: true, deletePost: false },
+      delete_resolve: { status: "resolved", note: "Post deleted and report resolved from admin reports queue.", hide: false, deletePost: true }
+    }[action];
+
+    if (!config) return;
+
+    if (config.deletePost && !window.confirm("Delete the reported post and resolve this report?")) {
+      return;
+    }
+
+    const previousText = button.textContent;
+    button.disabled = true;
+    button.classList.add("is-processing");
+    button.textContent = "Working...";
+
+    try {
+      await rpc("admin_update_public_space_report", {
+        input_session_token: sessionToken(),
+        input_report_id: reportId,
+        input_status: config.status,
+        input_admin_note: config.note,
+        input_hide_post: config.hide,
+        input_delete_post: config.deletePost
+      });
+
+      await loadPosts();
+      await renderAdminReports();
+      setMessage(messageNode, "Report updated.", "success");
+    } catch (error) {
+      button.disabled = false;
+      button.classList.remove("is-processing");
+      button.textContent = previousText;
+      setMessage(messageNode, getErrorMessage(error), "error");
+    }
+  }
+
+  async function renderAdminReports() {
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+    const results = adminResultsNode();
+
+    if (!results) return;
+
+    renderAdminInfoCards("Loading pending reports...", [
       {
-        title: "No report queue connected yet",
-        body: "The admin screen is ready. Report submission and report review RPC functions will be added after viewer-side testing."
-      },
-      {
-        title: "Planned report actions",
-        body: "Review report, hide post/comment, dismiss report, and keep a moderation log."
+        title: "Loading report queue",
+        body: "Please wait while Public Space reports are loaded."
       }
     ]);
+
+    try {
+      const reports = await rpc("list_public_space_reports", {
+        input_session_token: sessionToken(),
+        input_status: "pending"
+      });
+
+      const list = Array.isArray(reports) ? reports : [];
+
+      if (!list.length) {
+        renderAdminInfoCards("Reports ready.", [
+          {
+            title: "No pending reports",
+            body: "There are no reports waiting for review."
+          },
+          {
+            title: "Report actions ready",
+            body: "When reports exist, admins can resolve, dismiss, hide the post, or delete the post from this queue."
+          }
+        ]);
+        return;
+      }
+
+      const cardsHtml = list.map(report => {
+        const reporter = report.reporter || {};
+        const reported = report.reported_user || {};
+        const post = report.post || {};
+        const created = report.created_at ? formatDate(report.created_at) : "Unknown date";
+        const reason = String(report.reason || "No reason provided.").trim();
+        const postState = post.is_deleted ? "Post deleted" : post.is_hidden ? "Post hidden" : "Post visible";
+
+        return [
+          '<article class="ps-admin-post-card ps-admin-report-card" data-ps-admin-report-card data-report-id="' + escapeHtml(report.id || "") + '">',
+            '<div class="ps-admin-post-top">',
+              '<div>',
+                '<strong>Report from @' + escapeHtml(reporter.username || "unknown") + '</strong>',
+                '<span>Against @' + escapeHtml(reported.username || "unknown") + ' · ' + escapeHtml(created) + '</span>',
+              '</div>',
+              '<div class="ps-admin-post-pills">' + adminReportStatusPills(report) + '</div>',
+            '</div>',
+            '<p><strong>Reason:</strong> ' + escapeHtml(reason) + '</p>',
+            '<p><strong>Reported post:</strong> ' + escapeHtml(adminReportPreview(post.body)) + '</p>',
+            '<div class="ps-admin-post-foot">',
+              '<span>' + escapeHtml(postState) + '</span>',
+              '<div class="ps-admin-post-actions ps-admin-report-actions">' + adminReportActionButtons(report) + '</div>',
+            '</div>',
+          '</article>'
+        ].join("");
+      }).join("");
+
+      results.innerHTML = [
+        '<div class="ps-admin-results-head ps-admin-post-head ps-admin-report-head">',
+          '<strong>Pending reports</strong>',
+          '<span>' + String(list.length) + ' total</span>',
+        '</div>',
+        '<div class="ps-admin-post-list ps-admin-report-list" data-ps-admin-report-list>',
+          cardsHtml,
+        '</div>'
+      ].join("");
+
+      setMessage(messageNode, "Reports ready: " + String(list.length) + " pending", "success");
+    } catch (error) {
+      renderAdminInfoCards("Reports failed to load.", [
+        {
+          title: "Report queue unavailable",
+          body: "The reports backend may not be applied yet, or this account is not an admin."
+        },
+        {
+          title: "Registered users",
+          body: "Open Registered users to confirm your admin account and continue managing the space.",
+          action: "users",
+          actionLabel: "Open users"
+        }
+      ]);
+      setMessage(messageNode, getErrorMessage(error), "error");
+    }
   }
 
   function renderAdminSpaceSettings() {
@@ -5244,6 +5407,12 @@
       return;
     }
 
+    const reportActionButton = event.target.closest("[data-ps-admin-report-action]");
+    if (reportActionButton) {
+      await handleAdminReportActionButton(reportActionButton);
+      return;
+    }
+
     const button = event.target.closest("[data-ps-admin-action]");
     if (!button) return;
 
@@ -5274,7 +5443,7 @@
       }
 
       if (action === "reports") {
-        renderAdminReports();
+        await renderAdminReports();
         return;
       }
 
