@@ -1,7 +1,7 @@
 window.POEMS = [
   {
     slug: "grad",
-    title: "Hiiii, so, maging less poetic muna tayo kahit ngayong araw lang.",
+    title: "When it ends, New Begins",
     type: "spoken-poetry",
     access: "free",
     price: null,
