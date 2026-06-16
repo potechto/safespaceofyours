@@ -3479,3 +3479,143 @@ body.public-space-body .ps-confirm-actions button.is-danger {
   }
 }
 /* Q75AM custom confirm dialogs END */
+
+
+/* Q75AP softer report UI colors */
+body.public-space-body .ps-admin-report-filter {
+  color: #f7e7f1 !important;
+  background: rgba(255, 244, 251, 0.08) !important;
+  border: 1px solid rgba(255, 196, 229, 0.18) !important;
+  box-shadow: none !important;
+}
+
+body.public-space-body .ps-admin-report-filter:hover {
+  background: rgba(255, 196, 229, 0.12) !important;
+  border-color: rgba(255, 196, 229, 0.26) !important;
+}
+
+body.public-space-body .ps-admin-report-filter span {
+  color: rgba(247, 231, 241, 0.72) !important;
+  opacity: 1 !important;
+}
+
+body.public-space-body .ps-admin-report-filter.is-active {
+  color: #fff4fb !important;
+  background: linear-gradient(135deg, rgba(197, 104, 154, 0.32), rgba(110, 62, 120, 0.26)) !important;
+  border-color: rgba(255, 168, 215, 0.38) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+body.public-space-body .ps-admin-report-marked {
+  color: #f7e7f1 !important;
+  background: rgba(124, 170, 196, 0.10) !important;
+  border: 1px solid rgba(124, 170, 196, 0.22) !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel {
+  background: rgba(255, 244, 251, 0.045) !important;
+  border-color: rgba(255, 196, 229, 0.14) !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel textarea {
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.05) !important;
+  border-color: rgba(255, 196, 229, 0.16) !important;
+}
+
+body.public-space-body .ps-admin-report-other-panel textarea::placeholder,
+body.public-space-body .ps-report-note-field textarea::placeholder {
+  color: rgba(247, 231, 241, 0.42) !important;
+}
+
+body.public-space-body .ps-report-dialog {
+  background:
+    radial-gradient(circle at top left, rgba(223, 121, 180, 0.12), transparent 35%),
+    linear-gradient(145deg, rgba(36, 24, 46, 0.985), rgba(18, 12, 26, 0.985)) !important;
+  border-color: rgba(255, 196, 229, 0.16) !important;
+}
+
+body.public-space-body .ps-report-option {
+  color: #f8eaf3 !important;
+  background: rgba(255, 244, 251, 0.05) !important;
+  border-color: rgba(255, 196, 229, 0.14) !important;
+}
+
+body.public-space-body .ps-report-option:hover {
+  background: rgba(255, 196, 229, 0.085) !important;
+  border-color: rgba(255, 196, 229, 0.22) !important;
+}
+
+body.public-space-body .ps-report-option:has(input:checked) {
+  color: #fff4fb !important;
+  background: rgba(214, 116, 170, 0.16) !important;
+  border-color: rgba(255, 168, 215, 0.34) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 168, 215, 0.08) !important;
+}
+
+body.public-space-body .ps-report-note-field textarea {
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.045) !important;
+  border-color: rgba(255, 196, 229, 0.16) !important;
+}
+
+body.public-space-body .ps-report-note-field textarea:focus,
+body.public-space-body .ps-admin-report-other-panel textarea:focus {
+  border-color: rgba(255, 168, 215, 0.34) !important;
+  box-shadow: 0 0 0 4px rgba(214, 116, 170, 0.10) !important;
+}
+
+body.public-space-body .ps-report-close {
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.08) !important;
+  border: 1px solid rgba(255, 196, 229, 0.18) !important;
+}
+
+body.public-space-body .ps-report-close:hover {
+  background: rgba(255, 196, 229, 0.12) !important;
+  border-color: rgba(255, 196, 229, 0.24) !important;
+}
+
+body.public-space-body .ps-report-actions button,
+body.public-space-body .ps-admin-report-other-actions button,
+body.public-space-body .ps-confirm-actions button {
+  color: #fff4fb !important;
+  background: rgba(255, 244, 251, 0.08) !important;
+  border: 1px solid rgba(255, 196, 229, 0.18) !important;
+  box-shadow: none !important;
+}
+
+body.public-space-body .ps-report-actions button:hover,
+body.public-space-body .ps-admin-report-other-actions button:hover,
+body.public-space-body .ps-confirm-actions button:hover {
+  background: rgba(255, 196, 229, 0.12) !important;
+  border-color: rgba(255, 196, 229, 0.24) !important;
+}
+
+body.public-space-body .ps-report-actions [data-ps-report-submit],
+body.public-space-body .ps-admin-report-other-actions [data-ps-admin-report-other-submit],
+body.public-space-body .ps-confirm-actions [data-ps-confirm-primary] {
+  color: #fff8fc !important;
+  background: linear-gradient(135deg, rgba(201, 104, 159, 0.28), rgba(121, 66, 131, 0.24)) !important;
+  border-color: rgba(255, 168, 215, 0.30) !important;
+}
+
+body.public-space-body .ps-report-actions [data-ps-report-submit]:hover,
+body.public-space-body .ps-admin-report-other-actions [data-ps-admin-report-other-submit]:hover,
+body.public-space-body .ps-confirm-actions [data-ps-confirm-primary]:hover {
+  background: linear-gradient(135deg, rgba(214, 116, 170, 0.34), rgba(132, 74, 142, 0.30)) !important;
+  border-color: rgba(255, 182, 221, 0.36) !important;
+}
+
+body.public-space-body .ps-confirm-actions button.is-danger {
+  color: #ffe8f1 !important;
+  background: linear-gradient(135deg, rgba(176, 77, 113, 0.26), rgba(115, 52, 86, 0.22)) !important;
+  border-color: rgba(255, 145, 184, 0.28) !important;
+}
+
+body.public-space-body .ps-toast {
+  color: #fff4fb !important;
+  background: rgba(24, 18, 32, 0.94) !important;
+  border-color: rgba(255, 196, 229, 0.16) !important;
+}
+/* Q75AP softer report UI colors END */

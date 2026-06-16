@@ -2280,7 +2280,24 @@
     return "publicSpace.reportCooldown." + userKey;
   }
 
+  function isReportCooldownExempt() {
+    return Boolean(isAdminMode || (currentUser && currentUser.is_admin));
+  }
+
+  function clearReportCooldown() {
+    try {
+      window.localStorage.removeItem(reportCooldownKey());
+    } catch (error) {
+      // Ignore storage errors.
+    }
+  }
+
   function reportCooldownStartedAt() {
+    if (isReportCooldownExempt()) {
+      clearReportCooldown();
+      return 0;
+    }
+
     try {
       return Number(window.localStorage.getItem(reportCooldownKey()) || 0) || 0;
     } catch (error) {
@@ -2289,6 +2306,11 @@
   }
 
   function setReportCooldown() {
+    if (isReportCooldownExempt()) {
+      clearReportCooldown();
+      return;
+    }
+
     try {
       window.localStorage.setItem(reportCooldownKey(), String(Date.now()));
     } catch (error) {
