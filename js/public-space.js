@@ -2348,6 +2348,84 @@
     }, 2800);
   }
 
+
+  function showPublicSpaceConfirm(options = {}) {
+    const title = String(options.title || "Confirm action");
+    const message = String(options.message || "Are you sure you want to continue?");
+    const confirmLabel = String(options.confirmLabel || "Continue");
+    const cancelLabel = String(options.cancelLabel || "Cancel");
+    const danger = Boolean(options.danger);
+
+    return new Promise(resolve => {
+      const modal = document.createElement("div");
+      modal.className = "ps-confirm-modal";
+      modal.setAttribute("data-ps-confirm-modal", "");
+
+      modal.innerHTML = [
+        '<section class="ps-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="ps-confirm-title">',
+          '<div class="ps-confirm-icon" aria-hidden="true">!</div>',
+          '<div class="ps-confirm-copy">',
+            '<strong id="ps-confirm-title" data-ps-confirm-title></strong>',
+            '<p data-ps-confirm-message></p>',
+          '</div>',
+          '<div class="ps-confirm-actions">',
+            '<button type="button" data-ps-confirm-cancel></button>',
+            '<button type="button" data-ps-confirm-primary></button>',
+          '</div>',
+        '</section>'
+      ].join("");
+
+      const titleNode = modal.querySelector("[data-ps-confirm-title]");
+      const messageNode = modal.querySelector("[data-ps-confirm-message]");
+      const cancelButton = modal.querySelector("[data-ps-confirm-cancel]");
+      const primaryButton = modal.querySelector("[data-ps-confirm-primary]");
+
+      if (titleNode) titleNode.textContent = title;
+      if (messageNode) messageNode.textContent = message;
+      if (cancelButton) cancelButton.textContent = cancelLabel;
+      if (primaryButton) {
+        primaryButton.textContent = confirmLabel;
+        if (danger) primaryButton.classList.add("is-danger");
+      }
+
+      let settled = false;
+
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        document.removeEventListener("keydown", onKeyDown);
+        modal.remove();
+        resolve(Boolean(value));
+      }
+
+      function onKeyDown(event) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          finish(false);
+        }
+      }
+
+      modal.addEventListener("click", event => {
+        if (event.target === modal || event.target.closest("[data-ps-confirm-cancel]")) {
+          event.preventDefault();
+          finish(false);
+          return;
+        }
+
+        if (event.target.closest("[data-ps-confirm-primary]")) {
+          event.preventDefault();
+          finish(true);
+        }
+      });
+
+      document.addEventListener("keydown", onKeyDown);
+      document.body.appendChild(modal);
+
+      window.setTimeout(() => {
+        if (primaryButton) primaryButton.focus({ preventScroll: true });
+      }, 0);
+    });
+  }
   function setReportModalMessage(modal, message, tone = "error") {
     const node = modal ? modal.querySelector("[data-ps-report-message]") : null;
     if (!node) return;
@@ -4571,7 +4649,13 @@
 
     if (deleteButton) {
       const postId = deleteButton.dataset.psDeletePost || "";
-      if (!window.confirm(postDeleteConfirmText(postId))) {
+      if (!(await showPublicSpaceConfirm({
+        title: "Delete post?",
+        message: postDeleteConfirmText(postId),
+        confirmLabel: "Delete post",
+        cancelLabel: "Keep post",
+        danger: true
+      }))) {
         setFeedStatus("Post delete cancelled.");
         return;
       }
@@ -5011,6 +5095,57 @@
     return parts.map(part => '<span class="ps-status-pill ' + (part.className || "") + '" data-ps-admin-pill="' + escapeHtml(part.key) + '">' + escapeHtml(part.label) + '</span>').join("");
   }
   let adminReportStatusFilter = "all";
+  const adminReportHistoryCache = new Map();
+
+  function rememberAdminReport(report) {
+    if (!report || !report.id) return null;
+
+    const id = String(report.id);
+    const previous = adminReportHistoryCache.get(id) || {};
+    const next = {
+      ...previous,
+      ...report,
+      id,
+      reporter: {
+        ...(previous.reporter || {}),
+        ...(report.reporter || {})
+      },
+      reported_user: {
+        ...(previous.reported_user || {}),
+        ...(report.reported_user || {})
+      },
+      post: {
+        ...(previous.post || {}),
+        ...(report.post || {})
+      }
+    };
+
+    adminReportHistoryCache.set(id, next);
+    return next;
+  }
+
+  function adminReportFromCache(reportId) {
+    return adminReportHistoryCache.get(String(reportId || "")) || null;
+  }
+
+  function rememberAdminReportAction(reportId, updates = {}) {
+    const id = String(reportId || "").trim();
+    if (!id) return null;
+
+    const previous = adminReportFromCache(id) || { id };
+    const next = {
+      ...previous,
+      ...updates,
+      id,
+      updated_at: new Date().toISOString(),
+      post: {
+        ...(previous.post || {}),
+        ...(updates.post || {})
+      }
+    };
+
+    return rememberAdminReport(next);
+  }
 
   function adminReportStatus(report) {
     return String((report && report.status) || "pending").toLowerCase();
@@ -5077,6 +5212,7 @@
 
   async function loadAdminReportHistory() {
     const chunks = await Promise.all([
+      loadAdminReportsByStatus("all"),
       loadAdminReportsByStatus("pending"),
       loadAdminReportsByStatus("resolved"),
       loadAdminReportsByStatus("dismissed")
@@ -5085,8 +5221,14 @@
     const byId = new Map();
 
     chunks.flat().forEach(report => {
-      if (!report || !report.id) return;
-      byId.set(String(report.id), report);
+      const remembered = rememberAdminReport(report);
+      if (!remembered || !remembered.id) return;
+      byId.set(String(remembered.id), remembered);
+    });
+
+    adminReportHistoryCache.forEach((report, id) => {
+      if (!report || !id) return;
+      byId.set(String(id), report);
     });
 
     return Array.from(byId.values()).sort((a, b) => {
@@ -5170,6 +5312,10 @@
         input_delete_post: false
       });
 
+      rememberAdminReportAction(reportId, {
+        status: "resolved",
+        admin_note: "Other: " + note
+      });
       adminReportStatusFilter = "all";
       await loadPosts();
       await renderAdminReports();
@@ -5204,7 +5350,13 @@
 
     if (!config) return;
 
-    if (config.deletePost && !window.confirm("Delete the reported post and resolve this report?")) {
+    if (config.deletePost && !(await showPublicSpaceConfirm({
+      title: "Delete reported post?",
+      message: "Delete the reported post and resolve this report?",
+      confirmLabel: "Delete + resolve",
+      cancelLabel: "Cancel",
+      danger: true
+    }))) {
       return;
     }
 
@@ -5223,6 +5375,14 @@
         input_delete_post: config.deletePost
       });
 
+      rememberAdminReportAction(reportId, {
+        status: config.status,
+        admin_note: config.note,
+        post: {
+          is_hidden: config.hide ? true : undefined,
+          is_deleted: config.deletePost ? true : undefined
+        }
+      });
       adminReportStatusFilter = "all";
       await loadPosts();
       await renderAdminReports();
@@ -5778,7 +5938,13 @@
         ? `Disable ${userLabel}? This will block login until the account is enabled again.`
         : `Enable ${userLabel}? This will allow the account to login again.`;
 
-      if (!window.confirm(confirmText)) return;
+      if (!(await showPublicSpaceConfirm({
+        title: nextDisabled ? "Disable account?" : "Enable account?",
+        message: confirmText,
+        confirmLabel: nextDisabled ? "Disable" : "Enable",
+        cancelLabel: "Cancel",
+        danger: nextDisabled
+      }))) return;
 
       params.input_is_disabled = nextDisabled;
     }
@@ -5801,7 +5967,13 @@
         return;
       }
 
-      if (!window.confirm(`Reset password for ${userLabel}? The user will need the new password on next login.`)) return;
+      if (!(await showPublicSpaceConfirm({
+        title: "Reset password?",
+        message: `Reset password for ${userLabel}? The user will need the new password on next login.`,
+        confirmLabel: "Reset password",
+        cancelLabel: "Cancel",
+        danger: true
+      }))) return;
 
       params.input_new_password = newPassword;
     }
@@ -5816,7 +5988,13 @@
         return;
       }
 
-      if (!window.confirm(`Reset PIN/key for ${userLabel}? The user will need the new PIN/key for recovery.`)) return;
+      if (!(await showPublicSpaceConfirm({
+        title: "Reset PIN/key?",
+        message: `Reset PIN/key for ${userLabel}? The user will need the new PIN/key for recovery.`,
+        confirmLabel: "Reset PIN/key",
+        cancelLabel: "Cancel",
+        danger: true
+      }))) return;
 
       params.input_new_pin = newPin;
     }

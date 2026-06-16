@@ -3390,3 +3390,92 @@ body.public-space-body .ps-report-actions {
   }
 }
 /* Q75AL report modal mobile layout fix END */
+
+
+/* Q75AM custom confirm dialogs */
+body.public-space-body .ps-confirm-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 17000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 1rem !important;
+  background: rgba(8, 5, 12, 0.72) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+body.public-space-body .ps-confirm-dialog {
+  width: min(92vw, 25rem) !important;
+  display: grid !important;
+  gap: 0.85rem !important;
+  padding: 1rem !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 142, 209, 0.15), transparent 36%),
+    linear-gradient(145deg, rgba(38, 26, 48, 0.98), rgba(18, 12, 26, 0.98)) !important;
+  color: #fff4fb !important;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.62) !important;
+}
+
+body.public-space-body .ps-confirm-icon {
+  width: 2.2rem !important;
+  height: 2.2rem !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-weight: 950 !important;
+  color: #ffd6e8 !important;
+  border: 1px solid rgba(255, 142, 209, 0.35) !important;
+  background: rgba(255, 142, 209, 0.13) !important;
+}
+
+body.public-space-body .ps-confirm-copy {
+  display: grid !important;
+  gap: 0.35rem !important;
+}
+
+body.public-space-body .ps-confirm-copy strong {
+  font-size: 1.03rem !important;
+  font-weight: 950 !important;
+}
+
+body.public-space-body .ps-confirm-copy p {
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.72) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.4 !important;
+}
+
+body.public-space-body .ps-confirm-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.55rem !important;
+}
+
+body.public-space-body .ps-confirm-actions button {
+  width: 100% !important;
+  min-width: 0 !important;
+  border-radius: 999px !important;
+  padding: 0.68rem 0.82rem !important;
+  font-size: 0.88rem !important;
+  font-weight: 850 !important;
+}
+
+body.public-space-body .ps-confirm-actions button.is-danger {
+  background: rgba(255, 89, 137, 0.18) !important;
+  border-color: rgba(255, 89, 137, 0.38) !important;
+  color: #ffd6e8 !important;
+}
+
+@media (max-width: 380px) {
+  body.public-space-body .ps-confirm-dialog {
+    padding: 0.85rem !important;
+    border-radius: 20px !important;
+  }
+
+  body.public-space-body .ps-confirm-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* Q75AM custom confirm dialogs END */
