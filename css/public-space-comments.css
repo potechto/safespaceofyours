@@ -256,3 +256,65 @@ body.public-space-body .ps-comment-inline-actions {
     font-size: 0.82rem !important;
   }
 }
+
+/* Q75AG comment composer sticker picker front layer
+   Fixes sticker/emoji picker clicks being caught by the comment card/list behind it.
+   Keep scoped to Public Space comments modal only.
+*/
+body.public-space-body .ps-comments-card {
+  isolation: isolate !important;
+}
+
+body.public-space-body .ps-comments-card [data-ps-comments-list],
+body.public-space-body .ps-comments-card .ps-comments-list {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+body.public-space-body .ps-comments-card [data-ps-comments-form],
+body.public-space-body .ps-comments-card .ps-comments-form {
+  position: relative !important;
+  z-index: 80 !important;
+  isolation: isolate !important;
+  overflow: visible !important;
+}
+
+body.public-space-body .ps-comments-card [data-ps-comment-emoji-toggle],
+body.public-space-body .ps-comments-card .ps-comment-emoji-toggle,
+body.public-space-body .ps-comments-card .ps-emoji-toggle {
+  position: relative !important;
+  z-index: 100002 !important;
+  pointer-events: auto !important;
+}
+
+body.public-space-body .ps-comments-card [data-ps-comment-emoji-panel],
+body.public-space-body .ps-comments-card [data-ps-comment-emoji-picker],
+body.public-space-body .ps-comments-card [data-ps-emoji-panel],
+body.public-space-body .ps-comments-card [data-ps-emoji-picker],
+body.public-space-body .ps-comments-card .ps-comment-emoji-panel,
+body.public-space-body .ps-comments-card .ps-comment-emoji-picker,
+body.public-space-body .ps-comments-card .ps-emoji-panel,
+body.public-space-body .ps-comments-card .ps-emoji-picker,
+body.public-space-body .ps-comments-card .ps-emoji-popover,
+body.public-space-body .ps-comments-card .emoji-picker,
+body.public-space-body .ps-comments-card .sticker-picker {
+  position: absolute !important;
+  z-index: 100001 !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+}
+
+body.public-space-body .ps-comments-card [data-ps-comment-emoji-panel] *,
+body.public-space-body .ps-comments-card [data-ps-comment-emoji-picker] *,
+body.public-space-body .ps-comments-card [data-ps-emoji-panel] *,
+body.public-space-body .ps-comments-card [data-ps-emoji-picker] *,
+body.public-space-body .ps-comments-card .ps-comment-emoji-panel *,
+body.public-space-body .ps-comments-card .ps-comment-emoji-picker *,
+body.public-space-body .ps-comments-card .ps-emoji-panel *,
+body.public-space-body .ps-comments-card .ps-emoji-picker *,
+body.public-space-body .ps-comments-card .ps-emoji-popover *,
+body.public-space-body .ps-comments-card .emoji-picker *,
+body.public-space-body .ps-comments-card .sticker-picker * {
+  pointer-events: auto !important;
+}
