@@ -1,5 +1,17 @@
 window.POEMS = [
   {
+    slug: "grad",
+    title: "Hiiii, so, maging less poetic muna tayo kahit ngayong araw lang.",
+    type: "spoken-poetry",
+    access: "free",
+    price: null,
+    category: "Dreams",
+    cover: "Resources/grad.png",
+    file: "Resources/grad.txt",
+    published_at: "2026-06-16T18:23:53.096+08:00",
+    excerpt: "Kumbaga, let's just have a normal kwentuhan lang—iyakan, tawanan, kulitan, syempre, kamustahan. Kamusta kayo? No, really, kahit hindi ko naririnig, sagutin n'yo...."
+  },
+  {
     slug: "lag",
     title: "Love is a Gamble",
     type: "spoken-poetry",
