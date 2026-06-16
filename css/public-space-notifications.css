@@ -3247,3 +3247,146 @@ body.public-space-body .ps-admin-report-other-actions {
   flex-wrap: wrap !important;
 }
 /* Q75AK admin report history statuses END */
+
+
+/* Q75AL report modal mobile layout fix */
+body.public-space-body .ps-report-dialog {
+  max-height: calc(100dvh - 1.5rem) !important;
+  overflow: hidden !important;
+}
+
+body.public-space-body .ps-report-form {
+  max-height: calc(100dvh - 1.5rem) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: thin !important;
+}
+
+body.public-space-body .ps-report-actions {
+  position: sticky !important;
+  bottom: -1rem !important;
+  padding-top: 0.65rem !important;
+  padding-bottom: 0.15rem !important;
+  background: linear-gradient(to top, rgba(18, 12, 26, 0.98), rgba(18, 12, 26, 0.82), transparent) !important;
+}
+
+@media (max-width: 640px) {
+  body.public-space-body .ps-report-modal {
+    align-items: start !important;
+    place-items: start center !important;
+    padding: 0.45rem !important;
+  }
+
+  body.public-space-body .ps-report-dialog {
+    width: min(96vw, 29rem) !important;
+    max-height: calc(100dvh - 0.9rem) !important;
+    border-radius: 22px !important;
+  }
+
+  body.public-space-body .ps-report-form {
+    max-height: calc(100dvh - 0.9rem) !important;
+    gap: 0.55rem !important;
+    padding: 0.78rem !important;
+  }
+
+  body.public-space-body .ps-report-head {
+    gap: 0.55rem !important;
+  }
+
+  body.public-space-body .ps-report-head strong {
+    font-size: 1rem !important;
+    line-height: 1.05 !important;
+  }
+
+  body.public-space-body .ps-report-head span {
+    font-size: 0.78rem !important;
+    line-height: 1.2 !important;
+    max-width: 14rem !important;
+  }
+
+  body.public-space-body .ps-report-close {
+    width: 1.85rem !important;
+    height: 1.85rem !important;
+    min-width: 1.85rem !important;
+    font-size: 1rem !important;
+  }
+
+  body.public-space-body .ps-report-options {
+    gap: 0.34rem !important;
+  }
+
+  body.public-space-body .ps-report-option {
+    min-height: 0 !important;
+    padding: 0.48rem 0.58rem !important;
+    border-radius: 15px !important;
+    gap: 0.5rem !important;
+    font-size: 0.86rem !important;
+    line-height: 1.12 !important;
+  }
+
+  body.public-space-body .ps-report-option input {
+    width: 0.9rem !important;
+    height: 0.9rem !important;
+    min-width: 0.9rem !important;
+  }
+
+  body.public-space-body .ps-report-note-field {
+    gap: 0.25rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  body.public-space-body .ps-report-note-field textarea {
+    min-height: 4.2rem !important;
+    max-height: 7rem !important;
+    border-radius: 15px !important;
+    padding: 0.62rem 0.7rem !important;
+    font-size: 0.88rem !important;
+  }
+
+  body.public-space-body .ps-report-note-field small {
+    font-size: 0.74rem !important;
+    line-height: 1.15 !important;
+  }
+
+  body.public-space-body .ps-report-message {
+    padding: 0.52rem 0.62rem !important;
+    font-size: 0.76rem !important;
+  }
+
+  body.public-space-body .ps-report-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.45rem !important;
+    margin-top: 0.1rem !important;
+    bottom: -0.78rem !important;
+  }
+
+  body.public-space-body .ps-report-actions button {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0.58rem 0.7rem !important;
+    border-radius: 999px !important;
+    font-size: 0.86rem !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body.public-space-body .ps-report-form {
+    gap: 0.45rem !important;
+    padding: 0.65rem !important;
+  }
+
+  body.public-space-body .ps-report-option {
+    padding: 0.42rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  body.public-space-body .ps-report-note-field textarea {
+    min-height: 3.6rem !important;
+  }
+
+  body.public-space-body .ps-report-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* Q75AL report modal mobile layout fix END */
