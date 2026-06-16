@@ -6,7 +6,7 @@ window.POEMS = [
     access: "free",
     price: null,
     category: "Dreams",
-    cover: "Resources/grad.png",
+    cover: "Resources/grad.png?v=v20q75at-refresh-grad-cover",
     file: "Resources/grad.txt",
     published_at: "2026-06-16T18:23:53.096+08:00",
     excerpt: "Kumbaga, let's just have a normal kwentuhan lang—iyakan, tawanan, kulitan, syempre, kamustahan. Kamusta kayo? No, really, kahit hindi ko naririnig, sagutin n'yo...."
