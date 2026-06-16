@@ -143,3 +143,116 @@ body.public-space-body .ps-comment-inline-actions {
     margin: 0 !important;
   }
 }
+
+/* Q75AF compact/unzoom comments modal
+   Desktop-only compact pass.
+   Keeps Q75AE internal comments-list scroll and stable composer behavior.
+*/
+@media (min-width: 701px) {
+  body.public-space-body .ps-comments-modal {
+    padding: clamp(0.45rem, 1.25vw, 0.85rem) !important;
+  }
+
+  body.public-space-body .ps-comments-card {
+    width: min(96vw, 52rem) !important;
+    height: min(88dvh, 760px) !important;
+    max-height: min(88dvh, 760px) !important;
+    padding: clamp(0.75rem, 1.35vw, 1.1rem) !important;
+    border-radius: 1.35rem !important;
+  }
+
+  body.public-space-body .ps-comments-card .eyebrow {
+    font-size: 0.68rem !important;
+    line-height: 1 !important;
+    margin: 0 0 0.12rem 0 !important;
+  }
+
+  body.public-space-body .ps-comments-card [data-ps-comments-title] {
+    font-size: clamp(1.3rem, 2vw, 1.75rem) !important;
+    line-height: 1 !important;
+    margin: 0 2.75rem 0.18rem 0 !important;
+  }
+
+  body.public-space-body .ps-comments-card [data-ps-comments-subtitle] {
+    font-size: 0.8rem !important;
+    line-height: 1.25 !important;
+    margin: 0 0 0.5rem 0 !important;
+  }
+
+  body.public-space-body .ps-comments-card [data-ps-comments-post-preview] {
+    max-height: 4.35rem !important;
+    overflow-y: auto !important;
+    margin: 0 0 0.55rem 0 !important;
+    padding: 0.55rem 0.7rem !important;
+    border-radius: 0.95rem !important;
+  }
+
+  body.public-space-body .ps-comments-card [data-ps-comments-post-preview] p {
+    font-size: 0.84rem !important;
+    line-height: 1.35 !important;
+    margin: 0.22rem 0 0 0 !important;
+  }
+
+  body.public-space-body .ps-comments-card [data-ps-comments-list],
+  body.public-space-body .ps-comments-card .ps-comments-list {
+    gap: 0.55rem !important;
+    min-height: 10rem !important;
+    margin: 0 0 0.6rem 0 !important;
+    padding: 0 0.32rem 0 0 !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comment-item {
+    padding: 0.65rem 0.75rem !important;
+    border-radius: 0.95rem !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comment-item p {
+    font-size: 0.86rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comment-meta,
+  body.public-space-body .ps-comments-card .ps-comment-actions {
+    font-size: 0.74rem !important;
+    gap: 0.35rem !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comment-reaction-row {
+    margin-top: 0.35rem !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comment-reaction-chip {
+    font-size: 0.76rem !important;
+    padding: 0.18rem 0.38rem !important;
+  }
+
+  body.public-space-body .ps-comments-card [data-ps-comments-form],
+  body.public-space-body .ps-comments-card .ps-comments-form {
+    padding: 0.6rem 0 0 0 !important;
+  }
+
+  body.public-space-body .ps-comments-card [data-ps-comments-form] textarea[name="comment"] {
+    min-height: 3.6rem !important;
+    height: 3.8rem !important;
+    max-height: 5.5rem !important;
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.86rem !important;
+    line-height: 1.35 !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comments-form-footer {
+    gap: 0.5rem !important;
+    padding-top: 0.4rem !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comments-form-footer small,
+  body.public-space-body .ps-comments-card .ps-comments-form-footer .small-note {
+    font-size: 0.72rem !important;
+  }
+
+  body.public-space-body .ps-comments-card .ps-comments-form button[type="submit"] {
+    padding: 0.55rem 0.85rem !important;
+    font-size: 0.82rem !important;
+  }
+}

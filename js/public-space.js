@@ -1258,7 +1258,7 @@
     const length = textarea ? textarea.value.length : 0;
 
     if (title) title.textContent = post ? `Comments · ${commentCount(post)}` : "Post comments";
-    if (subtitle) subtitle.textContent = post ? `Replies for @${(post.author && post.author.username) || "someone"}'s post.` : "Read and add kind comments.";
+    if (subtitle) subtitle.textContent = post ? `Comments for @${(post.author && post.author.username) || "someone"}'s post.` : "Read and add kind comments.";
 
     if (preview) {
       preview.innerHTML = post
