@@ -2252,6 +2252,58 @@
       button.setAttribute("aria-expanded", "false");
     });
   }
+  function canReportPost(post) {
+    if (!post || !post.id || post.is_deleted) return false;
+    if (post.is_hidden && !isAdminMode) return false;
+    return !isCurrentUserPost(post);
+  }
+
+  async function handleReportPost(postId) {
+    const cleanPostId = String(postId || "").trim();
+
+    if (!cleanPostId) return;
+
+    if (!currentSession || !currentSession.session_token) {
+      showAuth("login");
+      setFeedStatus("Login first to report a post.");
+      return;
+    }
+
+    const post = postById(cleanPostId);
+    if (post && isCurrentUserPost(post)) {
+      setFeedStatus("You cannot report your own post.");
+      return;
+    }
+
+    const reasonInput = window.prompt(
+      "Why are you reporting this post? Optional, max 600 characters.",
+      ""
+    );
+
+    if (reasonInput === null) return;
+
+    const reason = String(reasonInput || "").trim();
+
+    if (reason.length > 600) {
+      setFeedStatus("Report note must be 600 characters or less.");
+      return;
+    }
+
+    try {
+      setFeedStatus("Sending report...");
+      const result = await rpc("report_public_space_post", {
+        input_session_token: sessionToken(),
+        input_post_id: cleanPostId,
+        input_reason: reason || null
+      });
+
+      setFeedStatus((result && result.message) || "Report sent to admin review.");
+    } catch (error) {
+      setFeedStatus(getErrorMessage(error));
+    }
+  }
+
+
 
   function postMenuHtml(post) {
     if (!post || !post.id) return "";
@@ -2269,7 +2321,19 @@
       ? `<button type="button" role="menuitem" data-ps-post-menu-action="hide" data-ps-toggle-hidden="${postId}" data-hidden="${post.is_hidden ? "true" : "false"}">${post.is_hidden ? "Unhide post" : "Hide post"}</button>`
       : "";
 
-    const options = [editButton, deleteButton, hideButton].filter(Boolean).join("");
+    const reportButton = canReportPost(post)
+
+
+      ? `<button type="button" role="menuitem" data-ps-post-menu-action="report" data-ps-report-post="${postId}">Report post</button>`
+
+
+      : "";
+
+
+
+    const options = [editButton, deleteButton, hideButton, reportButton].filter(Boolean).join("");
+
+
     if (!options) return "";
 
     return `
@@ -5357,12 +5421,20 @@
       const postId = postMenuAction.dataset.psEditPost
         || postMenuAction.dataset.psDeletePost
         || postMenuAction.dataset.psToggleHidden
+        || postMenuAction.dataset.psReportPost
         || "";
 
       if (postMenuAction.dataset.psPostMenuAction === "edit") {
         event.preventDefault();
         closePostMenus();
         openEditPostComposer(postById(postId));
+        return;
+      }
+
+      if (postMenuAction.dataset.psPostMenuAction === "report") {
+        event.preventDefault();
+        closePostMenus();
+        await handleReportPost(postId);
         return;
       }
 
