@@ -291,6 +291,7 @@
     if (isFullPublicSpaceAdmin(currentUser)) {
       currentUser.permissions = PUBLIC_SPACE_PERMISSION_OPTIONS.map(option => option.value);
       updateCurrentAdminAccess();
+      ensureAdminTools();
       syncAdminActionVisibility();
       return currentAdminPermissions;
     }
@@ -316,6 +317,13 @@
     }
 
     updateCurrentAdminAccess();
+
+    if (publicSpaceUserCanAccessAdmin(currentUser)) {
+      ensureAdminTools();
+      document.body.classList.toggle("ps-admin-mode", true);
+      root.classList.toggle("is-admin-mode", true);
+    }
+
     syncAdminActionVisibility();
 
     if (menu) {
