@@ -3852,3 +3852,148 @@ body.public-space-body .ps-toast {
   }
 }
 /* V2.0Q75AV admin access modal END */
+
+/* V2.0Q75AW compact admin access modal polish */
+.public-space-body [data-ps-user-action="badge"],
+.public-space-body [data-ps-user-action="premium"],
+.public-space-body [data-ps-user-action="password"],
+.public-space-body [data-ps-user-action="disable"],
+.public-space-body [data-ps-user-action="pin"],
+.public-space-body .ps-admin-access-button {
+  min-height: 2.12rem !important;
+  padding: 0.34rem 0.78rem !important;
+  border-radius: 15px !important;
+  font-size: 0.92rem !important;
+}
+
+.public-space-body .ps-admin-access-panel {
+  margin-top: 0.58rem !important;
+  padding: 0.62rem 0.72rem !important;
+  border-radius: 16px !important;
+  gap: 0.62rem !important;
+}
+
+.public-space-body .ps-admin-access-copy {
+  gap: 0.08rem !important;
+}
+
+.public-space-body .ps-admin-access-copy strong {
+  font-size: 0.9rem !important;
+}
+
+.public-space-body .ps-admin-access-copy span {
+  font-size: 0.74rem !important;
+  line-height: 1.28 !important;
+}
+
+.public-space-body .ps-admin-access-button {
+  min-width: 9rem !important;
+}
+
+.public-space-body .ps-admin-access-modal {
+  padding: 0.75rem !important;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255, 244, 251, 0.05), transparent 28%),
+    rgba(8, 5, 12, 0.44) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.public-space-body .ps-admin-access-dialog {
+  width: min(90vw, 31.5rem) !important;
+  max-height: min(74vh, 30rem) !important;
+  gap: 0.8rem !important;
+  padding: 0.92rem !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.42) !important;
+}
+
+.public-space-body .ps-admin-access-close {
+  top: 0.62rem !important;
+  right: 0.62rem !important;
+  width: 1.9rem !important;
+  min-width: 1.9rem !important;
+  height: 1.9rem !important;
+  min-height: 1.9rem !important;
+  font-size: 1rem !important;
+}
+
+.public-space-body .ps-admin-access-head {
+  gap: 0.18rem !important;
+  padding-right: 1.9rem !important;
+}
+
+.public-space-body .ps-admin-access-head span {
+  font-size: 0.66rem !important;
+  letter-spacing: 0.1em !important;
+}
+
+.public-space-body .ps-admin-access-head strong {
+  font-size: clamp(1.18rem, 3vw, 1.55rem) !important;
+}
+
+.public-space-body .ps-admin-access-head p,
+.public-space-body .ps-admin-access-message {
+  font-size: 0.82rem !important;
+  line-height: 1.38 !important;
+}
+
+.public-space-body .ps-admin-access-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.48rem !important;
+  max-height: 13.75rem !important;
+  overflow: auto !important;
+  padding-right: 0.14rem !important;
+}
+
+.public-space-body .ps-admin-access-choice {
+  min-height: 2.42rem !important;
+  padding: 0.5rem 0.58rem !important;
+  border-radius: 14px !important;
+  gap: 0.48rem !important;
+}
+
+.public-space-body .ps-admin-access-choice span {
+  font-size: 0.85rem !important;
+  line-height: 1.2 !important;
+}
+
+.public-space-body .ps-admin-access-choice input {
+  width: 0.98rem !important;
+  height: 0.98rem !important;
+}
+
+.public-space-body .ps-admin-access-buttons {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.55rem !important;
+}
+
+.public-space-body .ps-admin-access-buttons button {
+  min-height: 2.35rem !important;
+  border-radius: 15px !important;
+  font-size: 0.9rem !important;
+  padding: 0.38rem 0.75rem !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-admin-access-dialog {
+    width: min(100%, calc(100vw - 1rem)) !important;
+    max-height: min(82vh, 32rem) !important;
+    padding: 0.85rem !important;
+    border-radius: 20px !important;
+  }
+
+  .public-space-body .ps-admin-access-grid {
+    grid-template-columns: 1fr !important;
+    max-height: 12.8rem !important;
+  }
+
+  .public-space-body .ps-admin-access-panel {
+    gap: 0.48rem !important;
+  }
+
+  .public-space-body .ps-admin-access-button {
+    min-width: 0 !important;
+    width: auto !important;
+  }
+}
+/* V2.0Q75AW compact admin access modal polish END */
