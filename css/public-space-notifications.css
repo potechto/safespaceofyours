@@ -3687,3 +3687,168 @@ body.public-space-body .ps-toast {
   }
 }
 /* V2.0Q75AT admin permissions checklist END */
+
+/* V2.0Q75AV admin access modal */
+.public-space-body .ps-admin-access-panel {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  margin-top: 0.72rem !important;
+  padding: 0.72rem 0.8rem !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 244, 251, 0.12) !important;
+  background: rgba(255, 244, 251, 0.035) !important;
+}
+
+.public-space-body .ps-admin-access-copy {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 0.12rem !important;
+}
+
+.public-space-body .ps-admin-access-copy strong {
+  color: #fff4fb !important;
+  font-size: 0.96rem !important;
+}
+
+.public-space-body .ps-admin-access-copy span {
+  color: rgba(255, 244, 251, 0.64) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.35 !important;
+}
+
+.public-space-body .ps-admin-access-button {
+  flex: 0 0 auto !important;
+  min-height: 2.25rem !important;
+  padding: 0.48rem 0.78rem !important;
+  border-radius: 999px !important;
+}
+
+.public-space-body .ps-admin-access-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 16500 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 1rem !important;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 244, 251, 0.08), transparent 34%),
+    rgba(8, 5, 12, 0.76) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.public-space-body .ps-admin-access-dialog {
+  position: relative !important;
+  width: min(94vw, 44rem) !important;
+  max-height: min(88vh, 46rem) !important;
+  overflow: auto !important;
+  display: grid !important;
+  gap: 0.95rem !important;
+  padding: clamp(1rem, 3vw, 1.25rem) !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255, 244, 251, 0.16) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 244, 251, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(36, 25, 48, 0.98), rgba(16, 10, 24, 0.98)) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.58) !important;
+}
+
+.public-space-body .ps-admin-access-close {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  width: 2.1rem !important;
+  min-width: 2.1rem !important;
+  height: 2.1rem !important;
+  min-height: 2.1rem !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+}
+
+.public-space-body .ps-admin-access-head {
+  display: grid !important;
+  gap: 0.25rem !important;
+  padding-right: 2.2rem !important;
+}
+
+.public-space-body .ps-admin-access-head span {
+  text-transform: uppercase !important;
+  letter-spacing: 0.11em !important;
+  font-size: 0.72rem !important;
+  color: rgba(255, 220, 238, 0.82) !important;
+}
+
+.public-space-body .ps-admin-access-head strong {
+  color: #fff4fb !important;
+  font-size: clamp(1.45rem, 4vw, 2rem) !important;
+  line-height: 1 !important;
+}
+
+.public-space-body .ps-admin-access-head p,
+.public-space-body .ps-admin-access-message {
+  margin: 0 !important;
+  color: rgba(255, 244, 251, 0.68) !important;
+  line-height: 1.45 !important;
+}
+
+.public-space-body .ps-admin-access-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)) !important;
+  gap: 0.55rem !important;
+}
+
+.public-space-body .ps-admin-access-choice {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.58rem !important;
+  min-height: 2.8rem !important;
+  padding: 0.62rem 0.72rem !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 244, 251, 0.11) !important;
+  background: rgba(10, 6, 16, 0.44) !important;
+  color: rgba(255, 244, 251, 0.92) !important;
+  cursor: pointer !important;
+}
+
+.public-space-body .ps-admin-access-choice input {
+  width: 1.05rem !important;
+  height: 1.05rem !important;
+  accent-color: #ff8ed1 !important;
+}
+
+.public-space-body .ps-admin-access-buttons {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.65rem !important;
+}
+
+.public-space-body .ps-admin-access-buttons button {
+  min-height: 2.8rem !important;
+  border-radius: 18px !important;
+}
+
+@media (max-width: 640px) {
+  .public-space-body .ps-admin-access-panel {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .public-space-body .ps-admin-access-button {
+    width: 100% !important;
+  }
+
+  .public-space-body .ps-admin-access-dialog {
+    width: min(100%, calc(100vw - 0.9rem)) !important;
+    max-height: calc(100dvh - 1rem) !important;
+    border-radius: 22px !important;
+  }
+
+  .public-space-body .ps-admin-access-grid,
+  .public-space-body .ps-admin-access-buttons {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* V2.0Q75AV admin access modal END */

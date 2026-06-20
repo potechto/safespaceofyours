@@ -5626,11 +5626,23 @@
       .filter(item => allowed.has(item) && !seen.has(item) && seen.add(item));
   }
 
-  function adminUserSelectedPermissions(card) {
-    if (!card) return [];
-    return Array.from(card.querySelectorAll("[data-ps-user-permission]:checked"))
+  function adminUserSelectedPermissions(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll("[data-ps-user-permission]:checked"))
       .map(box => String(box.value || "").trim())
       .filter(Boolean);
+  }
+
+  function adminUserStoredPermissions(card) {
+    const panel = card ? card.querySelector("[data-ps-admin-access-panel]") : null;
+    return normalizePermissionList(panel ? panel.dataset.psAdminPermissionsValue || "" : "");
+  }
+
+  function adminUserPermissionSummary(permissions) {
+    const list = normalizePermissionList(permissions);
+    if (!list.length) return "No backend powers enabled";
+    if (list.length === 1) return "1 backend power enabled";
+    return list.length + " backend powers enabled";
   }
 
   function adminUserRoleBadgesFromValue(value) {
@@ -5644,27 +5656,18 @@
     const selected = normalizePermissionList(
       (user && (user.permissions || user.role_permissions || user.capabilities)) || []
     );
+    const value = selected.join(",");
+    const summary = adminUserPermissionSummary(selected);
 
-    return `
-      <div class="ps-admin-permissions" data-ps-admin-permissions>
-        <div class="ps-admin-permissions-head">
-          <strong>Permission checklist</strong>
-          <span>Badges are labels only. Tick the exact backend powers this user should have.</span>
-        </div>
-        <div class="ps-admin-permissions-grid">
-          ${PUBLIC_SPACE_PERMISSION_OPTIONS.map(option => {
-            const checked = selected.includes(option.value) ? " checked" : "";
-            return `
-              <label class="ps-admin-permission-choice">
-                <input type="checkbox" value="${escapeHtml(option.value)}" data-ps-user-permission${checked} />
-                <span>${escapeHtml(option.label)}</span>
-              </label>
-            `;
-          }).join("")}
-        </div>
-        <button type="button" data-ps-user-action="permissions" data-user-id="${escapeHtml((user && user.id) || "")}">Save permissions</button>
-      </div>
-    `;
+    return [
+      '<div class="ps-admin-access-panel" data-ps-admin-access-panel data-ps-admin-permissions-value="' + escapeHtml(value) + '">',
+        '<div class="ps-admin-access-copy">',
+          '<strong>Admin access</strong>',
+          '<span data-ps-admin-access-summary>' + escapeHtml(summary) + '</span>',
+        '</div>',
+        '<button type="button" class="ps-admin-access-button" data-ps-user-action="permissions" data-user-id="' + escapeHtml((user && user.id) || "") + '">Admin Access</button>',
+      '</div>'
+    ].join("");
   }
 
   function adminUserFilterStatusOptionsHtml() {
@@ -5900,6 +5903,95 @@
     if (target) target.remove();
   }
 
+  function closeAdminAccessModal(modal) {
+    const target = modal || root.querySelector("[data-ps-admin-access-modal]");
+    if (target) target.remove();
+  }
+
+  function openAdminAccessModal(button) {
+    const card = button.closest("[data-ps-admin-user-card]");
+    if (!card) return;
+
+    closeAdminAccessModal();
+
+    const panel = card.querySelector("[data-ps-admin-access-panel]");
+    const selected = normalizePermissionList(panel ? panel.dataset.psAdminPermissionsValue || "" : "");
+    const userLabel = card.querySelector(".ps-admin-user-main strong")?.textContent || "this user";
+    const modal = document.createElement("div");
+
+    modal.className = "ps-admin-access-modal";
+    modal.setAttribute("data-ps-admin-access-modal", "");
+    modal.innerHTML = [
+      '<div class="ps-admin-access-dialog" role="dialog" aria-modal="true" aria-label="Admin access permissions">',
+        '<button type="button" class="ps-admin-access-close" aria-label="Close admin access" data-ps-admin-access-close>&times;</button>',
+        '<div class="ps-admin-access-head">',
+          '<span>Backend powers</span>',
+          '<strong>Admin Access</strong>',
+          '<p>Choose the exact permissions for ' + escapeHtml(userLabel) + '. Changes only apply after you save.</p>',
+        '</div>',
+        '<div class="ps-admin-access-grid">',
+          PUBLIC_SPACE_PERMISSION_OPTIONS.map(option => {
+            const checked = selected.includes(option.value) ? " checked" : "";
+            return [
+              '<label class="ps-admin-access-choice">',
+                '<input type="checkbox" value="' + escapeHtml(option.value) + '" data-ps-user-permission' + checked + ' />',
+                '<span>' + escapeHtml(option.label) + '</span>',
+              '</label>'
+            ].join("");
+          }).join(""),
+        '</div>',
+        '<p class="ps-admin-access-message" data-ps-admin-access-message></p>',
+        '<div class="ps-admin-access-buttons">',
+          '<button type="button" data-ps-admin-access-cancel>Cancel</button>',
+          '<button type="button" data-ps-admin-access-save>Save permissions</button>',
+        '</div>',
+      '</div>'
+    ].join("");
+
+    card.appendChild(modal);
+  }
+
+  async function handleAdminAccessSave(button) {
+    const modal = button.closest("[data-ps-admin-access-modal]");
+    const card = modal ? modal.closest("[data-ps-admin-user-card]") : null;
+    const userId = card ? card.dataset.userId : "";
+    const modalMessage = modal ? modal.querySelector("[data-ps-admin-access-message]") : null;
+    const messageNode = root.querySelector("[data-ps-admin-message]");
+
+    if (!modal || !card || !userId) return;
+
+    const selectedPermissions = adminUserSelectedPermissions(modal);
+    const params = {
+      input_session_token: sessionToken(),
+      input_user_id: userId,
+      input_is_premium: null,
+      input_badge_label: null,
+      input_is_disabled: null,
+      input_new_password: null,
+      input_new_pin: null,
+      input_permissions: selectedPermissions
+    };
+
+    try {
+      button.disabled = true;
+      setMessage(modalMessage, "Applying permissions...", "info");
+      await adminUpdatePublicSpaceUser(params);
+      closeAdminAccessModal(modal);
+      if (typeof showPublicSpaceToast === "function") {
+        showPublicSpaceToast("Permissions applied.", "success");
+      }
+      await refreshAdminUsers("Permissions applied.");
+    } catch (error) {
+      setMessage(modalMessage, getErrorMessage(error), "error");
+      setMessage(messageNode, getErrorMessage(error), "error");
+      if (typeof showPublicSpaceToast === "function") {
+        showPublicSpaceToast(getErrorMessage(error), "error");
+      }
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   function openAdminUserResetModal(button, action) {
     const card = button.closest("[data-ps-admin-user-card]");
     if (!card) return;
@@ -5984,6 +6076,28 @@
   }
 
   function handleAdminUserResetClick(event) {
+    const accessBackdrop = event.target.matches && event.target.matches("[data-ps-admin-access-modal]") ? event.target : null;
+    const accessClose = event.target.closest("[data-ps-admin-access-close]");
+    const accessCancel = event.target.closest("[data-ps-admin-access-cancel]");
+    const accessSave = event.target.closest("[data-ps-admin-access-save]");
+
+    if (accessBackdrop) {
+      closeAdminAccessModal(accessBackdrop);
+      return;
+    }
+
+    if (accessClose || accessCancel) {
+      event.preventDefault();
+      closeAdminAccessModal((accessClose || accessCancel).closest("[data-ps-admin-access-modal]"));
+      return;
+    }
+
+    if (accessSave) {
+      event.preventDefault();
+      handleAdminAccessSave(accessSave);
+      return;
+    }
+
     const modalBackdrop = event.target.matches && event.target.matches("[data-ps-user-reset-modal]") ? event.target : null;
     const cancelButton = event.target.closest("[data-ps-user-reset-cancel]");
     const confirmButton = event.target.closest("[data-ps-user-reset-confirm]");
@@ -6016,6 +6130,11 @@
 
     if (action === "password" || action === "pin") {
       openAdminUserResetModal(button, action);
+      return;
+    }
+
+    if (action === "permissions") {
+      openAdminAccessModal(button);
       return;
     }
 
@@ -6068,28 +6187,22 @@
     if (action === "badge") {
       const badgeInput = card ? card.querySelector("[data-ps-user-badge]") : null;
       const selectedBadges = splitBadgeLabels(badgeInput ? badgeInput.value : "");
-      const selectedPermissions = adminUserSelectedPermissions(card);
+      const storedPermissions = adminUserStoredPermissions(card);
       const roleBadges = adminUserRoleBadgesFromValue(selectedBadges.join(", "));
       params.input_badge_label = selectedBadges.join(", ");
       params.input_is_premium = selectedBadges.some(label => normalizeBadgeValue(label) === "premium");
-      params.input_permissions = selectedPermissions;
       syncAdminUserCardBadgePreview(card, params.input_badge_label);
 
-      if (roleBadges.length && !selectedPermissions.length) {
+      if (roleBadges.length && !storedPermissions.length) {
         const proceed = await showPublicSpaceConfirm({
           title: "Save role badge with no powers?",
-          message: "Moderator/Admin badges are display labels only. This user will not get backend powers until at least one permission is checked.",
+          message: "Moderator/Admin badges are display labels only. Use Admin Access to assign backend powers after saving this label.",
           confirmLabel: "Save label only",
           cancelLabel: "Go back",
           danger: false
         });
         if (!proceed) return;
       }
-    }
-
-    if (action === "permissions") {
-      params.input_permissions = adminUserSelectedPermissions(card);
-      setMessage(messageNode, "Saving permissions checklist...", "info");
     }
 
     if (action === "password") {
