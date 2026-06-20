@@ -86,7 +86,8 @@
 
   let currentSession = readSession();
   let currentUser = currentSession ? currentSession.user : null;
-  let isAdminMode = Boolean(currentUser && currentUser.is_admin);
+  let currentAdminPermissions = userPermissionList(currentUser);
+  let isAdminMode = publicSpaceUserCanAccessAdmin(currentUser);
   let latestPublicSpacePosts = [];
   let activePublicProfileUser = null;
   let publicProfileBackRoute = "home";
@@ -213,7 +214,7 @@
       user: payload.user
     };
     currentUser = payload.user;
-    isAdminMode = Boolean(currentUser && currentUser.is_admin);
+    updateCurrentAdminAccess();
 
     try {
       window.localStorage.setItem(SESSION_KEY, JSON.stringify(currentSession));
@@ -223,12 +224,92 @@
   function clearSession() {
     currentSession = null;
     currentUser = null;
+    currentAdminPermissions = [];
     isAdminMode = false;
 
     try {
       window.localStorage.removeItem(SESSION_KEY);
       window.localStorage.removeItem(ADMIN_HANDOFF_KEY);
     } catch (error) {}
+  }
+
+  function userPermissionList(user) {
+    return normalizePermissionList(
+      (user && (user.permissions || user.role_permissions || user.capabilities)) || []
+    );
+  }
+
+  function isFullPublicSpaceAdmin(user) {
+    return Boolean(user && user.is_admin);
+  }
+
+  function publicSpaceUserCanAccessAdmin(user) {
+    return Boolean(isFullPublicSpaceAdmin(user) || userPermissionList(user).length);
+  }
+
+  function updateCurrentAdminAccess() {
+    currentAdminPermissions = userPermissionList(currentUser);
+    isAdminMode = publicSpaceUserCanAccessAdmin(currentUser);
+  }
+
+  function hasAdminPermission(permission) {
+    if (isFullPublicSpaceAdmin(currentUser)) return true;
+    return currentAdminPermissions.includes(String(permission || "").trim().toLowerCase());
+  }
+
+  function hasAnyAdminPermission(permissions) {
+    if (isFullPublicSpaceAdmin(currentUser)) return true;
+    return (Array.isArray(permissions) ? permissions : []).some(permission => hasAdminPermission(permission));
+  }
+
+  function canUseAdminAction(action) {
+    const cleanAction = String(action || "").trim().toLowerCase();
+    if (!publicSpaceUserCanAccessAdmin(currentUser)) return false;
+    if (isFullPublicSpaceAdmin(currentUser)) return true;
+
+    if (cleanAction === "overview") return currentAdminPermissions.length > 0;
+    if (cleanAction === "reports") return hasAdminPermission("manage_reports");
+    if (cleanAction === "posts") return hasAnyAdminPermission(["hide_post", "delete_post", "pin_post"]);
+    if (cleanAction === "users") {
+      return hasAnyAdminPermission([
+        "manage_badges",
+        "reset_password",
+        "reset_pin",
+        "disable_user",
+        "manage_private_settings"
+      ]);
+    }
+    if (cleanAction === "settings") return hasAdminPermission("manage_private_settings");
+
+    return false;
+  }
+
+  function firstAllowedAdminAction() {
+    return ["overview", "reports", "posts", "users", "settings"].find(action => canUseAdminAction(action)) || "";
+  }
+
+  function canUseAdminUserAction(action) {
+    const cleanAction = String(action || "").trim().toLowerCase();
+    if (isFullPublicSpaceAdmin(currentUser)) return true;
+    if (cleanAction === "badge" || cleanAction === "premium") return hasAdminPermission("manage_badges");
+    if (cleanAction === "password") return hasAdminPermission("reset_password");
+    if (cleanAction === "pin") return hasAdminPermission("reset_pin");
+    if (cleanAction === "disable") return hasAdminPermission("disable_user");
+    if (cleanAction === "permissions") return false;
+    return false;
+  }
+
+  function renderAdminAccessDenied(action) {
+    renderAdminInfoCards("No access for this admin section.", [
+      {
+        title: "Permission required",
+        body: "Your account can enter admin mode, but this section is not enabled for your access level."
+      },
+      {
+        title: "Enabled access",
+        body: currentAdminPermissions.length ? currentAdminPermissions.join(", ") : "No granular permissions found."
+      }
+    ]);
   }
 
   async function rpc(functionName, params) {
@@ -3128,22 +3209,27 @@
     `);
   }
 
+  function syncAdminActionVisibility() {
+    root.querySelectorAll("[data-ps-admin-action]").forEach(button => {
+      const action = String(button.dataset.psAdminAction || "").trim().toLowerCase();
+      button.hidden = !canUseAdminAction(action);
+    });
+  }
+
   function setAdminMode(enabled) {
-    isAdminMode = Boolean(enabled && currentUser && currentUser.is_admin);
+    updateCurrentAdminAccess();
+    isAdminMode = Boolean(enabled && publicSpaceUserCanAccessAdmin(currentUser));
     document.body.classList.toggle("ps-admin-mode", isAdminMode);
     root.classList.toggle("is-admin-mode", isAdminMode);
 
     ensureAdminTools();
+    syncAdminActionVisibility();
 
     if (menu) {
       menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
         item.hidden = !isAdminMode;
       });
     }
-
-    const adminTools = root.querySelector("[data-ps-admin-tools]:not([data-ps-control-screen])");
-    if (adminTools && !isAdminMode) adminTools.hidden = true;
-    syncMenuRouteItems(currentPublicSpaceRoute());
   }
 
   function openAdminScreen(initialAction) {
@@ -3163,9 +3249,12 @@
 
     adminTools.focus({ preventScroll: true });
 
-    if (initialAction) {
+    syncAdminActionVisibility();
+
+    const actionToOpen = canUseAdminAction(initialAction) ? initialAction : firstAllowedAdminAction();
+    if (actionToOpen) {
       window.setTimeout(() => {
-        const actionButton = adminTools.querySelector(`[data-ps-admin-action='${initialAction}']`);
+        const actionButton = adminTools.querySelector(`[data-ps-admin-action='${actionToOpen}']`);
         if (actionButton) actionButton.click();
       }, 0);
     }
@@ -4788,11 +4877,56 @@
       </div>
     `;
 
+    syncAdminActionVisibility();
     setMessage(messageNode, status || "Admin controls ready.", "info");
   }
 
   async function renderAdminOverview() {
     const messageNode = root.querySelector("[data-ps-admin-message]");
+
+    if (!isFullPublicSpaceAdmin(currentUser)) {
+      const cards = [];
+      if (canUseAdminAction("reports")) {
+        cards.push({
+          title: "Reports",
+          body: "You can review and resolve Public Space reports.",
+          action: "reports",
+          actionLabel: "Open reports"
+        });
+      }
+      if (canUseAdminAction("posts")) {
+        cards.push({
+          title: "Post moderation",
+          body: "You can moderate public posts based on your enabled permissions.",
+          action: "posts",
+          actionLabel: "Open posts"
+        });
+      }
+      if (canUseAdminAction("users")) {
+        cards.push({
+          title: "Registered users",
+          body: "You can use only the enabled user-management controls for your account.",
+          action: "users",
+          actionLabel: "Open users"
+        });
+      }
+      if (canUseAdminAction("settings")) {
+        cards.push({
+          title: "Space settings",
+          body: "You can review enabled private/settings controls.",
+          action: "settings",
+          actionLabel: "Open settings"
+        });
+      }
+
+      renderAdminInfoCards("Limited admin access ready.", cards.length ? cards : [
+        {
+          title: "No admin tools enabled",
+          body: "Ask the owner to enable at least one Admin Access permission."
+        }
+      ]);
+      return;
+    }
 
     renderAdminInfoCards("Loading admin overview stats...", [
       {
@@ -5021,6 +5155,12 @@
   function renderPostModerationAdmin() {
     const messageNode = root.querySelector("[data-ps-admin-message]");
     const results = adminResultsNode();
+
+    if (!canUseAdminAction("posts")) {
+      renderAdminAccessDenied("posts");
+      return;
+    }
+
     const sourcePosts = Array.isArray(latestPublicSpacePosts) ? latestPublicSpacePosts : [];
     const list = sourcePosts.filter(post => post && post.id);
 
@@ -5452,6 +5592,11 @@
 
     if (!results) return;
 
+    if (!canUseAdminAction("reports")) {
+      renderAdminAccessDenied("reports");
+      return;
+    }
+
     renderAdminInfoCards("Loading reports...", [
       {
         title: "Loading report history",
@@ -5555,6 +5700,11 @@
   }
 
   function renderAdminSpaceSettings() {
+    if (!canUseAdminAction("settings")) {
+      renderAdminAccessDenied("settings");
+      return;
+    }
+
     renderAdminInfoCards("Space settings ready.", [
       {
         title: "Posting rules",
@@ -5781,6 +5931,26 @@
     }
   }
 
+  function applyAdminUserAccessVisibility() {
+    root.querySelectorAll("[data-ps-user-action]").forEach(button => {
+      const action = String(button.dataset.psUserAction || "").trim().toLowerCase();
+      button.hidden = !canUseAdminUserAction(action);
+    });
+
+    root.querySelectorAll(".ps-admin-badge-form").forEach(form => {
+      form.hidden = !canUseAdminUserAction("badge");
+    });
+
+    root.querySelectorAll("[data-ps-admin-access-panel]").forEach(panel => {
+      panel.hidden = !isFullPublicSpaceAdmin(currentUser);
+    });
+
+    root.querySelectorAll(".ps-admin-reset-actions").forEach(group => {
+      const visibleButtons = Array.from(group.querySelectorAll("button")).filter(button => !button.hidden);
+      group.hidden = !visibleButtons.length;
+    });
+  }
+
   function renderAdminUsers(users) {
     const results = adminResultsNode();
     const messageNode = root.querySelector("[data-ps-admin-message]");
@@ -5872,7 +6042,8 @@
 
     enforceNumericPinFields();
     enhanceAdminBadgeSelectors();
-    bindAdminUserFilters();
+       applyAdminUserAccessVisibility();
+ bindAdminUserFilters();
     applyAdminUserFilters();
     setMessage(messageNode, `Registered users: ${list.length}`, "success");
   }
@@ -5880,6 +6051,11 @@
   async function refreshAdminUsers(message) {
     const messageNode = root.querySelector("[data-ps-admin-message]");
     const results = adminResultsNode();
+
+    if (!canUseAdminAction("users")) {
+      renderAdminAccessDenied("users");
+      return;
+    }
 
     if (message) setMessage(messageNode, message, "info");
     if (results) {
@@ -6127,6 +6303,11 @@
     const userLabel = card ? (card.querySelector(".ps-admin-user-main strong")?.textContent || "this user") : "this user";
 
     if (!userId || !action) return;
+
+    if (!canUseAdminUserAction(action)) {
+      setMessage(messageNode, "This user-management action is not enabled for your account.", "error");
+      return;
+    }
 
     if (action === "password" || action === "pin") {
       openAdminUserResetModal(button, action);
@@ -6425,6 +6606,11 @@
 
     if (!isAdminMode) {
       setMessage(messageNode, "Login with a Public Space admin account first.", "error");
+      return;
+    }
+
+    if (!canUseAdminAction(action)) {
+      renderAdminAccessDenied(action);
       return;
     }
 
