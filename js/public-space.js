@@ -214,11 +214,7 @@
     };
     currentUser = payload.user;
     updateCurrentAdminAccess();
-    window.setTimeout(() => {
-      refreshCurrentAdminPermissions().catch(() => {});
-    }, 0);
-
-    try {
+try {
       window.localStorage.setItem(SESSION_KEY, JSON.stringify(currentSession));
     } catch (error) {}
   }
@@ -270,70 +266,15 @@
   }
 
   function publicSpaceUserCanAccessAdmin(user) {
-    return Boolean(isFullPublicSpaceAdmin(user) || userPermissionList(user).length);
+    return isFullPublicSpaceAdmin(user);
   }
+
 
   function updateCurrentAdminAccess() {
     currentAdminPermissions = userPermissionList(currentUser);
     isAdminMode = publicSpaceUserCanAccessAdmin(currentUser);
   }
 
-  async function refreshCurrentAdminPermissions() {
-    const token = sessionToken();
-
-    if (!token || !currentUser) {
-      currentAdminPermissions = [];
-      isAdminMode = false;
-      syncAdminActionVisibility();
-      return currentAdminPermissions;
-    }
-
-    if (isFullPublicSpaceAdmin(currentUser)) {
-      currentUser.permissions = PUBLIC_SPACE_PERMISSION_OPTIONS.map(option => option.value);
-      updateCurrentAdminAccess();
-      ensureAdminTools();
-      syncAdminActionVisibility();
-      return currentAdminPermissions;
-    }
-
-    const checkedPermissions = await Promise.all(
-      PUBLIC_SPACE_PERMISSION_OPTIONS.map(async option => {
-        try {
-          const allowed = await rpc("public_space_current_user_can", {
-            input_session_token: token,
-            input_permission: option.value
-          });
-
-          return allowed === true ? option.value : "";
-        } catch (error) {
-          return "";
-        }
-      })
-    );
-
-    currentUser.permissions = checkedPermissions.filter(Boolean);
-    if (currentSession && currentSession.user) {
-      currentSession.user.permissions = currentUser.permissions;
-    }
-
-    updateCurrentAdminAccess();
-
-    if (publicSpaceUserCanAccessAdmin(currentUser)) {
-      ensureAdminTools();
-      document.body.classList.toggle("ps-admin-mode", true);
-      root.classList.toggle("is-admin-mode", true);
-    }
-
-    syncAdminActionVisibility();
-
-    if (menu) {
-      menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
-        item.hidden = !canShowAdminMenuItem(item);
-      });
-    }
-
-    return currentAdminPermissions;
-  }
 
 
   function hasAdminPermission(permission) {
@@ -347,41 +288,18 @@
   }
 
   function canUseAdminAction(action) {
-    const cleanAction = String(action || "").trim().toLowerCase();
-    if (!publicSpaceUserCanAccessAdmin(currentUser)) return false;
-    if (isFullPublicSpaceAdmin(currentUser)) return true;
-
-    if (cleanAction === "overview") return currentAdminPermissions.length > 0;
-    if (cleanAction === "reports") return hasAdminPermission("manage_reports");
-    if (cleanAction === "posts") return hasAnyAdminPermission(["hide_post", "delete_post", "pin_post"]);
-    if (cleanAction === "users") {
-      return hasAnyAdminPermission([
-        "manage_badges",
-        "reset_password",
-        "reset_pin",
-        "disable_user",
-        "manage_private_settings"
-      ]);
-    }
-    if (cleanAction === "settings") return hasAdminPermission("manage_private_settings");
-
-    return false;
+    return Boolean(isFullPublicSpaceAdmin(currentUser) && action);
   }
+
 
   function firstAllowedAdminAction() {
     return ["overview", "reports", "posts", "users", "settings"].find(action => canUseAdminAction(action)) || "";
   }
 
   function canUseAdminUserAction(action) {
-    const cleanAction = String(action || "").trim().toLowerCase();
-    if (isFullPublicSpaceAdmin(currentUser)) return true;
-    if (cleanAction === "badge" || cleanAction === "premium") return hasAdminPermission("manage_badges");
-    if (cleanAction === "password") return hasAdminPermission("reset_password");
-    if (cleanAction === "pin") return hasAdminPermission("reset_pin");
-    if (cleanAction === "disable") return hasAdminPermission("disable_user");
-    if (cleanAction === "permissions") return false;
-    return false;
+    return Boolean(isFullPublicSpaceAdmin(currentUser) && action);
   }
+
 
   function renderAdminAccessDenied(action) {
     renderAdminInfoCards("No access for this admin section.", [
@@ -1943,16 +1861,9 @@
   }
 
   function canShowAdminMenuItem(item) {
-    if (!item || !item.hasAttribute("data-ps-admin-menu-item")) return true;
-
-    const key = item.dataset.psMenuItem || item.dataset.psMenuLink || "";
-    const action = adminActionForMenuKey(key);
-
-    if (!action) return isFullPublicSpaceAdmin(currentUser);
-    if (action === "overview") return isFullPublicSpaceAdmin(currentUser);
-
-    return canUseAdminAction(action);
+    return Boolean(item && item.hasAttribute("data-ps-admin-menu-item") && isFullPublicSpaceAdmin(currentUser));
   }
+
 
   function ensureControlScreen() {
     if (!mainSpace || mainSpace.querySelector("[data-ps-control-screen]")) return;
@@ -6868,14 +6779,8 @@
   window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
   window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);
   if (menuToggle && menu) {
-    menuToggle.addEventListener("click", async () => {
-      const shouldOpen = menu.hidden;
-
-      if (shouldOpen) {
-        await refreshCurrentAdminPermissions();
-      }
-
-      setMenuOpen(shouldOpen);
+    menuToggle.addEventListener("click", () => {
+      setMenuOpen(menu.hidden);
     });
   }
 
