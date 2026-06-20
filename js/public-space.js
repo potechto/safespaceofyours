@@ -234,9 +234,33 @@
   }
 
   function userPermissionList(user) {
-    return normalizePermissionList(
-      (user && (user.permissions || user.role_permissions || user.capabilities)) || []
-    );
+    const allowed = new Set([
+      "delete_post",
+      "pin_post",
+      "hide_post",
+      "delete_comment",
+      "edit_comment",
+      "manage_reports",
+      "reset_password",
+      "reset_pin",
+      "disable_user",
+      "manage_badges",
+      "manage_private_settings"
+    ]);
+    const source = user && Array.isArray(user.permissions)
+      ? user.permissions
+      : user && Array.isArray(user.role_permissions)
+        ? user.role_permissions
+        : user && Array.isArray(user.capabilities)
+          ? user.capabilities
+          : user && user.permissions && typeof user.permissions === "object"
+            ? Object.keys(user.permissions).filter(key => user.permissions[key])
+            : [];
+    const seen = new Set();
+
+    return source
+      .map(item => String(item || "").trim().toLowerCase().replace(/[^a-z0-9_]+/g, "_"))
+      .filter(item => allowed.has(item) && !seen.has(item) && seen.add(item));
   }
 
   function isFullPublicSpaceAdmin(user) {
@@ -1841,12 +1865,35 @@
     menu.querySelectorAll("[data-ps-menu-item]").forEach(item => {
       const key = item.dataset.psMenuItem;
       const isAdminItem = item.hasAttribute("data-ps-admin-menu-item");
-      const hiddenForRole = isAdminItem && !isAdminMode;
+      const hiddenForRole = isAdminItem && !canShowAdminMenuItem(item);
       const hiddenForRoute = key === currentKey;
 
       item.hidden = hiddenForRole || hiddenForRoute;
     });
   }
+
+  function adminActionForMenuKey(key) {
+    const cleanKey = String(key || "").trim().toLowerCase();
+    if (cleanKey === "admin-users") return "users";
+    if (cleanKey === "admin-posts") return "posts";
+    if (cleanKey === "admin-reports") return "reports";
+    if (cleanKey === "admin-space-settings") return "settings";
+    if (cleanKey === "admin-overview") return "overview";
+    return "";
+  }
+
+  function canShowAdminMenuItem(item) {
+    if (!item || !item.hasAttribute("data-ps-admin-menu-item")) return true;
+
+    const key = item.dataset.psMenuItem || item.dataset.psMenuLink || "";
+    const action = adminActionForMenuKey(key);
+
+    if (!action) return isFullPublicSpaceAdmin(currentUser);
+    if (action === "overview") return isFullPublicSpaceAdmin(currentUser);
+
+    return canUseAdminAction(action);
+  }
+
   function ensureControlScreen() {
     if (!mainSpace || mainSpace.querySelector("[data-ps-control-screen]")) return;
 
@@ -3179,7 +3226,7 @@
     ensureMenuLink("private-space", "Back to private space", "admin.html", true);
     if (menu) {
       menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
-        item.hidden = !isAdminMode;
+        item.hidden = !canShowAdminMenuItem(item);
       });
     }
 
@@ -3214,6 +3261,12 @@
       const action = String(button.dataset.psAdminAction || "").trim().toLowerCase();
       button.hidden = !canUseAdminAction(action);
     });
+
+    if (menu) {
+      menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
+        item.hidden = !canShowAdminMenuItem(item);
+      });
+    }
   }
 
   function setAdminMode(enabled) {
@@ -3227,7 +3280,7 @@
 
     if (menu) {
       menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
-        item.hidden = !isAdminMode;
+        item.hidden = !canShowAdminMenuItem(item);
       });
     }
   }
