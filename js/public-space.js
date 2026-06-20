@@ -21,8 +21,7 @@
 
   const PUBLIC_SPACE_BADGE_LIMIT = 3;
   const PUBLIC_SPACE_BADGE_OPTIONS = [
-    { value: "Tester", label: "Tester", image: "Resources/betatester.png" },
-    { value: "Beta Tester", label: "Beta Tester", image: "Resources/betatester.png", aliases: ["tester"] },
+    { value: "Tester", label: "Tester", image: "Resources/betatester.png", aliases: ["beta tester", "beta_tester", "betatester"] },
     { value: "Moderator", label: "Moderator", image: "Resources/moderator.png" },
     { value: "Admin", label: "Admin", image: "Resources/admin.png" },
     { value: "Premium", label: "Premium", image: "Resources/premiumacc.png" }
@@ -215,6 +214,9 @@
     };
     currentUser = payload.user;
     updateCurrentAdminAccess();
+    window.setTimeout(() => {
+      refreshCurrentAdminPermissions().catch(() => {});
+    }, 0);
 
     try {
       window.localStorage.setItem(SESSION_KEY, JSON.stringify(currentSession));
@@ -275,6 +277,56 @@
     currentAdminPermissions = userPermissionList(currentUser);
     isAdminMode = publicSpaceUserCanAccessAdmin(currentUser);
   }
+
+  async function refreshCurrentAdminPermissions() {
+    const token = sessionToken();
+
+    if (!token || !currentUser) {
+      currentAdminPermissions = [];
+      isAdminMode = false;
+      syncAdminActionVisibility();
+      return currentAdminPermissions;
+    }
+
+    if (isFullPublicSpaceAdmin(currentUser)) {
+      currentUser.permissions = PUBLIC_SPACE_PERMISSION_OPTIONS.map(option => option.value);
+      updateCurrentAdminAccess();
+      syncAdminActionVisibility();
+      return currentAdminPermissions;
+    }
+
+    const checkedPermissions = await Promise.all(
+      PUBLIC_SPACE_PERMISSION_OPTIONS.map(async option => {
+        try {
+          const allowed = await rpc("public_space_current_user_can", {
+            input_session_token: token,
+            input_permission: option.value
+          });
+
+          return allowed === true ? option.value : "";
+        } catch (error) {
+          return "";
+        }
+      })
+    );
+
+    currentUser.permissions = checkedPermissions.filter(Boolean);
+    if (currentSession && currentSession.user) {
+      currentSession.user.permissions = currentUser.permissions;
+    }
+
+    updateCurrentAdminAccess();
+    syncAdminActionVisibility();
+
+    if (menu) {
+      menu.querySelectorAll("[data-ps-admin-menu-item]").forEach(item => {
+        item.hidden = !canShowAdminMenuItem(item);
+      });
+    }
+
+    return currentAdminPermissions;
+  }
+
 
   function hasAdminPermission(permission) {
     if (isFullPublicSpaceAdmin(currentUser)) return true;
@@ -2063,10 +2115,18 @@
   }
 
   function splitBadgeLabels(value) {
+    const seen = new Set();
+
     return String(value || "")
       .split(/[,|]/)
+      .map(item => canonicalBadgeLabel(item))
       .map(item => item.trim())
-      .filter(Boolean)
+      .filter(item => {
+        const key = normalizeBadgeValue(item);
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
       .slice(0, PUBLIC_SPACE_BADGE_LIMIT);
   }
 
@@ -2078,6 +2138,12 @@
         || normalizeBadgeValue(option.label) === clean
         || aliases.some(alias => normalizeBadgeValue(alias) === clean);
     }) || null;
+  }
+
+  function canonicalBadgeLabel(label) {
+    const cleanLabel = String(label || "").trim();
+    const option = badgeOptionFor(cleanLabel);
+    return option ? option.value : cleanLabel;
   }
 
   function profileBadgeItems(user) {
@@ -6794,8 +6860,14 @@
   window.addEventListener("popstate", renderCurrentPublicSpaceRoute);
   window.addEventListener("hashchange", renderCurrentPublicSpaceRoute);
   if (menuToggle && menu) {
-    menuToggle.addEventListener("click", () => {
-      setMenuOpen(menu.hidden);
+    menuToggle.addEventListener("click", async () => {
+      const shouldOpen = menu.hidden;
+
+      if (shouldOpen) {
+        await refreshCurrentAdminPermissions();
+      }
+
+      setMenuOpen(shouldOpen);
     });
   }
 
