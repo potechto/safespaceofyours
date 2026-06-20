@@ -21,10 +21,25 @@
 
   const PUBLIC_SPACE_BADGE_LIMIT = 3;
   const PUBLIC_SPACE_BADGE_OPTIONS = [
+    { value: "Tester", label: "Tester", image: "Resources/betatester.png" },
+    { value: "Beta Tester", label: "Beta Tester", image: "Resources/betatester.png", aliases: ["tester"] },
     { value: "Moderator", label: "Moderator", image: "Resources/moderator.png" },
     { value: "Admin", label: "Admin", image: "Resources/admin.png" },
-    { value: "tester", label: "tester", image: "Resources/betatester.png", aliases: ["Beta Tester"] },
     { value: "Premium", label: "Premium", image: "Resources/premiumacc.png" }
+  ];
+
+  const PUBLIC_SPACE_PERMISSION_OPTIONS = [
+    { value: "delete_post", label: "Delete post" },
+    { value: "pin_post", label: "Pin post" },
+    { value: "hide_post", label: "Hide/unhide post" },
+    { value: "delete_comment", label: "Delete comment" },
+    { value: "edit_comment", label: "Edit comment" },
+    { value: "manage_reports", label: "Manage reports" },
+    { value: "reset_password", label: "Reset password" },
+    { value: "reset_pin", label: "Reset PIN/key" },
+    { value: "disable_user", label: "Disable/enable users" },
+    { value: "manage_badges", label: "Manage badges" },
+    { value: "manage_private_settings", label: "Manage private settings" }
   ];
 
   const COPY = {
@@ -226,6 +241,24 @@
     const response = await client.rpc(functionName, params || {});
     if (response.error) throw response.error;
     return response.data;
+  }
+
+  async function adminUpdatePublicSpaceUser(params) {
+    const payload = { ...(params || {}) };
+
+    try {
+      return await rpc("admin_update_public_space_user", payload);
+    } catch (error) {
+      const message = String((error && (error.message || error.details || error.hint)) || "").toLowerCase();
+      const canRetryWithoutPermissions = Object.prototype.hasOwnProperty.call(payload, "input_permissions")
+        && (message.includes("input_permissions") || message.includes("function") || message.includes("argument"));
+
+      if (!canRetryWithoutPermissions) throw error;
+
+      const fallbackPayload = { ...payload };
+      delete fallbackPayload.input_permissions;
+      return await rpc("admin_update_public_space_user", fallbackPayload);
+    }
   }
 
   function sessionToken() {
@@ -2023,12 +2056,9 @@
     const id = publicSpaceUserId(user);
     const ownId = publicSpaceUserId(currentUser);
     if (id && ownId && id === ownId) return "";
+    if (!isPublicSpaceUserActive(user)) return "";
 
-    const isActive = isPublicSpaceUserActive(user);
-    const className = isActive ? "is-active" : "is-idle";
-    const label = isActive ? "Active now" : "Idle";
-
-    return `<span class="ps-presence-dot ${className}" title="${label}" aria-label="${label}"></span>`;
+    return `<span class="ps-presence-dot is-active" title="Active now" aria-label="Active now"></span>`;
   }
 
   function renderPublicSpaceUsernameStrong(user, fallbackUsername) {
@@ -5580,6 +5610,63 @@
     });
   }
 
+  function normalizePermissionList(value) {
+    const source = Array.isArray(value)
+      ? value
+      : typeof value === "string"
+        ? value.split(/[,|]/)
+        : value && typeof value === "object"
+          ? Object.keys(value).filter(key => value[key])
+          : [];
+    const allowed = new Set(PUBLIC_SPACE_PERMISSION_OPTIONS.map(option => option.value));
+    const seen = new Set();
+
+    return source
+      .map(item => String(item || "").trim().toLowerCase().replace(/[^a-z0-9_]+/g, "_"))
+      .filter(item => allowed.has(item) && !seen.has(item) && seen.add(item));
+  }
+
+  function adminUserSelectedPermissions(card) {
+    if (!card) return [];
+    return Array.from(card.querySelectorAll("[data-ps-user-permission]:checked"))
+      .map(box => String(box.value || "").trim())
+      .filter(Boolean);
+  }
+
+  function adminUserRoleBadgesFromValue(value) {
+    return splitBadgeLabels(value).filter(label => {
+      const clean = normalizeBadgeValue(label);
+      return clean === "admin" || clean === "moderator";
+    });
+  }
+
+  function renderAdminPermissionChecklist(user) {
+    const selected = normalizePermissionList(
+      (user && (user.permissions || user.role_permissions || user.capabilities)) || []
+    );
+
+    return `
+      <div class="ps-admin-permissions" data-ps-admin-permissions>
+        <div class="ps-admin-permissions-head">
+          <strong>Permission checklist</strong>
+          <span>Badges are labels only. Tick the exact backend powers this user should have.</span>
+        </div>
+        <div class="ps-admin-permissions-grid">
+          ${PUBLIC_SPACE_PERMISSION_OPTIONS.map(option => {
+            const checked = selected.includes(option.value) ? " checked" : "";
+            return `
+              <label class="ps-admin-permission-choice">
+                <input type="checkbox" value="${escapeHtml(option.value)}" data-ps-user-permission${checked} />
+                <span>${escapeHtml(option.label)}</span>
+              </label>
+            `;
+          }).join("")}
+        </div>
+        <button type="button" data-ps-user-action="permissions" data-user-id="${escapeHtml((user && user.id) || "")}">Save permissions</button>
+      </div>
+    `;
+  }
+
   function adminUserFilterStatusOptionsHtml() {
     const options = [
       ["all", "All users"],
@@ -5756,6 +5843,9 @@
                     <input type="hidden" value="${escapeHtml(badge)}" data-ps-user-badge data-ps-badge-input />
                   </label>
                   <button type="button" data-ps-user-action="badge" data-user-id="${escapeHtml(user.id)}">Save badges</button>
+                  <button type="button" data-ps-user-action="premium" data-user-id="${escapeHtml(user.id)}" data-next-premium="${isPremium ? "false" : "true"}">
+                    ${isPremium ? "Remove premium" : "Make premium"}
+                  </button>
                 </div>
 
                 <div class="ps-admin-reset-actions" aria-label="Account controls">
@@ -5766,6 +5856,7 @@
                   <button type="button" data-ps-user-action="pin" data-user-id="${escapeHtml(user.id)}">Reset PIN/key</button>
                 </div>
               </div>
+              ${renderAdminPermissionChecklist(user)}
             </article>
           `;
         }).join("")}
@@ -5874,13 +5965,14 @@
       input_badge_label: null,
       input_is_disabled: null,
       input_new_password: isPin ? null : value,
-      input_new_pin: isPin ? value : null
+      input_new_pin: isPin ? value : null,
+      input_permissions: null
     };
 
     try {
       button.disabled = true;
       setMessage(modalMessage, isPin ? "Resetting PIN/key..." : "Resetting password...", "info");
-      await rpc("admin_update_public_space_user", params);
+      await adminUpdatePublicSpaceUser(params);
       closeAdminUserResetModal(modal);
       await refreshAdminUsers("User updated.");
     } catch (error) {
@@ -5934,7 +6026,8 @@
       input_badge_label: null,
       input_is_disabled: null,
       input_new_password: null,
-      input_new_pin: null
+      input_new_pin: null,
+      input_permissions: null
     };
 
     if (action === "premium") {
@@ -5951,6 +6044,7 @@
 
         params.input_badge_label = nextBadges.join(", ");
         badgeInput.value = params.input_badge_label;
+        syncAdminUserCardBadgePreview(card, params.input_badge_label);
       }
     }
 
@@ -5974,9 +6068,28 @@
     if (action === "badge") {
       const badgeInput = card ? card.querySelector("[data-ps-user-badge]") : null;
       const selectedBadges = splitBadgeLabels(badgeInput ? badgeInput.value : "");
+      const selectedPermissions = adminUserSelectedPermissions(card);
+      const roleBadges = adminUserRoleBadgesFromValue(selectedBadges.join(", "));
       params.input_badge_label = selectedBadges.join(", ");
       params.input_is_premium = selectedBadges.some(label => normalizeBadgeValue(label) === "premium");
+      params.input_permissions = selectedPermissions;
       syncAdminUserCardBadgePreview(card, params.input_badge_label);
+
+      if (roleBadges.length && !selectedPermissions.length) {
+        const proceed = await showPublicSpaceConfirm({
+          title: "Save role badge with no powers?",
+          message: "Moderator/Admin badges are display labels only. This user will not get backend powers until at least one permission is checked.",
+          confirmLabel: "Save label only",
+          cancelLabel: "Go back",
+          danger: false
+        });
+        if (!proceed) return;
+      }
+    }
+
+    if (action === "permissions") {
+      params.input_permissions = adminUserSelectedPermissions(card);
+      setMessage(messageNode, "Saving permissions checklist...", "info");
     }
 
     if (action === "password") {
@@ -6025,7 +6138,7 @@
       button.disabled = true;
       setMessage(messageNode, "Saving user changes...", "info");
 
-      await rpc("admin_update_public_space_user", params);
+      await adminUpdatePublicSpaceUser(params);
 
       if (action === "password") {
         const passwordInput = card ? card.querySelector("[data-ps-user-password]") : null;
