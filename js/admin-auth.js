@@ -15,7 +15,7 @@ const authTabs = document.querySelectorAll("[data-auth-mode]");
 const authTitle = document.querySelector("#authTitle");
 const emailSubmitBtn = document.querySelector("#emailSubmitBtn");
 
-const CODE_LENGTH = 8;
+const CODE_LENGTH = 6;
 
 let authMode = sessionStorage.getItem("safespace_auth_mode") || "login";
 let pendingEmail = "";
@@ -41,6 +41,49 @@ function normalizeEmail(email) {
 
 function normalizeCode(code) {
   return String(code || "").replace(/\D/g, "").slice(0, CODE_LENGTH);
+}
+
+function getAuthErrorMessage(error, fallback = "Could not continue.") {
+  if (!error) return fallback;
+
+  const status = Number(error.status || error.statusCode || 0);
+  const code = String(error.code || error.error_code || "").toLowerCase();
+  const rawMessage = [
+    error.message,
+    error.error_description,
+    typeof error.error === "string" ? error.error : ""
+  ].find(value => typeof value === "string" && value.trim());
+  const message = String(rawMessage || "").trim();
+  const lowerMessage = message.toLowerCase();
+
+  if (status === 429 || code.includes("rate") || lowerMessage.includes("rate limit")) {
+    return "Too many code requests. Wait at least 60 seconds, then try again.";
+  }
+
+  if (lowerMessage.includes("failed to fetch") || lowerMessage.includes("network")) {
+    return "Could not reach the login service. Check your connection, then try again.";
+  }
+
+  if (lowerMessage.includes("email address not authorized")) {
+    return "This email is not authorized by the Supabase email sender.";
+  }
+
+  if (message && message !== "{}" && message !== "[object Object]") {
+    return message;
+  }
+
+  return fallback;
+}
+
+function setEmailSubmitBusy(isBusy) {
+  if (!emailSubmitBtn) return;
+
+  emailSubmitBtn.disabled = Boolean(isBusy);
+  emailSubmitBtn.textContent = isBusy
+    ? "Sending..."
+    : authMode === "signup"
+      ? "Sign-up"
+      : "Sign-in";
 }
 
 function isAllowedAdminEmail(email) {
@@ -179,27 +222,13 @@ async function createQuietProfile() {
 }
 
 async function verifyOtpForCurrentMode(email, token) {
-  const otpTypes = authMode === "signup"
-    ? ["email", "signup"]
-    : ["email"];
+  const { error } = await adminClient.auth.verifyOtp({
+    email,
+    token,
+    type: "email"
+  });
 
-  let lastError = null;
-
-  for (const type of otpTypes) {
-    const { error } = await adminClient.auth.verifyOtp({
-      email,
-      token,
-      type
-    });
-
-    if (!error) {
-      return null;
-    }
-
-    lastError = error;
-  }
-
-  return lastError;
+  return error || null;
 }
 
 async function refreshAuthState() {
@@ -254,6 +283,8 @@ emailForm.addEventListener("submit", async event => {
     return;
   }
 
+  setEmailSubmitBusy(true);
+
   try {
     if (authMode === "signup") {
       const exists = await emailAlreadyRegistered(email);
@@ -263,35 +294,48 @@ emailForm.addEventListener("submit", async event => {
         return;
       }
     }
-  } catch (error) {
-    setMessage(authMessage, error.message || "Could not check email.", "error");
-    return;
-  }
 
-  pendingEmail = email;
-  setMessage(authMessage, "Sending code...", "");
+    pendingEmail = email;
+    setMessage(authMessage, "Sending code...", "");
 
-  const { error } = await adminClient.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: authMode === "signup",
-      emailRedirectTo: window.location.href
-    }
-  });
+    const { error } = await adminClient.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: authMode === "signup"
+      }
+    });
 
-  if (error) {
-    const lowerMessage = String(error.message || "").toLowerCase();
+    if (error) {
+      const lowerMessage = String(error.message || "").toLowerCase();
 
-    if (authMode === "signup" && lowerMessage.includes("already")) {
-      setMessage(authMessage, "Email already exist.", "error");
+      if (authMode === "signup" && lowerMessage.includes("already")) {
+        setMessage(authMessage, "Email already exist.", "error");
+        return;
+      }
+
+      pendingEmail = "";
+      setMessage(
+        authMessage,
+        getAuthErrorMessage(
+          error,
+          "Could not send a login code. Wait 60 seconds and try again. If it continues, check Supabase Auth email/SMTP settings."
+        ),
+        "error"
+      );
       return;
     }
 
-    setMessage(authMessage, error.message || "Could not send code.", "error");
-    return;
+    showCodeStep("A 6-digit code was sent to your email.");
+  } catch (error) {
+    pendingEmail = "";
+    setMessage(
+      authMessage,
+      getAuthErrorMessage(error, "Could not send a login code. Please try again."),
+      "error"
+    );
+  } finally {
+    setEmailSubmitBusy(false);
   }
-
-  showCodeStep("Code sent.");
 });
 
 async function verifyCodeIfReady() {
@@ -311,14 +355,24 @@ async function verifyCodeIfReady() {
   suppressAuthRefresh = true;
   setMessage(authMessage, "Checking code...", "");
 
-  const verifyError = await verifyOtpForCurrentMode(pendingEmail, token);
+  let verifyError = null;
+
+  try {
+    verifyError = await verifyOtpForCurrentMode(pendingEmail, token);
+  } catch (error) {
+    verifyError = error;
+  }
 
   if (verifyError) {
     isVerifyingCode = false;
     suppressAuthRefresh = false;
     codeInput.value = "";
     codeInput.focus();
-    setMessage(authMessage, "Incorrect code.", "error");
+    setMessage(
+      authMessage,
+      getAuthErrorMessage(verifyError, "Incorrect or expired code."),
+      "error"
+    );
     return;
   }
 
